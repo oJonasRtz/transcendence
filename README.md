@@ -1,4 +1,4 @@
-# trancendence
+# transcendence
 
 Lembrem-se:  
 	`npm install` - instala os pacotes  
