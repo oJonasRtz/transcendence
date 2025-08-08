@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@feathersjs/cli": "^5.0.34",
     "vite": "^7.1.1"
   }
 }
