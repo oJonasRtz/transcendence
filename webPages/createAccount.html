@@ -20,13 +20,80 @@
 			object-fit: cover;
 			z-index: -1;
 		}
+
+		.createAccount
+		{
+			position: absolute;
+                        top: 0%;
+                        left: 0%;
+                        width: 100%;
+                        transform: translate(0%,20%);
+                        text-align: center;
+                        padding:30px;
+                        border-radius:12px;
+                        background: transparent;
+                        color:white;
+                        font-family: Arial, sans-serif;
+                        height: 100%;
+                        object-fit: cover;
+                        z-index: -1;
+                        font-size: 20px;
+                        font-weight: bold;
+		}
+
+		.createAccount input
+		{
+			width:250px;
+			margin: 10px auto;
+			padding: 10px;
+			display: block;
+			border:none;
+			border-radius:6px;
+			font-size:16px;
+			font-weight:bold;
+			text-align:center;
+		}
+
+		.createAccount button
+		{
+			background: transparent;
+			font-size: 16px;
+			font-weight: bold;
+			text-align: center;
+			font-family: Arial, sans-serif;
+			font-weight: bold;
+		}
+
+		.createAccount a
+		{
+			color: lightblue;
+			font-family: Arial, sans-serif;
+			font-weight: bold;
+		}
+
 	</style>
 	<body>
 		<video width="100%" height="100% "autoplay muted loop>
-			<source src="videos/login3.mp4" type="video/mp4"></source>
+				<source src="videos/login3.mp4" type="video/mp4"></source>
 		</video>
-		<form>
-			<label for=""></label>
-		</form>
+		<div class="createAccount">
+			<form>
+				<label for="NickName">Nick:</label>
+				<input id="NickName" type="text" placeholder="Enter your Nickname" required>
+				<br><br>
+				<label for="Email">Email:</label>
+				<input id="Email" type="email" placeholder="Enter your e-mail" required>
+				<br><br>
+				<label for="Password">Password:</label>
+				<input id="Password" type="password" placeholder="Enter your password" required>
+				<br>	
+				<input id="CheckBox" type="checkbox" required>
+				<label for="CheckBox">Do you agree with privacy terms?</label>
+				<br><br>
+				<button>Create magic account</button>
+				<br><br>
+				<a href="login.html">Return to login page</a>
+			</form>
+		</div>
 	</body>
 </html>
