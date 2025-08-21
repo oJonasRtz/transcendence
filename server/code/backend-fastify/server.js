@@ -9,8 +9,8 @@ app.get('/health', async () => {
 });
 
 /* Only for test */
-app.get('/fail', async () => {
-	throw new Error('Explodiu mano');
+app.get('/boom', async () => {
+	throw new Error('Boom');
 });
 
 app.setNotFoundHandler((req, reply) => {
