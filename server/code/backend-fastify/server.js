@@ -1,6 +1,6 @@
 const Fastify = require('fastify');
 const pino = require('pino'); // added pino
-const logStream = pino.destination('./logs/app.log'); // added log file destination
+const logStream = pino.destination('../../../infrastructure/logging/logs/app.log'); // added log file destination
 const app = Fastify({ logger: { stream : logStream} }); // added { stream : logStream}
 
 app.get('/', async () => ({hello: 'world'}));

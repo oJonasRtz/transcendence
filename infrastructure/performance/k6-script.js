@@ -11,11 +11,13 @@ export default function() {
   let resGet = http.get('http://localhost:3000/');
   let resPost = http.post('http://localhost:3000/', JSON.stringify({ name: 'test' }), { headers: { 'Content-Type': 'application/json' } });
   let resPut = http.put('http://localhost:3000/', JSON.stringify({ name: 'test' }), { headers: { 'Content-Type': 'application/json' } });
+  let resHealth = http.get('http://localhost:3000/health');
   let resWrong = http.get('http://localhost:3000/wrong');
   let resDelete = http.del('http://localhost:3000/');
   expect.soft(resGet.status).toBe(200);
   expect.soft(resPost.status).toBe(404);
   expect.soft(resPut.status).toBe(404);
+  expect.soft(resHealth.status).toBe(200);
   expect.soft(resWrong.status).toBe(404);
   expect.soft(resDelete.status).toBe(404);
   sleep(1);

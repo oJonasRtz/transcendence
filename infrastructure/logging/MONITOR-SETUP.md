@@ -1,9 +1,18 @@
 # Commands to run after starting the stack:
+
 docker exec elasticsearch bin/elasticsearch-create-enrollment-token -s kibana
+
+
 ## copy and paste token on localhost:5601
+
 docker exec kibana bin/kibana-verification-code
+
+
 ## copy and paste code
+
 docker exec -it elasticsearch bin/elasticsearch-reset-password -u elastic --interactive
+
+
 ## set new password, confirm new password, and login
 on 'Discover' tab: input the index pattern (fastify-logs-*)
 

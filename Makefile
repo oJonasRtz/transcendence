@@ -17,6 +17,11 @@ down:
 build:
 	docker-compose -f $(TRANSCENDENCE)
 
+# Run k6 performance test
+
+k6:
+	k6 run ./infrastructure/performance/k6-script.js
+
 #clean
 
 clean: down
