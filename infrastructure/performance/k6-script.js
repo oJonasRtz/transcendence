@@ -3,7 +3,7 @@ import { sleep } from 'k6';
 import { expect } from "https://jslib.k6.io/k6-testing/0.5.0/index.js";
 
 export const options = {
-  vus: 30,
+  vus: 50,
   duration: '20s',
 };
 

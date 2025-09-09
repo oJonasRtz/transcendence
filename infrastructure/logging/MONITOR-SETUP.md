@@ -16,7 +16,7 @@ docker exec -it elasticsearch bin/elasticsearch-reset-password -u elastic --inte
 
 # Run all docker but Kibana
 
-docker compose up -d --build elasticsearch logstash backend 
+docker compose up -d --build elasticsearch logstash backend  k6
 
 # Create system login
 
