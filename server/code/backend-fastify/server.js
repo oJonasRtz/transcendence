@@ -13,6 +13,29 @@ app.get('/health', async () => {
 	return {status: 'ok', runtime: 'node', version: process.version}
 });
 
+app.get('/api/users', async (request, reply) => {
+	try {
+		const users = await app.dbQueries.getAllUsers();
+		return reply.send({ users });
+	} catch (error) {
+		app.log.error(error);
+		return reply.code(500).send({ error: 'Internal server error' });
+	}
+});
+
+app.get('/api/users/:username', async (request, reply) => {
+	try {
+		const user = await app.dbQueries.getUserByUsername(request.params.username);
+		if (!user) {
+			return reply.code(404).send({ error: 'User not found' });
+		}
+		return reply.send({ user });
+	} catch (error) {
+		app.log.error(error);
+		return reply.code(500).send({ error: 'Internal server error' });
+	}
+});
+
 app.post('/api/users/register', async (request, reply) => {
 	try {
 		const { username, email, password } = request.body;

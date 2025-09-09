@@ -8,6 +8,7 @@ services:
       - "3000:3000"
     volumes:
       - ./infrastructure/logging/logs/app.log:/app/app.log
+      - ./server/code/backend-fastify/database.sqlite:/app/database.sqlite
     networks:
       - elk-net
 
@@ -59,6 +60,7 @@ services:
     container_name: k6
     volumes:
       - ./infrastructure/performance/k6-script.js:/k6-script.js
+      - ./infrastructure/performance/k6-script-db-test.js:/k6-script-db-test.js  
     networks:
       - elk-net
     entrypoint: ["sleep", "infinity"]
