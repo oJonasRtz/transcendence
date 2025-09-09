@@ -1,161 +1,211 @@
-# ft_transcendence Backend
+# ft_transcendence
 
-This repo is for the Web section of ft_transcendence 42 School project (refer en.subject.txt for more info), Major module: Use a framework to build the backend.
+A comprehensive web-based Pong game platform built for the 42 School ft_transcendence project.
 
-In this major module, it is required to use a specific web framework for backend development: **Fastify with Node.js**.
+## Project Overview
 
-## Features
-
-- **SQLite Database Integration**: Complete database layer with user management, tournaments, and game tracking
-- **Authentication System**: Secure password hashing with bcrypt and input validation
-- **Tournament Management**: Create and manage Pong tournaments with participant tracking
-- **Game Session Tracking**: Store game results and match history
-- **Security**: Protection against SQL injection and XSS attacks with parameterized queries
-- **RESTful API**: Clean API endpoints for all core functionality
-
-## Prerequisites
-
-- Node.js (v14 or higher)
-- npm (Node Package Manager)
-
-## Installation
-
-1. Clone the repository
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Set up the database:
-```bash
-npm run db:migrate
-```
-
-## Running the Application
-
-### Development Mode
-```bash
-npm run dev
-```
-
-### Production Mode
-```bash
-npm start
-```
-
-Both commands will start the server on `http://localhost:3000`
-
-## Database
-
-This application uses SQLite for data persistence with the following schema:
-
-- **users**: User accounts with secure password hashing
-- **tournaments**: Tournament management and organization
-- **tournament_participants**: Tournament participation tracking
-- **games**: Individual game sessions and results
-- **match_history**: Player match history and statistics
-
-### Database Commands
-
-```bash
-# Run database migrations
-npm run db:migrate
-
-# Test database connection
-npm run test:db
-```
-
-## API Endpoints
-
-### Core Endpoints
-- `GET /` - Health check: `{"hello":"world","database":"connected"}`
-- `GET /api/health/db` - Database health check with user count
-
-### User Management
-- `POST /api/users/register` - Register a new user
-  ```json
-  {
-    "username": "player1",
-    "email": "player1@example.com", 
-    "password": "securepassword"
-  }
-  ```
-
-### Tournament Management
-- `POST /api/tournaments` - Create a new tournament
-  ```json
-  {
-    "name": "Championship 2025",
-    "maxParticipants": 8
-  }
-  ```
-- `GET /api/tournaments` - List all tournaments
-
-## Security Features
-
-- **Password Security**: Bcrypt hashing with 12 salt rounds
-- **Input Validation**: Username, email, and password validation
-- **SQL Injection Prevention**: Parameterized queries for all database operations
-- **XSS Protection**: Input sanitization and validation
-
-## Testing
-
-### Basic Health Check
-```bash
-curl http://localhost:3000
-```
-
-Expected response:
-```json
-{"hello":"world","database":"connected"}
-```
-
-### Database Health Check
-```bash
-curl http://localhost:3000/api/health/db
-```
-
-### User Registration Test
-```bash
-curl -X POST http://localhost:3000/api/users/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
-```
-
-### Run All Tests
-```bash
-# Run linting
-npm run lint
-
-# Run database tests
-npm run test:db
-
-# Run all tests
-npm test
-```
+This project implements the ft_transcendence requirements with a complete web application featuring:
+- Backend API with Fastify framework (Node.js)
+- Frontend interface with React/TypeScript
+- Tournament management system
+- User authentication and registration
+- Game engine and web-based gameplay
+- Comprehensive database layer with SQLite
 
 ## Project Structure
 
 ```
-src/
-├── database/
-│   ├── config.js          # Database configuration
-│   ├── connection.js      # SQLite connection management
-│   ├── schema.sql         # Database schema definition
-│   ├── migrations.js      # Database migration script
-│   ├── queries.js         # Database query methods
-│   └── test-connection.js # Database connectivity tests
-├── plugins/
-│   └── database.js        # Fastify database plugin
-└── utils/
-    └── auth.js            # Authentication utilities
+transcendence/
+├── server/                     # Backend services
+│   ├── code/
+│   │   └── backend-fastify/   # Main Fastify backend implementation
+│   │       ├── server.js      # Main server entry point
+│   │       ├── package.json   # Dependencies and scripts
+│   │       ├── CLAUDE.md      # Backend documentation
+│   │       └── src/           # Source code
+│   │           ├── plugins/   # Fastify plugins
+│   │           │   └── database.js
+│   │           ├── utils/     # Utility functions
+│   │           │   └── auth.js
+│   │           └── database/  # Database layer
+│   │               ├── connection.js
+│   │               ├── queries.js
+│   │               ├── migrations.js
+│   │               ├── schema.sql
+│   │               ├── config.js
+│   │               └── test-connection.js
+│   ├── public/               # Static assets
+│   ├── settings/             # Server configuration
+│   ├── tests/                # Server tests
+│   └── Dockerfile            # Server containerization
+├── srcs/                      # Source code
+│   ├── front-end/            # React frontend application
+│   └── json/                 # JSON configurations
+├── website/                   # Website assets and pages
+│   ├── public/               # Public website assets
+│   │   ├── assets/
+│   │   │   ├── audios/
+│   │   │   ├── icons/
+│   │   │   └── videos/
+│   │   └── srcs/
+│   │       ├── components/
+│   │       ├── pages/
+│   │       ├── services/
+│   │       ├── store/
+│   │       └── utils/
+│   └── Dockerfile            # Website containerization
+├── game/                      # Game implementation
+│   ├── game-engine/          # Core game logic
+│   ├── game-web/             # Web-based game interface
+│   └── utils/                # Game utilities
+├── database/                  # Database configuration
+│   ├── create_tables/        # Database schema
+│   └── examples/             # Example data
+├── infrastructure/           # DevOps and infrastructure
+│   ├── docker-compose.yml    # Multi-container setup
+│   ├── nginx/               # Reverse proxy configuration
+│   ├── logging/             # Logging configuration
+│   └── monitoring/          # Monitoring setup
+├── documentation/           # Project documentation
+└── Makefile                 # Build automation
 ```
 
-## Development
+## Quick Start
 
-The application follows Fastify plugin architecture with:
+### Backend (Fastify Server)
 
-- **Database Plugin**: Decorates Fastify instance with database connection and queries
-- **Modular Structure**: Organized codebase with separation of concerns
-- **Error Handling**: Comprehensive error handling for database operations
-- **Resource Management**: Proper SQLite statement lifecycle management
+1. **Navigate to backend directory:**
+   ```bash
+   cd server/code/backend-fastify
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Run database migration:**
+   ```bash
+   npm run db:migrate
+   ```
+
+4. **Test database connection:**
+   ```bash
+   npm test
+   ```
+
+5. **Start the server:**
+   ```bash
+   npm start
+   # or for development
+   npm run dev
+   ```
+
+The backend server will be available at `http://localhost:3001`
+
+### Frontend (React Application)
+
+1. **Navigate to frontend directory:**
+   ```bash
+   cd srcs/front-end
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+## API Endpoints
+
+### Core Endpoints
+- `GET /` - Health check with database status
+- `GET /api/health/db` - Database health check with user count
+
+### User Management
+- `POST /api/users/register` - User registration
+  ```json
+  {
+    "username": "string",
+    "email": "string", 
+    "password": "string"
+  }
+  ```
+
+### Tournament System
+- `POST /api/tournaments` - Create tournament
+  ```json
+  {
+    "name": "string",
+    "maxParticipants": "number"
+  }
+  ```
+- `GET /api/tournaments` - List all tournaments
+
+## Database Schema
+
+The application uses SQLite with the following main tables:
+- `users` - User accounts and authentication
+- `tournaments` - Tournament management
+- `tournament_participants` - Tournament participation
+- `games` - Game sessions and results
+- `match_history` - Player match history
+
+## Available Scripts
+
+### Backend Scripts
+- `npm start` - Start the server in production mode
+- `npm run dev` - Start the server in development mode
+- `npm test` - Run database connection tests
+- `npm run db:migrate` - Run database migrations
+- `npm run test:db` - Test database functionality
+- `npm run lint` - Run code linting
+
+### Development
+
+The project uses:
+- **Backend**: Fastify (Node.js framework)
+- **Frontend**: React with TypeScript
+- **Database**: SQLite with proper migrations
+- **Authentication**: bcrypt for password hashing
+- **Security**: Prepared statements, input validation
+- **Containerization**: Docker support for all services
+
+## Architecture Highlights
+
+### Backend Features
+- Plugin-based architecture with Fastify
+- Comprehensive database layer with query abstraction
+- Secure authentication with bcrypt (12 salt rounds)
+- Input validation and SQL injection prevention
+- Proper error handling and logging
+- Database connection management
+
+### Security Implementation
+- Password hashing with bcrypt
+- Input validation (username, email, password requirements)
+- SQL injection prevention via prepared statements
+- Comprehensive error handling with appropriate HTTP status codes
+
+## Development Notes
+
+- All database operations use prepared statements for security
+- The database plugin decorates Fastify with `db`, `dbQueries`, and `dbConnection`
+- Branch naming convention: `jos-felipe/branch-name`
+- Never commit secrets or sensitive data
+- Follow existing code conventions and patterns
+
+## Requirements Compliance
+
+This implementation satisfies the ft_transcendence project requirements:
+- ✅ Web-based Pong game platform
+- ✅ Backend framework implementation (Fastify with Node.js)
+- ✅ User management and authentication
+- ✅ Tournament system
+- ✅ Database integration
+- ✅ Security best practices
+- ✅ Containerization support
