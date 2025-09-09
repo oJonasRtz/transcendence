@@ -1,6 +1,9 @@
 const Fastify = require('fastify');
 const pino = require('pino'); // added pino
-const logStream = pino.destination('../../../infrastructure/logging/logs/app.log'); // added log file destination
+// const logStream = pino.destination('../../../infrastructure/logging/logs/app.log'); // use without docker
+const logStream = pino.destination('/app/app.log'); // use with docker
+
+
 const app = Fastify({ logger: { stream : logStream} }); // added { stream : logStream}
 
 app.get('/', async () => ({hello: 'world'}));
@@ -34,4 +37,4 @@ app.setErrorHandler((err, req, reply) => {
 	});
 });
 
-app.listen({host: '127.0.0.1', port: 3000});
+app.listen({host: '0.0.0.0', port: 3000});
