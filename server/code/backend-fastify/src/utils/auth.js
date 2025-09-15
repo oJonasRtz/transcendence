@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 12;
 
@@ -39,4 +39,4 @@ class AuthUtils {
   }
 }
 
-module.exports = AuthUtils;
+export default AuthUtils;
