@@ -3,3 +3,4 @@ app.log
 .vscode/*
 .env
 node_modules
+*subject*

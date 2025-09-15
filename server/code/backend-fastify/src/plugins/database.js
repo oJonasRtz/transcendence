@@ -1,6 +1,6 @@
-const fp = require('fastify-plugin');
-const DatabaseConnection = require('../database/connection');
-const DatabaseQueries = require('../database/queries');
+import fp from 'fastify-plugin';
+import DatabaseConnection from '../database/connection.js';
+import DatabaseQueries from '../database/queries.js';
 
 async function databasePlugin(fastify, options) {
   const dbConnection = new DatabaseConnection();
@@ -26,7 +26,7 @@ async function databasePlugin(fastify, options) {
   }
 }
 
-module.exports = fp(databasePlugin, {
+export default fp(databasePlugin, {
   name: 'database',
   dependencies: []
 });

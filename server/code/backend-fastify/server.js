@@ -1,11 +1,14 @@
-const Fastify = require('fastify');
-const pino = require('pino'); // added pino
+import Fastify from 'fastify';
+import pino from 'pino'; // added pino
+import AuthUtils from './src/utils/auth.js';
+
 // const logStream = pino.destination('../../../infrastructure/logging/logs/app.log'); // use without docker
 const logStream = pino.destination('/app/app.log'); // use with docker
 const app = Fastify({ logger: { stream : logStream} }); // added { stream : logStream}
-const AuthUtils = require('./src/utils/auth');
 
-app.register(require('./src/plugins/database'));
+// Load and register database plugin
+const databasePlugin = await import('./src/plugins/database.js');
+app.register(databasePlugin.default);
 
 app.get('/', async () => ({hello: 'world', database: 'connected'}));
 
