@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'node:fs/promises';
 import path from 'path';
 import DatabaseConnection from './connection.js';
 import { fileURLToPath } from 'url';
@@ -6,13 +6,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-function inputInDataBase(db, sql) {
-	return new Promise((resolve, reject) => {
-		db.exec(sql, (err) => {
-			if (err) return reject(err);
-			resolve();
-		});
-	});
+async function inputInDataBase(db, sql) {
+	await db.exec(sql);
 }
 
 class DatabaseMigrations {
@@ -23,20 +18,19 @@ class DatabaseMigrations {
   async runMigrations() {
     try {
       await this.dbConnection.connect();
-      const db = this.dbConnection.getDatabase();
+      const db = await this.dbConnection.getDatabase();
       
       const migrations = ['authSchema.sql', 'schema.sql'];
 
       for (const schemaSQL of migrations) {
 
 	let schemaPath = path.join(__dirname, 'schemas', schemaSQL);
-	let schema = fs.readFileSync(schemaPath, 'utf8');
+	let schema = await fs.readFile(schemaPath, 'utf8');
       
 	await inputInDataBase(db, schema);
 }
       
       console.log('Database migrations completed successfully');
-     // await this.dbConnection.close();
       
     } catch (error) {
       console.error('Migration failed:', error);
@@ -45,17 +39,8 @@ class DatabaseMigrations {
     }
   }
 
-  executeStatement(db, statement) {
-    return new Promise((resolve, reject) => {
-      db.run(statement, (err) => {
-        if (err) {
-          console.error('Error executing statement: ', statement);
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+  async executeStatement(db, statement) {
+	await db.run(statement);
   }
 }
 

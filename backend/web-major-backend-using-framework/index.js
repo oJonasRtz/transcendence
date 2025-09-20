@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 // Set routes path
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: false });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -37,7 +37,7 @@ fastify.get('/', async (request, reply) => {
 // Register routes
 
 fastify.register(userRoutes, { prefix:'/api/users' });
-fastify.register(authRoutes, { prefix: '/api/test/users' });
+fastify.register(authRoutes, { prefix: '/api/auth/users' });
 fastify.register(relationsRoutes, { prefix: '/api/friends' });
 fastify.register(lobbiesRoutes, { prefix: '/api/lobbies' });
 fastify.register(matchmakingRoutes, { prefix: '/api/matchmaking' });

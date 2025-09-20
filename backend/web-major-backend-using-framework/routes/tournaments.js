@@ -15,13 +15,7 @@ async function tournamentRoutes(fastify, options) {
 });
 	// Lista os torneios
 	fastify.get('/', async (request, reply) => {
-		try {
-			const tournaments = await fastify.dbQueries.getAllTournaments();
-			return reply.send({ tournaments });
-		} catch (error) {
-			fastify.log.error(error);
-			return reply.code(500).send({ error: 'Internal server error' });
-		}
+		return reply.code(200).send({ message: 'Success!'});
 	});
 
 	// Obter um torneio específico

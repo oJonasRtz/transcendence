@@ -1,4 +1,6 @@
 import server from './index.js';
+import Fastify from 'fastify';
+import dbPlugin from './src/plugins/database.js';
 import dotenv from 'dotenv';
 
 dotenv.config();

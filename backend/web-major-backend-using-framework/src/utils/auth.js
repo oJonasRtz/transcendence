@@ -12,6 +12,24 @@ class AuthUtils {
     }
   }
 
+  static async deleteAuthTable(db) {
+	await db.exec('PRAGMA foreign_keys = OFF;');
+
+	await db.exec('DELETE FROM auth;');
+
+	const hasSeq = await db.get(`
+		SELECT 1
+		FROM sqlite_master
+		WHERE name = 'sqlite_sequence'
+		LIMIT 1
+		`
+	)
+	if (hasSeq) {
+		await db.exec(`DELETE FROM sqlite_sequence WHERE name='auth';`);
+	}
+	await db.exec('PRAGMA foreign_keys = ON;');
+  }
+
   static async verifyPassword(password, hash) {
     try {
       const isValid = await bcrypt.compare(password, hash);

@@ -1,4 +1,5 @@
 import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 import config from './config.js';
 
 class DatabaseConnection {
@@ -7,39 +8,25 @@ class DatabaseConnection {
   }
 
   async connect() {
-    return new Promise((resolve, reject) => {
-      this.db = new sqlite3.Database(config.database.filename, (err) => {
-        if (err) {
-          console.error('Error opening database:', err.message);
-          reject(err);
-        } else {
-          console.log('Connected to SQLite database');
-          this.db.run('PRAGMA foreign_keys = ON');
-          resolve(this.db);
-        }
-      });
-    });
+    if (this.db) return this.db;
+      this.db = await open({
+		filename: config.database.filename,
+		driver: sqlite3.Database,
+	});
+	console.log('Connected SQLite database (promise API)');
+	return (this.db);
   }
 
   async close() {
-    return new Promise((resolve, reject) => {
-      if (this.db) {
-        this.db.close((err) => {
-          if (err) {
-            console.error('Error closing database:', err.message);
-            reject(err);
-          } else {
-            console.log('Database connection closed');
-            resolve();
-          }
-        });
-      } else {
-        resolve();
-      }
-    });
-  }
-
+	if (this.db)
+		await this.db.close();
+	this.db = null;
+	console.log('Database connection closed');
+}
   getDatabase() {
+	if (!this.db) {
+		throw new Error('Database not connected. Call connect() first');
+	}
     return this.db;
   }
 }

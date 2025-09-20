@@ -34,13 +34,11 @@ async function databasePlugin(fastify, options) {
     
     console.log('Database plugin registered successfully');
     const migrations = new DatabaseMigration();
-    migrations.runMigrations()
-	.then(() => console.log('All migrations already done'))
-	.catch((err) => console.err('Something wrong happened in migrations: ', err));
+    await migrations.runMigrations()
     console.log('Migrations did with success');
     
   } catch (error) {
-    console.error('Failed to connect to database:', error);
+    console.error('Failed in database: ', error);
     throw error;
   }
 }

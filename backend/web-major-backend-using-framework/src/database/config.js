@@ -1,11 +1,7 @@
 import path from 'path';
-
 const config = {
   database: {
-    filename: path.join('../../database.sqlite'),
-    options: {
-      verbose: console.log
-    }
+    filename: path.resolve('./database.sqlite'),
   }
 };
 

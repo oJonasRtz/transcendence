@@ -6,21 +6,16 @@ class DatabaseQueries {
   }
 	async registerUser (username, email, password) {
 		const passwordHash = await AuthUtils.hashPassword(password);
-		return new Promise((resolve, reject) => {
-			const stmt = this.db.prepare(`
+			const stmt = await this.db.prepare(`
 			INSERT INTO auth (username, email, password_hash)
 			VALUES (?, ?, ?)
 			`);
-		
-		stmt.run([username, email, passwordHash], function (err) {
-			stmt.finalize();
-			if (err) {
-				reject(err);
-			} else {
-				resolve(true);
+			try {
+				const res = await stmt.run(username, email, passwordHash);
+				return true;
+			} finally {
+				await stmt.finalize();
 			}
-		});
-	}); 
-	};
+	}
 };
 export default DatabaseQueries;
