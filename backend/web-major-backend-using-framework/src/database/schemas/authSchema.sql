@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS auth (
 	-- Email of the user
 	email TEXT UNIQUE NOT NULL,
 	-- Password hashed of the user
-	password_hash VARCHAR(500) NOT NULL,
+	password_hash VARCHAR(1000) NOT NULL,
 	-- Password version, we can improve the algorithm
 	password_version INTEGER DEFAULT 1,
 	-- You forgot the password and made mistakes so many times

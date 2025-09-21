@@ -19,7 +19,16 @@ async function authRoutes (fastify, options) {
 
 	// Login
 	fastify.post('/login', async (request, reply) => {
-		return reply.code(200).send('Login efetuado com sucesso');
+		const { username, email, password } = request.body;
+
+		if ((!username && !email) || !password)
+			return reply.code(400).send({ error: 'Invalid input'});
+		try {
+			await fastify.dbQueries.auth.loginUser(username, email, password);
+		} catch (err) {
+			return reply.code(401).send({ error: 'Invalid input found' });
+		}
+		return reply.code(200).send('Login success!!!');
 	});
 	// Logout
 	fastify.post('/logout', async (request, reply) => {
