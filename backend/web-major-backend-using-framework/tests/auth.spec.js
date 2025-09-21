@@ -109,6 +109,14 @@ describe('Testando autenticação do usuário', () => {
 			password: 'Luke123@!'
 		})
 		.expect(401);
+
+		console.log('Conteúdo de auth');
+                const rows = await fastify.db.all('SELECT * FROM auth');
+                console.table(rows);
+
+                expect(rows.length).toBe(1);
+                expect(rows[0].username).toBe(user.username);
+                expect(rows[0].email).toBe(user.email);
 	});
 	test('login de usuário que passou apenas o email ou username com password', async () => {
 		const user = {

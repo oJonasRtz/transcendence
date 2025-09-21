@@ -38,8 +38,22 @@ class DatabaseQueries {
 				if (!res)
 					throw new Error('invalid input');
 				const isValid = await AuthUtils.verifyPassword(password, res.password_hash);
-				if (!isValid)
+				if (!isValid){
+					await this.db.run(`
+						UPDATE auth 
+						SET failed_login_count = failed_login_count + 1,
+							is_active = 0
+						WHERE email = ?
+					`, [res.email]);
 					throw new Error('invalid username/password/email');
+				}
+				await this.db.run(`
+					UPDATE auth 
+					SET is_active = 1,
+						failed_login_count = 0,
+						last_login_at = CURRENT_TIMESTAMP
+					WHERE email = ?`
+				, [res.email]);
 				return (true)
 			}
 			finally {
@@ -59,6 +73,12 @@ class DatabaseQueries {
 				const isValid = await AuthUtils.verifyPassword(password, res.password_hash);
 				if (!isValid)
 					throw new Error("Invalid username/email/password");
+				await this.db.run(`
+                                        UPDATE auth 
+                                        SET is_active = 1,
+                                                failed_login_count = 0
+                                        WHERE username = ?`
+                                , [res.username]);
 				return (true);
 			} finally {
 				await stmt.finalize();
