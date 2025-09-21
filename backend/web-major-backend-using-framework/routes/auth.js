@@ -12,7 +12,7 @@ async function authRoutes (fastify, options) {
 				return reply.code(400).send({ error: 'Invalid input'});
 			await fastify.dbQueries.auth.registerUser(username, email, password);
 		} catch (err) {
-			return reply.code(500).send({ error: 'Internal Server Error' });
+			return reply.code(409).send({ error: 'Conflict' });
 		}
 		return reply.code(201).send({ message: 'User registering successfully' });
 	});
@@ -22,7 +22,7 @@ async function authRoutes (fastify, options) {
 		const { username, email, password } = request.body;
 
 		if ((!username && !email) || !password)
-			return reply.code(400).send({ error: 'Invalid input'});
+			return reply.code(400).send({ error: 'Username/email and password required'});
 		try {
 			await fastify.dbQueries.auth.loginUser(username, email, password);
 		} catch (err) {

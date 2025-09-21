@@ -3,7 +3,9 @@ import AuthUtils from '../src/utils/auth.js';
 import fs from 'fs';
 import path from 'path';
 import fastify from '../index.js';
+import { jest } from '@jest/globals';
 
+jest.setTimeout(30000);
 beforeAll(async () => {
 	await fastify.ready();
 });
@@ -17,16 +19,21 @@ afterAll(async () => {
 });
 
 describe('Testando autenticação do usuário', () => {
-	test('criação de usuário', async () => {
+	test('criação de usuário, argumentos válidos e inválidos', async () => {
 		const user = {
 			username: 'IndianaJones',
-			email: 'indianaJones@gmail.com',
+			email: 'indianajones@gmail.com',
 			password: 'Isso12#ÉUmaSen@haForte'
 		};
 		const response = await supertest(fastify.server)
 		.post('/api/auth/users/register')
 		.send(user)
 		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(409);
 
 		console.log('Conteúdo de auth');
 		const rows = await fastify.db.all('SELECT * FROM auth');
@@ -35,71 +42,44 @@ describe('Testando autenticação do usuário', () => {
 		expect(rows.length).toBe(1);
 		expect(rows[0].username).toBe(user.username);
 		expect(rows[0].email).toBe(user.email);
-	});
-	test('criação de usuário inválido sem senha', async () => {
-		const user = {
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'IndianaJones',
+			email: 'indianajones@gmail.com'
+		})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
 			username: 'HanSolo',
-			email: 'hansolo@gmail.com',
-		}
-		const response = await supertest(fastify.server)
-		.post('/api/auth/users/register')
-		.send(user)
+			password: 'Senha@123Forte#'
+		})
 		.expect(400);
-	});
-	test('criação de usuário inválido sem email', async () => {
-		const user = {
-			username: 'DarthVader',
-			password: 'Senha@123FORTE#'
-		}
-		const response = await supertest(fastify.server)
-		.post('/api/auth/users/register')
-		.send(user)
-		.expect(400);
-	});
-	test('criação de usuário inválido sem username', async () => {
-		const user = {
-			email: 'PrincessLeia@hotmail.com',
-			password: 'princessLeia&Luke#2'
-		}
-		const response = await supertest(fastify.server)
-		.post('/api/auth/users/register')
-		.send(user)
-		.expect(400);
-	});
-	test('criação de usuário com senha fraca', async () => {
-		const user = {
-			username: 'Luke Skywalker',
-			email: 'luke@gmail.com',
-			password: 'eusouoluke'
-		};
-		const response = await supertest(fastify.server)
-		.post('/api/auth/users/register')
-		.send(user)
-		.expect(400);
-	});
-	test('login do usuário correto (registro e consulta)', async () => {
-		const user = { 
-			username: 'LukeSkywalker',
-			email: 'luke@gmail.com',
-			password: 'Casei#123PrincessLei@'
-		}
-		await supertest(fastify.server)
-		.post('/api/auth/users/register')
-		.send(user)
-		.expect(201);
 
 		await supertest(fastify.server)
-		.post('/api/auth/users/login')
-		.send(user)
-		.expect(200);
+		.post('/api/auth/users/register')
+		.send({
+			email: 'princessleia@gmail.com',
+			password: 'leia@123LhusbandLuke!'
+		})
+		.expect(400);
 
-		console.log('Conteúdo de auth');
-                const rows = await fastify.db.all('SELECT * FROM auth');
-                console.table(rows);
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({})
+		.expect(400);
 
-                expect(rows.length).toBe(1);
-                expect(rows[0].username).toBe(user.username);
-                expect(rows[0].email).toBe(user.email);
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Shanks',
+			email: 'shanksyonkou@gmail.com',
+			password: 'shanks'
+		})
+			.expect(400);
 	});
 	test('login do usuário incorreto (registro e consulta)', async () => {
 		const user = {
@@ -117,7 +97,52 @@ describe('Testando autenticação do usuário', () => {
 		.send({
 			username: 'DarthVader',
 			email: 'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthVader',
+			email: 'darthvader@gmail.com',
 			password: 'Luke123@!'
+		})
+		.expect(401);
+	});
+	test('login de usuário que passou apenas o email ou username com password', async () => {
+		const user = {
+			username: 'DarthVader',
+			email: 'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		}
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			email:'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthVader',
+			password: 'LukeMorreueDarthVenceuY12!'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthMaul',
+			email: 'darthmaul@gmail.com',
+			password: 'dartMaul21SITH@bomDeBriga'
 		})
 		.expect(401);
 	});

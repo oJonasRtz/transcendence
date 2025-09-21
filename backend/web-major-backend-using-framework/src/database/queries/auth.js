@@ -5,6 +5,14 @@ class DatabaseQueries {
     this.db = db;
   }
 	async registerUser (username, email, password) {
+		const existing = await this.db.get(`
+			SELECT id, username, email
+			FROM auth
+			WHERE username = ? OR email = ?
+			LIMIT 1
+		`, [username, email]);
+		if (existing)
+			throw new Error('User already exists');
 		const passwordHash = await AuthUtils.hashPassword(password);
 			const stmt = await this.db.prepare(`
 			INSERT INTO auth (username, email, password_hash)
