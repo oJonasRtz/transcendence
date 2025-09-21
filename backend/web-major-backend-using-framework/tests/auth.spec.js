@@ -21,7 +21,7 @@ describe('Testando autenticação do usuário', () => {
 		const user = {
 			username: 'IndianaJones',
 			email: 'indianaJones@gmail.com',
-			password: 'IssoÉUmaSenhaForte'
+			password: 'Isso12#ÉUmaSen@haForte'
 		};
 		const response = await supertest(fastify.server)
 		.post('/api/auth/users/register')
@@ -35,6 +35,47 @@ describe('Testando autenticação do usuário', () => {
 		expect(rows.length).toBe(1);
 		expect(rows[0].username).toBe(user.username);
 		expect(rows[0].email).toBe(user.email);
+	});
+	test('criação de usuário inválido sem senha', async () => {
+		const user = {
+			username: 'HanSolo',
+			email: 'hansolo@gmail.com',
+		}
+		const response = await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(400);
+	});
+	test('criação de usuário inválido sem email', async () => {
+		const user = {
+			username: 'DarthVader',
+			password: 'Senha@123FORTE#'
+		}
+		const response = await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(400);
+	});
+	test('criação de usuário inválido sem username', async () => {
+		const user = {
+			email: 'PrincessLeia@hotmail.com',
+			password: 'princessLeia&Luke#2'
+		}
+		const response = await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(400);
+	});
+	test('criação de usuário com senha fraca', async () => {
+		const user = {
+			username: 'Luke Skywalker',
+			email: 'luke@gmail.com',
+			password: 'eusouoluke'
+		};
+		const response = await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(400);
 	});
 	test('login do usuário', async () => {
 		const response = await supertest(fastify.server)

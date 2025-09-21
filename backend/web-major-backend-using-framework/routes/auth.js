@@ -7,6 +7,9 @@ async function authRoutes (fastify, options) {
 		try {
 			if (!AuthUtils.validateUsername(username) || !AuthUtils.validateEmail(email) || !AuthUtils.validatePassword(password))
 				return reply.code(400).send({ error: 'Invalid input'});
+			const strength = await AuthUtils.calculatePassWordStrength(password);
+			if (strength !== 5)
+				return reply.code(400).send({ error: 'Invalid input'});
 			await fastify.dbQueries.auth.registerUser(username, email, password);
 		} catch (err) {
 			return reply.code(500).send({ error: 'Internal Server Error' });

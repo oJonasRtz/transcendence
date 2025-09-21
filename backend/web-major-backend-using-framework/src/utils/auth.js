@@ -11,7 +11,15 @@ class AuthUtils {
       throw new Error('Error hashing password: ' + error.message);
     }
   }
-
+  static async calculatePassWordStrength(password) {
+	let strength = 0;
+	strength += Number(password.length >= 8);
+	strength += Number(/[A-Z]/.test(password));
+	strength += Number(/[0-9]/.test(password));
+	strength += Number(/[a-z]/.test(password));
+	strength += Number(/[^A-Za-z0-9]/.test(password));
+	return strength;
+}
   static async deleteAuthTable(db) {
 	await db.exec('PRAGMA foreign_keys = OFF;');
 
