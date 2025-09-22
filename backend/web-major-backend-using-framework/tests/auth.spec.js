@@ -161,10 +161,33 @@ describe('Testando autenticação do usuário', () => {
 		.expect(200);
 	});
 	test('logout do usuário', async () => {
-		const response = await supertest(fastify.server)
-		.post('/api/auth/users/logout')
+		const user = {
+			username: 'Superman',
+			email: 'superman@gmail.com',
+			password: 'superman@BomDeBriga12!'
+		}
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/logout/1')
 		.send({})
 		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/logout/423434')
+		.send({})
+		.expect(401);
+
+		console.log('Conteúdo de auth');
+                const rows = await fastify.db.all('SELECT * FROM auth');
+                console.table(rows);
+
+                expect(rows.length).toBe(1);
+                expect(rows[0].username).toBe(user.username);
+                expect(rows[0].email).toBe(user.email);
 	});
 	test('esqueceu a senha', async () => {
 		const response = await supertest(fastify.server)

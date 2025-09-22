@@ -109,10 +109,13 @@ class DatabaseQueries {
 			this.db.run(`
 			UPDATE auth
 			SET is_active = 0,
-			    update_at = CURRENT_TIMESTAMP
+			    updated_at = CURRENT_TIMESTAMP
 			WHERE id = ?
 		`, [id]);
+			return (true);
 		}
+		else
+			throw new Error("The user doesn't exist");
 	}
 };
 export default DatabaseQueries;

@@ -31,9 +31,14 @@ async function authRoutes (fastify, options) {
 		return reply.code(200).send('Login success!!!');
 	});
 	// Logout
-	fastify.post('/logout', async (request, reply) => {
-		const { username, email } = request.body;
-		return reply.code(200).send('Logout efetuado com sucesso');
+	fastify.post('/logout/:id', async (request, reply) => {
+		const { id } = request.params;
+		try {
+			await fastify.dbQueries.auth.logoutUser(id);
+		} catch (err) {
+			return reply.code(401).send({ error: "User doesn't exist"});
+		}
+		return reply.code(200).send('Logout successfully');
 	});
 
 	// Refresh -> validate the access again

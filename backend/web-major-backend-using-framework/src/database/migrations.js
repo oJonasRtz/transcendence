@@ -28,8 +28,7 @@ class DatabaseMigrations {
 	let schema = await fs.readFile(schemaPath, 'utf8');
       
 	await inputInDataBase(db, schema);
-}
-      
+} 
       console.log('Database migrations completed successfully');
       
     } catch (error) {
