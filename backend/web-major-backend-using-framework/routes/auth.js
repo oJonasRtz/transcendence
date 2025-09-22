@@ -32,6 +32,7 @@ async function authRoutes (fastify, options) {
 	});
 	// Logout
 	fastify.post('/logout', async (request, reply) => {
+		const { username, email } = request.body;
 		return reply.code(200).send('Logout efetuado com sucesso');
 	});
 

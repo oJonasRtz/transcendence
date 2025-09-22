@@ -95,5 +95,24 @@ class DatabaseQueries {
 		else
 			throw new Error("Don't have enough information to check");
 	}
+
+	async logoutUser (id) {
+		if (!id)
+			throw new Error ('Invalid input');
+		const existing = await this.db.get(`
+                        SELECT id, username, email
+                        FROM auth
+                        WHERE id = ?
+                        LIMIT 1
+                `, [id]);
+		if (existing) {
+			this.db.run(`
+			UPDATE auth
+			SET is_active = 0,
+			    update_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`, [id]);
+		}
+	}
 };
 export default DatabaseQueries;
