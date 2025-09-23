@@ -117,5 +117,38 @@ class DatabaseQueries {
 		else
 			throw new Error("The user doesn't exist");
 	}
+
+	async forgotPass(id, email, newPassword)
+	{
+		if (!id || !email || !newPassword)
+			throw new Error ("MISSING_INPUT");
+		const existing = await this.db.get(`
+			SELECT id, username, email, password_hash
+			FROM auth
+			WHERE id = ? AND email = ?
+		`, [id, email]);
+		if (!existing)
+			throw new Error ("NOT_FOUND");
+		const isTheSame = await bcrypt.compare(newPassword, existing.password_hash);
+		if (isTheSame)
+			throw new Error ('SAME_PASSWORD');
+		else
+		{
+			const strength = await AuthUtils.calculatePassWordStrength(newPassword);
+			if (strength !== 5)
+				throw new Error ("WEAK_NEW_PASSWORD");
+			const passwordHash = await AuthUtils.hashPassword(newPassword);
+			try {
+				await this.db.run(`
+					UPDATE auth
+					SET password_hash = ?
+					WHERE id = ? AND email = ?
+					`, [passwordHash, id, email]);
+			} catch (err) {
+				throw new Error ("INTERNAL_SERVER_ERROR");
+			}
+			return (true);
+		}
+	}
 };
 export default DatabaseQueries;

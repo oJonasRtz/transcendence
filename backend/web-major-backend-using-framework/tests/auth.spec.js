@@ -190,10 +190,46 @@ describe('Testando autenticação do usuário', () => {
                 expect(rows[0].email).toBe(user.email);
 	});
 	test('esqueceu a senha', async () => {
-		const response = await supertest(fastify.server)
-		.post('/api/auth/users/forgot')
-		.send({})
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Saitama',
+			email: 'saitama@gmail.com',
+			password: 'SenhaForteDoSaitamaNãoQuerResumirNão1234!!#'
+		})
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/forgot/1')
+		.send({
+			email: 'saitama@gmail.com',
+			newPassword: 'theMostSecurePassWord123!#'
+		})
 		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/forgot/1')
+		.send({
+			email: 'saitama@gmail.com'
+		})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/forgot/1')
+		.send({
+			email: 'saitama@gmail.com',
+			newPassword: "SenhaForteDoSaitamaNãoQuerResumirNão1234!!#"
+		})
+		.expect(409);
+
+		await supertest(fastify.server)
+		.post ('/api/auth/users/forgot/121222')
+		.send({
+			email: 'robin@gmail.com',
+			newPassword: "SenhaForteDoRobin!@#123"
+		})
+		.expect(404);
 	});
 	test('obter os dados do usuário logado', async () => {
 		const response = await supertest(fastify.server)

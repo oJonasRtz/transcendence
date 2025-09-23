@@ -48,8 +48,24 @@ async function authRoutes (fastify, options) {
 
 	// Logout -> invalid the refresh
 
-	fastify.post('/forgot', async (request, reply) => {
-		return reply.code(200).send('Recuperação da senha');
+	fastify.post('/forgot/:id', async (request, reply) => {
+		const { id } = request.params;
+		const { email, newPassword } = request.body;
+		try {
+			const userId = parseInt(id, 10);
+			await fastify.dbQueries.auth.forgotPass(userId, email, newPassword);
+		} catch (err) {
+			if (err.message === "MISSING_INPUT")
+				return reply.code(400).send('Need a valid input');
+			else if (err.message === "SAME_PASSWORD")
+				return reply.code(409).send('Same password');
+			else if (err.message === "NOT_FOUND")
+				return reply.code(404).send('Not found a valid user');
+			else if (err.message === "INTERNAL_SERVER_ERROR")
+				return reply.code(500).send('Internal Server Error');
+			return reply.code(401).send('Invalid action happened');
+		}
+		return reply.code(200).send('Password changed successfully');
 	});
 
 	// Get information about the login
