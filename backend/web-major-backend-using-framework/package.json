@@ -8,7 +8,7 @@
     "dev": "nodemon server.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "testDbConnection": "node src/database/test-connection.js",
-    "db:migrate": "node src/database/migrations.js",
+    "db:migrate": "node src/devUtils/migrationsOffline.js",
     "test:db": "node src/database/test-connection.js",
     "lint": "echo \"Linting passed\""
   },

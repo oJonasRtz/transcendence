@@ -10,8 +10,8 @@ class DatabaseConnection {
   async connect() {
     if (this.db) return this.db;
       this.db = await open({
-		filename: config.database.filename,
-		driver: sqlite3.Database,
+		filename: config.database.filename, 
+		driver: sqlite3.Database
 	});
 	console.log('Connected SQLite database (promise API)');
 	return (this.db);
