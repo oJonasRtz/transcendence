@@ -44,7 +44,7 @@ class DatabaseQueries {
 						UPDATE auth 
 						SET failed_login_count = failed_login_count + 1,
 						WHERE email = ?
-					`, [res.email]);
+					`, [res.email.toLowerCase()]);
 					throw new Error('invalid username/password/email');
 				}
 				await this.db.run(`
@@ -54,7 +54,7 @@ class DatabaseQueries {
 						last_login_at = CURRENT_TIMESTAMP,
 						updated_at = CURRENT_TIMESTAMP
 					WHERE email = ?`
-				, [res.email]);
+				, [res.email.toLowerCase()]);
 				return (true)
 			}
 			finally {
@@ -70,7 +70,7 @@ class DatabaseQueries {
 			try {
 				const res = await stmt.get(username);
 				if (!res)
-					throw new Error("Don't have an user with this username");
+					throw new Error("NOT_FOUND");
 				const isValid = await AuthUtils.verifyPassword(password, res.password_hash);
 				if (!isValid){
 					await this.db.run(`
@@ -78,7 +78,7 @@ class DatabaseQueries {
                                                 SET failed_login_count = failed_login_count + 1,
                                                 WHERE username = ?
                                         `, [res.username]);
-					throw new Error("Invalid username/email/password");
+					throw new Error("INVALID_USER_PASS");
 				}
 				await this.db.run(`
                                         UPDATE auth 

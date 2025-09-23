@@ -24,7 +24,7 @@ async function authRoutes (fastify, options) {
 		if ((!username && !email) || !password)
 			return reply.code(400).send({ error: 'Username/email and password required'});
 		try {
-			await fastify.dbQueries.auth.loginUser(username, email.toLowerCase(), password);
+			await fastify.dbQueries.auth.loginUser(username, email, password);
 		} catch (err) {
 			return reply.code(401).send({ error: 'Invalid input found' });
 		}
