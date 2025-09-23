@@ -5,22 +5,22 @@ class DatabaseQueries {
   constructor(db) {
     this.db = db;
   }
-	async registerUser (username, email, password) {
+	async registerUser (username, nickname, email, password) {
 		const existing = await this.db.get(`
-			SELECT id, username, email
+			SELECT id, username, nickname, email
 			FROM auth
-			WHERE username = ? OR email = ?
+			WHERE username = ? OR email = ? OR nickname = ?
 			LIMIT 1
-		`, [username, email]);
+		`, [username, email, nickname]);
 		if (existing)
 			throw new Error('User already exists');
 		const passwordHash = await AuthUtils.hashPassword(password);
 			const stmt = await this.db.prepare(`
-			INSERT INTO auth (username, email, password_hash)
-			VALUES (?, ?, ?)
+			INSERT INTO auth (username, nickname, email, password_hash)
+			VALUES (?, ?, ?, ?)
 			`);
 			try {
-				const res = await stmt.run(username, email, passwordHash);
+				const res = await stmt.run(username, nickname, email, passwordHash);
 				return true;
 			} finally {
 				await stmt.finalize();

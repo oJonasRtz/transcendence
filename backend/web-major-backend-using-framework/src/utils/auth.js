@@ -53,7 +53,7 @@ class AuthUtils {
   }
 
   static validateUsername(username) {
-    if (!username || username.length < 3 || username.length > 50) {
+    if (!username || username.length < 3 || username.length > 22) {
       return false;
     }
     const usernameRegex = /^[a-zA-Z0-9_-]+$/;

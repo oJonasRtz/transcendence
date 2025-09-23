@@ -3,14 +3,17 @@ import AuthUtils from '../src/utils/auth.js'
 async function authRoutes (fastify, options) {
 	// Register of user
 	fastify.post('/register', async (request, reply) => {
-		const { username, email, password } = request.body;
+		const { username, nickname, email, password } = request.body;
 		try {
-			if (!AuthUtils.validateUsername(username) || !AuthUtils.validateEmail(email) || !AuthUtils.validatePassword(password))
-				return reply.code(400).send({ error: 'Invalid input'});
+			if (!username || !nickname || !email || !password)
+				return reply.code(400).send({ error: 'MISSING_INPUT' });
+			if (!AuthUtils.validateUsername(username) || !AuthUtils.validateUsername(nickname) 
+				|| !AuthUtils.validateEmail(email) || !AuthUtils.validatePassword(password))
+				return reply.code(400).send({ error: 'MISSING_INPUT' });
 			const strength = await AuthUtils.calculatePassWordStrength(password);
 			if (strength !== 5)
-				return reply.code(400).send({ error: 'Invalid input'});
-			await fastify.dbQueries.auth.registerUser(username, email.toLowerCase(), password);
+				return reply.code(400).send({ error: 'MISSING_INPUT '});
+			await fastify.dbQueries.auth.registerUser(username, nickname, email.toLowerCase(), password);
 		} catch (err) {
 			return reply.code(409).send({ error: 'Conflict' });
 		}

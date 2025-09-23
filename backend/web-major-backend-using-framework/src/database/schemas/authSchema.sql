@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS auth (
 	username TEXT UNIQUE NOT NULL,
 	-- Email of the user
 	email TEXT UNIQUE NOT NULL,
+	-- Nickname of the user
+	nickname TEXT UNIQUE NOT NULL,
 	-- Password hashed of the user
 	password_hash VARCHAR(1000) NOT NULL,
 	-- Password version, we can improve the algorithm
