@@ -1,4 +1,5 @@
 import AuthUtils from '../../utils/auth.js';
+import bcrypt from 'bcrypt';
 
 class DatabaseQueries {
   constructor(db) {
@@ -149,6 +150,31 @@ class DatabaseQueries {
 			}
 			return (true);
 		}
+	}
+
+	async aboutMeGetUserInformation(id)
+	{
+		if (!id)
+			throw new Error ('MISSING_INPUT');
+		const existing = await this.db.get(`
+			SELECT *
+			FROM auth
+			WHERE id = ?
+		`, [id]);
+
+		if (existing)
+			return ({ 
+				id: existing.id, 
+				username: existing.username, 
+				email: existing.email,
+				is_active: existing.is_active,
+				password_hash: existing.password_hash,
+				last_login_at: existing.last_login_at,
+				failed_login_count: existing.failed_login_count,
+				last_login_ip: existing.last_login_ip
+			});
+		else if (!existing)
+			throw new Error('UNAUTHORIZED');
 	}
 };
 export default DatabaseQueries;

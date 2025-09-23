@@ -219,7 +219,7 @@ describe('Testando autenticação do usuário', () => {
 		.post('/api/auth/users/forgot/1')
 		.send({
 			email: 'saitama@gmail.com',
-			newPassword: "SenhaForteDoSaitamaNãoQuerResumirNão1234!!#"
+			newPassword: 'theMostSecurePassWord123!#' 
 		})
 		.expect(409);
 
@@ -227,13 +227,29 @@ describe('Testando autenticação do usuário', () => {
 		.post ('/api/auth/users/forgot/121222')
 		.send({
 			email: 'robin@gmail.com',
-			newPassword: "SenhaForteDoRobin!@#123"
+			newPassword: 'SenhaForteDoRobin!@#123'
 		})
 		.expect(404);
 	});
 	test('obter os dados do usuário logado', async () => {
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'MonkeyDLuffy',
+			email: 'monkeyDLuffy@gmail.com',
+			password: 'monkeyDLuffy123@!'
+		})
+		.expect(201);
+
 		const response = await supertest(fastify.server)
-		.get('/api/auth/users/me')
+		.get('/api/auth/users/me/1')
 		.expect(200);
+
+		expect(response.body.username === "MonkeyDLuffy" && response.body.email === "monkeyDLuffy@gmail.com");
+
+		await supertest(fastify.server)
+		.get('/api/auth/users/me/2390423437')
+		.expect(401);
 	});
 });
