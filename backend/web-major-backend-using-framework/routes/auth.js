@@ -10,7 +10,7 @@ async function authRoutes (fastify, options) {
 			const strength = await AuthUtils.calculatePassWordStrength(password);
 			if (strength !== 5)
 				return reply.code(400).send({ error: 'Invalid input'});
-			await fastify.dbQueries.auth.registerUser(username, email, password);
+			await fastify.dbQueries.auth.registerUser(username, email.toLowerCase(), password);
 		} catch (err) {
 			return reply.code(409).send({ error: 'Conflict' });
 		}
@@ -24,7 +24,7 @@ async function authRoutes (fastify, options) {
 		if ((!username && !email) || !password)
 			return reply.code(400).send({ error: 'Username/email and password required'});
 		try {
-			await fastify.dbQueries.auth.loginUser(username, email, password);
+			await fastify.dbQueries.auth.loginUser(username, email.toLowerCase(), password);
 		} catch (err) {
 			return reply.code(401).send({ error: 'Invalid input found' });
 		}
@@ -53,7 +53,7 @@ async function authRoutes (fastify, options) {
 		const { email, newPassword } = request.body;
 		try {
 			const userId = parseInt(id, 10);
-			await fastify.dbQueries.auth.forgotPass(userId, email, newPassword);
+			await fastify.dbQueries.auth.forgotPass(userId, email.toLowerCase(), newPassword);
 		} catch (err) {
 			switch (err.message)
 			{

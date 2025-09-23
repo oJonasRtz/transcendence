@@ -35,6 +35,15 @@ describe('Testando autenticação do usuário', () => {
 		.send(user)
 		.expect(409);
 
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'IndianaJones',
+			email: 'indianajones@gmail.com',
+			password: 'SenhaSuperForte12345###!!'
+		})
+		.expect(409);
+
 		console.log('Conteúdo de auth');
 		const rows = await fastify.db.all('SELECT * FROM auth');
 		console.table(rows);
@@ -79,7 +88,7 @@ describe('Testando autenticação do usuário', () => {
 			email: 'shanksyonkou@gmail.com',
 			password: 'shanks'
 		})
-			.expect(400);
+		.expect(400);
 	});
 	test('login do usuário incorreto (registro e consulta)', async () => {
 		const user = {
