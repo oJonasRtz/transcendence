@@ -1,0 +1,275 @@
+import supertest from 'supertest';
+import AuthUtils from '../src/utils/auth.js';
+import fs from 'fs';
+import path from 'path';
+import fastify from '../index.js';
+import { jest } from '@jest/globals';
+
+jest.setTimeout(30000);
+beforeAll(async () => {
+	await fastify.ready();
+});
+
+beforeEach(async () => {
+	await AuthUtils.deleteAuthTable(fastify.db);
+});
+
+afterAll(async () => {
+	await fastify.close();
+});
+
+describe('Testando autenticação do usuário', () => {
+	test('criação de usuário, argumentos válidos e inválidos', async () => {
+		const user = {
+			username: 'IndianaJones',
+			nickname: 'indiano',
+			email: 'indianajones@gmail.com',
+			password: 'Isso12#ÉUmaSen@haForte'
+		};
+		const response = await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(409);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'IndianaJones',
+			nickname: 'indiano',
+			email: 'indianajones@gmail.com',
+			password: 'SenhaSuperForte12345###!!'
+		})
+		.expect(409);
+
+		console.log('Conteúdo de auth');
+		const rows = await fastify.db.all('SELECT * FROM auth');
+		console.table(rows);
+
+		expect(rows.length).toBe(1);
+		expect(rows[0].username).toBe(user.username);
+		expect(rows[0].email).toBe(user.email);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'IndianaJones',
+			nickname: 'indiano',
+			email: 'indianajones@gmail.com'
+		})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'HanSolo',
+			nickname: 'atirador',
+			password: 'Senha@123Forte#'
+		})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			email: 'princessleia@gmail.com',
+			nickname: 'esposaDoDarthVader',
+			password: 'leia@123LhusbandLuke!'
+		})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Shanks',
+			nickname: 'red-haired',
+			email: 'shanksyonkou@gmail.com',
+			password: 'shanks'
+		})
+		.expect(400);
+	});
+	test('login do usuário incorreto (registro e consulta)', async () => {
+		const user = {
+			username: 'DarthVader',
+			nickname: 'Emperor',
+			email: 'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		}
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthVader',
+			email: 'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthVader',
+			email: 'darthvader@gmail.com',
+			password: 'Luke123@!'
+		})
+		.expect(401);
+
+		console.log('Conteúdo de auth');
+                const rows = await fastify.db.all('SELECT * FROM auth');
+                console.table(rows);
+
+                expect(rows.length).toBe(1);
+                expect(rows[0].username).toBe(user.username);
+                expect(rows[0].email).toBe(user.email);
+	});
+	test('login de usuário que passou apenas o email ou username com password', async () => {
+		const user = {
+			username: 'DarthVader',
+			nickname: 'Emperor',
+			email: 'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		}
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			email:'darthvader@gmail.com',
+			password: 'LukeMorreueDarthVenceuY12!'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthVader',
+			password: 'LukeMorreueDarthVenceuY12!'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/login')
+		.send({
+			username: 'DarthMaul',
+			email: 'darthmaul@gmail.com',
+			password: 'dartMaul21SITH@bomDeBriga'
+		})
+		.expect(401);
+	});
+	test('refresh do usuário', async () => {
+		const response = await supertest(fastify.server)
+		.post('/api/auth/users/refresh')
+		.send({})
+		.expect(200);
+	});
+	test('logout do usuário', async () => {
+		const user = {
+			username: 'Superman',
+			nickname: 'strogest',
+			email: 'superman@gmail.com',
+			password: 'superman@BomDeBriga12!'
+		}
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/logout/1')
+		.send({})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/logout/423434')
+		.send({})
+		.expect(401);
+
+		console.log('Conteúdo de auth');
+                const rows = await fastify.db.all('SELECT * FROM auth');
+                console.table(rows);
+
+                expect(rows.length).toBe(1);
+                expect(rows[0].username).toBe(user.username);
+                expect(rows[0].email).toBe(user.email);
+	});
+	test('esqueceu a senha', async () => {
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Saitama',
+			nickname: 'invencible',
+			email: 'saitama@gmail.com',
+			password: 'SenhaForteDoSaitamaNãoQuerResumirNão1234!!#'
+		})
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/forgot/1')
+		.send({
+			email: 'saitama@gmail.com',
+			newPassword: 'theMostSecurePassWord123!#'
+		})
+		.expect(200);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/forgot/1')
+		.send({
+			email: 'saitama@gmail.com'
+		})
+		.expect(400);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/forgot/1')
+		.send({
+			email: 'saitama@gmail.com',
+			newPassword: 'theMostSecurePassWord123!#' 
+		})
+		.expect(409);
+
+		await supertest(fastify.server)
+		.post ('/api/auth/users/forgot/121222')
+		.send({
+			email: 'robin@gmail.com',
+			newPassword: 'SenhaForteDoRobin!@#123'
+		})
+		.expect(404);
+	});
+	test('obter os dados do usuário logado', async () => {
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'MonkeyDLuffy',
+			nickname: 'Nika',
+			email: 'monkeyDLuffy@gmail.com',
+			password: 'monkeyDLuffy123@!'
+		})
+		.expect(201);
+
+		const response = await supertest(fastify.server)
+		.get('/api/auth/users/me/1')
+		.expect(200);
+
+		expect(response.body.username === "MonkeyDLuffy" && response.body.email === "monkeyDLuffy@gmail.com");
+
+		await supertest(fastify.server)
+		.get('/api/auth/users/me/2390423437')
+		.expect(401);
+	});
+});
