@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
 	-- Nickname of the user
 	nickname TEXT UNIQUE NOT NULL,
 	-- avatar
-	image TEXT UNIQUE NOT NULL,
+	avatar TEXT UNIQUE NOT NULL,
 	-- Level
 	level INTEGER DEFAULT 0,
 	-- experience points of the user
@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS users (
 	-- matches winner
 	wins INTEGER DEFAULT 0,
 	-- matches loser
-	losses INTEGER DEFAULT 0
+	losses INTEGER DEFAULT 0,
 	-- percentage total of winner / loser
-	win_rate REAL NOT NULL DEFAULT 0.0
+	win_rate REAL NOT NULL DEFAULT 0.0,
 	-- description
 	description TEXT DEFAULT NULL
 );

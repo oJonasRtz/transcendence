@@ -12,6 +12,6 @@ try {
 	await migrations.runMigrations()
 	console.log('Migrations did with success');
 } catch (err) {
-	console.err('Unfortunately migrations did not have success: ', err.message);
+	console.error('Unfortunately migrations did not have success:', err.message);
 	process.exit(1);
 }
