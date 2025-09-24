@@ -1,7 +1,7 @@
 import AuthUtils from '../../utils/auth.js';
 import bcrypt from 'bcrypt';
 
-class DatabaseQueries {
+class AuthQueries {
   constructor(db) {
     this.db = db;
   }
@@ -177,4 +177,4 @@ class DatabaseQueries {
 			throw new Error('UNAUTHORIZED');
 	}
 };
-export default DatabaseQueries;
+export default AuthQueries;
