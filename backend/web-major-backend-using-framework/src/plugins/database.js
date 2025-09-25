@@ -4,7 +4,7 @@ import DatabaseConnection from '../database/connection.js';
 import DatabaseMigration from '../database/migrations.js';
 
 async function importAllQueries(fastify, db) {
-	const queries = ['auth.js', 'users.js'];
+	const queries = ['auth.js', 'users.js', 'relations.js'];
 	const dbQueries = {};
 
 	for ( const queryName of queries ) {
