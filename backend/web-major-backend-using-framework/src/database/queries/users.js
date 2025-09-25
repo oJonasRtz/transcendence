@@ -64,6 +64,16 @@ class UsersQueries {
 			throw new Error('NO_CONTENT');
 		return (users);
 	}
+
+	async removeUser(id)
+	{
+		if (!id)
+			throw new Error('MISSING_INPUT');
+		const existing = this.db.get(`
+			SELECT
+		`);
+
+	}
 };
 
 export default UsersQueries;

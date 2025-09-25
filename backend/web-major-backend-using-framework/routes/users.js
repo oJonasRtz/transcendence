@@ -11,7 +11,15 @@ async function usersRoutes(fastify, options) {
 	// Remove a user
 	fastify.delete('/remove/:id', async (request, reply) => {
 		const { id } = request.params;
-		return reply.code(204).send();
+		const userId = parseInt(id, 10);
+		
+		try {
+			await fastify.dbQueries.users.removeUser();
+			return reply.code(204).send();
+		} catch (err)
+		{
+			return reply.code(204).send();
+		}
 	});
 
 	// Get list with all users
