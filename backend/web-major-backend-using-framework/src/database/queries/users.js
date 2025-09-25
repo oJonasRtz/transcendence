@@ -13,7 +13,7 @@ class UsersQueries {
 		if (existing)
 			throw new Error('USER_EXISTS');
 
-		const avatar = '../../images/man.png';
+		const avatar = '../../../images/man.png';
 		const gender = 'M';
 		const stmt = await this.db.prepare(`
                                 INSERT INTO users (username, nickname, email, avatar, gender)

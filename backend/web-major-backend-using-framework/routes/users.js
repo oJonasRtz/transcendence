@@ -39,7 +39,7 @@ async function usersRoutes(fastify, options) {
 		if (!username || !nickname || !email)
 			return reply.code(400).send('MISSING_INPUT');
 		try {
-			fastify.dbQueries.users.newUser(username, nickname, email);
+			await fastify.dbQueries.users.newUser(username, nickname, email);
 			return reply.code(201).send('DONE');
 		} catch (err) {
 			switch (err.mesage) {
