@@ -1,13 +1,21 @@
 import supertest from 'supertest';
-import fs from 'node:fs/promises';
+import AuthUtils from '../src/utils/auth.js';
+import fs from 'fs';
+import path from 'path';
 import fastify from '../index.js';
+import { jest } from '@jest/globals';
 
+jest.setTimeout(30000);
 beforeAll(async () => {
-	await fastify.ready();
+        await fastify.ready();
+});
+
+beforeEach(async () => {
+        await AuthUtils.deleteAuthTable(fastify.db);
 });
 
 afterAll(async () => {
-	await fastify.close();
+        await fastify.close();
 });
 
 describe ('Começando os testes focando no usuário', () => {
@@ -48,11 +56,46 @@ describe ('Começando os testes focando no usuário', () => {
 	});
 
 	// Registrar novo usuário
-	test.skip('Registrar novo usuário no banco de dados', async () => {
-		const response = await supertest(fastify.server)
-		.post('/api/users/register')
-		.send({})
+	test('Registrar novo usuário no banco de dados', async () => {
+		const user = {
+			username: 'SatoroGojo',
+			nickname: 'Gojo',
+			email: 'thestrongest@gmail.com',
+			password: 'SatoroGojo123@123!'
+		};
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
 		.expect(201);
+
+		console.log('Conteúdo de users');
+                const rows = await fastify.db.all('SELECT * FROM users');
+                console.table(rows);
+
+                expect(rows.length).toBe(1);
+                expect(rows[0].username).toBe(user.username);
+                expect(rows[0].email).toBe(user.email);
+		expect(rows[0].nickname).toBe(user.nickname);
+
+		await supertest(fastify.server)
+		.post('/api/users/register')
+		.send({
+			username: 'SatoroGojo',
+			nickname: 'Gojo',
+			email: 'thestrongest@gmail.com',
+			password: 'PasswordDifferentGojo123!!!'
+		})
+		.expect(401);
+
+		await supertest(fastify.server)
+		.post('/api/users/register')
+		.send({
+			username: 'Sukuna',
+			nickname: 'theKingOfCurses',
+			email: 'thestrongest@gmail.com',
+			password: 'PasswordDifferentGojo123!!!'
+		})
+		.expect(401);
 	})
 
 	// Substituir completamente um novo usuário

@@ -14,6 +14,7 @@ async function authRoutes (fastify, options) {
 			if (strength !== 5)
 				return reply.code(400).send({ error: 'MISSING_INPUT '});
 			await fastify.dbQueries.auth.registerUser(username, nickname, email.toLowerCase(), password);
+			await fastify.dbQueries.users.newUser(username, nickname, email);
 		} catch (err) {
 			return reply.code(409).send({ error: 'Conflict' });
 		}
