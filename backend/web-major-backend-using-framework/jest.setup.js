@@ -4,10 +4,10 @@ import { jest } from '@jest/globals';
 // Increase timeout for database operations
 jest.setTimeout(30000);
 
-// Mock console methods to reduce noise in tests
+// Keep console.log active for test output, mock others to reduce noise
 global.console = {
   ...console,
-  log: jest.fn(),
+  // log: jest.fn(), // Commented out to allow console.log in tests
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
