@@ -9,6 +9,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config jest.config.js",
     "test:relations": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config jest.config.js tests/relations.spec.js",
     "test:relations-basic": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --config jest.config.js tests/relations-basic.spec.js",
+    "test:simple": "node test-simple.js",
     "testDbConnection": "node src/database/test-connection.js",
     "db:migrate": "node src/devUtils/migrationsOffline.js",
     "test:db": "node src/database/test-connection.js",
