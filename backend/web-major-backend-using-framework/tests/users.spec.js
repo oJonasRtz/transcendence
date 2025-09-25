@@ -36,23 +36,87 @@ describe ('Começando os testes focando no usuário', () => {
 
 	// Receber a lista completa de usuários cadastrados
 	test('Receber a lista completa de usuários do cadastrados', async () => {
+
+		const res = await supertest(fastify.server)
+		.get('/api/users')
+		.expect(204);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Shanks',
+			nickname: 'red-haired',
+			email: 'shanks@gmail.com',
+			password: 'redhairedOnePiece123!!!@Haki'
+		})
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'EdwardNewgate',
+			nickname: 'WhiteBeard',
+			email: 'whitebeard@hotmail.com',
+			password: 'whitebeard@123FriendRoger!'
+		})
+		.expect(201);
+
 		const response = await supertest(fastify.server)
 		.get('/api/users')
 		.expect(200);
+
+		if (response.body)
+			console.table(response.body);
 	});
 
 	// Receber usuário especificado por ID
 	test('Receber o usuário especificado pelo ID', async () => {
+
+		await supertest(fastify.server)
+		.get('/api/users/1')
+		.expect(204);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Kaidou',
+			nickname: 'dragon',
+			email: 'kaidou@gmail.com',
+			password: 'monster@123!Strongest'
+		})
+		.expect(201);
+
 		const response = await supertest(fastify.server)
-		.get('/api/users/:id')
+		.get('/api/users/1')
 		.expect(200);
+
+		if (response)
+			console.table(response.body);
 	});
 
 	// Receber usuário especificado por query
 	test('Receber o usuário especificado pelo query', async () => {
+
+		await supertest(fastify.server)
+		.get('/api/users/search?nickStartWith=Go')
+		.expect(204);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'SatoroGojo',
+			nickname: 'Gojo',
+			email: 'satorogojo@gmail.com',
+			password: 'satoroGojo123@!'
+		})
+		.expect(201);
+
 		const response = await supertest(fastify.server)
-		.get('/api/users/search')
+		.get('/api/users/search?nickStartWith=Go')
 		.expect(200);
+
+		if (response)
+			console.table(response.body);
 	});
 
 	// Registrar novo usuário
@@ -85,7 +149,7 @@ describe ('Começando os testes focando no usuário', () => {
 			email: 'thestrongest@gmail.com',
 			password: 'PasswordDifferentGojo123!!!'
 		})
-		.expect(401);
+		.expect(409);
 
 		await supertest(fastify.server)
 		.post('/api/users/register')
@@ -95,7 +159,7 @@ describe ('Começando os testes focando no usuário', () => {
 			email: 'thestrongest@gmail.com',
 			password: 'PasswordDifferentGojo123!!!'
 		})
-		.expect(401);
+		.expect(409);
 	})
 
 	// Substituir completamente um novo usuário
@@ -109,7 +173,7 @@ describe ('Começando os testes focando no usuário', () => {
 	// Obter dados do usuário
 	test('Obter dados do usuário especificado por ID', async () => {
 		const response = await supertest(fastify.server)
-		.get('/api/users/teste/stats')
+		.get('/api/users/1/stats')
 		.expect(200);
 	});
 

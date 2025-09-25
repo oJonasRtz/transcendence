@@ -26,6 +26,44 @@ class UsersQueries {
 		}
 		return (true);
 	}
+
+	async getAllUsers() {
+		const users = await this.db.get(`
+			SELECT * FROM users;
+		`);
+
+		if (!users) 
+			throw new Error('NO_CONTENT');
+		return (users);
+	}
+	
+	async getIdUser(id) {
+		const user = await this.db.get(`
+			SELECT * FROM users
+			WHERE id = ?
+		`, [id]);
+
+		if (!user)
+			throw new Error ('NO_CONTENT');
+		return (user);
+	}
+
+	async getQueryUser(nickStartWith) {
+		if (!nickStartWith)
+			throw new Error('BAD_REQUEST');
+
+		const stmt = await this.db.prepare(`
+			SELECT * FROM users
+			WHERE nickname LIKE ? COLLATE NOCASE
+		`);
+		const users = await stmt.all(`${nickStartWith}%`);
+
+		await stmt.finalize();
+
+		if (users.length === 0)
+			throw new Error('NO_CONTENT');
+		return (users);
+	}
 };
 
 export default UsersQueries;

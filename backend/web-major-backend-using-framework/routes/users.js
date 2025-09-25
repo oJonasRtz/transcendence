@@ -17,21 +17,57 @@ async function usersRoutes(fastify, options) {
 	// Get list with all users
 
 	fastify.get('/', async (request, reply) => {
-		return reply.code(200).send('Toma todo os usuários');
+		try {
+			const users = await fastify.dbQueries.users.getAllUsers();
+			return reply.code(200).send(users);
+		} catch (err) {
+			switch (err.message) {
+				case 'NO_CONTENT':
+					return reply.code(204).send({message: 'No content'});
+				default:
+					return reply.code(500).send({message: 'Internal Server Error'});
+			}
+		}
 	});
 
 	// Get a user specified by an ID
 
 	fastify.get('/:id', async (request, reply) => {
 		const { id } = request.params;
-		return reply.code(200).send('Toma o usuário de id especificado');
+		const userId = parseInt(id, 10);
+
+		try {
+			const user = await fastify.dbQueries.users.getIdUser(userId);
+			return reply.code(200).send(user);
+		} catch (err) {
+			switch (err.message) {
+				case 'NO_CONTENT':
+					return reply.code(204).send({message: err.message});
+				default:
+					return reply.code(500).send({message: 'INTERNAL_SERVER_ERROR'});
+			};
+		}
 	});
 
 	// Get a user specified by a query
 
 	fastify.get('/search', async (request, reply) => {
 		const { nickStartWith } = request.query;
-		return reply.code(200).send('Toma a pesquisa aproximada pelo nick do usuário');
+		if (!nickStartWith)
+			return reply.code(400).send({message: 'MISSING_INPUT'});
+		try {
+			const user = await fastify.dbQueries.users.getQueryUser(nickStartWith);
+			return reply.code(200).send(user);
+		} catch (err) {
+			switch (err.message) {
+				case 'NO_CONTENT':
+					return reply.code(204).send({message: err.message});
+				case 'BAD_REQUEST':
+					return reply.code(400).send({message: err.message});
+				default:
+					return reply.code(500).send({message: 'INTERNAL_SERVER_ERROR'});
+			};
+		}
 	});
 
 	fastify.post('/register', async (request, reply) => {
@@ -42,7 +78,7 @@ async function usersRoutes(fastify, options) {
 			await fastify.dbQueries.users.newUser(username, nickname, email);
 			return reply.code(201).send('DONE');
 		} catch (err) {
-			switch (err.mesage) {
+			switch (err.message) {
 
 			case "MISSING_INPUT":
 				return reply.code(400).send(err.message);
