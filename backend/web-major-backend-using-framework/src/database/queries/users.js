@@ -69,10 +69,16 @@ class UsersQueries {
 	{
 		if (!id)
 			throw new Error('MISSING_INPUT');
-		const existing = this.db.get(`
-			SELECT
-		`);
+		const existing = await this.db.get(`
+			SELECT * FROM users
+			WHERE id = ?
+		`, [id]);
 
+		if (!existing)
+			throw new Error('NOT_FOUND');
+
+		await this.db.run(`DELETE FROM auth WHERE email = ?`, [existing.email]);
+		await this.db.run(`DELETE FROM users WHERE email = ?`, [existing.email]);
 	}
 };
 

@@ -29,9 +29,33 @@ describe ('Começando os testes focando no usuário', () => {
 
 	// Remover um usuário do banco de dados
 	test('Remover um usuário', async () => {
-		const response = await supertest(fastify.server)
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'NikolasTesla',
+			nickname: 'eletric',
+			password: 'nikolasshokFforte123@!#',
+			email: 'nikolastesla@hotmail.com'
+		})
+		.expect(201);
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send({
+			username: 'Yuta',
+			nickname: 'Rika',
+			email: 'yuta@gmail.com',
+			password: 'yutaYUTA123Rik@!'
+		})
+		.expect(201);
+
+		await supertest(fastify.server)
 		.delete('/api/users/remove/1')
 		.expect(204);
+
+		console.log('Conteúdo de users');
+                const rows = await fastify.db.all('SELECT * FROM users');
+                console.table(rows);
 	});
 
 	// Receber a lista completa de usuários cadastrados
