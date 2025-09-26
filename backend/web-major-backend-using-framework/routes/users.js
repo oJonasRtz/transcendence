@@ -14,11 +14,11 @@ async function usersRoutes(fastify, options) {
 		const userId = parseInt(id, 10);
 		
 		try {
-			await fastify.dbQueries.users.removeUser();
+			await fastify.dbQueries.users.removeUser(userId);
 			return reply.code(204).send();
 		} catch (err)
 		{
-			return reply.code(204).send();
+			return reply.code(404).send();
 		}
 	});
 

@@ -5,12 +5,12 @@ class UsersQueries {
 	async newUser(username, nickname, email) {
 		if (!username || !nickname || !email)
 			throw new Error('MISSING_INPUT');
-		const existing = await this.db.get(`
+		const existing = await this.db.all(`
 			SELECT username, nickname, email FROM users
 			WHERE username = ? OR nickname = ? OR email = ?
 		`, [username, nickname, email]);
 
-		if (existing)
+		if (existing.length !== 0)
 			throw new Error('USER_EXISTS');
 
 		const avatar = '../../../images/man.png';
@@ -28,11 +28,11 @@ class UsersQueries {
 	}
 
 	async getAllUsers() {
-		const users = await this.db.get(`
+		const users = await this.db.all(`
 			SELECT * FROM users;
 		`);
 
-		if (!users) 
+		if (users.length === 0) 
 			throw new Error('NO_CONTENT');
 		return (users);
 	}
