@@ -20,8 +20,12 @@ CREATE TABLE IF NOT EXISTS users (
 	wins INTEGER DEFAULT 0,
 	-- matches loser
 	losses INTEGER DEFAULT 0,
-	-- percentage total of winner / loser
+	-- percentage total of wins / losses
 	win_rate REAL NOT NULL DEFAULT 0.0,
 	-- description
-	description TEXT DEFAULT NULL
+	description TEXT DEFAULT NULL,
+	-- Original time
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	-- Modification time
+	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
