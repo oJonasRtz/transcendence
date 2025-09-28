@@ -200,11 +200,4 @@ describe ('Começando os testes focando no usuário', () => {
 		.get('/api/users/1/stats')
 		.expect(200);
 	});
-
-	// Fazer o upload de um avatar
-	test('Enviar um avatar ao banco de dados, para o usuário especificado', async () => {
-		const response = supertest(fastify.server)
-		.post('/api/users/1/avatar')
-		.expect(200);
-	});
 })

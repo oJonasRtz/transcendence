@@ -1,4 +1,5 @@
 import AuthUtils from './auth.js';
+import bcrypt from 'bcrypt';
 
 class UserUtils {
 	constructor(db) {
@@ -45,6 +46,12 @@ class UserUtils {
 			throw new Error('NOT_FOUND');
 		const strength = await AuthUtils.calculatePassWordStrength(password);
 		if (strength !== 5)
+			throw new Error('INVALID_INPUT');
+		const userAuth = await this.db.get('SELECT * FROM auth WHERE email = ?', [isValid.email]);
+		if (!userAuth)
+			throw new Error('NOT_FOUND');
+		const verify = await bcrypt.compare(password, userAuth.password_hash);
+		if (verify)
 			throw new Error('INVALID_INPUT');
 		const password_hash = await AuthUtils.hashPassword(password);
 		await this.db.run('UPDATE auth SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE email = ?', [password_hash, isValid.email]);

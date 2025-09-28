@@ -106,6 +106,31 @@ class UsersQueries {
 			await this.userUtils.handleDescription(userId, description);
 		return (true);
 	}
+
+	async updatePutUser(id, username, nickname, email, password, gender, avatar, description) {
+		if (!id || !username || !nickname || !email || !password || !gender || !avatar || !description)
+			throw new Error('MISSING_INPUT');
+
+		const userId = parseInt(id, 10);
+
+		await this.userUtils.handleUsername(userId, username);
+		await this.userUtils.handleNickname(userId, nickname);
+		await this.userUtils.handlePassword(userId, password);
+		await this.userUtils.handleGender(userId, gender);
+		await this.userUtils.handleAvatar(userId, avatar);
+		await this.userUtils.handleDescription(userId, description);
+		await this.userUtils.handleEmail(userId, email);
+	}
+
+	async getUserStatus(id) {
+		if (!id)
+			throw new Error('MISSING_INPUT');
+		const userId = parseInt(id, 10);
+		const response = this.db.get(`SELECT nickname, title, wins, losses, win_rate, level, experience_points FROM users WHERE id = ?`, [userId]);
+		if (!response)
+			throw new Error('NOT_FOUND');
+		return (response);
+	}
 };
 
 export default UsersQueries;

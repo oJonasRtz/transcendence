@@ -122,22 +122,50 @@ async function usersRoutes(fastify, options) {
 	// Substitute an entire user, full update
 	fastify.put('/update/:id', async (request, reply) => {
 		const { id } = request.params;
-		const { username, email, password } = request.body;
-
-		return reply.code(200).send('Success update user');
+		const { username, nickname, email, password, gender, avatar, description } = request.body;
+		try {
+			await fastify.dbQueries.users.updatePutUser(id, username, nickname, email, password, gender, avatar, description);
+			return reply.code(200).send('Succeed update user');
+		} catch (err)
+                {
+                        switch (err.message) {
+                                case 'INVALID_INPUT':
+                                        return reply.code(422).send( { error: err.message } );
+                                case 'MISSING_INPUT':
+                                        return reply.code(400).send( { error: err.message } );
+                                case 'ALREADY_EXISTS':
+                                        return reply.code(409).send( { error: err.message } );
+                                case 'NOT_FOUND':
+                                        return reply.code(404).send( { error: err.message } );
+                                default:
+                                        return reply.code(500).send( { error: err.message } );
+                        }
+                }
 	});
 
 	// Obtain status of user
 	fastify.get('/:id/stats', async (request, reply) => {
 		const { id } = request.params;
-		return reply.code(200).send('Status do usuário, vitórias, derrotas e mais');
+		try {
+			const response = await fastify.dbQueries.users.getUserStatus(id);
+			return reply.code(200).send(response);
+		} catch (err) {
+			switch (err.message) {
+				case 'MISSING_INPUT':
+					return reply.code(400).send({ error: err.message });
+				case 'NOT_FOUND':
+					return reply.code(404).send({ error: err.message });
+				default:
+					return reply.code(500).send({ error: err.message });
+			}		
+		}
 	});
 
-	// Upload an avatar
+	/* Upload an avatar
 	fastify.post('/:id/avatar', async (request, reply) => {
 		const { id } = request.params;
 		return reply.code(200).send('O avatar foi enviado camarada');
-	});
+	});*/
 }
 
 export default usersRoutes; 
