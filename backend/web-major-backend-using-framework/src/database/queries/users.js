@@ -126,9 +126,9 @@ class UsersQueries {
 		if (!id)
 			throw new Error('MISSING_INPUT');
 		const userId = parseInt(id, 10);
-		const response = this.db.get(`SELECT nickname, title, wins, losses, win_rate, level, experience_points FROM users WHERE id = ?`, [userId]);
+		const response = await this.db.get(`SELECT nickname, title, wins, losses, win_rate, level, experience_points FROM users WHERE id = ?`, [userId]);
 		if (!response)
-			throw new Error('NOT_FOUND');
+			throw new Error('NO_CONTENT');
 		return (response);
 	}
 };

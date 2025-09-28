@@ -21,10 +21,30 @@ afterAll(async () => {
 describe ('Começando os testes focando no usuário', () => {
 	// Atualizar os dados cadastrados de um usuário (avatar, nickname, email, senha...)
 	test('Atualização parcial do usuário', async () => {
-		const response = await supertest(fastify.server)
+		const user = {
+			username: 'FernandoRuan',
+			nickname: 'Nando',
+			email: 'fernando@gmail.com',
+			password: 'Ecole42Student132@#$@@!',
+			gender: 'M',
+			description: 'O melhor jogador de Pong do mundo'
+		}
+
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
 		.patch('/api/users/update/1')
-		.send({})
-		.expect(200);
+		.send({
+			username: 'Shanks',
+			nickname: 'red-haired',
+			email: 'shanks@red-haired.com',
+			gender: 'M',
+			description: 'The strongest haki of the world',
+			password: 'shanksRedHairedYonkouGrandLine4Emperors!!!'
+		})
 	});
 
 	// Remover um usuário do banco de dados
@@ -188,16 +208,55 @@ describe ('Começando os testes focando no usuário', () => {
 
 	// Substituir completamente um novo usuário
 	test('Atualizar por completo um novo usuário', async () => {
-		const response = await supertest(fastify.server)
+		const user = {
+			username: 'MonkeyDLuffy',
+			nickname: 'Luffy',
+			email: 'monkeydluffy@gmail.com',
+			password: 'Luffy&HancockS2!!!'
+		}
+		await supertest(fastify.server)
+		.post('/api/auth/users/register')
+		.send(user)
+		.expect(201);
+
+		await supertest(fastify.server)
 		.put('/api/users/update/1')
-		.send({})
+		.send({
+			username: 'DraculeMihawk',
+			nickname: 'bestSwordman',
+			email: 'draculeMihawk@gmail.com',
+			password: 'draculeMihawk123#@!',
+			gender: 'M',
+			avatar: '../../../images/man.png',
+			description: 'O melhor espadachim é Dracule Mihawk'
+		})
 		.expect(200);
+
+		await supertest(fastify.server)
+		.put('/api/users/update/1')
+		.send(user)
+		.expect(400);
 	});
 
 	// Obter dados do usuário
 	test('Obter dados do usuário especificado por ID', async () => {
+		const user = {
+                        username: 'MonkeyDLuffy',
+                        nickname: 'Luffy',
+                        email: 'monkeydluffy@gmail.com',
+                        password: 'Luffy&HancockS2!!!'
+                }
+                await supertest(fastify.server)
+                .post('/api/auth/users/register')
+                .send(user)
+                .expect(201);
+
 		const response = await supertest(fastify.server)
 		.get('/api/users/1/stats')
 		.expect(200);
+
+		await supertest(fastify.server)
+		.get('/api/users/24342234/stats')
+		.expect(204);
 	});
 })

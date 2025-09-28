@@ -155,9 +155,11 @@ async function usersRoutes(fastify, options) {
 					return reply.code(400).send({ error: err.message });
 				case 'NOT_FOUND':
 					return reply.code(404).send({ error: err.message });
+				case 'NO_CONTENT':
+					return reply.code(204).send({ error: err.message });
 				default:
 					return reply.code(500).send({ error: err.message });
-			}		
+			}	
 		}
 	});
 
