@@ -23,7 +23,7 @@ describe ('Começando os testes das salas de espera, lobbies', () => {
 		const response = await supertest(fastify.server)
 		.post('/api/lobbies/')
 		.send({})
-		.expect(200);
+		.expect(400);
 	});
 
 	// Retornando uma sala de espera específica
@@ -38,7 +38,7 @@ describe ('Começando os testes das salas de espera, lobbies', () => {
 		const response = await supertest(fastify.server)
 		.post('/api/lobbies/1/join')
 		.send({})
-		.expect(200);
+		.expect(400);
 	});
 	
 	// Remover um usuário da sala de espera

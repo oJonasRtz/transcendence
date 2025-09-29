@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
 	nickname TEXT UNIQUE NOT NULL,
 	-- avatar
 	avatar TEXT NOT NULL,
-	-- Level
+	-- level
 	level INTEGER DEFAULT 0,
 	-- experience points of the user
 	experience_points INTEGER DEFAULT 0,
