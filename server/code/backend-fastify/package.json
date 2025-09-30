@@ -7,6 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "test": "node src/database/test-connection.js",
+	"test:sqlite": "LOG_LEVEL=debug NODE_ENV=development node src/database/test-sqlite-connection.js",
     "db:migrate": "node src/database/migrations.js",
     "test:db": "node src/database/test-connection.js",
     "lint": "echo \"Linting passed\""
@@ -18,8 +19,9 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/sensible": "^6.0.3",
+    "bcrypt": "^5.1.1",
     "fastify": "^5.5.0",
-    "sqlite3": "^5.1.6",
-    "bcrypt": "^5.1.1"
+    "pino-pretty": "^13.1.1",
+    "sqlite3": "^5.1.6"
   }
 }

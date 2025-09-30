@@ -39,5 +39,5 @@ export default pino(isDevelopment ? developmentConfig : productionConfig);
 
 export const dbLogger = pino({
   ...baseConfig,
-  nama: 'database'
+  name: 'database'
 }, isDevelopment ? pinoPretty() : undefined);

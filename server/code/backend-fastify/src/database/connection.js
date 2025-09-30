@@ -121,7 +121,7 @@ export default class DatabaseConnection {
    * Creates the SQLite connection
    * @private
    */
-  #createConnection() {
+  async #createConnection() {
     return new Promise((resolve, reject) => {
       logger.debug({
         connectionId: this.#connectionId,
@@ -164,7 +164,7 @@ export default class DatabaseConnection {
 
     for (const pragma of pragmas) {
       try {
-        await this.runPragma(pragma);
+        await this.#runPragma(pragma);
         logger.debug({
           connectionId: this.#connectionId,
           pragma,
@@ -184,7 +184,7 @@ export default class DatabaseConnection {
    * Runs a SQLite pragma
    * @private
    */
-  #runPragma(pragma) {
+  async #runPragma(pragma) {
     return new Promise((resolve, reject) => {
       this.#db.run(pragma, (err) => {
         err ? reject(err) : resolve();
@@ -207,14 +207,6 @@ export default class DatabaseConnection {
 
     logger.info({
       connectionId: this.#connectionId,
-    }, 'Closing database connection');
-
-    await this.#db.close();
-
-    const duration = Date.now() - startTime;
-    logger.info({
-      connectionId: this.#connectionId,
-      duration,
     }, 'Closing database connection...');
     
     try {
