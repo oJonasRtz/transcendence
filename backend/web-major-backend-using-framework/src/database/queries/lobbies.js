@@ -51,6 +51,25 @@ class LobbiesQueries {
 
 		await this.db.run(`UPDATE lobbies SET players = players + 1, updated_at = CURRENT_TIMESTAMP WHERE lobby_id = ? AND lobby_name = ?`, [lobby_id, lobby_name]);
 	}
+
+	async removeUserFromLobby(username, nickname, email, lobby_name, id)
+	{
+		if (!username || !nickname || !email || !lobby_name || !id)
+			throw new Error('MISSING_INPUT');
+		const existing = await this.db.get(`SELECT * FROM lobbies_members WHERE username = ?
+			AND nickname = ?
+			AND email = ?
+			AND lobby_name = ?
+			AND id = ?
+			`, [username, nickname, email, lobby_name, id]);
+		if (!existing)
+			throw new Error('INVALID_USER');
+		const stmt = await this.db.prepare(`DELETE FROM lobbies_name
+			WHERE username = ? AND nickname = ? AND lobby_name = ? AND id = ?`);
+
+		await stmt.run(username, nickname, email, lobby_name, id);
+		await stmt.finalize();
+	}
 }
 
 export default LobbiesQueries;

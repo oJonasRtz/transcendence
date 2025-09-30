@@ -67,9 +67,24 @@ async function lobbiesRoutes(fastify, options) {
 	});
 
 	// Fazer o usuário sair da sala de espera, mas o jogo não começou
-	fastify.post('/:id/leave', async (request, reply) => {
+	fastify.delete('/:id/leave', async (request, reply) => {
 		const { id } = request.params;
-		return reply.code(200).send('Usuário pediu para sair da sala');
+		const { username, nickname, email, lobby_name, id } = request.body;
+
+		try {
+			await fastify.dbQueries.lobbies.removeUserFromLobby(username, nickname, email, lobby_name, id);
+			return reply.code(204).send({});
+		} catch (err)
+		{
+			switch (err.message) {
+				case 'MISSING_INPUT':
+					return reply.code(400).send(err.message);
+				case 'INVALID_USER':
+					return reply.code(404).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
+			}
+		}
 	});
 
 	// O host aceitou o jogo começar
