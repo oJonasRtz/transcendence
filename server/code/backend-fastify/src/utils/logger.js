@@ -10,7 +10,7 @@ const baseConfig = {
     log: (object) => ({ 
       ...object,
       hostname: process.env.HOSTNAME || 'unknown',
-      service: process.env.SERVICE_NAME || 'fastify-app',
+      service: process.env.SERVICE_NAME || 'fastify-app'
     })
   }
 };
@@ -22,7 +22,7 @@ const developmentConfig = {
     options: {
       colorize: true,
       translateTime: 'SYS:dd-mm-yyyy HH:MM:ss',
-      ignore: 'pid,hostname,service',
+      ignore: 'pid,hostname,service'
     }
   }
 };
@@ -33,7 +33,7 @@ const productionConfig = {
     paths: ['password', 'token', 'authorization', 'cookie'],
     censor: '[REDACTED]'
   }
-}
+};
 
 export default pino(isDevelopment ? developmentConfig : productionConfig);
 

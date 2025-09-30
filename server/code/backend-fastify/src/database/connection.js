@@ -42,7 +42,7 @@ export default class DatabaseConnection {
 
     logger.debug({
       filename: config.database.filename,
-      connectionId: this.#connectionId,
+      connectionId: this.#connectionId
     }, 'Database configuration validated');
   }
 
@@ -64,14 +64,14 @@ export default class DatabaseConnection {
 
     if (this.#connectionPromise) {
       logger.debug({
-         connectionId: this.#connectionId 
+        connectionId: this.#connectionId 
       }, 'Reusing existing connection promise');
       return this.#connectionPromise;
     }
 
     logger.info({
       connectionId: this.#connectionId,
-      filename: config.database.filename,
+      filename: config.database.filename
     }, 'Initiating database connection');
 
     this.#connectionPromise = this.#doConnect();
@@ -83,7 +83,7 @@ export default class DatabaseConnection {
       logger.info({
         connectionId: this.#connectionId,
         duration,
-        filename: config.database.filename,
+        filename: config.database.filename
       }, 'Database connected successfully');
 
       return db;
@@ -94,7 +94,7 @@ export default class DatabaseConnection {
         stack: error.stack,
         connectionId: this.#connectionId,
         duration,
-        filename: config.database.filename,
+        filename: config.database.filename
       }, 'Failed to connect to database');
       throw error;
     } finally {
@@ -124,23 +124,23 @@ export default class DatabaseConnection {
   async #createConnection() {
     return new Promise((resolve, reject) => {
       logger.debug({
-        connectionId: this.#connectionId,
+        connectionId: this.#connectionId
       }, 'Creating SQLite database connection');
 
       const db = new Database(config.database.filename, (err) => {
         if (err) {
           logger.error({
             error: err.message,
-            connectionId: this.#connectionId,
+            connectionId: this.#connectionId
           }, 'SQLite connection failed');
           reject(err);
         } else {
           logger.debug({
-            connectionId: this.#connectionId,
+            connectionId: this.#connectionId
           }, 'SQLite connection established');
           resolve(db);
         }
-      })
+      });
     });
   }
 
@@ -154,12 +154,12 @@ export default class DatabaseConnection {
       'PRAGMA journal_mode = WAL',
       'PRAGMA synchronous = NORMAL',
       'PRAGMA cache_size = 1000',
-      'PRAGMA temp_store = MEMORY',
+      'PRAGMA temp_store = MEMORY'
     ];
     
     logger.debug({
       connectionId: this.#connectionId,
-      pragmas,
+      pragmas
     }, 'Configuring SQLite pragmas');
 
     for (const pragma of pragmas) {
@@ -167,15 +167,15 @@ export default class DatabaseConnection {
         await this.#runPragma(pragma);
         logger.debug({
           connectionId: this.#connectionId,
-          pragma,
+          pragma
         }, 'Pragma executed successfully');
       } catch (error) {
         logger.error({
           error: error.message,
           connectionId: this.#connectionId,
-          pragma,
+          pragma
         }, 'Failed to execute pragma');
-          throw error;
+        throw error;
       }
     }
   }
@@ -198,7 +198,7 @@ export default class DatabaseConnection {
   async close() {
     if (!this.#db) {
       logger.debug({
-        connectionId: this.#connectionId,
+        connectionId: this.#connectionId
       }, 'No database connection to close');
       return;
     }
@@ -206,7 +206,7 @@ export default class DatabaseConnection {
     const startTime = Date.now();
 
     logger.info({
-      connectionId: this.#connectionId,
+      connectionId: this.#connectionId
     }, 'Closing database connection...');
     
     try {
@@ -219,7 +219,7 @@ export default class DatabaseConnection {
       const duration = Date.now() - startTime;
       logger.info({
         connectionId: this.#connectionId,
-        duration,
+        duration
       }, 'Database connection closed successfully');
 
     } catch (error) {
@@ -228,7 +228,7 @@ export default class DatabaseConnection {
         error: error.message,
         stack: error.stack,
         connectionId: this.#connectionId,
-        duration,
+        duration
       }, 'Failed to close database connection');
       throw error;
     } finally {
@@ -245,7 +245,7 @@ export default class DatabaseConnection {
     if (!this.#db) {
       const error = new Error('Database not connected. Call connect() first.');
       logger.error({
-        connectionId: this.#connectionId,
+        connectionId: this.#connectionId
       }, 'Attempted to get database before connecting');
       throw error;
     }
@@ -280,7 +280,7 @@ export default class DatabaseConnection {
       connectionId: this.#connectionId,
       sql: sql.trim(),
       params: params.length > 0 ? params : undefined,
-      duration,
+      duration
     };
 
     // If the query took more than 1 second, log it as a warning

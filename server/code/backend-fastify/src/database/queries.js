@@ -82,7 +82,7 @@ class DatabaseQueries {
   async getAllUsers() {
     return new Promise((resolve, reject) => {
       this.db.all(
-        `SELECT id, username, email, created_at, updated_at FROM users ORDER BY created_at DESC`,
+        'SELECT id, username, email, created_at, updated_at FROM users ORDER BY created_at DESC',
         (err, rows) => {
           if (err) {
             reject(err);
