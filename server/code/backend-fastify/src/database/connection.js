@@ -196,6 +196,106 @@ export default class DatabaseConnection {
    * Closes the database connection
    */
   async close() {
+    if (!this.#db) {
+      logger.debug({
+        connectionId: this.#connectionId,
+      }, 'No database connection to close');
+      return;
+    }
+
+    const startTime = Date.now();
+
+    logger.info({
+      connectionId: this.#connectionId,
+    }, 'Closing database connection');
+
+    await this.#db.close();
+
+    const duration = Date.now() - startTime;
+    logger.info({
+      connectionId: this.#connectionId,
+      duration,
+    }, 'Closing database connection...');
+    
+    try {
+      await new Promise((resolve, reject) => {
+        this.#db.close((err) => {
+          err ? reject(err) : resolve();
+        });
+      });
+
+      const duration = Date.now() - startTime;
+      logger.info({
+        connectionId: this.#connectionId,
+        duration,
+      }, 'Database connection closed successfully');
+
+    } catch (error) {
+      const duration = Date.now() - startTime;
+      logger.error({
+        error: error.message,
+        stack: error.stack,
+        connectionId: this.#connectionId,
+        duration,
+      }, 'Failed to close database connection');
+      throw error;
+    } finally {
+      this.#db = null;
+      this.#connectionPromise = null;
+    }
   }
 
+  /**
+   * Gets the database connection instance
+   * @throws {Error} if the database connection is not established
+   */
+  getDatabase() {
+    if (!this.#db) {
+      const error = new Error('Database not connected. Call connect() first.');
+      logger.error({
+        connectionId: this.#connectionId,
+      }, 'Attempted to get database before connecting');
+      throw error;
+    }
+    
+    return this.#db;
+  }
+
+  /**
+   * Checks if is connected
+   * @returns {boolean} true if the database is connected, false otherwise
+   */
+  get isConnected() {
+    return this.#db !== null;
+  }
+
+  /**
+   * Gets the connection ID
+   * @returns {string} the connection ID
+   */
+  get connectionId() {
+    return this.#connectionId;
+  }
+
+  /** Utility method for logging queries
+   * 
+   * @param {string} sql - Query SQL
+   * @param {Array} params - Query parameters
+   * @param {number} duration - Query duration in milliseconds
+   */
+  logQuery(sql, params = [], duration = null) {
+    const logData = {
+      connectionId: this.#connectionId,
+      sql: sql.trim(),
+      params: params.length > 0 ? params : undefined,
+      duration,
+    };
+
+    // If the query took more than 1 second, log it as a warning
+    if (duration && duration > 1000) {
+      logger.warn(logData, 'Slow query detected');
+    } else {
+      logger.debug(logData, 'Query executed');
+    }
+  }
 }
