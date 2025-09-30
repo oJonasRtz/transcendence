@@ -2,7 +2,7 @@ import fp from 'fastify-plugin';
 import DatabaseConnection from '../database/connection.js';
 import DatabaseQueries from '../database/queries.js';
 
-async function databasePlugin(fastify, options) {
+async function databasePlugin(fastify) {
   const dbConnection = new DatabaseConnection();
   
   try {
@@ -14,7 +14,7 @@ async function databasePlugin(fastify, options) {
     fastify.decorate('dbQueries', queries);
     fastify.decorate('dbConnection', dbConnection);
     
-    fastify.addHook('onClose', async (instance) => {
+    fastify.addHook('onClose', async () => {
       await dbConnection.close();
     });
     

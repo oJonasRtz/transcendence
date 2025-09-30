@@ -1,6 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const DatabaseConnection = require('./connection');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import DatabaseConnection from './connection.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class DatabaseMigrations {
   constructor() {
@@ -45,7 +49,8 @@ class DatabaseMigrations {
   }
 }
 
-if (require.main === module) {
+// Check if this file is being run directly (ES module equivalent of require.main === module)
+if (import.meta.url === `file://${process.argv[1]}`) {
   const migrations = new DatabaseMigrations();
   migrations.runMigrations()
     .then(() => {
@@ -58,4 +63,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = DatabaseMigrations;
+export default DatabaseMigrations;
