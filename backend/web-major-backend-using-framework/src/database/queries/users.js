@@ -12,7 +12,7 @@ class UsersQueries {
 		const existing = await this.db.all(`
 			SELECT username, nickname, email FROM users
 			WHERE username = ? OR nickname = ? OR email = ?
-		`, [username, nickname, email]);
+		`, [username, nickname, email.toLowerCase()]);
 
 		if (existing.length !== 0)
 			throw new Error('USER_EXISTS');
@@ -24,7 +24,7 @@ class UsersQueries {
                                 VALUES (?, ?, ?, ?, ?)
                         `); 
 		try {
-			await stmt.run(username, nickname, email, avatar, gender);
+			await stmt.run(username, nickname, email.toLowerCase(), avatar, gender);
 		} finally {
 			if (stmt) await stmt.finalize();
 		}

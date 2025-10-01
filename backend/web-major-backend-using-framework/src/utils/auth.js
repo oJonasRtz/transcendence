@@ -25,6 +25,8 @@ class AuthUtils {
 
 	await db.exec('DELETE FROM auth;');
 	await db.exec('DELETE FROM users;');
+	await db.exec('DELETE FROM lobbies;');
+	await db.exec('DELETE FROM lobbies_members;');
 
 	const hasSeq = await db.get(`
 		SELECT 1
@@ -34,7 +36,7 @@ class AuthUtils {
 		`
 	)
 	if (hasSeq) {
-		await db.exec(`DELETE FROM sqlite_sequence WHERE name='auth' OR name='users';`);
+		await db.exec(`DELETE FROM sqlite_sequence WHERE name='auth' OR name='users' OR name='lobbies' OR name='lobbies_members';`);
 	}
 	await db.exec('PRAGMA foreign_keys = ON;');
   }
