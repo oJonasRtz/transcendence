@@ -115,6 +115,21 @@ class LobbiesQueries {
 			throw new Error('NOT_FOUND');
 		return (existing);
 	}
+
+	async deleteLobby(lobby_name)
+	{
+		if (!lobby_name)
+			throw new Error('MISSING_INPUT');
+		const existing = await this.db.get(`SELECT * FROM lobbies WHERE lobby_name = ?`, [lobby_name]);
+		if (!existing)
+			throw new Error ('NOT_FOUND');
+		const stmt = await this.db.prepare(`DELETE FROM lobbies_members WHERE lobby_name = ?`);
+
+		await stmt.run(lobby_name);
+		await stmt.finalize();
+
+		await this.db.exec(`DELETE FROM lobbies`);
+	}
 }
 
 export default LobbiesQueries;

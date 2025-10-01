@@ -130,6 +130,24 @@ async function lobbiesRoutes(fastify, options) {
 			}
 		}
 	});
+
+	fastify.delete('/lobbyDestroy', async (request, reply) => {
+		const { lobby_name } = request.body;
+		try {
+			await fastify.dbQueries.lobbies.deleteLobby(lobby_name);
+			return reply.code(204).send({});
+		} catch (err) {
+			switch (err.message)
+			{
+				case 'MISSING_INPUT':
+					return reply.code(200).send(err.message);
+				case 'NOT_FOUND':
+					return reply.code(404).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
+			}
+		}
+	});
 }
 
 export default lobbiesRoutes;
