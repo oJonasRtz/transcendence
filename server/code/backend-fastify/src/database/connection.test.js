@@ -7,6 +7,7 @@ import { test, describe, afterEach } from 'node:test';
 // - assert: provides functions to check if conditions are true/false
 import assert from 'node:assert';
 import DatabaseConnection from './connection.js';
+import config from './config.js';
 
 let dbConnection;
 
@@ -83,17 +84,38 @@ describe('DatabaseConnection', () => {
 
   test('original test scenario - fixed', async () => {
     dbConnection = new DatabaseConnection();
-    
+
     // This should throw (original bug was missing this check)
     assert.throws(() => dbConnection.getDatabase());
-    
+
     // These should work fine
     await dbConnection.connect();
     await dbConnection.connect(); // Second connect should be safe
     const db = dbConnection.getDatabase();
     assert.ok(db);
-    
+
     await dbConnection.close();
     await dbConnection.close(); // Second close should be safe
+  });
+
+  test('should throw error when database configuration is invalid', () => {
+    // Save original configuration
+    const originalFilename = config.database.filename;
+
+    try {
+      // Temporarily remove the database filename to simulate invalid config
+      delete config.database.filename;
+
+      // Creating a new DatabaseConnection should throw an error
+      assert.throws(
+        () => new DatabaseConnection(),
+        {
+          message: 'Database filename configuration is required'
+        }
+      );
+    } finally {
+      // Restore original configuration
+      config.database.filename = originalFilename;
+    }
   });
 });
