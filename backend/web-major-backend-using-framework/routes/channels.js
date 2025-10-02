@@ -33,9 +33,9 @@ async function channelsRoutes(fastify, options) {
 
 	// Criar um novo canal
 	fastify.post('/create', async (request, reply) => {
-		const { name, topic, password, invitationFlag, limitTopic, hasLimit} = request.body;
+		const { name, topic, password, invitationFlag, limitTopic, hasLimit, isPrivate} = request.body;
 		try {
-			await fastify.dbQueries.channels.createNewChannel(name, topic, password, invitationFlag, limitTopic, hasLimit);
+			await fastify.dbQueries.channels.createNewChannel(name, topic, password, invitationFlag, limitTopic, hasLimit, isPrivate);
 			return reply.code(201).send('New channel created');
 		} catch (err) {
 			switch (err.message){
@@ -49,7 +49,6 @@ async function channelsRoutes(fastify, options) {
 					throw reply.code(500).send(err.message);
 			}
 		}
-		return reply.code(200).send('novo canal criado =D');
 	});
 
 	// Delete a channel
@@ -66,6 +65,85 @@ async function channelsRoutes(fastify, options) {
 					throw new Error(err.message);
 				default:
 					throw new Error(err.message);
+			}
+		}
+	});
+
+	//add a new user into a channel
+	fastify.post('/addUser', async (request, reply) => {
+		const { channel_id, channel_name, password, username, nickname, email} = request.body;
+		try {
+			await fastify.dbQueries.channels.addUserToChannel(channel_id, channel_name, password, username, nickname, email);
+			return reply.code(201).send('USER_ADDED_TO_CHANNEL');
+		} catch (err) {
+			switch (err.message) {
+				case 'MISSING_INPUT':
+					return reply.code(400).send(err.message);
+				case 'NOT_FOUND_USER':
+					return reply.code(404).send(err.message);
+				case 'NOT_FOUND_CHANNEL':
+					return reply.code(404).send(err.message);
+				case 'FORGOT_PASSWORD':
+					return reply.code(400).send(err.message);
+				case 'WITHOUT_INVITATION':
+					return reply.code(401).send(err.message);
+				case 'INVALID_PASSWORD':
+					return reply.code(401).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
+			}
+		}
+	});
+
+	// get all users of specif channel
+	fastify.get('/getChannelUsers', async (request, reply) => {
+		const { channelName } = request.query;
+		try {
+			const response = await fastify.dbQueries.channels.getChannelUsers(channelName);
+			return reply.code(200).send(response);
+		} catch (err) {
+			switch (err.message) {
+				case 'NO_CONTENT':
+					return reply.code(204).send(err.message);
+				case 'MISSING_INPUT':
+					return reply.code(400).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
+			}	
+		}
+	});
+
+	// delete all users of specif channel
+	fastify.delete('/deleteChannelUser', async (request, reply) => {
+		const { channel_name, username, nickname, email } = request.body;
+		try {
+			await fastify.dbQueries.channels.deleteChannelUser(channel_name, username, nickname, email);
+			return reply.code(204).send({});
+		} catch (err) {
+			switch (err.message) {
+				case 'MISSING_INPUT':
+					return reply.code(200).send(err.message);
+				case 'NOT_FOUND_USER':
+					return reply.code(404).send(err.message);
+				case 'NOT_FOUND_CHANNEL':
+					return reply.code(404).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
+			}
+		}
+	});
+
+	// Get visible channels
+	fastify.get('/getChannels', async (request, reply) => {
+		try{
+			const response = await fastify.dbQueries.channels.getVisibleChannels();
+			return reply.code(200).send(response);
+		} catch (err) {
+			switch (err.message) {
+				case 'NO_CONTENT':
+					return reply.code(204).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
 			}
 		}
 	});
