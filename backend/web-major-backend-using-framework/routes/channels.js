@@ -147,6 +147,31 @@ async function channelsRoutes(fastify, options) {
 			}
 		}
 	});
-}
 
+	// Invite a user to a channel
+	fastify.post('/inviteUser', async (request, reply) => {
+		const { channel_name, channel_id, ownerEmail, targetUsername, targetNickname, targetEmail } = request.body;
+		try {
+			await fastify.dbQueries.channels.inviteNewUser(channel_name, channel_id, ownerEmail, targetUsername, targetNickname, targetEmail);
+			return reply.code(201).send('INVITED');
+		} catch (err) {
+			switch (err.message) {
+				case 'MISSING_INPUT':
+					return reply.code(400).send(err.message);
+				case 'NOT_FOUND_TARGET':
+					return reply.code(404).send(err.message);
+				case 'NOT_FOUND_OWNER':
+					return reply.code(404).send(err.message);
+				case 'NOT_OPERATOR':
+					return reply.code(401).send(err.message);
+				case 'ALREADY_EXISTS':
+					return reply.code(409).send(err.message);
+				case 'NOT_FOUND_CHANNEL':
+					return reply.code(404).send(err.message);
+				default:
+					return reply.code(500).send(err.message);
+		}
+	}
+	});
+}
 export default channelsRoutes;
