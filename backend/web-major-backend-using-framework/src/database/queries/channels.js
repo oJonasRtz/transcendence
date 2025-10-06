@@ -123,12 +123,18 @@ class ChannelsQueries {
 		await stmt.finalize();
 	}
 
-	async getVisibleChannels()
+	async getVisibleChannels(email)
 	{
-		const existing = await this.db.get(`SELECT * FROM channels WHERE is_private = FALSE`);
-		if (!existing)
+		if (!email)
+			throw new Error('MISSING_INPUT');
+		// visible channels for everybody
+		const existing = await this.db.all(`SELECT * FROM channels WHERE is_private = FALSE`);
+		const invitedChannels = await this.db.all(`SELECT * FROM invited_members WHERE email = ?`, [email]);
+
+		const allChannels = existing.concat(invitedChannels);
+		if (allChannels.length === 0)
 			throw new Error('NO_CONTENT');
-		return (existing);
+		return (allChannels);
 	}
 
 	async inviteNewUser(channel_name, channel_id, ownerEmail, targetUsername, targetNickname, targetEmail)

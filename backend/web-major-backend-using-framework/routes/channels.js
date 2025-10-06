@@ -135,13 +135,16 @@ async function channelsRoutes(fastify, options) {
 
 	// Get visible channels
 	fastify.get('/getChannels', async (request, reply) => {
+		const { email } = request.query;
 		try{
-			const response = await fastify.dbQueries.channels.getVisibleChannels();
+			const response = await fastify.dbQueries.channels.getVisibleChannels(email);
 			return reply.code(200).send(response);
 		} catch (err) {
 			switch (err.message) {
 				case 'NO_CONTENT':
 					return reply.code(204).send(err.message);
+				case 'MISSING_INPUT':
+					return reply.code(400).send(err.message);
 				default:
 					return reply.code(500).send(err.message);
 			}
