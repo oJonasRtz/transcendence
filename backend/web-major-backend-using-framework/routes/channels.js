@@ -33,9 +33,9 @@ async function channelsRoutes(fastify, options) {
 
 	// Criar um novo canal
 	fastify.post('/create', async (request, reply) => {
-		const { name, topic, password, invitationFlag, limitTopic, hasLimit, isPrivate} = request.body;
+		const { name, topic, password, limitTopic, hasLimit, isPrivate} = request.body;
 		try {
-			await fastify.dbQueries.channels.createNewChannel(name, topic, password, invitationFlag, limitTopic, hasLimit, isPrivate);
+			await fastify.dbQueries.channels.createNewChannel(name, topic, password, limitTopic, hasLimit, isPrivate);
 			return reply.code(201).send('New channel created');
 		} catch (err) {
 			switch (err.message){
@@ -88,6 +88,8 @@ async function channelsRoutes(fastify, options) {
 				case 'WITHOUT_INVITATION':
 					return reply.code(401).send(err.message);
 				case 'INVALID_PASSWORD':
+					return reply.code(401).send(err.message);
+				case 'SURPASSED_THE_USER_LIMIT':
 					return reply.code(401).send(err.message);
 				default:
 					return reply.code(500).send(err.message);

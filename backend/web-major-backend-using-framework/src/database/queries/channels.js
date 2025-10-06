@@ -5,7 +5,7 @@ class ChannelsQueries {
 		this.db = db;
 	}
 
-	async createNewChannel(name, topic, password, invitationFlag, limitTopic, hasLimit, isPrivate) {
+	async createNewChannel(name, topic, password, limitTopic, hasLimit, isPrivate) {
 		if (!name || !topic)
 			throw new Error('MISSING_INPUT');
 		let password_hash;
@@ -14,8 +14,6 @@ class ChannelsQueries {
 			throw new Error('ALREADY_EXISTS');
 		if (!password)
 			password = null;
-		if (!invitationFlag)
-			invitationFlag = false;
 		if (!limitTopic)
 			limitTopic = false;
 		if (!hasLimit)
@@ -30,10 +28,10 @@ class ChannelsQueries {
 			password_hash = await AuthUtils.hashPassword(password);
 		}
 		const stmt = await this.db.prepare(`
-			INSERT INTO channels (name, topic, has_password, invitation, changeTopic, players_limit, is_private)
-			VALUES (?, ?, ?, ?, ?, ?, ?);
+			INSERT INTO channels (name, topic, has_password, changeTopic, players_limit, is_private)
+			VALUES (?, ?, ?, ?, ?, ?);
 		`);
-		await stmt.run(name, topic, password_hash, !!invitationFlag, !!limitTopic, !!hasLimit, !!isPrivate);
+		await stmt.run(name, topic, password_hash, !!limitTopic, !!hasLimit, !!isPrivate);
 		await stmt.finalize();
 	}
 
@@ -74,27 +72,36 @@ class ChannelsQueries {
 		if (!isValidChannel)
 			throw new Error ('NOT_FOUND_CHANNEL');
 
-		const playersOnChannel = await this.db.all(`SELECT * FROM channels WHERE name = ? AND id = ?`, [name, channel_id]);
-		if (playersOnChannel.length === 0)
+		const playersOnChannel = await this.db.get(`SELECT players FROM channels WHERE name = ? AND id = ?`, [name, channel_id]);
+		if (!playersOnChannel || playersOnChannel === 0)
 			isOperator = true;
 	
 		if (!password && isValidChannel.has_password !== null)
 			throw new Error ('FORGOT_PASSWORD');
 		if (isValidChannel.invitation) {
-			const check = await this.db.get(`SELECT * FROM channels_members WHERE username = ? AND nickname = ? AND email = ?`, [username, nickname, email]);
+			const check = await this.db.get(`SELECT * FROM invited_members WHERE username = ? AND nickname = ? AND email = ?`, [username, nickname, email]);
 			if (!check)
 				throw new Error ('WITHOUT_INVITATION');
 		}
-		if (isValidChannel.password_hash !== null && password){
+		if (isValidChannel.has_password !== null && password){
 			const checking = await AuthUtils.verifyPassword(password, isValidChannel.has_password);
 			if (!checking)
 				throw new Error ('INVALID_PASSWORD');
+		}
+		const limit = await this.db.get(`SELECT players_limit FROM channels WHERE name = ?`, [name]);
+		const has_limit = await this.db.get(`SELECT has_limit FROM channels WHERE name = ?`, [name]);
+		if ((has_limit !== 0 || has_limit) && (limit !== 0 || limit !== null)) {
+			const players = await this.db.get(`SELECT players FROM channels WHERE name = ?`, [name]);
+			if ((players + 1) > limit)
+				throw new Error ('SURPASSED_THE_USER_LIMIT');
 		}
 		const stmt = await this.db.prepare(`INSERT INTO channels_members (username, nickname, email, channel_name, channel_id, isOperator) 
 			VALUES (?, ?, ?, ?, ?, ?)`);
 
 		await stmt.run(username, nickname, email, name, channel_id, isOperator);
 		await stmt.finalize();
+
+		await this.db.run(`UPDATE channels SET players = players + 1`);
 	}
 
 	async getChannelUsers(name)
@@ -121,6 +128,8 @@ class ChannelsQueries {
 
 		await stmt.run(username, nickname, email);
 		await stmt.finalize();
+
+		await this.db.run(`UPDATE players SET players = players - 1 FROM channels WHERE name = ?`, [name]);
 	}
 
 	async getVisibleChannels(email)
@@ -129,7 +138,7 @@ class ChannelsQueries {
 			throw new Error('MISSING_INPUT');
 		// visible channels for everybody
 		const existing = await this.db.all(`SELECT * FROM channels WHERE is_private = FALSE`);
-		const invitedChannels = await this.db.all(`SELECT * FROM invited_members WHERE email = ?`, [email]);
+		const invitedChannels = await this.db.all(`SELECT * FROM channels_members WHERE email = ?`, [email]);
 
 		const allChannels = existing.concat(invitedChannels);
 		if (allChannels.length === 0)
@@ -152,12 +161,10 @@ class ChannelsQueries {
 		const checkExists = await this.db.get(`SELECT * FROM channels_members WHERE email = ? AND channel_name = ?`, [targetEmail, channel_name]);
 		if (checkExists)
 			throw new Error('ALREADY_EXISTS');
-
 		const existingChannel = await this.db.get(`SELECT * FROM channels WHERE channel_name = ? AND channel_id = ?`, [channel_name, channel_id]);
 		if (!existingChannel)
 			throw new Error('NOT_FOUND_CHANNEL');
 		const stmt = await this.db.prepare(`INSERT INTO invited_members (channelName, channelId, username, nickname, email)`);
-
 		await stmt.run(channel_name, channel_id, ownerEmail, targetUsername, targetNickname, targetEmail);
 		await stmt.finalize();
 	}

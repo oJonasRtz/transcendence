@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS channels (
 	-- limit
 	has_limit BOOLEAN DEFAULT FALSE,
 	-- limitOfUsers
-	players_limit INTEGER DEFAULT NULL,
+	players_limit INTEGER DEFAULT 0,
 	-- players in that channel
 	players INTEGER DEFAULT 0,
 	-- create time
