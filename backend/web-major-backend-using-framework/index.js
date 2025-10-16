@@ -18,6 +18,8 @@ import matchesRoutes from './routes/matches.js';
 import tournamentRoutes from './routes/tournaments.js';
 import channelsRoutes from './routes/channels.js';
 import healthRoutes from './routes/health.js';
+import rankingsRoutes from './routes/rankings.js';
+import notificationsRoutes from './routes/notifications.js';
 
 // Set handlers
 
@@ -44,6 +46,8 @@ fastify.register(matchmakingRoutes, { prefix: '/api/matchmaking' });
 fastify.register(matchesRoutes, { prefix: '/api/matches' });
 fastify.register(tournamentRoutes, { prefix: '/api/tournaments' });
 fastify.register(channelsRoutes, { prefix: '/api/channels' });
+fastify.register(notificationsRoutes, { prefix: '/api/notifications' });
+fastify.register(rankingsRoutes, { prefix: '/api/rankings' });
 fastify.register(healthRoutes);
 
 export default fastify;

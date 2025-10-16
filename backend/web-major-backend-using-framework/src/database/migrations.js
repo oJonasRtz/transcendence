@@ -20,7 +20,7 @@ class DatabaseMigrations {
       await this.dbConnection.connect();
       const db = await this.dbConnection.getDatabase();
       
-      const migrations = ['authSchema.sql', 'usersSchema.sql', 'relationsSchema.sql', 'lobbiesSchema.sql', 'channelsSchema.sql'];
+      const migrations = ['authSchema.sql', 'usersSchema.sql', 'relationsSchema.sql', 'lobbiesSchema.sql', 'channelsSchema.sql', 'rankingSchema.sql', 'notificationsSchema.sql'];
 
       for (const schemaSQL of migrations) {
 

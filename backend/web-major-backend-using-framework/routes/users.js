@@ -12,6 +12,16 @@ async function usersRoutes(fastify, options) {
 			return reply.code(200).send('Succeed update user');
 		} catch (err)
 		{
+			/*const map = {
+				INVALID_INPUT: 422,
+				MISSING_INPUT: 400,
+				ALREADY_EXISTS: 409,
+				NOT_FOUND: 404
+			};
+	
+			if (Object.key(map).find(err.message))
+				return reply.code(map[err.message]).send({ error: err.message } );*/
+
 			switch (err.message) {
 				case 'INVALID_INPUT':
 					return reply.code(422).send( { error: err.message } );
