@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "That service needs to handle with all authentication of our transcendence",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

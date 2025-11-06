@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "That container needs to handle with our database",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
