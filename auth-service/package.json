@@ -10,6 +10,7 @@
   "author": "Time do balacobako",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.1"
   }

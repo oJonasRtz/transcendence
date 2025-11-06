@@ -24,7 +24,16 @@ app.get("/api/db/hello", async (req, reply) => {
 		return reply.send(`API GATEWAY - sqlite: ${result.data}`);
 	} catch (err) {
 		console.error("Unfortunately, the api-gateway failed to communicate with sqlite-db by:", err.message);
-		return reply.code(500).send("Error:", err.message);
+		return reply.send("The API-GATEWAY cannot access database anymore");
+	}
+});
+
+app.get("/api/auth/helloDb", async (req, reply) => {
+	try {
+		const result = await axios.get("http://auth-service:3001/helloDb");
+		return reply.send(`API GATEWAY - auth: ${result.data}`);
+	} catch (err) {
+		return reply.send(`Unfortunately, the auth-service cannot access the database: ${err.message}`);
 	}
 });
 

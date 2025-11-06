@@ -24,7 +24,6 @@ services:
     container_name: sqlite-db
     restart: always
     networks:
-      - "transcendence"
       - "db_connection"
     volumes:
       - sqlite-db:/app/database
