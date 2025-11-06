@@ -21,7 +21,7 @@ services:
   sqlite-db:
     build: ./sqlite-db
     image: sqlite-db:1.0.0
-    container_name: sqlite
+    container_name: sqlite-db
     restart: always
     networks:
       - "transcendence"
