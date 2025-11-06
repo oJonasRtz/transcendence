@@ -31,7 +31,10 @@ fclean:
 
 # Restart all the services (RESTART, MAN)
 
-re: clean up
-	@echo "Restarting all the system"
+re: down up
+	@echo "Restarting all microservices"
+
+remake: clean up
+	@echo "Recycling all microservices"
 
 .PHONY: up down build clean fclean re
