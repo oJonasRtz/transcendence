@@ -1,0 +1,34 @@
+services:
+  api-gateway:
+    build: ./api-gateway
+    image: api-gateway:1.0.0
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+    networks:
+      - "transcendence"
+  auth-service:
+    build: ./auth-service
+    image: auth-service:1.0.0
+    container_name: auth-service
+    depends_on:
+      - sqlite-db
+    networks:
+      - "transcendence"
+      - "db_connection"
+  sqlite-db:
+    build: ./sqlite-db
+    image: sqlite-db:1.0.0
+    container_name: sqlite
+    restart: always
+    networks:
+      - "transcendence"
+      - "db_connection"
+
+networks:
+  transcendence:
+    driver: bridge
+  db_connection:
+    driver: bridge

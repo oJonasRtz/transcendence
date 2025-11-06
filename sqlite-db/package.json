@@ -1,0 +1,16 @@
+{
+  "name": "sqlite-db",
+  "version": "1.0.0",
+  "description": "That container needs to handle with our database",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Time do balacobako",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.1",
+    "sqlite": "^5.1.1"
+  }
+}
