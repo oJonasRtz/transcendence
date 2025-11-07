@@ -1,14 +1,12 @@
-import fastify from 'fastify';
+import app from './app.js';
 import dotenv from 'dotenv';
 import axios from 'axios';
 
 dotenv.config();
 
-const app = fastify();
-
 const PORT = process.env.PORT || 3000;
 
-app.get("/api/auth/hello", async (req, reply) => {
+/*app.get("/api/auth/hello", async (req, reply) => {
 	try {
 		const result = await axios.get("http://auth-service:3001/hello");
 		return reply.send(`API GATEWAY - auth: ${result.data}`);
@@ -35,7 +33,7 @@ app.get("/api/auth/helloDb", async (req, reply) => {
 	} catch (err) {
 		return reply.send(`Unfortunately, the auth-service cannot access the database: ${err.message}`);
 	}
-});
+});*/
 
 app.listen({ port: PORT, host: "0.0.0.0" }, () => {
 	console.log(`Api-gateway is running on api-gateway:${PORT} port`);
