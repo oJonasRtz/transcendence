@@ -18,6 +18,16 @@
 				<h1>Sign In</h1>
 			</section>
 			<section>
+				<% if (success && success.length > 0) { %>
+					<% success.forEach(suc => { %>
+						<p style="color: green"> <%= suc %> </p>
+					<% }) %>
+				<% } %>
+				<% if (error && error.length > 0) { %>
+					<% error.forEach(err => { %>
+						<p style="color: red"> <%= err %> </p>
+					<% }) %>
+				<% } %>
 				<form action="/api/auth/checkLogin" method="POST">
 					<label>Login:</label><br>
 					<input type="email" name="email" placeholder="Type your e-mail here" required><br><br>

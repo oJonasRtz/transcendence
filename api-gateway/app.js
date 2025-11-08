@@ -3,7 +3,8 @@ import publicRoutes from './routes/publicRoutes.js';
 import privateRoutes from './routes/privateRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { authHook } from './hooks/hooks.js';
+import { authHook, validatorHook } from './hooks/hooks.js';
+import cookie from '@fastify/cookie';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,7 +14,21 @@ const __dirname = dirname(__filename);
 
 const app = fastify();
 
+const isProduction = process.env.NODE_ENV;
+
+app.register(cookie, {
+	secret: process.env.COOKIE_SECRET || 'purpleVoid',
+	parseOptions: {
+		path: '/',
+		httpOnly: true,
+		sameSite: 'strict',
+		secure: isProduction
+	}
+});
+
 // You can add prefix: /api to prefix every route prefix: '/api'
+
+app.addHook('preHandler', validatorHook);
 
 app.register(publicRoutes, {});
 
@@ -21,7 +36,5 @@ app.register(async (privateScope) => {
 	privateScope.addHook('preHandler', authHook);
 	privateScope.register(privateRoutes, {});
 });
-
-app.get('/', (req, reply) => reply.send('Gateway alive!'));
 
 export default app;

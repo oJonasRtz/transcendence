@@ -1,15 +1,26 @@
 import axios from 'axios';
 
 const publicControllers = {
+	//GETTERS
 	login: async function getLoginPage (req, reply) {
 		try {
                         const { data: html } = await axios.get("http://auth-service:3001/login");
                         return reply.type('text/html').send(html);
                 } catch (err) {
-                        return reply.code(500).send("Internal Server Error");
+                        return reply.code(500).send("Internal Server Error:", err);
                 }
 	},
 
+	register: async function getRegisterPage(req, reply) {
+		try {
+			const { data: html } = await axios.get("http://auth-service:3001/register");
+			return reply.type('text/html').send(html);
+		} catch (err) {
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {
                         const result = await axios.get("http://auth-service:3001/hello");

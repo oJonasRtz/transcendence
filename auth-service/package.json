@@ -10,6 +10,7 @@
   "author": "Time do balacobako",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/view": "^11.1.1",
     "axios": "^1.13.2",
     "cookie-parse": "^0.4.0",

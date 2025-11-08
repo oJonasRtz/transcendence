@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="timeDoBalacoBaco">
+		<title>Sign Up</title>
+	</head>
+	<body>
+		<main>
+			<header>
+				<a href="/login">Sign In</a>
+			</header>
+			<section>
+				<h2>Sign Up</h2>
+			</section>
+			<section>
+				<% if (success && success.length > 0) { %>
+					<% success.forEach(suc => { %>
+						<p style="color: green"> <%= suc %></p>
+					<% }) %>
+				<% } %>
+				<% if (error && error.length > 0) { %>
+					<% error.forEach(err => { %>
+						<p style="color: red"> <%= err %></p>
+					<% }) %>
+				<% } %>
+				<form action="/submit" method="POST">
+					<label>Username:</label><br>
+					<input type="text" name="username" placeholder="Type your username here" required><br><br>
+					<label>Nickname:</label><br>
+					<input type="text" name="nickname" placeholder="Type your nickname here" required><br><br>
+					<label>Email:</label><br>
+					<input type="email" name="email" placeholder="Type your e-mail here" required><br><br>
+					<label>Password:</label><br>
+					<input type="password" name="password" placeholder="Type your password here" required><br><br>
+					<label>Confirm Password:</label><br>
+					<input type="password" name="confirmPassword" placeholder="Confirm your password" required><br><br>
+					<button type="submit">Submit</button>
+				</form>
+			</section>
+			<footer>
+				<h6>TimeDoBalacoBaco</h6>
+			</footer>
+		</main>
+	</body>
+</html>

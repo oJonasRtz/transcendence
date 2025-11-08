@@ -10,8 +10,8 @@
   "author": "Time do Balacobako",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "axios": "^1.13.2",
-    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2"

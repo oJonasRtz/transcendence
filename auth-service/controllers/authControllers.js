@@ -3,10 +3,21 @@ import axios from 'axios';
 // AUTH-SERVICE CONTROLLERS
 
 const authControllers = {
+
+	// GETTERS 
 	login: function getLoginPage(req, reply) {
-		return reply.view("login");
+		const success = [];
+		const error = [];
+		return reply.view("login", { success, error });
 	},
 
+	register: function getRegisterPage(req, reply) {
+		const success = [];
+		const error = [];
+		return reply.view("register", { success, error });
+	},
+
+	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");
 	},
