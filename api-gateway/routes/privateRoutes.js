@@ -1,13 +1,8 @@
 import axios from 'axios';
+import privateControllers from '../controllers/privateControllers.js';
+
+// AUTH-SERVICE
 
 export default async function privateRoutes(fastify, options) {
-	// AUTH-SERVICE
-	fastify.get("/helloDb", async (req, reply) => {
-        	try {
-                	const result = await axios.get("http://auth-service:3001/helloDb");
-                	return reply.send(`API GATEWAY - auth: ${result.data}`);
-        	} catch (err) {
-                	return reply.send(`Unfortunately, the auth-service cannot access the database: ${err.message}`);
-        	}
-	});	
+	fastify.get("/helloDb", privateControllers.helloDb);
 };

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { mkdir } from 'node:fs/promises';
 import { open } from 'sqlite';
 import sqlite3 from 'sqlite3';
+import databaseRoutes from './routes/databaseRoutes.js';
 
 dotenv.config();
 
@@ -35,9 +36,7 @@ const PORT = process.env.PORT || 3002;
 
 const app = fastify();
 
-app.get("/hello", (req, reply) => {
-	return reply.send("The sqlite-db is working perfectly");
-});
+app.register(databaseRoutes, {});
 
 await app.listen({ port: PORT, host: "0.0.0.0" }, () => {
 	console.log(`sqlite-db container is listening on sqlite-db:${PORT}`);

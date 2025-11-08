@@ -1,35 +1,14 @@
 import axios from 'axios';
+import publicControllers from '../controllers/publicControllers.js';
+
+// AUTH-SERVICE
 
 export default async function publicRoutes(fastify, options) {
-	// AUTH-SERVICE
 	
-	fastify.get("/login", async (req, reply) => {
-		try {
-			const { data: html } = await axios.get("http://auth-service:3001/login");
-			return reply.type('text/html').send(html);
-		} catch (err) {
-			return reply.code(500).send("Internal Server Error");
-		}
-	});
+	fastify.get("/login", publicControllers.login);
 
-	fastify.get("/hello", async (req, reply) => {
-        	try {
-                	const result = await axios.get("http://auth-service:3001/hello");
-                	return reply.send(`API GATEWAY - auth: ${result.data}`);
-        	} catch (err) {
-                	console.error("Unfortunately, the api-gateway failed to communicate with auth-service by:", err.message);
-                	return reply.code(500).send("Error:", err.message);
-        	}
-	});
+	fastify.get("/hello", publicControllers.hello);
 
 	// TESTING BAD ROUTES
-	fastify.get("/checkDb", async (req, reply) => {
-        	try {
-                	const result = await axios.get("http://sqlite-db:3002/hello");
-                	return reply.send(`API GATEWAY - sqlite: ${result.data}`);
-        	} catch (err) {
-                	console.error("Unfortunately, the api-gateway failed to communicate with sqlite-db by:", err.message);
-                	return reply.send("The API-GATEWAY cannot access database anymore");
-        	}
-	});
+	fastify.get("/checkDb", publicControllers.checkDb);
 };
