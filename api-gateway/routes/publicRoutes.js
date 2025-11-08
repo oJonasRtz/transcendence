@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export default async function privateRoutes(fastify, options) {
+export default async function publicRoutes(fastify, options) {
 	// AUTH-SERVICE
 	fastify.get("/auth/hello", async (req, reply) => {
         	try {

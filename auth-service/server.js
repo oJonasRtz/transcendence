@@ -1,12 +1,14 @@
-import fastify from 'fastify';
+import app from './app.js';
 import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const app = fastify();
-
 const PORT = process.env.PORT || 3001;
+
+app.get("/login", (req, reply) => {
+	return reply.view("login");
+});
 
 app.get("/hello", (req, reply) => {
 	return reply.send("The auth-service is working perfectly");
