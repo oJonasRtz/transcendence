@@ -9,6 +9,8 @@ export default async function publicRoutes(fastify, options) {
 
 	fastify.get("/register", publicControllers.register);
 
+	fastify.post("/checkRegister", publicControllers.checkRegister);
+
 	fastify.get("/hello", publicControllers.hello);
 
 	// TESTING BAD ROUTES

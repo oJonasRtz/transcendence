@@ -1,4 +1,5 @@
 import axios from 'axios';
+import authModels from '../models/authModels.js';
 
 // AUTH-SERVICE CONTROLLERS
 
@@ -15,6 +16,35 @@ const authControllers = {
 		const success = [];
 		const error = [];
 		return reply.view("register", { success, error });
+	},
+
+	// SETTERS
+	
+	checkRegister: async function tryRegisterTheUser(req, reply) {
+		const success = [];
+		const error = [];
+		try {
+			const { username, nickname, email, password, confirmPassword } = req.body;
+
+			if (!username || !nickname || !email || !password || !confirmPassword) {
+				error.push("You forgot to complete all fields");
+				return reply.view("register", { success, error });
+			}
+
+			if (password !== confirmPassword) {
+				error.push("Password Mismatch");
+				return reply.view("register", { success, error });
+			}
+
+			await authModels.registerNewUser(req.body);
+
+			success.push(`User ${username} registered successfully`);
+			return reply.view("register", { success, error });
+		} catch (err) {
+			console.error("An error happened during registration process:", err);
+			error.push("An error happened, please try again.");
+			return reply.view("register", { success, error });
+		}
 	},
 
 	// TESTS

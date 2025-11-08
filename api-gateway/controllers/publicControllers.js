@@ -20,6 +20,18 @@ const publicControllers = {
 		}
 	},
 
+	//SETTERS
+
+	checkRegister: async function tryRegisterNewUser(req, reply) {
+		try {
+			await axios.post("http://auth-service:3001/checkRegister", req.body);
+			return reply.code(204);
+		} catch (err) {
+			console.error("Unfortunately, the registration of new user failed");
+			return reply.code(500).json({ error: err });
+		}
+	},
+
 	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {
