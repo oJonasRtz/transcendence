@@ -13,11 +13,15 @@ const __dirname = dirname(__filename);
 
 const app = fastify();
 
-app.register(publicRoutes, { prefix: "/api" });
+// You can add prefix: /api to prefix every route prefix: '/api'
+
+app.register(publicRoutes, {});
 
 app.register(async (privateScope) => {
 	privateScope.addHook('preHandler', authHook);
-	privateScope.register(privateRoutes, { prefix: "/api" });
+	privateScope.register(privateRoutes, {});
 });
+
+app.get('/', (req, reply) => reply.send('Gateway alive!'));
 
 export default app;

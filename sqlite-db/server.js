@@ -39,6 +39,6 @@ app.get("/hello", (req, reply) => {
 	return reply.send("The sqlite-db is working perfectly");
 });
 
-app.listen({ port: PORT, host: "0.0.0.0" }, () => {
+await app.listen({ port: PORT, host: "0.0.0.0" }, () => {
 	console.log(`sqlite-db container is listening on sqlite-db:${PORT}`);
 });

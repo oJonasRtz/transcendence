@@ -2,7 +2,17 @@ import axios from 'axios';
 
 export default async function publicRoutes(fastify, options) {
 	// AUTH-SERVICE
-	fastify.get("/auth/hello", async (req, reply) => {
+	
+	fastify.get("/login", async (req, reply) => {
+		try {
+			const { data: html } = await axios.get("http://auth-service:3001/login");
+			return reply.type('text/html').send(html);
+		} catch (err) {
+			return reply.code(500).send("Internal Server Error");
+		}
+	});
+
+	fastify.get("/hello", async (req, reply) => {
         	try {
                 	const result = await axios.get("http://auth-service:3001/hello");
                 	return reply.send(`API GATEWAY - auth: ${result.data}`);
@@ -13,7 +23,7 @@ export default async function publicRoutes(fastify, options) {
 	});
 
 	// TESTING BAD ROUTES
-	fastify.get("/db/hello", async (req, reply) => {
+	fastify.get("/checkDb", async (req, reply) => {
         	try {
                 	const result = await axios.get("http://sqlite-db:3002/hello");
                 	return reply.send(`API GATEWAY - sqlite: ${result.data}`);
