@@ -38,6 +38,7 @@ const authControllers = {
 
 			await authModels.registerNewUser(req.body);
 
+			console.log(`Success added the user ${username}`);
 			success.push(`User ${username} registered successfully`);
 			return reply.view("register", { success, error });
 		} catch (err) {

@@ -10,5 +10,5 @@ export default async function databaseRoutes(fastify, options) {
 	// SETTERS
 	fastify.post("/registerNewUser", async (req, reply) => {
 		return databaseControllers.registerNewUser(fastify, req, reply);
-	};
+	});
 };

@@ -17,17 +17,17 @@ export async function validatorHook(req, reply) {
 			error.push("Password must contain eight or more characters");
 	}
 
-	else if (req.body && req.body.email) {
-		if (!emaiRegex.test(req.body.email))
+	if (req.body && req.body.email) {
+		if (!emailRegex.test(req.body.email))
 			error.push("Invalid e-mail");
 	}
 
-	else if (req.body && req.body.username) {
+	if (req.body && req.body.username) {
 		if (!usernameRegex.test(req.body.username))
 			error.push("Invalid username");
 	}
 
-	else if (req.body && req.body.nickname) {
+	if (req.body && req.body.nickname) {
 		if (!usernameRegex.test(req.body.nickname))
 			error.push("Invalid nickname");
 	}
@@ -38,6 +38,8 @@ export async function validatorHook(req, reply) {
 		else if (req.url === '/login')
 			return reply.view("login", { error, success });
 	}
+
+	return ;
 };
 
 export async function authHook(req, reply) {
@@ -60,4 +62,5 @@ export async function authHook(req, reply) {
 		console.error("JWT ERROR:", err);
 		return reply.code(500).send("Authentication internal error");
 	}
+	return ;
 }

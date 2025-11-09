@@ -14,3 +14,15 @@ try {
 	console.error("Error initializing the sqlite-db container:", err);
 	process.exit(1);
 }
+
+process.on("uncaughtException", (exception) => {
+        console.error("Unhandled Exception:", exception);
+});
+
+process.on("unhandledRejection", (reason) => {
+        console.error("Unhandled rejection:", reason);
+});
+
+app.server.on('close', () => {
+        console.log('Fastify server closed');
+});

@@ -1,7 +1,13 @@
 import axios from 'axios';
 
 const publicControllers = {
+	
 	//GETTERS
+	
+	homePage: function getHomePage(req, reply) {
+		return reply.view("homePage");
+	},
+
 	login: async function getLoginPage (req, reply) {
 		try {
                         const { data: html } = await axios.get("http://auth-service:3001/login");

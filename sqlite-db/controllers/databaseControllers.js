@@ -9,12 +9,16 @@ const databaseControllers = {
 	registerNewUser: async function registerNewUser(fastify, req, reply) {
 		const { username, nickname, password, email } = req.body;
 
+		console.log("username:",username);
+		console.log("nickname:",nickname);
+		console.log("password:",password);
+		console.log("email:",email);
 		if (!username || !nickname || !password || !email)
 			throw new Error("MISSING_INPUT");
 
 		const password_hash = await bcrypt.hash(password, 12);
 
-		await fastify.db.exec("INSERT INTO auth (username, nickname, password, email) VALUES (?, ?, ?, ?)", [ username, nickname, password_hash, email ]);
+		await fastify.db.run("INSERT INTO auth (username, nickname, password, email) VALUES (?, ?, ?, ?)", [ username, nickname, password_hash, email ]);
 		return reply.code(204);
 	}
 };
