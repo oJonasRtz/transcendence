@@ -35,7 +35,6 @@ const publicControllers = {
 		} catch (err) {
 			success = err.response.data.success || [];
 			error = err.response.data.error || [];
-			console.error("Unfortunately, the registration of new user failed");
 			return reply.view("register", { success, error });
 		}
 	},

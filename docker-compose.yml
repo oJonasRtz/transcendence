@@ -18,6 +18,17 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
+  users-service:
+    build: ./users-service
+    image: users-service:1.0.0
+    container_name: users-service
+    depends_on:
+      - sqlite-db
+    networks:
+      - "transcendence"
+      - "db_connection"
+    volumes:
+      - users-service:/app
   sqlite-db:
     build: ./sqlite-db
     image: sqlite-db:1.0.0
@@ -29,6 +40,7 @@ services:
       - sqlite-db:/app/database
 volumes:
   sqlite-db:
+  users-service:
 networks:
   transcendence:
     driver: bridge
