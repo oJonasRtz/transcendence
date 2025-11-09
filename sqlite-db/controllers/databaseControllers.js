@@ -18,8 +18,10 @@ const databaseControllers = {
 
 		const password_hash = await bcrypt.hash(password, 12);
 
+		console.log("Vou tentar registrar");
 		await fastify.db.run("INSERT INTO auth (username, nickname, password, email) VALUES (?, ?, ?, ?)", [ username, nickname, password_hash, email ]);
-		return reply.code(204);
+		console.log("Registrei");
+		return reply.code(204).send();
 	}
 };
 

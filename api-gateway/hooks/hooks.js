@@ -9,6 +9,8 @@ export async function validatorHook(req, reply) {
 	let error = [];
 	let success = [];
 
+	console.log("entrei aqui");
+
 	if (req.body && req.body.password) {
 		if (!passwordRegex.test(req.body.password))
 			error.push("Password must have numbers, letters, special characters");
@@ -23,12 +25,12 @@ export async function validatorHook(req, reply) {
 	}
 
 	if (req.body && req.body.username) {
-		if (!usernameRegex.test(req.body.username))
+		if (!usernameRegex.test(req.body.username) || req.body.username.length < 3)
 			error.push("Invalid username");
 	}
 
 	if (req.body && req.body.nickname) {
-		if (!usernameRegex.test(req.body.nickname))
+		if (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3)
 			error.push("Invalid nickname");
 	}
 

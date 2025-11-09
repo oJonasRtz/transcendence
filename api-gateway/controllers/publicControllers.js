@@ -8,33 +8,35 @@ const publicControllers = {
 		return reply.view("homePage");
 	},
 
-	login: async function getLoginPage (req, reply) {
-		try {
-                        const { data: html } = await axios.get("http://auth-service:3001/login");
-                        return reply.type('text/html').send(html);
-                } catch (err) {
-                        return reply.code(500).send("Internal Server Error:", err);
-                }
-	},
+	 login: function getLoginPage(req, reply) {
+                const success = [];
+                const error = [];
+                return reply.view("login", { success, error });
+        },
 
-	register: async function getRegisterPage(req, reply) {
-		try {
-			const { data: html } = await axios.get("http://auth-service:3001/register");
-			return reply.type('text/html').send(html);
-		} catch (err) {
-			return reply.code(500).send("Internal Server Error");
-		}
-	},
+        register: function getRegisterPage(req, reply) {
+                const success = [];
+                const error = [];
+                return reply.view("register", { success, error });
+        },
 
 	//SETTERS
 
 	checkRegister: async function tryRegisterNewUser(req, reply) {
+		let success = [];
+		let error = [];
 		try {
-			await axios.post("http://auth-service:3001/checkRegister", req.body);
-			return reply.code(204);
+			const response = await axios.post("http://auth-service:3001/checkRegister", req.body);
+
+			success = response.data.success || [];
+			error = response.data.error || [];
+
+			return reply.view("register", { success, error });
 		} catch (err) {
+			success = err.response.data.success || [];
+			error = err.response.data.error || [];
 			console.error("Unfortunately, the registration of new user failed");
-			return reply.code(500).json({ error: err });
+			return reply.view("register", { success, error });
 		}
 	},
 

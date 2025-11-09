@@ -17,7 +17,7 @@ build:
 
 # erase everything, but not delete the volumes
 
-clean:
+clean: down
 	@echo "Cleaning the services"
 	@docker image prune -a -f
 	@docker container prune -f
@@ -25,7 +25,7 @@ clean:
 
 # Erase everything including the volumes (FULL CLEAN)
 
-fclean:
+fclean: down
 	@echo "Erasing everything"
 	@docker system prune -a -f --volumes
 

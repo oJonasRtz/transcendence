@@ -5,19 +5,6 @@ import authModels from '../models/authModels.js';
 
 const authControllers = {
 
-	// GETTERS 
-	login: function getLoginPage(req, reply) {
-		const success = [];
-		const error = [];
-		return reply.view("login", { success, error });
-	},
-
-	register: function getRegisterPage(req, reply) {
-		const success = [];
-		const error = [];
-		return reply.view("register", { success, error });
-	},
-
 	// SETTERS
 	
 	checkRegister: async function tryRegisterTheUser(req, reply) {
@@ -27,24 +14,27 @@ const authControllers = {
 			const { username, nickname, email, password, confirmPassword } = req.body;
 
 			if (!username || !nickname || !email || !password || !confirmPassword) {
-				error.push("You forgot to complete all fields");
-				return reply.view("register", { success, error });
+				error.push("Please, fill all fields");
+				return reply.code(400).send({ success, error });
 			}
 
 			if (password !== confirmPassword) {
 				error.push("Password Mismatch");
-				return reply.view("register", { success, error });
+				return reply.code(409).send({ success, error });
 			}
 
 			await authModels.registerNewUser(req.body);
 
 			console.log(`Success added the user ${username}`);
-			success.push(`User ${username} registered successfully`);
-			return reply.view("register", { success, error });
+			success.push(`User ${username} ${nickname} added successfully`);
+			return reply.code(200).send({ success, error });
 		} catch (err) {
-			console.error("An error happened during registration process:", err);
-			error.push("An error happened, please try again.");
-			return reply.view("register", { success, error });
+			if (err.code === 'SQLITE_CONSTRAINT') {
+				error.push("User already exists");
+				return reply.code(500).send({ success, error });
+			}
+			error.push(`An error happening: ${err.message}`);
+			return reply.code(500).send({ success, error });
 		}
 	},
 
