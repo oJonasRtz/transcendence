@@ -25,13 +25,12 @@ const authControllers = {
 
 			await authModels.registerNewUser(req.body);
 
-			console.log(`Success added the user ${username}`);
 			success.push(`User ${username} ${nickname} added successfully`);
 			return reply.code(200).send({ success, error });
 		} catch (err) {
-			if (err.code === 'SQLITE_CONSTRAINT') {
+			if (err.response.status === 409) {
 				error.push("User already exists");
-				return reply.code(500).send({ success, error });
+				return reply.code(409).send({ success, error });
 			}
 			error.push(`An error happening: ${err.message}`);
 			return reply.code(500).send({ success, error });

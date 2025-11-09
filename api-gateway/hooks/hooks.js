@@ -9,14 +9,17 @@ export async function validatorHook(req, reply) {
 	let error = [];
 	let success = [];
 
-	console.log("entrei aqui");
-
 	if (req.body && req.body.password) {
 		if (!passwordRegex.test(req.body.password))
 			error.push("Password must have numbers, letters, special characters");
 	
 		if (req.body.password.length < 8)
 			error.push("Password must contain eight or more characters");
+
+		if (req.url !== '/checkLogin') {
+			if (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password)
+				error.push("Password Mismatch");
+		}
 	}
 
 	if (req.body && req.body.email) {
@@ -35,9 +38,9 @@ export async function validatorHook(req, reply) {
 	}
 
 	if (error.length !== 0) {
-		if (req.url === '/register')
+		if (req.url === '/checkRegister')
 			return reply.view("register", { error, success });
-		else if (req.url === '/login')
+		else if (req.url === '/checkLogin')
 			return reply.view("login", { error, success });
 	}
 
