@@ -4,7 +4,7 @@ import authControllers from '../controllers/authControllers.js';
 // AUTH-SERVICE ROUTES
 
 export default async function authRoutes(fastify, options) {
-	//fastify.post("/checkLogin", authControllers.checkLogin);
+	fastify.post("/checkLogin", authControllers.tryLoginTheUser);
 
 	fastify.post("/checkRegister", authControllers.checkRegister);
 

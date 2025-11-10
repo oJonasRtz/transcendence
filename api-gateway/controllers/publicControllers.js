@@ -39,6 +39,23 @@ const publicControllers = {
 		}
 	},
 
+	// Authentication
+	
+	checkLogin: async function tryLoginTheUser(req, reply) {
+		let success = [];
+		let error = [];
+		try {
+			await axios.post("http://auth-service:3001/checkLogin", req.body);
+
+			return reply.redirect("/homePage");
+		} catch (err) {
+			success = err?.response?.data?.success || []; // optional, we are thinking about it
+			error = err?.response?.data?.error || [];
+			console.error("Error trying login");
+			return reply.view("login", { success, error });
+		}
+	},
+
 	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {

@@ -4,8 +4,14 @@ import ejs from 'ejs';
 import fastifyView from '@fastify/view';
 import authRoutes from './routes/authRoutes.js';
 import formbody from '@fastify/formbody';
+import cookie from '@fastify/cookie';
 
 const app = fastify();
+
+app.register(cookie, {
+	secret: process.env.COOKIE_SECRET || "purpleVoid",
+	hook: "onRequest"
+});
 
 app.register(formbody);
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import authModels from '../models/authModels.js';
+import jwt from 'jsonwebtoken';
 
 // AUTH-SERVICE CONTROLLERS
 
@@ -7,7 +8,7 @@ const authControllers = {
 
 	// SETTERS
 
-	checkLogin: async function tryLoginTheUser(req, reply) {
+	tryLoginTheUser: async function tryLoginTheUser(req, reply) {
 		const success = [];
 		const error = [];
 
@@ -21,9 +22,29 @@ const authControllers = {
 
 			await authModels.tryLoginTheUser(req.body);
 
+			const { username, id } = await authModels.getUserData(email);
+
+			console.log(`username ${username}, id ${id}, email ${email}`);
+
+			const user_id = id;
+			const payload = { username, user_id, email };
+
+			const token = jwt.sign(payload, process.env.JWT_SECRET, {
+				expiresIn: process.env.JWT_EXPIRES_IN || "1h"
+			});
+
+			const isProduction = process.env.NODE_ENV === "production";
+
+			reply.setCookie("jwt", token, {
+				httpOnly: true,
+				secure: isProduction,
+				sameSite: "strict",
+				maxAge: 60 * 60 * 1000 // 1h
+			});
+
 			return reply.code(200).send({ success, error });
 		} catch (err) {
-			error.push("An error happened trying to login:", err.message);
+			error.push(`An error happened trying to login: ${err.message}`);
 			return reply.code(500).send({ success, error });
 		}
 	},
