@@ -6,7 +6,28 @@ import authModels from '../models/authModels.js';
 const authControllers = {
 
 	// SETTERS
-	
+
+	checkLogin: async function tryLoginTheUser(req, reply) {
+		const success = [];
+		const error = [];
+
+		try {
+			const { email, password } = req.body;
+
+			if (!email || !password) {
+				error.push("You need to fill all the fields");
+				return reply.code(400).send({ success, error });
+			}
+
+			await authModels.tryLoginTheUser(req.body);
+
+			return reply.code(200).send({ success, error });
+		} catch (err) {
+			error.push("An error happened trying to login:", err.message);
+			return reply.code(500).send({ success, error });
+		}
+	},
+
 	checkRegister: async function tryRegisterTheUser(req, reply) {
 		const success = [];
 		const error = [];
@@ -18,6 +39,8 @@ const authControllers = {
 				return reply.code(400).send({ success, error });
 			}
 
+			req.body.is2faEnable = req.body.is2faEnable === "true";
+
 			if (password !== confirmPassword) {
 				error.push("Password Mismatch");
 				return reply.code(409).send({ success, error });
@@ -28,7 +51,7 @@ const authControllers = {
 			success.push(`User ${username} ${nickname} added successfully`);
 			return reply.code(200).send({ success, error });
 		} catch (err) {
-			if (err.response.status === 409) {
+			if (err?.response?.status === 409) {
 				error.push("User already exists");
 				return reply.code(409).send({ success, error });
 			}

@@ -18,7 +18,9 @@ export default async function initDatabase() {
                         username TEXT UNIQUE NOT NULL,
                         nickname TEXT UNIQUE NOT NULL,
                         email TEXT UNIQUE NOT NULL,
-                        password TEXT NOT NULL
+                        password TEXT NOT NULL,
+			twoFactorEnable BOOLEAN DEFAULT FALSE,
+			twoFactorSecret TEXT DEFAULT NULL
                 );
         `);
 

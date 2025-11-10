@@ -37,4 +37,4 @@ re: down up
 remake: clean up
 	@echo "Recycling all microservices"
 
-.PHONY: up down build clean fclean re
+.PHONY: up down build clean fclean re remake
