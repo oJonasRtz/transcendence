@@ -37,4 +37,7 @@ re: down up
 remake: clean up
 	@echo "Recycling all microservices"
 
+game-logs:
+	@docker compose logs -f game-server
+
 .PHONY: up down build clean fclean re remake
