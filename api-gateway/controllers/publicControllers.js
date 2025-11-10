@@ -1,4 +1,5 @@
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
 const publicControllers = {
 	
@@ -45,13 +46,26 @@ const publicControllers = {
 		let success = [];
 		let error = [];
 		try {
-			await axios.post("http://auth-service:3001/checkLogin", req.body);
+			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
 
-			return reply.redirect("/homePage");
+			const token = response.data.token;
+			if (!token)
+				return reply.code(400).send("NO_AUTH");
+			const isProduction = process.env.NODE_ENV === "production";
+
+			reply.setCookie("jwt", token, {
+                               	httpOnly: true,
+                               	secure: isProduction,
+                               	path: "/",
+                               	sameSite: "lax",
+                               	maxAge: 60 * 60 * 1000 // 1h
+                        });
+
+			return reply.redirect("/home");
 		} catch (err) {
 			success = err?.response?.data?.success || []; // optional, we are thinking about it
 			error = err?.response?.data?.error || [];
-			console.error("Error trying login");
+			console.error("Error trying login:", err);
 			return reply.view("login", { success, error });
 		}
 	},

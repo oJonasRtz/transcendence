@@ -1,4 +1,5 @@
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
 const privateControllers = {
 	helloDb: async function testPrivateRoute(req, reply) {
@@ -8,6 +9,24 @@ const privateControllers = {
                 } catch (err) {
                         return reply.send(`Unfortunately, the auth-service cannot access the database: ${err.message}`);
                 }
+	},
+
+	getHomePage: async function getHomePage(req, reply) {
+		try {
+			const token = req.jwt;
+
+			if (!token) {
+				console.log("You are not authenticated");
+				return reply.redirect("/login");
+			}
+
+			const username = req.user.username;
+
+			return reply.view("home", { username } );
+		} catch (err) {
+			console.error("You are not authenticated");
+			return reply.redirect("/login");
+		}
 	}
 };
 

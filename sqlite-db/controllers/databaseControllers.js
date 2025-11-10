@@ -32,22 +32,22 @@ const databaseControllers = {
 			if (!email || !password)
 				return reply.code(400).send("You need to fill all the fields");
 
-			const { password as pass } = await fastify.db.get("SELECT password FROM auth WHERE email = ?", [ email ]);
-			if (!pass)
+			const object = await fastify.db.get("SELECT password FROM auth WHERE email = ?", [ email ]);
+			if (!object.password)
 				return reply.code(404).send("The user does not exist");
-			const match = await bcrypt.compare(password, pass);
+			const match = await bcrypt.compare(password, object.password);
 			if (!match)
 				return reply.code(401).send("User/Password incorrect");
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("Error trying login the user:", err);
+			console.error("Error trying login the user:", err.message);
 			return reply.code(500).send(err.message);
 		}
 	},
 
 	getUserData: async function getUserData(fastify, req, reply) {
 		try {
-			const { email } = req.body;
+			const email = req.body;
 
 			if (!email)
 				return reply.code(400).send("You need to give the email to make that request");

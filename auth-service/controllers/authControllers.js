@@ -24,25 +24,14 @@ const authControllers = {
 
 			const { username, id } = await authModels.getUserData(email);
 
-			console.log(`username ${username}, id ${id}, email ${email}`);
-
 			const user_id = id;
 			const payload = { username, user_id, email };
 
-			const token = jwt.sign(payload, process.env.JWT_SECRET, {
+			const token = jwt.sign(payload, process.env.JWT_SECRET || "purpleVoid", {
 				expiresIn: process.env.JWT_EXPIRES_IN || "1h"
 			});
 
-			const isProduction = process.env.NODE_ENV === "production";
-
-			reply.setCookie("jwt", token, {
-				httpOnly: true,
-				secure: isProduction,
-				sameSite: "strict",
-				maxAge: 60 * 60 * 1000 // 1h
-			});
-
-			return reply.code(200).send({ success, error });
+			return reply.code(200).send({ success, error, token });
 		} catch (err) {
 			error.push(`An error happened trying to login: ${err.message}`);
 			return reply.code(500).send({ success, error });

@@ -58,7 +58,8 @@ export async function authHook(req, reply) {
 
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		//req.user = decoded.user;
+		req.jwt = token; // original jwt
+		req.user = decoded;  // decoded data
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
 			reply.redirect("/login");
