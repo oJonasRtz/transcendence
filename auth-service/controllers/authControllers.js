@@ -1,6 +1,7 @@
 import axios from 'axios';
 import authModels from '../models/authModels.js';
 import jwt from 'jsonwebtoken';
+import svgCaptcha from 'svg-captcha';
 
 // AUTH-SERVICE CONTROLLERS
 
@@ -37,7 +38,11 @@ const authControllers = {
 				error.push("Email/Password Incorrect");
 				return reply.code(401).send({ success, error });
 			}
-			error.push(`An error happened trying to login: ${err.message}`);
+			else if (err.response && err.response.status === 404) {
+				error.push("The user does not exist");
+				return reply.code(404).send({ success, error });
+			}
+			error.push(`An error happened trying to login: ${err}`);
 			return reply.code(500).send({ success, error });
 		}
 	},
@@ -72,6 +77,22 @@ const authControllers = {
 			error.push(`An error happening: ${err.message}`);
 			return reply.code(500).send({ success, error });
 		}
+	},
+
+	getCaptcha: async function getCaptchaImageCode(req, reply) {
+		const captcha = svgCaptcha.create({
+			size: 5,
+			noise: 3,
+			color: true,
+			background: "#f4f4f4"
+		});
+
+		const svgBase64 = Buffer.from(captcha.data).toString('base64');
+
+		return reply
+			.code(200)
+			.type("application/json")
+			.send({ code: captcha.text, data: `data:image/svg+xml;base64,${svgBase64}` });
 	},
 
 	// TESTS

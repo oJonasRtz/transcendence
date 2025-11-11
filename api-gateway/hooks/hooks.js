@@ -22,6 +22,11 @@ export async function validatorHook(req, reply) {
 		}
 	}
 
+	if (req.body && req.body.captchaInput) {
+		if (req.session.captcha !== req.body.captchaInput)
+			error.push("Invalid captcha code, try again");
+	}
+
 	if (req.body && req.body.email) {
 		if (!emailRegex.test(req.body.email))
 			error.push("Invalid e-mail");
@@ -38,10 +43,13 @@ export async function validatorHook(req, reply) {
 	}
 
 	if (error.length !== 0) {
-		if (req.url === '/checkRegister')
-			return reply.view("register", { error, success });
+		req.session.success = success;
+		req.session.error = error;
+		if (req.url === '/checkRegister') {
+			return reply.redirect("/register");
+		}
 		else if (req.url === '/checkLogin')
-			return reply.view("login", { error, success });
+			return reply.redirect("/login");
 	}
 
 	return ;

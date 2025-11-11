@@ -9,6 +9,10 @@ import formBody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
 import ejs from 'ejs';
 import fastifyView from '@fastify/view';
+import session from '@fastify/session';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -18,19 +22,37 @@ const __dirname = dirname(__filename);
 
 const app = fastify();
 
-app.register(formBody);
+const isProduction = process.env.NODE_ENV === 'production';
 
-const isProduction = process.env.NODE_ENV;
+// Registering the cookie
+
+app.register(cookie, {
+	secret: process.env.COOKIE_SECRET || 'purpleVoidSatoroGojopurpleVoidSatoroGojo',
+	hook: 'onRequest'
+});
+
+// Registering the session
+
+app.register(session, {
+	secret: process.env.SESSION_SECRET || 'purpleVoidSatoroGojopurpleVoidSatoroGojo',
+	cookieName: "session",
+	cookie: {
+		httpOnly: true,
+		sameSite: 'lax',
+		path: '/',
+		secure: isProduction
+	},
+	saveUninitialized: false
+});
+
+// Now, we are able to read formularies
+
+app.register(formBody);
 
 app.register(fastifyView, {
         engine: { ejs },
         root: path.join(process.cwd(), "views"),
         viewExt: "ejs"
-});
-
-app.register(cookie, {
-	secret: process.env.COOKIE_SECRET || 'purpleVoid',
-	hook: 'onRequest'
 });
 
 // You can add prefix: /api to prefix every route prefix: '/api'

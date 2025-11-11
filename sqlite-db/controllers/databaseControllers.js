@@ -34,7 +34,7 @@ const databaseControllers = {
 				return reply.code(400).send("You need to fill all the fields");
 
 			const object = await databaseModels.getUserPassword(fastify, email);
-			if (!object.password)
+			if (!object || !object.password)
 				return reply.code(404).send("The user does not exist");
 			const match = await bcrypt.compare(password, object.password);
 			if (!match)

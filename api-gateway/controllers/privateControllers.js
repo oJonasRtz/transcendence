@@ -30,11 +30,14 @@ const privateControllers = {
 	},
 
 	logout: async function logoutTheUser(req, reply) {
-		reply.clearCookie("jwt", {
-			httpOnly: true,
-			sameSite: "lax",
-			path: "/"
-		});
+
+		// erase all cookies
+
+		await req.session.destroy();
+
+		reply.clearCookie("jwt");
+		reply.clearCookie("session");
+
 		return reply.redirect("/login");
 	}
 };
