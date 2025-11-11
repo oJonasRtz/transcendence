@@ -33,6 +33,10 @@ const authControllers = {
 
 			return reply.code(200).send({ success, error, token });
 		} catch (err) {
+			if (err.response && err.response.status === 401) {
+				error.push("Email/Password Incorrect");
+				return reply.code(401).send({ success, error });
+			}
 			error.push(`An error happened trying to login: ${err.message}`);
 			return reply.code(500).send({ success, error });
 		}

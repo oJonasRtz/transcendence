@@ -1,5 +1,6 @@
 import axios from 'axios';
 import bcrypt from 'bcrypt';
+import databaseModels from '../models/databaseModels.js';
 
 const databaseControllers = {
 	hello: function testDatabaseConnection(req, reply) {
@@ -14,13 +15,13 @@ const databaseControllers = {
 				return reply.code(400).send("You need to fill all the fields");
 
 			const password_hash = await bcrypt.hash(password, 12);
-		
-			await fastify.db.run("INSERT INTO auth (username, nickname, password, email, twoFactorEnable) VALUES (?, ?, ?, ?, ?)", [ username, nickname, password_hash, email, is2faEnable ]);
+	
+			await databaseModels.registerNewUser(fastify, req.body, password_hash);
+
 			return reply.code(204).send();
 		} catch (err) {
 			if (err.code === 'SQLITE_CONSTRAINT')
 				return reply.code(409).send("USER_ALREADY_EXISTS");
-			console.error("Error:", err);
 			return reply.code(500).send("INTERNAL_SERVER_ERROR");
 		}
 	},
@@ -32,7 +33,7 @@ const databaseControllers = {
 			if (!email || !password)
 				return reply.code(400).send("You need to fill all the fields");
 
-			const object = await fastify.db.get("SELECT password FROM auth WHERE email = ?", [ email ]);
+			const object = await databaseModels.getUserPassword(fastify, email);
 			if (!object.password)
 				return reply.code(404).send("The user does not exist");
 			const match = await bcrypt.compare(password, object.password);
@@ -51,7 +52,7 @@ const databaseControllers = {
 
 			if (!email)
 				return reply.code(400).send("You need to give the email to make that request");
-			const { username, id } = await fastify.db.get("SELECT username, id FROM auth WHERE email = ?", [ email ]);
+			const { username, id } = await databaseModels.getUserData(fastify, email);
 			if (!username || !id)
 				return reply.code(404).send("Not found the user");
 			return (reply.code(200).send({ username: username, id: id }));
