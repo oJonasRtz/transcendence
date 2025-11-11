@@ -30,12 +30,7 @@ app.register(fastifyView, {
 
 app.register(cookie, {
 	secret: process.env.COOKIE_SECRET || 'purpleVoid',
-	parseOptions: {
-		path: '/',
-		httpOnly: true,
-		sameSite: 'strict',
-		secure: isProduction
-	}
+	hook: 'onRequest'
 });
 
 // You can add prefix: /api to prefix every route prefix: '/api'

@@ -27,6 +27,15 @@ const privateControllers = {
 			console.error("You are not authenticated");
 			return reply.redirect("/login");
 		}
+	},
+
+	logout: async function logoutTheUser(req, reply) {
+		reply.clearCookie("jwt", {
+			httpOnly: true,
+			sameSite: "lax",
+			path: "/"
+		});
+		return reply.redirect("/login");
 	}
 };
 
