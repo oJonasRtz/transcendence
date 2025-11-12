@@ -85,8 +85,10 @@ export class Player {
 		this.#direction = {...direction};
 	}
 	destroy(err = null) {
-		this.#ws.close();
-		this.#ws = null;
+		if (this.#ws) {
+			this.#ws.close();
+			this.#ws = null;
+		}
 		this.#connected = false;
 
 		if (err) {
