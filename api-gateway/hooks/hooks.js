@@ -47,41 +47,44 @@ const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
 // 	return ;
 // };
 
-const view = {
-	1: "register",
-	"-1": "login"
-};
+// const view = {
+// 	1: "register",
+// 	"-1": "login"
+// };
 
 export async function validatorHook(req, reply) {
 	let error = [];
 	let success = [];
+
+	if (!req.body) return;
+
 	const check = [
 	{
-		cond: (req.body && req.body.password) && !passwordRegex.test(req.body.password),
+		cond: (req.body.password) && !passwordRegex.test(req.body.password),
 		msg: "Password must have numbers, letters, special characters"
 	},
 	{
-		cond: (req.body && req.body.password) && req.body.password.length < 8,
+		cond: (req.body.password) && req.body.password.length < 8,
 		msg: "Password must contain eight or more characters"
 	},
 	{
-		cond: (req.body && req.body.password && req.url !== '/checkLogin') && (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password),
+		cond: (req.body.password && req.url !== '/checkLogin') && (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password),
 		msg: "Password Mismatch"
 	},
 	{
-		cond: (req.body && req.body.email) && !emailRegex.test(req.body.email),
+		cond: (req.body.email) && !emailRegex.test(req.body.email),
 		msg: "Invalid e-mail"
 	},
 	{
-		cond: (req.body && req.body.username) && (!usernameRegex.test(req.body.username) || req.body.username.length < 3),
+		cond: (req.body.username) && (!usernameRegex.test(req.body.username) || req.body.username.length < 3),
 		msg: "Invalid username"
 	},
 	{
-		cond: (req.body && req.body.nickname) && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
+		cond: (req.body.nickname) && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
 		msg: "Invalid nickname"
 	},
 	{
-		cond: (req.body && req.body.captchaInput) && (req.session.captcha !== req.body.captchaInput),
+		cond: (req.body.captchaInput) && (req.session.captcha !== req.body.captchaInput),
 		msg: "Invalid captcha code, try again"
 	}
 ];
@@ -92,10 +95,18 @@ export async function validatorHook(req, reply) {
 	});
 
 	if (!error.length) return;
+	req.session.success = success;
+	req.session.error = error;
+	const view = {
+		'/checkLogin': "/login",
+		'/checkRegister': "/register"
+	};
+	if (!(req.url in view)) return;
 
-	const cond = (req.url === '/checkRegister') - (req.url === '/checkLogin');
+	return reply.redirect(view[req.url]);
+	// const cond = (req.url === '/checkRegister') - (req.url === '/checkLogin');
 	
-	return reply.view(view[cond], { error, success });
+	// return reply.view(view[cond], { error, success });
 }
 // 		if (req.body.password.length < 8)
 // 			error.push("Password must contain eight or more characters");
@@ -129,11 +140,11 @@ export async function validatorHook(req, reply) {
 // 	if (error.length !== 0) {
 // 		req.session.success = success;
 // 		req.session.error = error;
-// 		if (req.url === '/checkRegister') {
-// 			return reply.redirect("/register");
-// 		}
-// 		else if (req.url === '/checkLogin')
-// 			return reply.redirect("/login");
+		// if (req.url === '/checkRegister') {
+		// 	return reply.redirect("/register");
+		// }
+		// else if (req.url === '/checkLogin')
+		// 	return reply.redirect("/login");
 // 	}
 
 // 	return ;

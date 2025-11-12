@@ -3,7 +3,7 @@ import { handleConnect } from "./handleConnect.js";
 
 const handlers = {
 	[types.recieves.PING]: ({data, match}) =>
-		match.pong({id: data.id}),
+		match.pong(data.id),
 	[types.recieves.NEW_MATCH]: ({data, ws}) =>
 		lobby.createMatch({players: data.players, maxPlayers: data.maxPlayers}, ws),
 	[types.recieves.REMOVE_MATCH]: ({match}) =>

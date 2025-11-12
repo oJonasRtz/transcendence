@@ -34,6 +34,17 @@ export class Match {
 			});
 
 			console.log(`New match created with ID: ${this.#id}`);
+			console.log("📋 Player list:");
+			Object.entries(this.#players).forEach(([slot, player]) => {
+				const info = player.info;
+				console.log(`  • Slot ${slot}:`, {
+					id: info.id,
+					name: info.name,
+					score: info.score,
+					direction: info.direction,
+					connected: info.connected,
+				});
+			});
 			this.#inactivityDisconnect(5);
 		} catch (error) {
 			if (error.name === "TypeError")
