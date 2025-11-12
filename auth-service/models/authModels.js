@@ -8,7 +8,25 @@ const authModels = {
 			headers: { 'Content-type': 'application/json' }
 		})
 		return ;
-	}	
+	},
+
+	tryLoginTheUser: async function tryLoginTheUser(data) {
+		await axios.post("http://sqlite-db:3002/tryLoginTheUser",
+			data,
+			{
+				headers: { 'Content-type': 'application/json' }
+			})
+		return ;
+	},
+
+	getUserData: async function getUserData(email) {
+		const response = await axios.post("http://sqlite-db:3002/getUserData",
+			email,
+			{
+				headers: { 'Content-type': 'text/plain' }
+			})
+		return (response.data);
+	}
 };
 
 export default authModels;

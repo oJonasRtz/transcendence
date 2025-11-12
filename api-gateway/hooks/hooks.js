@@ -79,6 +79,10 @@ export async function validatorHook(req, reply) {
 	{
 		cond: (req.body && req.body.nickname) && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
 		msg: "Invalid nickname"
+	},
+	{
+		cond: (req.body && req.body.captchaInput) && (req.session.captcha !== req.body.captchaInput),
+		msg: "Invalid captcha code, try again"
 	}
 ];
 
@@ -93,6 +97,47 @@ export async function validatorHook(req, reply) {
 	
 	return reply.view(view[cond], { error, success });
 }
+// 		if (req.body.password.length < 8)
+// 			error.push("Password must contain eight or more characters");
+
+// 		if (req.url !== '/checkLogin') {
+// 			if (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password)
+// 				error.push("Password Mismatch");
+// 		}
+// 	}
+
+// 	if (req.body && req.body.captchaInput) {
+// 		if (req.session.captcha !== req.body.captchaInput)
+// 			error.push("Invalid captcha code, try again");
+// 	}
+
+// 	if (req.body && req.body.email) {
+// 		if (!emailRegex.test(req.body.email))
+// 			error.push("Invalid e-mail");
+// 	}
+
+// 	if (req.body && req.body.username) {
+// 		if (!usernameRegex.test(req.body.username) || req.body.username.length < 3)
+// 			error.push("Invalid username");
+// 	}
+
+// 	if (req.body && req.body.nickname) {
+// 		if (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3)
+// 			error.push("Invalid nickname");
+// 	}
+
+// 	if (error.length !== 0) {
+// 		req.session.success = success;
+// 		req.session.error = error;
+// 		if (req.url === '/checkRegister') {
+// 			return reply.redirect("/register");
+// 		}
+// 		else if (req.url === '/checkLogin')
+// 			return reply.redirect("/login");
+// 	}
+
+// 	return ;
+// };
 
 export async function authHook(req, reply) {
 	const token = req.cookies?.jwt;
@@ -105,7 +150,8 @@ export async function authHook(req, reply) {
 
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		//req.user = decoded.user;
+		req.jwt = token; // original jwt
+		req.user = decoded;  // decoded data
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
 			reply.redirect("/login");

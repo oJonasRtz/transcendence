@@ -1,5 +1,7 @@
 import axios from 'axios';
 import authModels from '../models/authModels.js';
+import jwt from 'jsonwebtoken';
+import svgCaptcha from 'svg-captcha';
 
 // AUTH-SERVICE CONTROLLERS
 
@@ -7,7 +9,7 @@ const authControllers = {
 
 	// SETTERS
 
-	checkLogin: async function tryLoginTheUser(req, reply) {
+	tryLoginTheUser: async function tryLoginTheUser(req, reply) {
 		const success = [];
 		const error = [];
 
@@ -21,9 +23,26 @@ const authControllers = {
 
 			await authModels.tryLoginTheUser(req.body);
 
-			return reply.code(200).send({ success, error });
+			const { username, id } = await authModels.getUserData(email);
+
+			const user_id = id;
+			const payload = { username, user_id, email };
+
+			const token = jwt.sign(payload, process.env.JWT_SECRET || "purpleVoid", {
+				expiresIn: process.env.JWT_EXPIRES_IN || "1h"
+			});
+
+			return reply.code(200).send({ success, error, token });
 		} catch (err) {
-			error.push("An error happened trying to login:", err.message);
+			if (err.response && err.response.status === 401) {
+				error.push("Email/Password Incorrect");
+				return reply.code(401).send({ success, error });
+			}
+			else if (err.response && err.response.status === 404) {
+				error.push("The user does not exist");
+				return reply.code(404).send({ success, error });
+			}
+			error.push(`An error happened trying to login: ${err}`);
 			return reply.code(500).send({ success, error });
 		}
 	},
@@ -58,6 +77,22 @@ const authControllers = {
 			error.push(`An error happening: ${err.message}`);
 			return reply.code(500).send({ success, error });
 		}
+	},
+
+	getCaptcha: async function getCaptchaImageCode(req, reply) {
+		const captcha = svgCaptcha.create({
+			size: 5,
+			noise: 3,
+			color: true,
+			background: "#f4f4f4"
+		});
+
+		const svgBase64 = Buffer.from(captcha.data).toString('base64');
+
+		return reply
+			.code(200)
+			.type("application/json")
+			.send({ code: captcha.text, data: `data:image/svg+xml;base64,${svgBase64}` });
 	},
 
 	// TESTS

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
 const publicControllers = {
 	
@@ -8,16 +9,50 @@ const publicControllers = {
 		return reply.view("homePage");
 	},
 
-	 login: function getLoginPage(req, reply) {
-                const success = [];
-                const error = [];
-                return reply.view("login", { success, error });
+	 login: async function getLoginPage(req, reply) {
+                let success = [];
+                let error = [];
+
+		 success = req.session.success || [];
+		 error = req.session.error || [];
+
+		 delete req.session.success;
+		 delete req.session.error;
+
+		try {
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
+			const { code, data } = response.data;
+			req.session.captcha = code;
+			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+                	return reply.view("login", { success, error, captcha: data });
+		} catch (err) {
+			error.push('Error loading the captcha D=');
+			return reply.view("login", { success, error, captcha: null });
+		}
         },
 
-        register: function getRegisterPage(req, reply) {
-                const success = [];
-                const error = [];
-                return reply.view("register", { success, error });
+        register: async function getRegisterPage(req, reply) {
+                let success = [];
+                let error = [];
+
+		 success = req.session.success || [];
+		 error = req.session.error || [];
+
+		 delete req.session.success;
+		 delete req.session.error;
+
+		try {
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
+			const { code, data } = response.data;
+			req.session.captcha = code;
+			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+                
+			return reply.view("register", { success, error, captcha: data });
+		} catch (err) {
+			error.push('Error loading the captcha D=');
+			return reply.view("register", { success, error, captcha: null });
+		}
         },
 
 	//SETTERS
@@ -31,11 +66,44 @@ const publicControllers = {
 			success = response.data.success || [];
 			error = response.data.error || [];
 
-			return reply.view("register", { success, error });
+			req.session.success = success;
+			req.session.error = error;
+
+			return reply.redirect("/login");
 		} catch (err) {
 			success = err.response.data.success || [];
 			error = err.response.data.error || [];
 			return reply.view("register", { success, error });
+		}
+	},
+
+	// Authentication
+	
+	checkLogin: async function tryLoginTheUser(req, reply) {
+		let success = [];
+		let error = [];
+		try {
+			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
+
+			const token = response.data.token;
+			if (!token) 
+				return reply.redirect("/login");
+			const isProduction = process.env.NODE_ENV === "production";
+
+			reply.setCookie("jwt", token, {
+                               	httpOnly: true,
+                               	secure: isProduction,
+                               	path: "/",
+                               	sameSite: "lax",
+                               	maxAge: 60 * 60 * 1000 // 1h
+                        });
+
+			return reply.redirect("/home");
+		} catch (err) {
+			success = err?.response?.data?.success || []; // optional, we are thinking about it
+			error = err?.response?.data?.error || [];
+			console.error("Error trying login:", err);
+			return reply.view("login", { success, error });
 		}
 	},
 

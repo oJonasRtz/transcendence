@@ -1,8 +1,5 @@
 import app from './app.js';
-import dotenv from 'dotenv';
 import axios from 'axios';
-
-dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
