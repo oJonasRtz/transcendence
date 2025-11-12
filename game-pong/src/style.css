@@ -1,0 +1,14 @@
+/* Remove margens e padding da página */
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* evita barras de rolagem */
+  background-color: black;
+}
+
+/* Faz o canvas preencher toda a tela */
+canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
