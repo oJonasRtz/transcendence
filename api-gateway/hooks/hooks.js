@@ -51,7 +51,11 @@ const view = {
 	1: "register",
 	"-1": "login"
 };
-const check = [
+
+export async function validatorHook(req, reply) {
+	let error = [];
+	let success = [];
+	const check = [
 	{
 		cond: (req.body && req.body.password) && !passwordRegex.test(req.body.password),
 		msg: "Password must have numbers, letters, special characters"
@@ -77,10 +81,6 @@ const check = [
 		msg: "Invalid nickname"
 	}
 ];
-
-export async function validatorHook(req, reply) {
-	let error = [];
-	let success = [];
 
 	check.forEach(item => {
 		if (item.cond)

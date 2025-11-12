@@ -9,6 +9,7 @@ import formBody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
 import ejs from 'ejs';
 import fastifyView from '@fastify/view';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,7 +17,12 @@ const __dirname = dirname(__filename);
 //console.log(__filename);
 //console.log(__dirname);
 
-const app = fastify();
+const app = fastify({
+	https: {
+		key: fs.readFileSync('./ssl/server.key'),
+		cert: fs.readFileSync('./ssl/server.cert')
+	}
+});
 
 app.register(formBody);
 
