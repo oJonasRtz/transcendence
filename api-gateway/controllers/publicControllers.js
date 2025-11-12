@@ -135,9 +135,13 @@ const publicControllers = {
 
 			await axios.post("http://auth-service:3001/checkEmail", req.body);
 
+			req.session.email = req.body.email;
+
 			return reply.redirect("/checkEmailCode");
 
 		} catch (err) {
+			delete req.session.email;
+
 			if (err?.response?.status === 400)
 				error.push("You need to fill all fields");
 			else if (err?.response?.status === 404)
@@ -150,6 +154,11 @@ const publicControllers = {
 	},
 
 	checkEmailCode: async function checkEmailCode(req, reply) {
+		if (!req.session.email) {
+			req.session.success = [];
+			req.session.error = ["You need to follow step by step"];
+			return reply.redirect("/login");
+		}
 		return reply.view("checkEmailCode", {});
 	},
 
