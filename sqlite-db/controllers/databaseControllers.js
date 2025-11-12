@@ -60,6 +60,25 @@ const databaseControllers = {
 			console.error("Error during getting the user data:", err);
 			return reply.code(500).send("Internal server error");
 		}
+	},
+
+	checkEmail: async function checkEmail(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an e-mail");
+
+			const { email } = req.body;
+
+			const match = await databaseModels.checkEmail(fastify, email);
+
+			if (!match)
+				return reply.code(404).send("There is not a user with that target email");
+
+			return reply.code(200).send("That is a valid e-mail");
+		} catch (err) {
+			console.error("Error na sqlite-db checkEmail:", err.message);
+			return reply.code(500).send("Internal Server Error");
+		}
 	}
 };
 

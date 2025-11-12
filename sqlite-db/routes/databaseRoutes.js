@@ -19,4 +19,8 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/getUserData", async (req, reply) => {
 		return databaseControllers.getUserData(fastify, req, reply);
 	});
+
+	fastify.post("/checkEmail", async (req, reply) => {
+		return databaseControllers.checkEmail(fastify, req, reply);
+	});
 };

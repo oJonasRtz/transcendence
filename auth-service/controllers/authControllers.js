@@ -95,6 +95,23 @@ const authControllers = {
 			.send({ code: captcha.text, data: `data:image/svg+xml;base64,${svgBase64}` });
 	},
 
+	checkEmail: async function checkEmail(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email, please");
+
+			await axios.post("http://sqlite-db:3002/checkEmail", req.body);
+
+			return reply.code(200).send("E-mail confirmed");
+		}
+		catch (err) {
+			console.error("Error da auth:", err.message);
+			if (err?.response?.status === 404)
+				return reply.code(404).send("Not found a user");
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

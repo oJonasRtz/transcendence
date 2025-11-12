@@ -12,5 +12,7 @@ export default async function authRoutes(fastify, options) {
 
 	fastify.get("/getCaptcha", authControllers.getCaptcha);
 
+	fastify.post("/checkEmail", authControllers.checkEmail);
+
 	fastify.get("/helloDb", authControllers.helloDb);
 }

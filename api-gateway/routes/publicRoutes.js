@@ -17,6 +17,12 @@ export default async function publicRoutes(fastify, options) {
 
 	fastify.get("/hello", publicControllers.hello);
 
+	fastify.get("/forgotPassword", publicControllers.forgotPasswordPage);
+
+	fastify.post("/checkEmail", publicControllers.checkEmail);
+
+	fastify.get("/checkEmailCode", publicControllers.checkEmailCode);
+
 	// TESTING BAD ROUTES
 	fastify.get("/checkDb", publicControllers.checkDb);
 };

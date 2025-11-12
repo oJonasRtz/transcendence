@@ -107,6 +107,52 @@ const publicControllers = {
 		}
 	},
 
+
+	forgotPasswordPage: async function forgotPasswordPage(req, reply) {
+		let success = [];
+		let error = [];
+
+		success = req.session.success || [];
+		error = req.session.error || [];
+
+		delete req.session.success;
+		delete req.session.error;
+
+		return reply.view("forgotPasswordPage", { success, error });
+	},
+
+	checkEmail: async function checkEmail(req, reply) {
+		let success = [];
+		let error = [];
+
+		try {
+			if (!req.body || !req.body.email) {
+				error.push("User not found");
+				req.session.success = success;
+				req.session.error = error;
+				return reply.redirect("/forgotPassword");
+			}
+
+			await axios.post("http://auth-service:3001/checkEmail", req.body);
+
+			return reply.redirect("/checkEmailCode");
+
+		} catch (err) {
+			if (err?.response?.status === 400)
+				error.push("You need to fill all fields");
+			else if (err?.response?.status === 404)
+				error.push("User not found");
+			req.session.success = success;
+			req.session.error = error;
+			console.error("api-gateway error no checkEmail:", err.message);
+			return reply.redirect("/forgotPassword");
+		}
+	},
+
+	checkEmailCode: async function checkEmailCode(req, reply) {
+		return reply.view("checkEmailCode", {});
+	},
+
 	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {
