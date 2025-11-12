@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const authModels = {
 	registerNewUser: async function registerNewUser(data) {
-		await axios.post("http://sqlite-db:3002/registerNewUser", 
+		await axios.post("https://sqlite-db:3002/registerNewUser", 
 		data, 
 		{ 
 			headers: { 'Content-type': 'application/json' }
@@ -11,7 +11,7 @@ const authModels = {
 	},
 
 	tryLoginTheUser: async function tryLoginTheUser(data) {
-		await axios.post("http://sqlite-db:3002/tryLoginTheUser",
+		await axios.post("https://sqlite-db:3002/tryLoginTheUser",
 			data,
 			{
 				headers: { 'Content-type': 'application/json' }
@@ -20,7 +20,7 @@ const authModels = {
 	},
 
 	getUserData: async function getUserData(email) {
-		const response = await axios.post("http://sqlite-db:3002/getUserData",
+		const response = await axios.post("https://sqlite-db:3002/getUserData",
 			email,
 			{
 				headers: { 'Content-type': 'text/plain' }

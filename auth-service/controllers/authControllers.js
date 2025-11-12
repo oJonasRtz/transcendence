@@ -100,7 +100,7 @@ const authControllers = {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email, please");
 
-			await axios.post("http://sqlite-db:3002/checkEmail", req.body);
+			await axios.post("https://sqlite-db:3002/checkEmail", req.body);
 
 			return reply.code(200).send("E-mail confirmed");
 		}
@@ -119,7 +119,7 @@ const authControllers = {
 
 	helloDb: async function testCommunicationAuthWithDatabase(req, reply) {
 		try {
-                        const response = await axios.get("http://sqlite-db:3002/hello");
+                        const response = await axios.get("https://sqlite-db:3002/hello");
                         return reply.send(`Auth-service confirms communication with sqlite-db ${response.data}`);
                         console.log("Success communicating with database");
                 } catch(err) {
