@@ -23,4 +23,8 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/checkEmail", async (req, reply) => {
 		return databaseControllers.checkEmail(fastify, req, reply);
 	});
+
+	fastify.post("/newPassword", async (req, reply) => {
+		return databaseControllers.newPassword(fastify, req, reply);
+	});
 };

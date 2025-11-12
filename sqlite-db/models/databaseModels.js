@@ -1,3 +1,5 @@
+import bcrypt import 'bcrypt';
+
 const databaseModels = {
 	getUserData: async function getUserData(fastify, email) {
 		let object = await fastify.db.get("SELECT username, id FROM auth WHERE email = ?", [ email ]);
@@ -21,6 +23,16 @@ const databaseModels = {
 	checkEmail: async function checkEmail(fastify, email) {
 		const match = await fastify.db.get("SELECT email FROM auth WHERE email = ?", [ email ]);
 		return (match || null);
+	},
+
+	getPassword: async function getPassword(fastify, email) {
+		const object = await fastify.db.get("SELECT password FROM auth WHERE email = ?", [ email ]);
+		return (object || null);
+	},
+
+	newPassword: async function newPassword(fastify, password, email) {
+		const password_hash = await bcrypt.hash();
+		await fastify.db.get("UPDATE auth SET password_hash = ? WHERE email = ?", [ password, email ]);
 	}
 }
 

@@ -14,5 +14,7 @@ export default async function authRoutes(fastify, options) {
 
 	fastify.post("/checkEmail", authControllers.checkEmail);
 
+	fastify.post("/newPassword", authControllers.newPassword);
+
 	fastify.get("/helloDb", authControllers.helloDb);
 }

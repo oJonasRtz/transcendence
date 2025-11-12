@@ -79,6 +79,28 @@ const databaseControllers = {
 			console.error("Error na sqlite-db checkEmail:", err.message);
 			return reply.code(500).send("Internal Server Error");
 		}
+	},
+
+	newPassword: async function newPassword(fastify, req, reply) {
+		try {
+			const { password } = req.body;
+
+			const email = req.body.email;
+			const password_hash = await bcrypt.hash(password, 12);
+
+			const object = await databaseModels.getPassword(fastify, email);
+
+			const match = await bcrypt.compare(password, object.password);
+			if (match)
+				return reply.code(409).send("You cannot put the same password as a new one");
+
+			await databaseModels.newPassword(fastify, email, password_hash);
+
+			return reply.code(200).send("success");
+		} catch (err) {
+			console.error("Error in newPassword changing password");
+			return reply.code(500).send("Fatal error");
+		}
 	}
 };
 

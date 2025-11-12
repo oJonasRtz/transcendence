@@ -112,6 +112,23 @@ const authControllers = {
 		}
 	},
 
+	newPassword: async function newPassword(req, reply) {
+		if (!req.body || !req.body.password || !req.body.confirmPassword)
+			return reply.code(400).send("You need to fill all the fields");
+
+		if (req.body.password !== req.body.confirmPassword)
+			return reply.code(403).send("Password and ConfirmPassword mismatch");
+
+		try {
+			await axios.post("https://sqlite-db:3002/newPassword", req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			if (err?.response?.status === 409)
+				return reply.code(409).send("Same password");
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

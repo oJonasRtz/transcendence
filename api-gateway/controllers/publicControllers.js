@@ -1,5 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import sendEmail from '../utils/sendMail.js';
 
 const publicControllers = {
 	
@@ -16,8 +17,12 @@ const publicControllers = {
 		 success = req.session.success || [];
 		 error = req.session.error || [];
 
-		 delete req.session.success;
-		 delete req.session.error;
+		delete req.session.captcha;
+		delete req.session.captchaExpires;
+		delete req.session.email;
+		delete req.session.permission;
+		delete req.session.success;
+		delete req.session.error;
 
 		try {
 			const response = await axios.get("https://auth-service:3001/getCaptcha");
@@ -39,8 +44,12 @@ const publicControllers = {
 		 success = req.session.success || [];
 		 error = req.session.error || [];
 
-		 delete req.session.success;
-		 delete req.session.error;
+		delete req.session.captcha;
+		delete req.session.captchaExpires;
+		delete req.session.email;
+		delete req.session.permission;
+		delete req.session.success;
+		delete req.session.error;
 
 		try {
 			const response = await axios.get("https://auth-service:3001/getCaptcha");
@@ -50,8 +59,8 @@ const publicControllers = {
                 
 			return reply.view("register", { success, error, captcha: data });
 		} catch (err) {
-			error.push('Error loading the captcha D=');
-			return reply.view("register", { success, error, captcha: null });
+			req.session.error = [`An error happened: ${err.message}`];
+			return reply.redirect("/register");
 		}
         },
 
@@ -71,9 +80,11 @@ const publicControllers = {
 
 			return reply.redirect("/login");
 		} catch (err) {
-			success = err.response.data.success || [];
-			error = err.response.data.error || [];
-			return reply.view("register", { success, error });
+			error = [`${err.message}`];
+			req.session.success = success;
+			req.session.error = error;
+
+			return reply.redirect("/register");
 		}
 	},
 
@@ -137,15 +148,35 @@ const publicControllers = {
 
 			req.session.email = req.body.email;
 
+                        const response = await axios.get("https://auth-service:3001/getCaptcha");
+                        const { code, data } = response.data;
+                        req.session.captcha = code;
+                        req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+                        const receiver = req.session.email;
+                        const subject = "Forgot Password - Transcendence";
+                        const webPage = `
+                                <h2>Forgot Password - Your Pong Transcendence</h2>
+                                <p>Please, you need to inform the code below to change the password of your account</p>
+                                <p>The code is ${code}. Type it in the checkEmailCode page to validate it</p>
+                        `;
+                        await sendMail(receiver, subject, webPage);
+
 			return reply.redirect("/checkEmailCode");
 
 		} catch (err) {
 			delete req.session.email;
+			delete req.session.captcha;
+                        delete req.session.captchaExpires;
+                        delete req.session.email;
+			delete req.session.permission;
 
 			if (err?.response?.status === 400)
 				error.push("You need to fill all fields");
 			else if (err?.response?.status === 404)
 				error.push("User not found");
+			else
+				error.push("An error happened trying to checking E-mail");
 			req.session.success = success;
 			req.session.error = error;
 			console.error("api-gateway error no checkEmail:", err.message);
@@ -154,12 +185,46 @@ const publicControllers = {
 	},
 
 	checkEmailCode: async function checkEmailCode(req, reply) {
-		if (!req.session.email) {
+		if (!req.session.email || !req.body || !req.body.captchaInput) {
 			req.session.success = [];
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/login");
 		}
-		return reply.view("checkEmailCode", {});
+		
+		// validator hook validates the captchaInput
+
+		req.session.permission = true;
+		return reply.redirect("/changePassword");
+	},
+
+	changePassword: async function validateEmailCode(req, reply) {
+		if (!req.session.email || !req.session.permission) {
+
+			req.session.error = ["You need to follow step by step"];
+			return reply.redirect("/login");
+		}
+		return reply.view("changePassword", {});
+	},
+
+	newPassword: async function newPassword(req, reply) {
+		if (!req.body || !req.session.permission || !req.session.email || !req.body.password || !req.body.confirmPassword) {
+			req.session.error = ["You need to follow step by step"];
+			return reply.redirect("/login");
+		}
+
+		try {
+			req.body.email = req.session.email;
+			await axios.post("https://auth-service:3001/newPassword", req.body);
+			req.session.success = ["Password changed successfully"];
+			return reply.redirect("/login");
+		} catch (err) {
+			if (err?.response?.status === 409) {
+				req.session.error = ["You cannot put the same password as a new one"];
+				return reply.redirect("/login");
+			}
+			req.session.error = ["An error happened when we are trying to change your password as requested D="];
+			return reply.redirect("/login");
+		}
 	},
 
 	//TESTS

@@ -11,10 +11,10 @@
 				<h2>Check Email Code Page</h2>
 			</section>
 			<section>
-				<form action="/validateEmailCode" method="POST">
+				<form action="/checkEmailCode" method="POST">
 					<label>
 						Type the code that we sent to your e-mail here:
-						<input type="text" placeholder="Type the code here" required>
+						<input type="text" name="captchaInput" placeholder="Type the code here" required>
 					</label><br><br>
 					<button type="submit">Submit</button>
 				</form>
