@@ -32,8 +32,8 @@ const publicControllers = {
 
                 	return reply.view("login", { success, error, captcha: data });
 		} catch (err) {
-			error.push('Error loading the captcha D=', err.message);
-			return reply.view("login", { success, error, captcha: null });
+			req.session.error = [`Error loading the captcha D= : ${err.message}`];
+			return reply.redirect("/login");
 		}
         },
 
@@ -113,8 +113,10 @@ const publicControllers = {
 		} catch (err) {
 			success = err?.response?.data?.success || []; // optional, we are thinking about it
 			error = err?.response?.data?.error || [];
+			req.session.success = success;
+			req.session.error = error;
 			console.error("Error trying login:", err);
-			return reply.view("login", { success, error });
+			return reply.redirect("/login");
 		}
 	},
 
