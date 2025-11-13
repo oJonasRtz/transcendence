@@ -1,4 +1,4 @@
-import bcrypt import 'bcrypt';
+import bcrypt from 'bcrypt';
 
 const databaseModels = {
 	getUserData: async function getUserData(fastify, email) {
