@@ -191,7 +191,9 @@ const publicControllers = {
 			req.session.error = ["You need to follow step by step"];
 			return redirect("/login");
 		}
-		return reply.view("checkEmailCode", {});
+		const error = req.session.error || [];
+		delete req.session.error;
+		return reply.view("checkEmailCode", { error });
 	},
 
 	checkEmailCode: async function checkEmailCode(req, reply) {
@@ -200,7 +202,7 @@ const publicControllers = {
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/login");
 		}
-		
+
 		// validator hook validates the captchaInput
 
 		req.session.permission = true;

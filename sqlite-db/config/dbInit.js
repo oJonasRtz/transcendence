@@ -30,10 +30,11 @@ export default async function initDatabase() {
 		CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
-			experience_points INTEGER NOT NULL,
-			avatar TEXT NOT NULL,
+			experience_points INTEGER DEFAULT 0,
+			avatar TEXT DEFAULT 'assets/images/default.png',
 			isOnline TEXT DEFAULT 'offline',
 			description TEXT DEFAULT NULL,
+			isEmailConfirmed BOOLEAN DEFAULT FALSE,
 			friends INTEGER DEFAULT 0,
 			wins INTEGER DEFAULT 0,
 			losses INTEGER DEFAULT 0,

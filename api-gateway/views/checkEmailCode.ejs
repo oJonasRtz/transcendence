@@ -11,6 +11,11 @@
 				<h2>Check Email Code Page</h2>
 			</section>
 			<section>
+				<% if (error && error.length > 0) { %>
+					<% error.forEach(err => { %>
+						<p style="color: red"> <%= err %> </p>
+					<% }) %>
+				<% } %>
 				<form action="/checkEmailCode" method="POST">
 					<label>
 						Type the code that we sent to your e-mail here:
