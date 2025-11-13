@@ -34,6 +34,7 @@ const authControllers = {
 
 			return reply.code(200).send({ success, error, token });
 		} catch (err) {
+			console.error("tryLoginTheUser Auth:", err);
 			if (err.response && err.response.status === 401) {
 				error.push("Email/Password Incorrect");
 				return reply.code(401).send({ success, error });
@@ -70,6 +71,7 @@ const authControllers = {
 			success.push(`User ${username} ${nickname} added successfully`);
 			return reply.code(200).send({ success, error });
 		} catch (err) {
+			console.error("checkRegister Auth:", err);
 			if (err?.response?.status === 409) {
 				error.push("User already exists");
 				return reply.code(409).send({ success, error });

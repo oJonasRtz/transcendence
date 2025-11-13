@@ -4,7 +4,6 @@ const sendMail = async function sendTheEmailToTarget (receiver, content, webPage
         try {
                 if (!receiver || !content || !webPage)
                         throw new Error("MISSING_INPUT");
-                await transporter.verify();
                 console.log("Successfully connected to email server");
                 const email = await transporter.sendMail({
                         from: `Your life coach todoApp :) <${process.env.EMAIL_GMAIL_USER}>`,

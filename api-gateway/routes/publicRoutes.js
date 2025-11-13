@@ -21,6 +21,8 @@ export default async function publicRoutes(fastify, options) {
 
 	fastify.post("/checkEmail", publicControllers.checkEmail);
 
+	fastify.get("/validateEmailCode", publicControllers.validateEmailCode);
+
 	fastify.get("/checkEmailCode", publicControllers.checkEmailCode);
 
 	fastify.post("/checkEmailCode", publicControllers.checkEmailCode);

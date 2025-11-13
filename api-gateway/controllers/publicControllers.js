@@ -1,6 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-import sendEmail from '../utils/sendMail.js';
+import sendMail from '../utils/sendMail.js';
 
 const publicControllers = {
 	
@@ -164,7 +164,7 @@ const publicControllers = {
                         `;
                         await sendMail(receiver, subject, webPage);
 
-			return reply.redirect("/checkEmailCode");
+			return reply.redirect("/validateEmailCode");
 
 		} catch (err) {
 			delete req.session.email;
@@ -184,6 +184,14 @@ const publicControllers = {
 			console.error("api-gateway error no checkEmail:", err.message);
 			return reply.redirect("/forgotPassword");
 		}
+	},
+
+	validateEmailCode: async function validateEmailCode(req, reply) {
+		if (!req.session.email) {
+			req.session.error = ["You need to follow step by step"];
+			return redirect("/login");
+		}
+		return reply.view("checkEmailCode", {});
 	},
 
 	checkEmailCode: async function checkEmailCode(req, reply) {

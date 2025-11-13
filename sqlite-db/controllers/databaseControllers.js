@@ -20,6 +20,7 @@ const databaseControllers = {
 
 			return reply.code(204).send();
 		} catch (err) {
+			console.error("registerNewUser SQlite-db:", err);
 			if (err.code === 'SQLITE_CONSTRAINT')
 				return reply.code(409).send("USER_ALREADY_EXISTS");
 			return reply.code(500).send("INTERNAL_SERVER_ERROR");
@@ -41,6 +42,7 @@ const databaseControllers = {
 				return reply.code(401).send("User/Password incorrect");
 			return reply.code(204).send();
 		} catch (err) {
+			console.error("tryLoginTheUser SQlite-db:", err);
 			console.error("Error trying login the user:", err.message);
 			return reply.code(500).send(err.message);
 		}
@@ -57,6 +59,7 @@ const databaseControllers = {
 				return reply.code(404).send("Not found the user");
 			return (reply.code(200).send({ username: username, id: id }));
 		} catch (err) {
+			console.error("getUserData SQlite-db:", err);
 			console.error("Error during getting the user data:", err);
 			return reply.code(500).send("Internal server error");
 		}
