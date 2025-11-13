@@ -213,7 +213,10 @@ const publicControllers = {
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/login");
 		}
-		return reply.view("changePassword", {});
+		const error = req.session.error || [];
+		delete req.session.error;
+
+		return reply.view("changePassword", { error });
 	},
 
 	newPassword: async function newPassword(req, reply) {
@@ -233,7 +236,7 @@ const publicControllers = {
 				return reply.redirect("/login");
 			}
 			req.session.error = ["An error happened when we are trying to change your password as requested D="];
-			return reply.redirect("/login");
+			return reply.redirect("/changePassword");
 		}
 	},
 

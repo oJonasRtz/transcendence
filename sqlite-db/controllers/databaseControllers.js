@@ -86,9 +86,13 @@ const databaseControllers = {
 
 	newPassword: async function newPassword(fastify, req, reply) {
 		try {
-			const { password } = req.body;
+			const { password, email } = req.body;
 
-			const email = req.body.email;
+			if (!password || !email)
+				throw new Error("You forgot password or email");
+
+			console.log("password:", password, "email", email);
+
 			const password_hash = await bcrypt.hash(password, 12);
 
 			const object = await databaseModels.getPassword(fastify, email);
@@ -97,11 +101,12 @@ const databaseControllers = {
 			if (match)
 				return reply.code(409).send("You cannot put the same password as a new one");
 
+			console.log("new password hash:", password_hash);
 			await databaseModels.newPassword(fastify, email, password_hash);
 
 			return reply.code(200).send("success");
 		} catch (err) {
-			console.error("Error in newPassword changing password");
+			console.error("Sqlite-db (newPassword) Error in newPassword changing password", err);
 			return reply.code(500).send("Fatal error");
 		}
 	}

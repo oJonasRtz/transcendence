@@ -30,9 +30,9 @@ const databaseModels = {
 		return (object || null);
 	},
 
-	newPassword: async function newPassword(fastify, password, email) {
-		const password_hash = await bcrypt.hash();
-		await fastify.db.get("UPDATE auth SET password_hash = ? WHERE email = ?", [ password, email ]);
+	newPassword: async function newPassword(fastify, email, password_hash) {
+		await fastify.db.get("UPDATE auth SET password = ? WHERE email = ?", [ password_hash, email ]);
+		return (true);
 	}
 }
 
