@@ -1,5 +1,5 @@
 {
-  "name": "pong",
+  "name": "game-pong",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,18 +9,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "ts-node": "^10.9.2",
-    "typescript": "~5.8.3",
-    "vite": "^7.1.2"
+    "typescript": "~5.9.3",
+    "vite": "^7.2.2"
   },
   "dependencies": {
-    "excalibur": "^0.30.3",
-    "ws": "^8.18.3"
-  },
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": ""
+    "excalibur": "^0.31.0"
+  }
 }
