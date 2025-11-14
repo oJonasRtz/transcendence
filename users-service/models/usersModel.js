@@ -1,11 +1,9 @@
 import axios from 'axios';
 
 const usersModel = {
-	createNewUser: async function createNewUser(req, reply) {
-		if (!req.body || !req.body.user_id)
-			return reply.code(400).send("You need to inform the user_id");
+	createNewUser: async function createNewUser(data) {
 
-		await axios.post("https://sqlite-db:3002/createNewUser");
+		await axios.post("https://sqlite-db:3002/createNewUser", data);
 
 		return reply.code(201).send("Success");
 	}

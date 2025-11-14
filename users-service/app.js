@@ -19,6 +19,8 @@ const app = fastify({
     }
 });
 
+app.register(usersRoutes, {});
+
 app.register(cookie, {
         secret: process.env.COOKIE_SECRET || "purpleVoid",
         hook: "onRequest"

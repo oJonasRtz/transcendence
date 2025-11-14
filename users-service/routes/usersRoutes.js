@@ -1,5 +1,6 @@
 import axios from 'axios';
+import usersControllers from '../controllers/usersControllers.js';
 
 export default async function usersRoutes(fastify, options) {
-	fastify.post("/createUserAccount", usersControllers.createUserAccount);
+	fastify.post("/createNewUser", usersControllers.createNewUser);
 };

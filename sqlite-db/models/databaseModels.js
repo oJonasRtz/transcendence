@@ -33,6 +33,15 @@ const databaseModels = {
 	newPassword: async function newPassword(fastify, email, password_hash) {
 		await fastify.db.get("UPDATE auth SET password = ? WHERE email = ?", [ password_hash, email ]);
 		return (true);
+	},
+
+	getUserid: async function getUserId(fastify, username) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE username = ?", [ username ]);
+		return (user_id || null);
+	},
+
+	createNewUser: async function createNewUser(fastify, user_id) {
+		await fastify.db.run("INSERT INTO users (user_id) VALUES (?)", [ user_id ]);
 	}
 }
 

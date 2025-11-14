@@ -1,8 +1,8 @@
-import usersModel from '../models.usersModel.js';
+import usersModel from '../models/usersModel.js';
 
 const usersControllers = {
-	createUserAccount: async function createNewUser(req, reply) {
-		if (!req.body || !req.body.user_id)
+	createNewUser: async function createNewUser(req, reply) {
+		if (!req.body || !req.body.email)
 			return reply.code(400).send("You need to inform user id");
 		try {
 			await usersModel.createNewUser(req.body);

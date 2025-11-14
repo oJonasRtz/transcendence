@@ -109,6 +109,13 @@ const databaseControllers = {
 			console.error("Sqlite-db (newPassword) Error in newPassword changing password", err);
 			return reply.code(500).send("Fatal error");
 		}
+	},
+
+	createNewUser: async function createNewUser(fastify, req, reply) {
+			const { username } = req.body;
+
+			const user_id = await databaseModels.getUserId(fastify, username);
+			await databaseModels.createNewUser(fastify, user_id);
 	}
 };
 
