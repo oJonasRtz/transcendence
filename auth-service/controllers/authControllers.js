@@ -132,7 +132,7 @@ const authControllers = {
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
-
+	
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

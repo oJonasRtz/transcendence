@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Confirm User Email Code</title>
+	</head>
+	<body>
+		<main>
+			<header>
+				<a href="/home">Home</a>
+			</header>
+			<section>
+				<h2>Confirm User Email Code Page</h2>
+			</section>
+			<section>
+				<% if (error && error.length > 0) { %>
+				<% error.forEach(err => { %>
+					<p style="color: red"> <%= err %> </p>
+				<% }) %>
+				<% } %>
+				<form action="/validateUserEmailCode" method="POST">
+					<label>
+						Code:
+					<input type="text" name="captchaInput" placeholder="Type the code here" required>
+					<button type="submit">Submit</button>
+					</label>
+				</form>
+			</section>
+			<footer>
+				<h6>Time do balacobaco</h6>
+			</footer>
+		</main>
+	</body>
+</html>

@@ -63,7 +63,9 @@ const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
 
 const redirect = {
 	'/checkRegister': "/register",
-	'/checkLogin': "/login"
+	'/checkLogin': "/login",
+	'/validateUserEmailCode': "/confirmUserEmailCode",
+	'/changePassword': "validateEmailCode",
 };
 
 export async function validatorHook(req, reply) {

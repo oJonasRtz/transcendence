@@ -10,10 +10,23 @@
 			<header>
 				<nav>
 					<a href="/logout">Logout</a>
+					<a href="/confirmUserEmail">Confirm your email</a>
 				</nav>
 			</header>
 			<section>
 				<h2>Welcome to your exclusive account <strong><%= username %></strong> !!!</h2>
+			</section>
+			<section>
+				<% if (success && success.length > 0) { %>
+					<% success.forEach(suc => { %>
+						<p style="color: green"> <%= suc %> </p>
+					<% }) %>
+				<% } %>
+				<% if (error && error.length > 0) { %>
+					<% error.forEach(err => { %>
+						<p style="color: red"> <%= err %> </p>
+					<% }) %>
+				<% } %>
 			</section>
 			<section>
 				<p>Pong is a multiplayer game. You can be happy here.</p>

@@ -122,6 +122,19 @@ const databaseControllers = {
 			console.error(`SQLITE-DB ERROR createNewUser ${err}`);
 			return reply.code(500).send("Error creating the user");
 		}
+	},
+
+	validateUserEmail: async function validateUserEmail(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			await databaseModels.activateEmail(fastify, req.body.email);
+
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error(`validateUserEmail Sqlite-db: ${err}`);
+			return reply.code(500).send("An error happened trying to validate your e-mail");
+		}
 	}
 };
 

@@ -3,4 +3,6 @@ import usersControllers from '../controllers/usersControllers.js';
 
 export default async function usersRoutes(fastify, options) {
 	fastify.post("/createNewUser", usersControllers.createNewUser);
+
+	fastify.post("/validateUserEmail", usersControllers.validateUserEmail);
 };

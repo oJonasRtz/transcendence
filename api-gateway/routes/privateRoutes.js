@@ -9,4 +9,10 @@ export default async function privateRoutes(fastify, options) {
 	fastify.get("/home", privateControllers.getHomePage);
 
 	fastify.get("/logout", privateControllers.logout);
+
+	fastify.get("/confirmUserEmail", privateControllers.confirmUserEmail);
+
+	fastify.get("/confirmUserEmailCode", privateControllers.confirmUserEmailCode);
+
+	fastify.post("/validateUserEmailCode", privateControllers.validateUserEmailCode);
 };

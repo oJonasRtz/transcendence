@@ -42,6 +42,10 @@ const databaseModels = {
 
 	createNewUser: async function createNewUser(fastify, user_id) {
 		await fastify.db.run("INSERT INTO users (user_id) VALUES (?)", [ user_id ]);
+	},
+
+	activateEmail: async function validateUserEmail(fastify, email) {
+		await fastify.db.exec("UPDATE users SET isEmailConfirmed = true");
 	}
 }
 
