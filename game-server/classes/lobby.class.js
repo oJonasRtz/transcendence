@@ -112,13 +112,6 @@ export class Lobby {
 		showMatches();
 	}
 	#sendPending() {
-		// console.log(("t//rying to send pending messages"));
-		console.log(`${JSON.stringify({
-			length: !this.#sendQueue.messages.length,
-			connected: !this.#connected,
-			ws: !this.#ws,
-			ready: this.#ws?.readyState !== 1,
-		})}`);
 		if (!this.#sendQueue.messages.length || !this.#connected || !this.#ws || this.#ws?.readyState !== 1) return;
 
 		// console.log("im gonna send pending messages");

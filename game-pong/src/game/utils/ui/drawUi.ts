@@ -49,7 +49,7 @@ export function drawUi() {
 	const player1 = createLabel(`${score[1]?.name}`, this.game.font, this.game.engine.drawWidth * .2, TEXT_Y);
 	const player2 = createLabel(`${score[2]?.name}`, this.game.font, this.game.engine.drawWidth * .8, TEXT_Y);
 
-	addElements.call(this, [ border, ground, middleLine, player1, player2, this.game.scoreLabel, this.game.timeLabel]);
+	addElements.call(this, [ ground, middleLine, player1, player2, this.game.scoreLabel, this.game.timeLabel]);
 	this.game.border = border;
 }
   

@@ -32,17 +32,18 @@ export function handleType(data: any) {
 
 function updateState(data: Object): void {
 	try {
+		console.log("Updating state with data:", data);
 		const {ball, game, players} = data as any;
 		
 		state.ballPos.exist = ball.exists;
 		state.ballPos.vector = ball.position;
 
 		state.timer = game.timer;
-		state.gameStarted = game.gameStarted;
-		state.gameEnd = game.gameEnd;
+		state.gameStarted = game.started;
+		state.gameEnd = game.ended;
 
 		for (const [key, val] of Object.entries(players)) {
-			const i: number = Number(key) + 1;
+			const i: number = Number(key);
 
 			state.players[i].name = val.name;
 			state.players[i].score = val.score;
@@ -54,6 +55,8 @@ function updateState(data: Object): void {
 			else
 				state.connection.opponent = val.connected;
 		}
+
+		console.log("State updated to:", state);
 	} catch (error) {
 		console.error("Error updating state:", error);
 	}

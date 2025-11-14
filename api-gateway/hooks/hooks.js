@@ -5,61 +5,117 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
 
+// export async function validatorHook(req, reply) {
+// 	let error = [];
+// 	let success = [];
+
+// 	if (req.body && req.body.password) {
+// 		if (!passwordRegex.test(req.body.password))
+// 			error.push("Password must have numbers, letters, special characters");
+	
+// 		if (req.body.password.length < 8)
+// 			error.push("Password must contain eight or more characters");
+
+// 		if (req.url !== '/checkLogin') {
+// 			if (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password)
+// 				error.push("Password Mismatch");
+// 		}
+// 	}
+
+// 	if (req.body && req.body.captchaInput) {
+// 		if (req.session.captcha !== req.body.captchaInput)
+// 			error.push("Invalid captcha code, try again");
+// 		if (req.url === '/checkEmailCode') {
+// 			if (req.session.captcha !== req.body.captchaInput) {
+// 				req.session.error = ["Invalid Validation Code"];
+// 				return reply.redirect('/validateEmailCode');
+// 			}
+// 		}
+// 	}
+
+// 	if (req.body && req.body.email) {
+// 		if (!emailRegex.test(req.body.email))
+// 			error.push("Invalid e-mail");
+// 	}
+
+// 	if (req.body && req.body.username) {
+// 		if (!usernameRegex.test(req.body.username) || req.body.username.length < 3)
+// 			error.push("Invalid username");
+// 	}
+
+// 	if (req.body && req.body.nickname) {
+// 		if (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3)
+// 			error.push("Invalid nickname");
+// 	}
+
+// 	if (error.length !== 0) {
+// 		req.session.success = success;
+// 		req.session.error = error;
+// 		if (req.url === '/checkRegister') {
+// 			return reply.redirect("/register");
+// 		}
+// 		else if (req.url === '/checkLogin')
+// 			return reply.redirect("/login");
+// 	}
+
+// 	return ;
+// };
+
+const redirect = {
+	'/checkRegister': "/register",
+	'/checkLogin': "/login"
+};
+
 export async function validatorHook(req, reply) {
+	if (!req.body) return ;
+
 	let error = [];
 	let success = [];
-
-	if (req.body && req.body.password) {
-		if (!passwordRegex.test(req.body.password))
-			error.push("Password must have numbers, letters, special characters");
-	
-		if (req.body.password.length < 8)
-			error.push("Password must contain eight or more characters");
-
-		if (req.url !== '/checkLogin') {
-			if (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password)
-				error.push("Password Mismatch");
+	const check = [
+		{
+			condition: req.body.password && !passwordRegex.test(req.body.password),
+			message: "Password must have numbers, letters, special characters"
+		},
+		{
+			condition: req.body.password && req.body.password.length < 8,
+			message: "Password must contain eight or more characters"
+		},
+		{
+			condition: req.body.password && req.url !== '/checkLogin' && (!req.body.confirmPassword || req.body.confirmPassword !== req.body.password),
+			message: "Password Mismatch"
+		},
+		{
+			condition: req.body.captchaInput && req.session.captcha !== req.body.captchaInput,
+			message: "Invalid captcha code, try again"
+		},
+		{
+			condition: req.body.email && !emailRegex.test(req.body.email),
+			message: "Invalid e-mail"
+		},
+		{
+			condition: req.body.username && (!usernameRegex.test(req.body.username) || req.body.username.length < 3),
+			message: "Invalid username"
+		},
+		{
+			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
+			message: "Invalid nickname"
 		}
-	}
+	];
 
-	if (req.body && req.body.captchaInput) {
-		if (req.session.captcha !== req.body.captchaInput)
-			error.push("Invalid captcha code, try again");
-		if (req.url === '/checkEmailCode') {
-			if (req.session.captcha !== req.body.captchaInput) {
-				req.session.error = ["Invalid Validation Code"];
-				return reply.redirect('/validateEmailCode');
-			}
-		}
-	}
+	check.forEach((item) => {
+		if (item.condition)
+			error.push(item.message);
+	});
 
-	if (req.body && req.body.email) {
-		if (!emailRegex.test(req.body.email))
-			error.push("Invalid e-mail");
-	}
+	if (!error.length) return ;
 
-	if (req.body && req.body.username) {
-		if (!usernameRegex.test(req.body.username) || req.body.username.length < 3)
-			error.push("Invalid username");
-	}
+	req.session.success = success;
+	req.session.error = error;
 
-	if (req.body && req.body.nickname) {
-		if (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3)
-			error.push("Invalid nickname");
-	}
+	if (!(req.url in redirect)) return ;
 
-	if (error.length !== 0) {
-		req.session.success = success;
-		req.session.error = error;
-		if (req.url === '/checkRegister') {
-			return reply.redirect("/register");
-		}
-		else if (req.url === '/checkLogin')
-			return reply.redirect("/login");
-	}
-
-	return ;
-};
+	return reply.redirect(redirect[req.url]);
+}
 
 export async function authHook(req, reply) {
 	const token = req.cookies?.jwt;

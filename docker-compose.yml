@@ -43,7 +43,7 @@ services:
     image: game-server:1.0.0
     container_name: game-server
     ports:
-      - 8443:8443
+      - "8443:8443"
     networks:
       - "transcendence"
   game-pong:
@@ -51,7 +51,8 @@ services:
     image: game-pong:1.0.0
     container_name: game-pong
     ports:
-      - 5173:5173
+      - "5173:5173"
+      - "9229:9229"
     depends_on:
       - game-server
     networks:

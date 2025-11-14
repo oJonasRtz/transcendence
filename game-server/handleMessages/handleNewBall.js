@@ -1,7 +1,3 @@
-import { broadcast } from "../utils/broadcast.js";
-
-const START_DELAY = 1000;
-
 //Returns 1 or -1 randomly
 export function getRandomDir() {
 	const val = Math.random();

@@ -22,7 +22,7 @@ export class Ball {
 		};
 
 		this.#direction = vector;
-		const startTime = INTERVALS + this.#networkBuffer; //1sec + message letency buffer
+		const startTime = INTERVALS; //1sec + message letency buffer
 
 		setTimeout(() => {
 			this.#start = true;
@@ -40,7 +40,6 @@ export class Ball {
 	}
 
 	#updatePosition() {
-		
 		this.#position.x += this.#direction.x * this.#speed
 		this.#position.y += this.#direction.y * this.#speed;
 
@@ -58,6 +57,7 @@ export class Ball {
 		if (!this.#start || this.#interval) return;
 
 		this.#interval = setInterval(() => {
+			if (!this.#start) return;
 			const scorer = this.#updatePosition();
 			if (this.#position.y <= 0 || this.#position.y >= this.#map.height)
 				this.bounce('y');

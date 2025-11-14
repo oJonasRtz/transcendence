@@ -1,6 +1,6 @@
 import { createId } from "../creates/createId.js";
 import { Player } from "./player.class.js";
-import { DISCONNECT_TIMEOUT, FPS, lobby, matches, types } from "../server.shared.js";
+import { DISCONNECT_TIMEOUT, FPS, INTERVALS, lobby, matches, types } from "../server.shared.js";
 import { Ball } from "./Ball.class.js";
 
 export class Match {
@@ -125,12 +125,9 @@ export class Match {
 				connected = true;
 				break;
 			} catch (error) {
-				// Ignore NOTFOUND errors, log others
-				// if (error.message !== types.error.NOT_FOUND)
-					console.error("Error connecting player:", error.message);
+				console.error("Error connecting player:", error.message);
 			}
 		}
-
 		if (!connected)
 			throw new Error(types.error.NOT_FOUND);
 
@@ -148,6 +145,7 @@ export class Match {
 				this.#matchStarted = Date.now();
 				this.#gameStarted = true;
 				this.#startTimer();
+				this.#newBall();
 			}
 			this.#ping();
 		}
@@ -173,7 +171,7 @@ export class Match {
 		if (this.#pingInterval) return;
 	
 		this.#pingInterval = setInterval(() => {
-
+			
 			const players =  Object.keys(this.#players).reduce((acc, id) => {
 			acc[id] = {
 				...this.#players[id].info
@@ -277,7 +275,7 @@ export class Match {
 			console.log("Error handling input:", error.message);
 		}
 	}
-	newBall() {
+	#newBall() {
 		this.#ball = new Ball(this.#lastScorer);
 		console.log(`New ball created for match ${this.#id}`);
 		this.#updateBall({});
@@ -292,9 +290,10 @@ export class Match {
 		this.#ball.updateState((scorer) => {
 			this.#lastScorer = scorer;
 			Object.values(this.#players).forEach((p) => {
-				if (p.side === scorer && p.score < this.#maxScore)
+				if (p.side === scorer && p.score < this.#maxScore) {
 					p.score++;
-
+					this.#newBall();
+				}
 				if (p.score >= this.#maxScore)
 					this.endGame(p.name);
 			});

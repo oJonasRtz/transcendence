@@ -1,14 +1,14 @@
 import "./style.css"
 import { connectPlayer } from './connection/connect';
 import { Pong } from './game/pong';
-import { gameState, identity } from './globals';
+import { identity, state } from './globals';
 
 connectPlayer();
 
 function waitGameStart(): Promise<void> {
 	return new Promise((resolve) => {
 		const check = () => {
-			if (gameState.gameStarted) {
+			if (state.gameStarted) {
 				resolve();
 			} else {
 				requestAnimationFrame(check);
