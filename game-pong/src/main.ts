@@ -2,6 +2,7 @@ import "./style.css"
 import { connectPlayer } from './connection/connect';
 import { Pong } from './game/pong';
 import { identity, state } from './globals';
+import * as ex from 'excalibur';
 
 connectPlayer();
 
@@ -27,7 +28,7 @@ export async function startGame(playerId: number, matchId: number, name: string,
 	pong.start();
 };
 
-//This will be called in front-end | erase this line after
+// //This will be called in front-end | erase this line after
 (async() => {
 	const playerId = Number(prompt("Enter your player ID:"));
 	const matchId = Number(prompt("Enter your match ID:"));
@@ -35,3 +36,21 @@ export async function startGame(playerId: number, matchId: number, name: string,
 
 	await startGame(playerId, matchId, name);
 })();
+
+// const engine = new ex.Engine({
+// 	width: 800,
+// 	height: 600,
+// 	backgroundColor: ex.Color.White
+// });
+
+// const paddle = new ex.Actor({
+// 	width: 20,
+// 	height: 100,
+// 	x: 50,
+// 	y: engine.drawHeight / 2,
+// 	color: ex.Color.Blue
+// });
+
+// engine.add(paddle);
+
+// engine.start();

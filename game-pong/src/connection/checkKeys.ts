@@ -4,7 +4,7 @@ import { socket } from "./connect";
 
 export const keys: InputType = {
 	id: 0,
-	matchId: identity.matchId,
+	matchId: 0,
 	type: "INPUT",
 	up: false,
 	down: false
@@ -29,8 +29,11 @@ function handleKey(event: KeyboardEvent, isPressed: boolean = true) {
 	keys.up = keys.up !== up ? up : keys.up;
 	keys.down = keys.down !== down ? down : keys.down; 
 
-	if (changed && socket.readyState === socket.OPEN && identity.id)
+	if (changed && socket.readyState === socket.OPEN && identity.id) {
+		keys.id = identity.id;
+		keys.matchId = identity.matchId;
 		socket.send(JSON.stringify(keys));
+	}
 }
 
 export function checkKeys(socket: WebSocket | null): void {

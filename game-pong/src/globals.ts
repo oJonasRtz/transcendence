@@ -42,7 +42,6 @@ export const BACKGROUND =  Object.freeze({
 	height: 600,
 	color: ex.Color.Black,
 	displayMode: ex.DisplayMode.Fixed,
-	z: 0,
 });
 
 export const ballPos: Vector = {

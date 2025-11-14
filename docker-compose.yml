@@ -52,7 +52,6 @@ services:
     container_name: game-pong
     ports:
       - "5173:5173"
-      - "9229:9229"
     depends_on:
       - game-server
     networks:

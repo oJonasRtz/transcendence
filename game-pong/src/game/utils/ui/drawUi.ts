@@ -30,7 +30,7 @@ export const border = new ex.Actor({
 	x: BACKGROUND.width / 2,
 	y: BACKGROUND.height / 2,
 	color: ex.Color.Blue,
-	z: 0,
+	z: 10,
 });
 
 export function drawUi() {
@@ -49,6 +49,10 @@ export function drawUi() {
 	const player1 = createLabel(`${score[1]?.name}`, this.game.font, this.game.engine.drawWidth * .2, TEXT_Y);
 	const player2 = createLabel(`${score[2]?.name}`, this.game.font, this.game.engine.drawWidth * .8, TEXT_Y);
 
+	middleLine.z = 10;
+	player1.z = 10;
+	player2.z = 10;
+	
 	addElements.call(this, [ ground, middleLine, player1, player2, this.game.scoreLabel, this.game.timeLabel]);
 	this.game.border = border;
 }

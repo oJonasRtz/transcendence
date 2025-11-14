@@ -7,5 +7,8 @@ export function drawPlayers() {
 	const paddle1 = new Paddle(DISTANCE_FROM_WALL, this.game.engine.drawHeight / 2, 1, this.height);
 	const paddle2 = new Paddle(this.game.engine.drawWidth - DISTANCE_FROM_WALL, this.game.engine.drawHeight / 2, 2, this.height);
 
+	paddle1.z = 10;
+	paddle2.z = 10;
+
 	addElements.call(this, [paddle1, paddle2]);
 }

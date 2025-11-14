@@ -14,5 +14,5 @@ COPY . .
 #generate ssl certificates
 RUN cd ssl/ && bash ./mkcert.sh
 EXPOSE 8443
-CMD ["node", "--inspect=0.0.0.0:9229", "server.js"]
+CMD ["node", "server.js"]
 

@@ -38,7 +38,7 @@ function updateState(data: Object): void {
 		state.ballPos.exist = ball.exists;
 		state.ballPos.vector = ball.position;
 
-		state.timer = game.timer;
+		state.timer = game.time;
 		state.gameStarted = game.started;
 		state.gameEnd = game.ended;
 
@@ -47,8 +47,8 @@ function updateState(data: Object): void {
 
 			state.players[i].name = val.name;
 			state.players[i].score = val.score;
-			state.players[i].up = val.up;
-			state.players[i].down = val.down;
+			state.players[i].up = val.direction.up;
+			state.players[i].down = val.direction.down;
 			
 			if (i === identity.id)
 				state.connection.me = val.connected;
@@ -56,7 +56,7 @@ function updateState(data: Object): void {
 				state.connection.opponent = val.connected;
 		}
 
-		console.log("State updated to:", state);
+		console.log("State updated to:", JSON.stringify(state, null, 2));
 	} catch (error) {
 		console.error("Error updating state:", error);
 	}
