@@ -28,7 +28,7 @@ services:
       - "transcendence"
       - "db_connection"
     volumes:
-      - users-service:/app
+      - users-service:/app/assets
   sqlite-db:
     build: ./sqlite-db
     image: sqlite-db:1.0.0

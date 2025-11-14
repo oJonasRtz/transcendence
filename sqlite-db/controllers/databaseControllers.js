@@ -112,10 +112,16 @@ const databaseControllers = {
 	},
 
 	createNewUser: async function createNewUser(fastify, req, reply) {
+		try {
 			const { username } = req.body;
 
 			const user_id = await databaseModels.getUserId(fastify, username);
 			await databaseModels.createNewUser(fastify, user_id);
+			return reply.code(201).send("Success");
+		} catch (err) {
+			console.error(`SQLITE-DB ERROR createNewUser ${err}`);
+			return reply.code(500).send("Error creating the user");
+		}
 	}
 };
 

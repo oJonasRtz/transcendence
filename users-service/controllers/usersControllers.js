@@ -9,6 +9,7 @@ const usersControllers = {
 
 			return reply.code(201).send("New user account created");
 		} catch (err) {
+			console.error(`users-service USERS: ${err}`);
 			return reply.code(500).send("Error creating user account");
 		}
 	}

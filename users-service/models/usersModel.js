@@ -5,7 +5,7 @@ const usersModel = {
 
 		await axios.post("https://sqlite-db:3002/createNewUser", data);
 
-		return reply.code(201).send("Success");
+		return (true);
 	}
 }
 

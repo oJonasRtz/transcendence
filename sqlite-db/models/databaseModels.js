@@ -35,7 +35,7 @@ const databaseModels = {
 		return (true);
 	},
 
-	getUserid: async function getUserId(fastify, username) {
+	getUserId: async function getUserId(fastify, username) {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE username = ?", [ username ]);
 		return (user_id || null);
 	},

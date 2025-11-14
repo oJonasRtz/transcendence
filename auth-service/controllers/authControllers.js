@@ -68,7 +68,7 @@ const authControllers = {
 
 			await authModels.registerNewUser(req.body);
 
-			await axios.post("http://users-service:3003/createNewUser", req.body);
+			await axios.post("https://users-service:3003/createNewUser", req.body);
 
 			success.push(`User ${username} ${nickname} added successfully`);
 			return reply.code(200).send({ success, error });
