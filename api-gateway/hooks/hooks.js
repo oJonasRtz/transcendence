@@ -65,7 +65,7 @@ const redirect = {
 	'/checkRegister': "/register",
 	'/checkLogin': "/login",
 	'/validateUserEmailCode': "/confirmUserEmailCode",
-	'/changePassword': "validateEmailCode",
+	'/checkEmailCode': "validateEmailCode",
 };
 
 export async function validatorHook(req, reply) {
