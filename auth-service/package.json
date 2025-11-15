@@ -19,6 +19,8 @@
     "ejs": "^3.1.10",
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
     "svg-captcha": "^1.4.0"
   },
   "devDependencies": {

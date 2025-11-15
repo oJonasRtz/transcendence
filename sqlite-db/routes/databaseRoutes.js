@@ -37,6 +37,10 @@ export default async function databaseRoutes(fastify, options) {
 	});
 
 	fastify.post("/get2FAEnable", async (req, reply) => {
-		return databaseControllers.get2FAEnabel(fastify, req, reply);
+		return databaseControllers.get2FAEnable(fastify, req, reply);
+	});
+
+	fastify.post("/set2FASecret", async (req, reply) => {
+		return databaseControllers.set2FASecret(fastify, req, reply);
 	});
 };

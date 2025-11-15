@@ -49,7 +49,15 @@ const databaseModels = {
 	},
 
 	get2FAEnable: async function get2FAEnable(fastify, email) {
-		await fastify.db.exec("SELECT twoFactorEnable FROM users WHERE email = ?", [ email ]);
+		await fastify.db.exec("SELECT twoFactorEnable FROM auth WHERE email = ?", [ email ]);
+	},
+
+	set2FASecret: async function set2FASecret(fastify, email, secret) {
+		await fastify.db.exec("UPDATE auth SET twoFactorSecret = ? WHERE email = ?", [ secret, email ]);
+	},
+
+	get2FASecret: async function get2FASecret(fastify, email) {
+		await fastify.db.exec("SELECT twoFactorSecret FROM auth WHERE email = ?", [ email ]);
 	}
 }
 

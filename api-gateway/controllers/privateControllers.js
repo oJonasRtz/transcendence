@@ -113,6 +113,45 @@ const privateControllers = {
 			req.session.error = ["An error happened trying to validating your code"];
 			return reply.redirect("/confirmUserEmailCode");
 		}
+	},
+
+	get2FAQrCode: async function get2FAQrCode(req, reply) {
+		try {
+			const token = req.cookies.jwt;
+			const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+			const res = await axios.post("https://auth-service:3001/get2FAEnable", { email: decoded.email });
+			if (!res.data.twoFactorEnable) {
+				req.session.error = ["You do not have 2FA activated at the moment"];
+				return reply.redirect("/home");
+			}
+			const response = await axios.post("https://auth-service:3001/get2FAQrCode", { email: decoded.email });
+			if (!response.data.qrCodeDataURL) {
+				console.error("Error generating the qrCodeDataURL");
+				return reply.code(500).send("Error generating the qrCode");
+			}
+			const qrCodeDataURL = response.data.qrCodeDataURL;
+			console.log("qrcode:", qrCodeDataURL);
+			req.session.qrCodeDataURL = qrCodeDataURL;
+			return reply.redirect("/check2FAQrCode");
+		} catch (err) {
+			console.error("get2FAQrCode", err);
+			req.session.error = ["Error getting get2FAQrCode"];
+			return reply.redirect("/home");
+		}
+	},
+
+	check2FAQrCode: async function check2FAQrCode(req, reply) {
+		if (!req.session.qrCodeDataURL) {
+			req.session.error = ["You need to follow step by step"];
+			return redirect("/home");
+		}
+		const qrCodeDataURL = req.session.qrCodeDataURL;
+		if (!qrCodeDataURL) {
+			req.session.error = ["Error generating the qrcode"];
+			return redirect("/home");
+		}	
+		delete req.session.qrCodeDataURL;
+		return reply.view("check2FAQrCode", { qrCodeDataURL } );
 	}
 };
 

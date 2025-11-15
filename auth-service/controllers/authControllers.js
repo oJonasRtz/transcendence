@@ -2,6 +2,8 @@ import axios from 'axios';
 import authModels from '../models/authModels.js';
 import jwt from 'jsonwebtoken';
 import svgCaptcha from 'svg-captcha';
+import speakeasy from 'speakeasy';
+import qrcode from 'qrcode';
 
 // AUTH-SERVICE CONTROLLERS
 
@@ -129,6 +131,35 @@ const authControllers = {
 		} catch (err) {
 			if (err?.response?.status === 409)
 				return reply.code(409).send("Same password");
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	get2FAQrCode: async function generate2FASendIt(req, reply) {
+		if (!req.body || !req.body.email)
+			return reply.code(400).send("You need to inform an username here");
+		try {
+			const secret2FA = speakeasy.generateSecret({ name: `Transcendence, time do Balacobaco: ${req.body.email}` });
+			await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA });
+
+			const qrCodeDataURL = await qrcode.toDataURL(secret2FA.otpauth_url);
+
+			return reply.code(200).send(qrCodeDataURL);
+
+		} catch (err) {
+			console.error("Auth-Service get2FAQrCode:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	get2FAEnable: async function get2FAEnable(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an e-mail here");
+			const result = await axios.post("https://sqlite-db:3002/get2FAEnable", req.body);
+			return reply.code(200).send(result.data ?? null);
+		} catch (err) {
+			console.error("Auth-Service get2FAEnable");
 			return reply.code(500).send("Internal Server Error");
 		}
 	},

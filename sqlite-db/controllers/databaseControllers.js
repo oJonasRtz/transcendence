@@ -141,11 +141,36 @@ const databaseControllers = {
 		try { 
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
-			const result = await databaseModels.get2FAEnable(fastify, email);
-			return (result || null);
+			const result = await databaseModels.get2FAEnable(fastify, req.body.email);
+			return reply.code(200).send(result ?? {});
 		} catch (err) {
 			console.error("Sqlite-db get2FAEnable:", err);
 			return reply.code(500).send("Internal server error");
+		}
+	},
+
+	get2FASecret: async function get2FASecret(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+
+			const result = await databaseModels.get2FASecret(fastify, req.body.email);
+			return reply.code(200).send(result ?? {});
+		} catch (err) {
+			console.error("Sqlite-db get2FASecret:", err);
+			return reply.code(500).send("Internal server error");
+		}
+	},
+
+	set2FASecret: async function set2FASecret(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || !req.body.secret)
+				return reply.code(400).send("You need to inform an email here");
+			await databaseModels.set2FASecret(fastify, req.body.email, req.body.secret);
+			return reply.code(200).send("Secret set successfully");
+		} catch (err) {
+			console.error("set2FASecret SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
 		}
 	}
 };

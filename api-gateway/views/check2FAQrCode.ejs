@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>2FA Page</title>
+	</head>
+	<body>
+		<img src="<%= qrCodeDataURL %>"><br>
+		<form action="" method="POST">
+			<section>
+				<h2>2FA Code Page</h2>
+			</section>
+			<section>
+				<label>
+					Code:
+					<input type="text" name="code" placeholder="Type the code here" required>
+					<button type="submit">Submit</button>
+				</label>
+			</section>
+			<footer>
+				<h6>Time do balacobaco</h6>
+			</footer>
+		</form>
+	</body>
+</html>
