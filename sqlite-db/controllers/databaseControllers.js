@@ -135,6 +135,18 @@ const databaseControllers = {
 			console.error(`validateUserEmail Sqlite-db: ${err}`);
 			return reply.code(500).send("An error happened trying to validate your e-mail");
 		}
+	},
+
+	get2FAEnable: async function get2FAEnable(fastify, req, reply) {
+		try { 
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const result = await databaseModels.get2FAEnable(fastify, email);
+			return (result || null);
+		} catch (err) {
+			console.error("Sqlite-db get2FAEnable:", err);
+			return reply.code(500).send("Internal server error");
+		}
 	}
 };
 

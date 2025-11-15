@@ -35,4 +35,8 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/validateUserEmail", async (req, reply) => {
 		return databaseControllers.validateUserEmail(fastify, req, reply);
 	});
+
+	fastify.post("/get2FAEnable", async (req, reply) => {
+		return databaseControllers.get2FAEnabel(fastify, req, reply);
+	});
 };
