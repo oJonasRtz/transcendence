@@ -19,7 +19,8 @@
     "ejs": "^3.1.10",
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^7.0.10"
+    "nodemailer": "^7.0.10",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

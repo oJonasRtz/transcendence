@@ -1,6 +1,7 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import sendMail from '../utils/sendMail.js';
+import speakeasy from 'speakeasy';
 
 const privateControllers = {
 	helloDb: async function testPrivateRoute(req, reply) {
@@ -130,7 +131,6 @@ const privateControllers = {
 				return reply.code(500).send("Error generating the qrCode");
 			}
 			const qrCodeDataURL = response.data.qrCodeDataURL;
-			console.log("qrcode:", qrCodeDataURL);
 			req.session.qrCodeDataURL = qrCodeDataURL;
 			return reply.redirect("/check2FAQrCode");
 		} catch (err) {
@@ -149,9 +149,53 @@ const privateControllers = {
 		if (!qrCodeDataURL) {
 			req.session.error = ["Error generating the qrcode"];
 			return redirect("/home");
-		}	
-		delete req.session.qrCodeDataURL;
-		return reply.view("check2FAQrCode", { qrCodeDataURL } );
+		}
+		const error = req.session.error || [];
+		delete req.session.error;
+		req.session.canValidate = true;
+		return reply.view("check2FAQrCode", { qrCodeDataURL, error } );
+	},
+
+	validate2FAQrCode: async function validate2FAQrCode(req, reply) {
+		try {
+			if (!req.session.canValidate) {
+				req.session.error = ["You need to follow step by step"];
+				delete req.session.canValidate;
+				return reply.redirect("/home");
+			}
+			if (!req.body || !req.body.code) {
+				req.session.error = ["You need to follow step by step"];
+				return reply.redirect("/check2FAQrCode");
+			}
+			const token = req.cookies.jwt;
+			const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+			const response = await axios.post("https://auth-service:3001/get2FASecret", { email: decoded.email });
+			if (!response.data.twoFactorSecret) {
+				req.session.error = ["You cannot have 2FA activate"];
+				return reply.redirect("/home");
+			}
+
+			const code = req.body.code;
+			const twoFactorSecret = response.data.twoFactorSecret;
+			console.log("secret:",twoFactorSecret);
+			const verified = speakeasy.totp.verify({
+                        secret: twoFactorSecret,
+                        encoding: "base32",
+                        token: code,
+                        window: 1
+                });
+
+			if (!verified) {
+				req.session.error = ["The code is incorrect. Try again"];
+				return reply.redirect("/check2FAQrCode");
+			}
+			req.session.success = ["2FA passed successfully"];
+			return reply.redirect("/home");
+		} catch (err) {
+			console.error("Validate2FAQrCode Api-Gateway", err);
+			req.session.error = ["An error happened trying to validate your 2FA Code"];
+			return reply.redirect("/home");
+		}
 	}
 };
 

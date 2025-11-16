@@ -87,8 +87,8 @@ const authControllers = {
 
 	getCaptcha: async function getCaptchaImageCode(req, reply) {
 		const captcha = svgCaptcha.create({
-			size: 5,
-			noise: 3,
+			size: 6,
+			noise: 4,
 			color: true,
 			background: "#f4f4f4"
 		});
@@ -139,12 +139,12 @@ const authControllers = {
 		if (!req.body || !req.body.email)
 			return reply.code(400).send("You need to inform an username here");
 		try {
-			const secret2FA = speakeasy.generateSecret({ name: `Transcendence, time do Balacobaco: ${req.body.email}` });
+			const secret2FA = speakeasy.generateSecret({ name: `Transcendence: ${req.body.email}` });
 			await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA });
 
 			const qrCodeDataURL = await qrcode.toDataURL(secret2FA.otpauth_url);
 
-			return reply.code(200).send(qrCodeDataURL);
+			return reply.code(200).send({ qrCodeDataURL: qrCodeDataURL });
 
 		} catch (err) {
 			console.error("Auth-Service get2FAQrCode:", err);
@@ -157,9 +157,21 @@ const authControllers = {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an e-mail here");
 			const result = await axios.post("https://sqlite-db:3002/get2FAEnable", req.body);
-			return reply.code(200).send(result.data ?? null);
+			return reply.code(200).send({ twoFactorEnable: result?.data?.twoFactorEnable ?? null });
 		} catch (err) {
-			console.error("Auth-Service get2FAEnable");
+			console.error("Auth-Service get2FAEnable", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	get2FASecret: async function get2FASecret(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an e-mail here");
+			const result = await axios.post("https://sqlite-db:3002/get2FASecret", req.body);
+			return reply.code(200).send({ twoFactorSecret: result?.data?.twoFactorSecret ?? null });
+		} catch (err) {
+			console.error("Auth-Service get2FASecret", err);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},

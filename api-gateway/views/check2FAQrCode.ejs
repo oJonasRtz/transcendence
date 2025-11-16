@@ -7,20 +7,25 @@
 	</head>
 	<body>
 		<img src="<%= qrCodeDataURL %>"><br>
-		<form action="" method="POST">
-			<section>
-				<h2>2FA Code Page</h2>
-			</section>
-			<section>
+		<section>
+			<h2>2FA Code Page</h2>
+		</section>
+		<section>
+			<% if (error && error.length > 0) { %>
+			<% error.forEach(err => { %>
+				<p style="color: red"> <%= err %> </p>
+			<% }) %>
+			<% } %>
+			<form action="/validate2FAQrCode" method="POST">
 				<label>
 					Code:
 					<input type="text" name="code" placeholder="Type the code here" required>
 					<button type="submit">Submit</button>
 				</label>
-			</section>
-			<footer>
-				<h6>Time do balacobaco</h6>
-			</footer>
-		</form>
+			</form>
+		</section>
+		<footer>
+			<h6>Time do balacobaco</h6>
+		</footer>
 	</body>
 </html>

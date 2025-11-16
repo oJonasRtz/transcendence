@@ -22,12 +22,12 @@ const databaseModels = {
 
 	checkEmail: async function checkEmail(fastify, email) {
 		const match = await fastify.db.get("SELECT email FROM auth WHERE email = ?", [ email ]);
-		return (match || null);
+		return (match ?? null);
 	},
 
 	getPassword: async function getPassword(fastify, email) {
 		const object = await fastify.db.get("SELECT password FROM auth WHERE email = ?", [ email ]);
-		return (object || null);
+		return (object ?? null);
 	},
 
 	newPassword: async function newPassword(fastify, email, password_hash) {
@@ -37,7 +37,7 @@ const databaseModels = {
 
 	getUserId: async function getUserId(fastify, username) {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE username = ?", [ username ]);
-		return (user_id || null);
+		return (user_id ?? null);
 	},
 
 	createNewUser: async function createNewUser(fastify, user_id) {
@@ -49,7 +49,10 @@ const databaseModels = {
 	},
 
 	get2FAEnable: async function get2FAEnable(fastify, email) {
-		await fastify.db.exec("SELECT twoFactorEnable FROM auth WHERE email = ?", [ email ]);
+		const twoFactorEnable = await fastify.db.get("SELECT twoFactorEnable FROM auth WHERE email = ?", [ email ]);
+		if (!twoFactorEnable)
+			return (null);
+		return (twoFactorEnable);
 	},
 
 	set2FASecret: async function set2FASecret(fastify, email, secret) {
@@ -57,7 +60,10 @@ const databaseModels = {
 	},
 
 	get2FASecret: async function get2FASecret(fastify, email) {
-		await fastify.db.exec("SELECT twoFactorSecret FROM auth WHERE email = ?", [ email ]);
+		const twoFactorSecret = await fastify.db.get("SELECT twoFactorSecret FROM auth WHERE email = ?", [ email ]);
+		if (!twoFactorSecret)
+			return (null);
+		return (twoFactorSecret);
 	}
 }
 
