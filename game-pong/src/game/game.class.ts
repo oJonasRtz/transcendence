@@ -1,9 +1,12 @@
 import * as ex from 'excalibur';
 import { Paddle } from './actors/paddle';
+import { gameState } from '../globals';
+import { Ball } from './actors/ball';
 
 export class Game {
 	private engine: ex.Engine;
-	private paddles: ex.Actor[]; 
+	private paddles: ex.Actor[];
+	private ball: ex.Actor;
 	constructor() {
 		this.engine = new ex.Engine({
 			width: 800,
@@ -12,17 +15,45 @@ export class Game {
 			displayMode: ex.DisplayMode.Fixed
 		});
 
-		this.paddles = [];
-		for (let i = 1; i <= 2; i++) {
-			const x = i === 1 ? 50 : this.engine.drawWidth - 50;
-			this.paddles[i] = new Paddle(x, this.engine.drawHeight / 2, i, 10);
-		}
-		this.paddles.forEach((paddle) => {
-			this.engine.add(paddle);
+		this.addPaddles();
+
+		this.engine.on('preupdate', () => {
+			this.ballReset();
 		});
 	}
 
+	public checkVerticalCollision(newPos: number, actorHeight: number): boolean {
+		const MARGIN: number = 10;
+		const roomHeight = this.engine.drawHeight;
 
+		const bottom: boolean = newPos > ((roomHeight - actorHeight / 2) - MARGIN);
+		const top: boolean = newPos < (actorHeight / 2) + MARGIN;
+
+		return bottom || top;
+	}
+
+	private ballReset() {
+		const {exist} = gameState.getBall();
+		const {gameEnd} = gameState.getGame();
+		if (exist || gameEnd) return;
+
+		this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
+	}
+	private addPaddles() {
+		this.paddles = [
+			new Paddle(50, this.engine.drawHeight / 2, 1),
+			new Paddle(this.engine.drawWidth - 50, this.engine.drawHeight / 2, 2),
+		];
+
+
+		this.addToGame(this.paddles);
+	}
+
+	private addToGame(data: ex.Actor[]) {
+		data.forEach((actor) => {
+			this.engine.add(actor);
+		});
+	}
 
 	start() {
 		this.engine.start();

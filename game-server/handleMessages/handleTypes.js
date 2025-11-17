@@ -42,8 +42,10 @@ export function handleTypes(ws, data) {
 		const match = validateData(matchId, 'number')
 			? matches[matchId]
 			: null;
-		
-		console.log(`received type: ${type} with:`, {data});
+
+		if (type !== types.PING)
+			console.log(`received type: ${type}`);
+
 		//All messages except CONNECT_PLAYER require id
 		const newConnection = type === types.recieves.CONNECT_PLAYER
 			|| type === types.recieves.CONNECT_LOBBY;

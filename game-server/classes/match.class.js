@@ -3,6 +3,10 @@ import { Player } from "./player.class.js";
 import { DISCONNECT_TIMEOUT, FPS, INTERVALS, lobby, matches, types } from "../server.shared.js";
 import { Ball } from "./Ball.class.js";
 
+function choose(arr) {
+	return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export class Match {
 	#allConnected = false;
 	#players = {};
@@ -17,7 +21,7 @@ export class Match {
 	#timeout = null;
 	#timeFormated = "00:00";
 	#ball = null;
-	#lastScorer = null; // "left" | "right" | null
+	#lastScorer = choose(["left", "right"]);
 	#lastState = null;
 	#pingInterval = null;
 
@@ -141,7 +145,10 @@ export class Match {
 		if (Object.values(this.#players).every(p => p.connected)) {
 			this.#allConnected = true;
 
-			if (!this.#matchStarted) {
+			console.log(`All players connected for match ${this.#id}. Starting game...`);
+
+			if (this.#allConnected && !this.#gameStarted) {
+				console.log("\x1b[33mvamos comecar essa bagaca\x1b[0m");
 				this.#matchStarted = Date.now();
 				this.#gameStarted = true;
 				this.#startTimer();
@@ -257,15 +264,6 @@ export class Match {
 		this.#broadcast({type: types.message.END_GAME});
 	}
 	input(id, direction) {
-		// try {
-		// 	const p = this.#players[id];
-		// 	if (!p) return;
-
-		// 	p.direction.up = direction.up;
-		// 	p.direction.down = direction.down;
-		// } catch (error) {
-		// 	console.log("Error handling input:", error.message);
-		// }
 		try {
 			const p = this.#players[id];
 
@@ -277,7 +275,7 @@ export class Match {
 	}
 	#newBall() {
 		this.#ball = new Ball(this.#lastScorer);
-		console.log(`New ball created for match ${this.#id}`);
+		console.log(`\x1b[35m\x1b[1m[NEW BALL] New ball created for match ${this.#id}\x1b[0m`);
 		this.#updateBall({});
 	}
 	bounce(axis) {

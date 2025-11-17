@@ -1,6 +1,5 @@
 import { INTERVAL, types } from "../globals";
 import type { InputType, StartType } from "../types";
-import type { Connection } from "./Connection.class";
 import { Identity } from "./Identity.class";
 
 const UPKEYS = ["ArrowUp", "w", "W"]; 
@@ -71,7 +70,7 @@ export class State {
 		}
 	}
 	public getPlayers() {
-		return {...this.players};
+		return this.players;
 	}
 
 	public setBall({exist, vector}: {exist: boolean; vector?: {x: number; y: number;};}) {
@@ -160,7 +159,7 @@ export class State {
 			this.handleKey(event, sendCallback);
 		});
 		window.addEventListener("keyup", (event) => {
-			this.handleKey(event, sendCallback);
+			this.handleKey(event, sendCallback, false);
 		});
 	}
 }

@@ -1,32 +1,38 @@
 import * as ex from 'excalibur';
-import { state } from '../../globals';
 import { Paddle } from './paddle';
-import { notifyBounce } from '../../connection/notify/notifyBounce';
+import { gameState } from '../../globals';
 
 export class Ball extends ex.Actor {
-	constructor() {
+	constructor(x: number, y: number) {
 		super({
 			width: 20,
 			height: 20,
 			color: ex.Color.White,
-			collisionType: ex.CollisionType.Passive
+			collisionType: ex.CollisionType.Passive,
+			pos: new ex.Vector(x, y),
 		});
 	}
 
 	onInitialize(): void {
-		this.pos.x = state.ballPos.vector.x;
-		this.pos.y = state.ballPos.vector.y;
+		// this.pos.x = state.ballPos.vector.x;
+		// this.pos.y = state.ballPos.vector.y;
+
 
 		this.on('collisionstart', (col) => {
-			if (col.other.owner instanceof Paddle)
+			if (col.other.owner instanceof  Paddle)
 				notifyBounce('x');
 		});
 	}
 
 	onPreUpdate(_engine: ex.Engine, _delta: number): void {
-		if (!state.allOk || !state.ballPos.exist) return;
+		// if (!state.allOk || !state.ballPos.exist) return;
 		
-		this.pos.x = state.ballPos.vector.x;
-		this.pos.y = state.ballPos.vector.y;
+		// this.pos.x = state.ballPos.vector.x;
+		// this.pos.y = state.ballPos.vector.y;
+		const {vector, exist} = gameState.getBall();
+		if (!exist) return;
+
+		this.pos.x = vector.x;
+		this.pos.y = vector.y;
 	}
 }

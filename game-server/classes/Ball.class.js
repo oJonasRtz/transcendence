@@ -2,7 +2,6 @@ import { INTERVALS, types } from "../server.shared.js";
 
 export class Ball {
 	#direction = {x: 0, y: 0};
-	#position = {x: 0, y: 0};
 	#speed = .3;
 	#lastBounce = null;
 	#DELAY = 100;
@@ -10,7 +9,7 @@ export class Ball {
 	#start = false;
 	#networkBuffer = INTERVALS / FPS;
 	#map = {width: 800, height: 600};
-
+	#position = {x: this.#map.width / 2, y: this.#map.height / 2};
 	constructor(lastScorer) {
 		const dir = {"left": -1, "right": 1};
 
