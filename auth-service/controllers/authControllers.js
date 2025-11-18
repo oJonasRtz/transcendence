@@ -140,7 +140,7 @@ const authControllers = {
 			return reply.code(400).send("You need to inform an username here");
 		try {
 			const secret2FA = speakeasy.generateSecret({ name: `Transcendence: ${req.body.email}` });
-			await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA });
+			await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA.base32 });
 
 			const qrCodeDataURL = await qrcode.toDataURL(secret2FA.otpauth_url);
 
@@ -169,9 +169,22 @@ const authControllers = {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an e-mail here");
 			const result = await axios.post("https://sqlite-db:3002/get2FASecret", req.body);
+			console.log("o result da auth secret:", result);
 			return reply.code(200).send({ twoFactorSecret: result?.data?.twoFactorSecret ?? null });
 		} catch (err) {
 			console.error("Auth-Service get2FASecret", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	set2FAValidate: async function set2FAValidate(req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.signal === undefined)
+				return reply.code(400).send("You need to inform an email and signal here");
+			await axios.post("https://sqlite-db:3002/set2FAValidate", req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("Sqlite-db set2FAValidate", err);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},

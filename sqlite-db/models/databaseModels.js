@@ -31,7 +31,7 @@ const databaseModels = {
 	},
 
 	newPassword: async function newPassword(fastify, email, password_hash) {
-		await fastify.db.get("UPDATE auth SET password = ? WHERE email = ?", [ password_hash, email ]);
+		await fastify.db.run("UPDATE auth SET password = ? WHERE email = ?", [ password_hash, email ]);
 		return (true);
 	},
 
@@ -45,7 +45,7 @@ const databaseModels = {
 	},
 
 	activateEmail: async function validateUserEmail(fastify, email) {
-		await fastify.db.exec("UPDATE users SET isEmailConfirmed = true");
+		await fastify.db.run("UPDATE users SET isEmailConfirmed = true");
 	},
 
 	get2FAEnable: async function get2FAEnable(fastify, email) {
@@ -56,7 +56,8 @@ const databaseModels = {
 	},
 
 	set2FASecret: async function set2FASecret(fastify, email, secret) {
-		await fastify.db.exec("UPDATE auth SET twoFactorSecret = ? WHERE email = ?", [ secret, email ]);
+		console.log("email do set:", email, "secret do set:", secret);
+		await fastify.db.run("UPDATE auth SET twoFactorSecret = ? WHERE email = ?", [ secret, email ]);
 	},
 
 	get2FASecret: async function get2FASecret(fastify, email) {
@@ -64,6 +65,11 @@ const databaseModels = {
 		if (!twoFactorSecret)
 			return (null);
 		return (twoFactorSecret);
+	},
+
+	set2FAValidate: async function set2FAValidate(fastify, email, signal) {
+		await fastify.db.run("UPDATE auth SET twoFactorValidate = ? WHERE email = ?", [ signal, email ]);
+		return (true);
 	}
 }
 

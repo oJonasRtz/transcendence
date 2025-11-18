@@ -172,6 +172,18 @@ const databaseControllers = {
 			console.error("set2FASecret SQLITE-DB error:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	set2FAValidate: async function set2FAValidate(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.signal === undefined)
+				return reply.code(400).send("You need to inform an email here");
+			await databaseModels.set2FAValidate(fastify, req.body.email, req.body.signal);
+			return reply.code(200).send("Signal updated successfully");
+		} catch (err) {
+			console.error("set2FAValidate SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

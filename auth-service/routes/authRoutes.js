@@ -23,4 +23,6 @@ export default async function authRoutes(fastify, options) {
 	fastify.post("/get2FAEnable", authControllers.get2FAEnable);
 
 	fastify.post("/get2FASecret", authControllers.get2FASecret);
+
+	fastify.post("/set2FAValidate", authControllers.set2FAValidate);
 }

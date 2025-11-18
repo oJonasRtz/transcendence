@@ -21,6 +21,7 @@ export default async function initDatabase() {
                         password TEXT NOT NULL,
 			twoFactorEnable BOOLEAN DEFAULT FALSE,
 			twoFactorSecret TEXT DEFAULT NULL,
+			twoFactorValidate BOOLEAN DEFAULT FALSE,
 			created_at DATETIME DEFAULT (datetime('now')),
 			updated_at DATETIME DEFAULT (datetime('now'))
                 );

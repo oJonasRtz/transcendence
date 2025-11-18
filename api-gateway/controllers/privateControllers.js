@@ -41,11 +41,16 @@ const privateControllers = {
 
 		// erase all cookies
 
+		const token = req.cookies.jwt;
+		const decoded = jwt.decode(token) || {};
+
+		console.log("decode", decoded);
 		await req.session.destroy();
 
 		reply.clearCookie("jwt");
 		reply.clearCookie("session");
 
+		await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 		return reply.redirect("/login");
 	},
 
@@ -177,7 +182,6 @@ const privateControllers = {
 
 			const code = req.body.code;
 			const twoFactorSecret = response.data.twoFactorSecret;
-			console.log("secret:",twoFactorSecret);
 			const verified = speakeasy.totp.verify({
                         secret: twoFactorSecret,
                         encoding: "base32",
@@ -190,6 +194,7 @@ const privateControllers = {
 				return reply.redirect("/check2FAQrCode");
 			}
 			req.session.success = ["2FA passed successfully"];
+			await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: true });
 			return reply.redirect("/home");
 		} catch (err) {
 			console.error("Validate2FAQrCode Api-Gateway", err);

@@ -121,7 +121,7 @@ export async function validatorHook(req, reply) {
 
 export async function authHook(req, reply) {
 	const token = req.cookies?.jwt;
-
+	let decoded = jwt.decode(token) ?? {};
 	// Check if the user has a token
 	if (!token) {
 		reply.redirect("/login");
@@ -129,11 +129,13 @@ export async function authHook(req, reply) {
 	}
 
 	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		const data = jwt.verify(token, process.env.JWT_SECRET);
 		req.jwt = token; // original jwt
-		req.user = decoded;  // decoded data
+		req.user = data;  // decoded data
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+			if (err.name === "TokenExpiredError")
+				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 			reply.redirect("/login");
 			return ;
 		}
