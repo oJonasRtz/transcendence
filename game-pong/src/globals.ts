@@ -1,6 +1,6 @@
-import { Connection } from "./classes/Connection.class";
-import { Identity } from "./classes/Identity.class";
-import { State } from "./classes/State.class";
+import { Connection } from "./controllers/Connection.class";
+import { Identity } from "./controllers/Identity.class";
+import { State } from "./controllers/State.class";
 
 export const identity = new Identity();
 export const MAXSCORE: number = 11;

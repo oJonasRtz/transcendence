@@ -1,7 +1,7 @@
 import { Match } from "./match.class.js";
 import { closeCodes, lobby, matches, types } from "../server.shared.js"
-import { sendError } from "../utils/sendError.js";
-import { showMatches } from "../utils/showMatches.log.js";
+import { sendError } from '../controllers/sendError.js'
+import { showMatches } from "../controllers/showMatches.log.js";
 
 const SECOND = 1000;
 

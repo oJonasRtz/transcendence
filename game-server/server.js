@@ -2,10 +2,9 @@ import { WebSocketServer } from "ws";
 import fs from "fs";
 import https from "https";
 import { lobby, matches } from "./server.shared.js";
-import { handleTypes } from "./handleMessages/handleTypes.js";
+import { handleTypes } from "./controllers/handleTypes.js";
 import 'dotenv/config';
-import { ddosDetect, removeConnection } from "./utils/ddosDetector.js";
-
+import { ddosDetect, removeConnection } from './controllers/ddosDetector.js';
 
 //port 8443 for tests with wss, change to 443  for production
 //.env nao esta funcionando ainda verificar futuramente

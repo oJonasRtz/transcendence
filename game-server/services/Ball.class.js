@@ -6,6 +6,7 @@ export class Ball {
   #lastBounce = null;
   #DELAY = 100;
   #interval = null;
+  #margin = 10;
   #start = false;
   #networkBuffer = INTERVALS / FPS;
   #map = { width: 800, height: 600 };
@@ -39,7 +40,9 @@ export class Ball {
     this.#position.x += this.#direction.x * this.#speed;
     this.#position.y += this.#direction.y * this.#speed;
 
-    const i = (this.#position.x <= 0) - (this.#position.x >= this.#map.width);
+    const hitLeft = this.#position.x <= this.#margin;
+    const hitRight = this.#position.x >= this.#map.width - this.#margin;
+    const i = hitLeft - hitRight;
     const scorer = {
       0: null,
       1: "right",

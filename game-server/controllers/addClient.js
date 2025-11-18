@@ -1,5 +1,5 @@
-import { closeCodes, matches } from "../server.shared.js";
-import { sendError } from "../utils/sendError.js";
+import { closeCodes } from "../server.shared.js";
+import { sendError } from "./sendError.js";
 
 const errorMessages = {
 	NOTFOUND: "Match not found",

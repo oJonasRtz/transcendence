@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Lobby } from './classes/lobby.class.js';
+import { Lobby } from './services/lobby.class.js';
 
 export const matches = {};
 export const lobby = new Lobby();

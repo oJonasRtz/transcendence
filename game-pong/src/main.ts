@@ -1,4 +1,4 @@
-import { Game } from "./game/game.class";
+import { Game } from "./view/game.class";
 import { connection, gameState, identity } from "./globals";
 import type { StartType } from "./types";
 

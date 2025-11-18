@@ -1,4 +1,4 @@
-import { createId } from "../creates/createId.js";
+import { createId } from "../controllers/createId.js";
 import { Player } from "./player.class.js";
 import {
   DISCONNECT_TIMEOUT,
