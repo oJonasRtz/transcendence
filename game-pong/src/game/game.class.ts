@@ -5,8 +5,8 @@ import { Ball } from './actors/ball';
 
 export class Game {
 	private engine: ex.Engine;
-	private paddles: ex.Actor[];
-	private ball: ex.Actor;
+	private paddles: ex.Actor[] | null = null;
+	private ball: ex.Actor | null = null;
 	constructor() {
 		this.engine = new ex.Engine({
 			width: 800,
@@ -35,16 +35,22 @@ export class Game {
 	private ballReset() {
 		const {exist} = gameState.getBall();
 		const {gameEnd} = gameState.getGame();
-		if (exist && !gameEnd && this.ball) return;
-
-		if (this.ball) {
-			this.engine.remove(this.ball);
-			delete this.ball;
+		
+		if (!exist) {
+			if (this.ball) {
+				this.engine.remove(this.ball);
+				delete this.ball;
+				this.ball = null;
+				console.log("Ball removed from the game");
+			}
+			return;
 		}
 
-		this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
-		this.addToGame([this.ball]);
-		console.log("Ball reset at center");
+		if (!this.ball) {
+			this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
+			this.addToGame([this.ball]);
+			console.log("Ball added to the game");
+		}
 	}
 	private addPaddles() {
 		this.paddles = [

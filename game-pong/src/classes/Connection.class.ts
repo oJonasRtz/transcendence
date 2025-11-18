@@ -87,10 +87,11 @@ export class Connection {
 	}
 	private updateState(data: Object): void {
 		try {
-			// console.log("Updating state with data:", data);
+			console.log("Updating state with data:", data);
 
 			const {ball, game, players} = data as any;
 
+			console.log("[updateState] Ball data:", ball);
 			gameState.setBall({exist: ball.exists, vector: ball.position});
 
 			for (const [key, val] of Object.entries(players)) {

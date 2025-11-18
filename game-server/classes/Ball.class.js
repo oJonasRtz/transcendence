@@ -28,9 +28,7 @@ export class Ball {
   }
 
   get position() {
-    return {
-      position: { ...this.#position },
-    };
+    return { x: this.#position.x, y: this.#position.y };
   }
 
   #getRandom() {

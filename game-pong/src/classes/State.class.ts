@@ -75,8 +75,11 @@ export class State {
 
 	public setBall({exist, vector}: {exist: boolean; vector?: {x: number; y: number;};}) {
 		this.ball.exist = exist;
-		if (vector)
+		console.log(`ball Stats set to exist: ${exist} vector: ${vector ? `x: ${vector.x}, y: ${vector.y}` : "undefined"}`);
+		if (vector) {
 			this.ball.vector = vector;
+			console.log(`Ball position set to x: ${vector.x}, y: ${vector.y}`);
+		}
 	}
 	public getBall() {
 		return {...this.ball};

@@ -29,10 +29,9 @@ export class Ball extends ex.Actor {
 		
 		// this.pos.x = state.ballPos.vector.x;
 		// this.pos.y = state.ballPos.vector.y;
-		const {vector, exist} = gameState.getBall();
-		if (!exist) return;
-
+		const {vector} = gameState.getBall();
 		this.pos.x = vector.x;
 		this.pos.y = vector.y;
+		// console.log(`Ball position updated to x: ${this.pos.x}, y: ${this.pos.y}`);
 	}
 }
