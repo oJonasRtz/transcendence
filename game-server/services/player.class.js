@@ -1,4 +1,5 @@
 import { lobby, types } from "../server.shared.js";
+import { Paddle } from "./Paddle.class.js";
 
 export class Player {
 	#id;
@@ -11,6 +12,7 @@ export class Player {
 	#notifyBallDeath = false;
 	#side;
 	#direction = {up: false, down: false};
+	#paddle;
 	#matchId = 0;
 
 	constructor(data, {index, matchId}) {
@@ -20,13 +22,14 @@ export class Player {
 		this.#side = side;
 		this.#matchId = matchId;
 		this.#slot = index;
+		this.#paddle = new Paddle(this.#side);
 	}
 	get info() {
 		return {
 			id: this.#slot,
 			name: this.#name,
 			score: this.#score,
-			direction: {...this.#direction},
+			position: {...this.#paddle.position},
 			connected: this.#connected,
 		}
 	}
@@ -64,6 +67,7 @@ export class Player {
 		}
 		this.#ws = ws;
 		this.#connected = true;
+		this.#paddle.start();
 
 		this.#ws.on("close", (err) => this.destroy(err));
 		this.#ws.on("error", (err) => this.destroy(err));
@@ -82,16 +86,17 @@ export class Player {
 			|| Object.values(direction).some(v => typeof v !== 'boolean')) return;
 		
 		this.#direction = {...direction};
+		this.#paddle.updateDirection(this.#direction);
 	}
 	destroy(err = null) {
 		if (this.#ws) {
-			this.#ws.close();
+			try {this.#ws.close()} catch (error) {}
 			this.#ws = null;
 		}
 		this.#connected = false;
+		this.#paddle.stop();
 
-		if (err) {
+		if (err)
 			console.log(`[Player ${this.#name}] disconnected from match ${this.#matchId}:`, err.code, err.reason);
-		}
 	}
 }

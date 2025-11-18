@@ -1,16 +1,20 @@
-import { FPS, INTERVALS, types } from "../server.shared.js";
+import { FPS, gameMap, INTERVALS, types } from "../server.shared.js";
 
 export class Ball {
   #direction = { x: 0, y: 0 };
-  #speed = 0.3;
+  #speed = {
+    moveSpeed: 5,
+    speedIncrement: 1,
+    maxSpeed: 8,
+  };
   #lastBounce = null;
   #DELAY = 100;
   #interval = null;
   #margin = 10;
   #start = false;
   #networkBuffer = INTERVALS / FPS;
-  #map = { width: 800, height: 600 };
-  #position = { x: this.#map.width / 2, y: this.#map.height / 2 };
+  #position = { x: gameMap.width / 2, y: gameMap.height / 2 };
+ 
   constructor(lastScorer) {
     const dir = { left: -1, right: 1 };
 
@@ -37,11 +41,11 @@ export class Ball {
   }
 
   #updatePosition() {
-    this.#position.x += this.#direction.x * this.#speed;
-    this.#position.y += this.#direction.y * this.#speed;
+    this.#position.x += this.#direction.x * this.#speed.moveSpeed;
+    this.#position.y += this.#direction.y * this.#speed.moveSpeed;
 
     const hitLeft = this.#position.x <= this.#margin;
-    const hitRight = this.#position.x >= this.#map.width - this.#margin;
+    const hitRight = this.#position.x >= gameMap.width - this.#margin;
     const i = hitLeft - hitRight;
     const scorer = {
       0: null,
@@ -58,7 +62,7 @@ export class Ball {
     this.#interval = setInterval(() => {
       if (!this.#start) return;
       const scorer = this.#updatePosition();
-      if (this.#position.y <= 0 || this.#position.y >= this.#map.height)
+      if (this.#position.y <= 0 || this.#position.y >= gameMap.height)
         this.bounce("y");
       if (scorer) {
         clearInterval(this.#interval);
@@ -83,7 +87,7 @@ export class Ball {
     const axisMap = {
       x: () => {
         this.#direction.x = -this.#direction.x;
-        if (this.#speed < 1.5) this.#speed += 0.2;
+        if (this.#speed.moveSpeed < this.#speed.maxSpeed) this.#speed += this.#speed.speedIncrement;
       },
       y: () => {
         this.#direction.y = -this.#direction.y;

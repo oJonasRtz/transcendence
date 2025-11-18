@@ -22,16 +22,6 @@ export class Game {
 		});
 	}
 
-	public checkVerticalCollision(newPos: number, actorHeight: number): boolean {
-		const MARGIN: number = 10;
-		const roomHeight = this.engine.drawHeight;
-
-		const bottom: boolean = newPos > ((roomHeight - actorHeight / 2) - MARGIN);
-		const top: boolean = newPos < (actorHeight / 2) + MARGIN;
-
-		return bottom || top;
-	}
-
 	private ballReset() {
 		const {exist} = gameState.getBall();
 		const {gameEnd} = gameState.getGame();

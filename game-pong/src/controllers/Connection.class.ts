@@ -105,7 +105,7 @@ export class Connection {
           id: i,
           name: val.name,
           score: val.score,
-          direction: { up: val.direction.up, down: val.direction.down },
+          pos: {x: val.position.x, y: val.position.y},
           connected: val.connected,
         });
       }

@@ -1,15 +1,10 @@
 import * as ex from 'excalibur';
 import { gameState } from '../../globals';
-import { checkVerticalCollision } from '../utils/checkCollision';
-// import { checkVerticalCollision } from '../utils/checkCollision';
-// import { state } from '../../globals';
 
 export class Paddle extends ex.Actor {
-	speed: number;
-	number: 1 | 2;
-	upMargin: number;
+	private number: 1 | 2 = 1;
 
-	constructor(x: number, y: number, player: 1 | 2 = 1, upMargin: number = 0) {
+	constructor(x: number, y: number, player: 1 | 2 = 1) {
 		super({
 			x: x,
 			y: y,
@@ -18,25 +13,18 @@ export class Paddle extends ex.Actor {
 			color: ex.Color.White,
 			collisionType: ex.CollisionType.Fixed
 		});
-		this.upMargin = upMargin;
-		this.speed = 1;
+
 		this.number = player;
-		console.log(`Paddle ${this.number} created`);
 	}
 
-	onPreUpdate(engine: ex.Engine, elapsed: number): void {
-		const moveSpeed: number = this.getMoveSpeed(elapsed);
+	onPreUpdate(): void {
+		const players = gameState.getPlayers();
+		const p = players[this.number];
 
-		if (checkVerticalCollision(this.pos.y + moveSpeed, this.height, engine.drawHeight, this.upMargin))
-			return;
+		if (!p) return;
 
-		this.pos.y += moveSpeed;
+		this.pos.y = p.pos.y;
+		this.pos.x = p.pos.x;
 	}
 
-	getMoveSpeed(delta: number): number {
-		const input = gameState.getPlayers()[this.number].direction;
-
-		const dir = Number(input.down) - Number(input.up);
-		return((dir * this.speed) * delta) * Number(gameState.getGame().allOk);
-	}
 }

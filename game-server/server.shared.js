@@ -4,6 +4,8 @@ import { Lobby } from './services/lobby.class.js';
 export const matches = {};
 export const lobby = new Lobby();
 
+export const gameMap = { width: 800, height: 600 };
+
 /*
 	messages: used to manage types on sending
 	errors: used in throwing errors

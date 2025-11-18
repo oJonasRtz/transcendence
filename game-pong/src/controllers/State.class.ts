@@ -11,11 +11,11 @@ export class State {
 	private players: Record<1 | 2, {
 		name: string;
 		score: number;
-		direction: {up: boolean; down: boolean;};
+		pos: {x: number; y: number;};
 		connected: boolean
 	}> = {
-		1: {name: "", score: 0, direction: {up: false, down: false}, connected: false},
-		2: {name: "", score: 0, direction: {up: false, down: false}, connected: false},
+		1: {name: "", score: 0, pos: {x: 0, y: 0}, connected: false},
+		2: {name: "", score: 0, pos: {x: 0, y: 0}, connected: false},
 	};
 	private latency = {
 		ping: 0,
@@ -55,17 +55,17 @@ export class State {
 		if (id)
 			this.players[id].connected = me;
 	}
-	public setPlayer({id, name, score, direction, connected}: {
+	public setPlayer({id, name, score, pos, connected}: {
 		id: 1 | 2;
 		name: string;
 		score: number;
-		direction: {up: boolean; down: boolean;};
+		pos: {x: number; y: number;};
 		connected: boolean;
 	}) {
 		this.players[id] = {
 			name,
 			score,
-			direction,
+			pos,
 			connected,
 		}
 	}
