@@ -55,4 +55,8 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/getIsOnline", async (req, reply) => {
 		return databaseControllers.getIsOnline(fastify, req, reply);
 	});
+
+	fastify.post("/setIsOnline", async (req, reply) => {
+		return databaseControllers.setIsOnline(fastify, req, reply);
+	});
 };

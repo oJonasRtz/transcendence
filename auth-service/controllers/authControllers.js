@@ -200,7 +200,20 @@ const authControllers = {
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
-	
+
+	setIsOnline: async function setIsOnline(req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.isOnline === undefined)
+				return reply.code(400).send("You need to inform an email and the signal for isOnline");
+			console.log("Teste do auth:", req.body);
+			await axios.post("https://sqlite-db:3002/setIsOnline", req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("AUTH-SERVICE setIsOnline", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

@@ -136,12 +136,17 @@ export async function authHook(req, reply) {
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
 			req.user.isOnline = false;
-			if (err.name === "TokenExpiredError")
+			if (err.name === "TokenExpiredError") {
+				// The user must do 2FA again
 				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+				// Put the user as offline
+				await axios.post("https://auth-service:3001/setIsOnline", req.user);
+			}
+			console.error("JWT ERROR:", err);
 			reply.redirect("/login");
 			return ;
 		}
-		console.error("JWT ERROR:", err);
+		console.error("AuthHook ERROR:", err);
 		return reply.code(500).send("Authentication internal error");
 	}
 	return ;

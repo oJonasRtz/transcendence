@@ -37,7 +37,7 @@ const databaseModels = {
 
 	getUserId: async function getUserId(fastify, username) {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE username = ?", [ username ]);
-		return (user_id ?? null);
+		return (user_id.id ?? null);
 	},
 
 	createNewUser: async function createNewUser(fastify, user_id) {
@@ -77,6 +77,12 @@ const databaseModels = {
 		if (!isOnline)
 			return (null);
 		return (isOnline);
+	},
+
+	setIsOnline: async function setIsOnline(fastify, email, isOnline) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ?", [ isOnline, user_id.id ]);
+		return (true);
 	}
 }
 

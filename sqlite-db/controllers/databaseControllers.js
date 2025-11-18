@@ -196,6 +196,18 @@ const databaseControllers = {
 			console.error("getIsOnline SQLITE-DB error", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	setIsOnline: async function setIsOnline(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.isOnline === undefined)
+				return reply.code(400).send("You need to inform an email here");
+			await databaseModels.setIsOnline(fastify, req.body.email, req.body.isOnline);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setIsOnline SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

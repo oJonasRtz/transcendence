@@ -30,11 +30,13 @@ const privateControllers = {
 			delete req.session.success;
 			delete req.session.error;
 
-			const isOnline = req.user.isOnline;
+			req.user.isOnline = true;
 
+			const isOnline = req.user.isOnline;
+			await axios.post("https://auth-service:3001/setIsOnline", req.user);
 			return reply.view("home", { username, success, error, isOnline } );
 		} catch (err) {
-			console.error("You are not authenticated");
+			console.error("getHomePage API-GATEWAY ERROR:", err);
 			return reply.redirect("/login");
 		}
 	},
@@ -48,7 +50,8 @@ const privateControllers = {
 
 		req.user.isOnline = false;
 
-		console.log("decode", decoded);
+		await axios.post("https://auth-service:3001/setIsOnline", req.user);
+
 		await req.session.destroy();
 
 		reply.clearCookie("jwt");
