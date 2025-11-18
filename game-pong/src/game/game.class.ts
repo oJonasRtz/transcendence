@@ -12,7 +12,7 @@ export class Game {
 			width: 800,
 			height: 600,
 			backgroundColor: ex.Color.Black,
-			displayMode: ex.DisplayMode.Fixed
+			displayMode: ex.DisplayMode.FitScreen,
 		});
 
 		this.addPaddles();
@@ -35,9 +35,16 @@ export class Game {
 	private ballReset() {
 		const {exist} = gameState.getBall();
 		const {gameEnd} = gameState.getGame();
-		if (exist || gameEnd) return;
+		if (exist && !gameEnd && this.ball) return;
+
+		if (this.ball) {
+			this.engine.remove(this.ball);
+			delete this.ball;
+		}
 
 		this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
+		this.addToGame([this.ball]);
+		console.log("Ball reset at center");
 	}
 	private addPaddles() {
 		this.paddles = [

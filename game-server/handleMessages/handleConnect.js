@@ -4,8 +4,7 @@ import { closeCodes } from "../server.shared.js";
 export function handleConnect(ws, data) {
 	try {
 		const playerData = addClient(ws, data);
-
-		console.log(`Player connected:`, {playerData});
+		
 		ws.player = {
 			slot: playerData.id,
 			matchIndex: playerData.matchIndex,

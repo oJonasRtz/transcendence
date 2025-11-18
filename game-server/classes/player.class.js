@@ -64,7 +64,6 @@ export class Player {
 		}
 		this.#ws = ws;
 		this.#connected = true;
-		console.log(`[Player ${this.#name}] connected to match ${this.#matchId}`);
 
 		this.#ws.on("close", (err) => this.destroy(err));
 		this.#ws.on("error", (err) => this.destroy(err));

@@ -4,7 +4,7 @@ import { State } from "./classes/State.class";
 
 export const identity = new Identity();
 export const MAXSCORE: number = 11;
-export const RECONNECTION__DELAY: number = 10000; //10 seconds
+export const RECONNECTION__DELAY: number = 5000; //10 seconds
 export const INTERVAL: number = 1000; //1 second
 
 //Messages types for WebSocket communication

@@ -18,10 +18,10 @@ export class Ball extends ex.Actor {
 		// this.pos.y = state.ballPos.vector.y;
 
 
-		this.on('collisionstart', (col) => {
-			if (col.other.owner instanceof  Paddle)
-				notifyBounce('x');
-		});
+		// this.on('collisionstart', (col) => {
+		// 	if (col.other.owner instanceof  Paddle)
+		// 		notifyBounce('x');
+		// });
 	}
 
 	onPreUpdate(_engine: ex.Engine, _delta: number): void {

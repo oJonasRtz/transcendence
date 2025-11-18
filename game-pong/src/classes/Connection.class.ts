@@ -34,7 +34,8 @@ export class Connection {
 		this.socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
 
-			console.log('Message from server:', {data});
+			if (data.type !== types.PONG && data.type !== types.PING)
+				console.log('Message from server:', {data});
 
 			this.handleType(data);
 		}
@@ -86,7 +87,7 @@ export class Connection {
 	}
 	private updateState(data: Object): void {
 		try {
-			console.log("Updating state with data:", data);
+			// console.log("Updating state with data:", data);
 
 			const {ball, game, players} = data as any;
 

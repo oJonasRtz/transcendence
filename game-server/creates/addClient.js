@@ -21,7 +21,6 @@ export function addClient(ws, {playerId, name, match}) {
 	try {
 		const { matchIndex, id } = match.connectPlayer(playerId, ws, name);
 
-		console.log(`[addClient] Player ${id} connected to match ${matchIndex}`);
 		return { matchIndex: matchIndex, id: id };
 	} catch (error) {
 		const message = error.message;

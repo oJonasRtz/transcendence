@@ -120,7 +120,6 @@ export class State {
 	}
 	public setLatency() {
 		this.latency.ms = Date.now() - this.latency.lastPingTimestamp;
-		console.log(`Latency: ${this.latency.ms} ms`);
 	}
 	public stopGettingLatency() {
 		if (this.latency.ping) {

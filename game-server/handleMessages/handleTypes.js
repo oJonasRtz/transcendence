@@ -43,7 +43,7 @@ export function handleTypes(ws, data) {
 			? matches[matchId]
 			: null;
 
-		if (type !== types.PING)
+		if (type !== types.recieves.PING && type !== types.recieves.CONNECT_LOBBY)
 			console.log(`received type: ${type}`);
 
 		//All messages except CONNECT_PLAYER require id
