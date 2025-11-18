@@ -177,6 +177,18 @@ const authControllers = {
 		}
 	},
 
+	get2FAValidate: async function get2FAValidate(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an e-mail here");
+			const result = await axios.post("https://sqlite-db:3002/get2FAValidate", req.body);
+			return reply.code(200).send({ twoFactorValidate: result?.data?.twoFactorValidate ?? null });
+		} catch (err) {
+			console.error("Auth-Service get2FAValidate", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	set2FAValidate: async function set2FAValidate(req, reply) {
 		try {
 			if (!req.body || !req.body.email || req.body.signal === undefined)

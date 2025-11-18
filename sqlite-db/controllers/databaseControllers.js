@@ -174,6 +174,18 @@ const databaseControllers = {
 		}
 	},
 
+	get2FAValidate: async function get2FAValidate(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const result = await databaseModels.get2FAValidate(fastify, req.body.email);
+			return reply.code(200).send(result ?? null);
+		} catch (err) {
+			console.error("get2FAValidate ERROR", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	set2FAValidate: async function set2FAValidate(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.email || req.body.signal === undefined)

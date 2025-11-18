@@ -67,6 +67,13 @@ const databaseModels = {
 		return (twoFactorSecret);
 	},
 
+	get2FAValidate: async function get2FAValidate(fastify, email) {
+		const twoFactorValidate = await fastify.db.get("SELECT twoFactorValidate FROM auth WHERE email = ?", [ email ]);
+		if (!twoFactorValidate)
+			return (null);
+		return (twoFactorValidate);
+	},
+
 	set2FAValidate: async function set2FAValidate(fastify, email, signal) {
 		await fastify.db.run("UPDATE auth SET twoFactorValidate = ? WHERE email = ?", [ signal, email ]);
 		return (true);
