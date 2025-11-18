@@ -151,3 +151,19 @@ export async function authHook(req, reply) {
 	}
 	return ;
 }
+
+export async function require2faHook(req, reply) {
+	const token = req.cookies?.jwt;
+
+	if (!token)
+		return reply.redirect("/login");
+	const is2faEnable = await axios.post("https://auth-service:3001/get2faEnable", { email: req.user.email });
+	if (is2faEnable) {
+		const is2faValidate = await axios.post("https://auth-service:3001/get2faValidate", { email: req.user.email });
+		if (!is2faValidate) {
+			req.session.error = ["You need to pass by 2FA authenticator process"];
+			return reply.redirect("/login");
+		}
+	}
+	return ;
+}

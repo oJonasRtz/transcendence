@@ -3,7 +3,7 @@ import publicRoutes from './routes/publicRoutes.js';
 import privateRoutes from './routes/privateRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { authHook, validatorHook } from './hooks/hooks.js';
+import { authHook, validatorHook, require2faHook } from './hooks/hooks.js';
 import path from 'path';
 import formBody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
@@ -72,6 +72,7 @@ app.register(publicRoutes, {});
 
 app.register(async (privateScope) => {
 	privateScope.addHook('preHandler', authHook);
+	privateScope.addHook('preHandler', require2faHook);
 	privateScope.register(privateRoutes, {});
 });
 
