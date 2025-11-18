@@ -70,6 +70,13 @@ const databaseModels = {
 	set2FAValidate: async function set2FAValidate(fastify, email, signal) {
 		await fastify.db.run("UPDATE auth SET twoFactorValidate = ? WHERE email = ?", [ signal, email ]);
 		return (true);
+	},
+
+	getIsOnline: async function getIsOnline(fastify, email) {
+		const isOnline = await fastify.db.get("SELECT isOnline FROM users WHERE email = ?", [ email ]);
+		if (!isOnline)
+			return (null);
+		return (isOnline);
 	}
 }
 

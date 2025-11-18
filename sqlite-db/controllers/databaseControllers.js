@@ -184,6 +184,18 @@ const databaseControllers = {
 			console.error("set2FAValidate SQLITE-DB error:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getIsOnline: async function getIsOnline(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const isOnline = await databaseModels.getIsOnline(fastify, req.body.email);
+			return reply.code(200).send(isOnline ?? {});
+		} catch (err) {
+			console.error("getIsOnline SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

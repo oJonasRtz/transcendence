@@ -30,7 +30,9 @@ const privateControllers = {
 			delete req.session.success;
 			delete req.session.error;
 
-			return reply.view("home", { username, success, error } );
+			const isOnline = req.user.isOnline;
+
+			return reply.view("home", { username, success, error, isOnline } );
 		} catch (err) {
 			console.error("You are not authenticated");
 			return reply.redirect("/login");
@@ -43,6 +45,8 @@ const privateControllers = {
 
 		const token = req.cookies.jwt;
 		const decoded = jwt.decode(token) || {};
+
+		req.user.isOnline = false;
 
 		console.log("decode", decoded);
 		await req.session.destroy();

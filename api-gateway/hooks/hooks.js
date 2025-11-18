@@ -132,8 +132,10 @@ export async function authHook(req, reply) {
 		const data = jwt.verify(token, process.env.JWT_SECRET);
 		req.jwt = token; // original jwt
 		req.user = data;  // decoded data
+		req.user.isOnline = true;
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+			req.user.isOnline = false;
 			if (err.name === "TokenExpiredError")
 				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 			reply.redirect("/login");

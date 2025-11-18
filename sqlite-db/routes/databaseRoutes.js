@@ -51,4 +51,8 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/set2FAValidate", async (req, reply) => {
 		return databaseControllers.set2FAValidate(fastify, req, reply);
 	});
+
+	fastify.post("/getIsOnline", async (req, reply) => {
+		return databaseControllers.getIsOnline(fastify, req, reply);
+	});
 };

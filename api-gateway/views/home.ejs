@@ -30,6 +30,11 @@
 				<% } %>
 			</section>
 			<section>
+				<% if (isOnline) { %>
+					<p style="color: green"><strong>Online</strong></p>
+				<% } else { %>
+					<p style="color: orange"><strong>Offline</strong</p>
+				<% } %>
 				<p>Pong is a multiplayer game. You can be happy here.</p>
 			</section>
 			<footer>

@@ -188,6 +188,18 @@ const authControllers = {
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
+
+	getIsOnline: async function getIsOnline(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const isOnline = await axios.post("https://sqlite-db:3002/getIsOnline", req.body);
+			return reply.code(200).send(isOnline ?? {});
+		} catch (err) {
+			console.error("Auth-Service getIsOnline", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
 	
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
