@@ -1,5 +1,5 @@
 import { checkVerticalCollision } from "../controllers/checkVerticalCollision.js";
-import { FPS, gameMap, INTERVALS } from "../server.shared.js";
+import { FRAME_TIME, gameMap } from "../server.shared.js";
 
 export class Paddle {
 	#speed = 8;
@@ -9,7 +9,7 @@ export class Paddle {
 	#direction = {up: false, down: false};
 	#size = {width: 20, height: 100};
 	#interval = null;
-	#networkBuffer = INTERVALS / FPS;	
+	#networkBuffer = FRAME_TIME;	
 
 	constructor(side) {
 		const pos = {
@@ -31,6 +31,9 @@ export class Paddle {
 
 	get position() {
 		return {x: this.#position.x, y: this.#position.y};
+	}
+	get size() {
+		return {width: this.#size.width, height: this.#size.height};
 	}
 
 	stop() {

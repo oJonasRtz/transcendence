@@ -5,11 +5,13 @@ export class Paddle extends ex.Actor {
 	private number: 1 | 2 = 1;
 
 	constructor(x: number, y: number, player: 1 | 2 = 1) {
+		const players = gameState.getPlayers();
+		const p = players[player];
 		super({
 			x: x,
 			y: y,
-			width: 20,
-			height: 100,
+			width: p.size.width,
+			height: p.size.height,
 			color: ex.Color.White,
 			collisionType: ex.CollisionType.Fixed
 		});

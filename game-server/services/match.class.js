@@ -268,14 +268,22 @@ export class Match {
     }
   }
   #newBall() {
+    if (this.#ball)
+      this.#ball = null;
+
     this.#ball = new Ball(this.#lastScorer);
     console.log(
       `\x1b[35m\x1b[1m[NEW BALL] New ball created for match ${this.#id}\x1b[0m`
     );
     this.#updateBall();
   }
-  bounce(axis) {
+  //wip - this don not work yet
+  #bounce() {
     if (!this.#ball) return;
+
+    const paddles = Object.values(this.#players).map((p) => p.paddlePos);
+    const ball = this.#ball.position;
+
     this.#ball.bounce(axis);
   }
   #updateBall() {

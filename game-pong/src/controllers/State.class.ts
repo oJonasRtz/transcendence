@@ -12,10 +12,11 @@ export class State {
 		name: string;
 		score: number;
 		pos: {x: number; y: number;};
+		size: {width: number; height: number;};
 		connected: boolean
 	}> = {
-		1: {name: "", score: 0, pos: {x: 0, y: 0}, connected: false},
-		2: {name: "", score: 0, pos: {x: 0, y: 0}, connected: false},
+		1: {name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
+		2: {name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
 	};
 	private latency = {
 		ping: 0,
@@ -55,17 +56,19 @@ export class State {
 		if (id)
 			this.players[id].connected = me;
 	}
-	public setPlayer({id, name, score, pos, connected}: {
+	public setPlayer({id, name, score, pos, size, connected}: {
 		id: 1 | 2;
 		name: string;
 		score: number;
 		pos: {x: number; y: number;};
+		size: {width: number; height: number;};
 		connected: boolean;
 	}) {
 		this.players[id] = {
 			name,
 			score,
 			pos,
+			size,
 			connected,
 		}
 	}

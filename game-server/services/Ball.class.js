@@ -1,4 +1,4 @@
-import { FPS, gameMap, INTERVALS, types } from "../server.shared.js";
+import { FRAME_TIME, gameMap, types } from "../server.shared.js";
 
 export class Ball {
   #direction = { x: 0, y: 0 };
@@ -12,7 +12,7 @@ export class Ball {
   #interval = null;
   #margin = 10;
   #start = false;
-  #networkBuffer = INTERVALS / FPS;
+  #networkBuffer = FRAME_TIME;
   #position = { x: gameMap.width / 2, y: gameMap.height / 2 };
  
   constructor(lastScorer) {
@@ -87,7 +87,7 @@ export class Ball {
     const axisMap = {
       x: () => {
         this.#direction.x = -this.#direction.x;
-        if (this.#speed.moveSpeed < this.#speed.maxSpeed) this.#speed += this.#speed.speedIncrement;
+        if (this.#speed.moveSpeed < this.#speed.maxSpeed) this.#speed.moveSpeed += this.#speed.speedIncrement;
       },
       y: () => {
         this.#direction.y = -this.#direction.y;

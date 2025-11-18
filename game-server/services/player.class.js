@@ -30,8 +30,15 @@ export class Player {
 			name: this.#name,
 			score: this.#score,
 			position: {...this.#paddle.position},
+			size: {...this.#paddle.size},
 			connected: this.#connected,
 		}
+	}
+	get paddlePos() {
+		return {
+			pos: {...this.#paddle.position},
+			size: {...this.#paddle.size},
+		};
 	}
 	get connected() {
 		return this.#connected;

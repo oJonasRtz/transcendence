@@ -1,5 +1,4 @@
 import * as ex from 'excalibur';
-import { Paddle } from './paddle';
 import { gameState } from '../../globals';
 
 export class Ball extends ex.Actor {

@@ -106,6 +106,7 @@ export class Connection {
           name: val.name,
           score: val.score,
           pos: {x: val.position.x, y: val.position.y},
+          size: {width: val.size.width, height: val.size.height},
           connected: val.connected,
         });
       }
@@ -126,8 +127,5 @@ export class Connection {
 
     if (!gameEnd) return;
     this.send({ type: types.END_GAME });
-  }
-  public notifyBounce(axis: "x" | "y"): void {
-    this.send({ type: types.BOUNCE, axis });
   }
 }

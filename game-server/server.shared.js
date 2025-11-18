@@ -55,3 +55,4 @@ export const closeCodes = {
 export const DISCONNECT_TIMEOUT = 60000; // 1 minute
 export const INTERVALS = 1000; //1 second
 export const FPS = 60;
+export const FRAME_TIME = 1000 / FPS;
