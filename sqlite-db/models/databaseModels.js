@@ -79,9 +79,9 @@ const databaseModels = {
 		return (isOnline);
 	},
 
-	setIsOnline: async function setIsOnline(fastify, email, isOnline) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
-		await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ?", [ isOnline, user_id.id ]);
+	setIsOnline: async function setIsOnline(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ?", [ data.isOnline, user_id.id ]);
 		return (true);
 	}
 }

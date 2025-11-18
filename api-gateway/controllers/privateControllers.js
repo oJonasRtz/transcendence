@@ -33,7 +33,7 @@ const privateControllers = {
 			req.user.isOnline = true;
 
 			const isOnline = req.user.isOnline;
-			await axios.post("https://auth-service:3001/setIsOnline", req.user);
+			await axios.post("https://users-service:3003/setIsOnline", req.user);
 			return reply.view("home", { username, success, error, isOnline } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
@@ -50,7 +50,7 @@ const privateControllers = {
 
 		req.user.isOnline = false;
 
-		await axios.post("https://auth-service:3001/setIsOnline", req.user);
+		await axios.post("https://users-service:3003/setIsOnline", req.user);
 
 		await req.session.destroy();
 

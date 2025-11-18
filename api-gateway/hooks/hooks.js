@@ -140,7 +140,7 @@ export async function authHook(req, reply) {
 				// The user must do 2FA again
 				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 				// Put the user as offline
-				await axios.post("https://auth-service:3001/setIsOnline", req.user);
+				await axios.post("https://users-service:3003/setIsOnline", req.user);
 			}
 			console.error("JWT ERROR:", err);
 			reply.redirect("/login");

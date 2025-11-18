@@ -30,6 +30,31 @@ const usersControllers = {
                         return reply.code(500).send("Internal Server Error");
                 }
         },
+
+	getIsOnline: async function getIsOnline(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const isOnline = await axios.post("https://sqlite-db:3002/getIsOnline", req.body);
+			return reply.code(200).send(isOnline ?? {});
+		} catch (err) {
+			console.error("Users-Service getIsOnline", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	setIsOnline: async function setIsOnline(req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.isOnline === undefined)
+				return reply.code(400).send("You need to inform an email and the signal for isOnline");
+			console.log("Teste do users:", req.body);
+			await axios.post("https://sqlite-db:3002/setIsOnline", req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("USERS-SERVICE setIsOnline", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
 }
 
 export default usersControllers;

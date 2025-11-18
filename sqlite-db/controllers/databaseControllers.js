@@ -202,7 +202,7 @@ const databaseControllers = {
 		try {
 			if (!req.body || !req.body.email || req.body.isOnline === undefined)
 				return reply.code(400).send("You need to inform an email here");
-			await databaseModels.setIsOnline(fastify, req.body.email, req.body.isOnline);
+			await databaseModels.setIsOnline(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setIsOnline SQLITE-DB error", err);
