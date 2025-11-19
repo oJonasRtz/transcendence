@@ -154,12 +154,13 @@ export async function authHook(req, reply) {
 
 export async function require2faHook(req, reply) {
 	const token = req.cookies?.jwt;
-	let decoded = jwt.decode(token) ?? {};
+	let decoded = null;
 	try {
 		if (req.url === "/check2FAQrCode" || req.url === "/validate2FAQrCode")
 			return ;
 		if (!token)
 			return reply.redirect("/login");
+		decoded = jwt.verify(token, process.env.JWT_SECRET) ?? {};
 		const twoFactorEnable = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.user.email });
 		if (twoFactorEnable?.data.twoFactorEnable) {
 			const twoFactorValidate = await axios.post("https://auth-service:3001/get2FAValidate", { email: req.user.email });
@@ -171,6 +172,7 @@ export async function require2faHook(req, reply) {
 		}
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+			decoded = jwt.decode(token);
 			req.user.isOnline = false;
 			if (err.name === "TokenExpiredError") {
 				// The user must do 2FA again

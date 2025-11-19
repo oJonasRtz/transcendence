@@ -12,6 +12,7 @@ import fastifyView from '@fastify/view';
 import session from '@fastify/session';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import fastifyStatic from "@fastify/static";
 
 dotenv.config();
 
@@ -29,6 +30,11 @@ const app = fastify({
         key: fs.readFileSync('./ssl/server.key'),
         cert: fs.readFileSync('./ssl/server.cert')
     }
+});
+
+app.register(fastifyStatic, {
+	root: path.join(__dirname, "public"),
+	prefix: "/public/"
 });
 
 const isProduction = process.env.NODE_ENV === 'production';

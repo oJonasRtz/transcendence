@@ -6,7 +6,11 @@
 		<title>2FA Page</title>
 	</head>
 	<body>
-		<img src="<%= qrCodeDataURL %>"><br>
+		<% if (qrCodeDataURL) { %>
+			<img src="<%= qrCodeDataURL %>"><br>
+		<% } else if (image) { %>
+			<img src="<%= image %>" width="350" height="350"<br>
+		<% } %>
 		<section>
 			<h2>2FA Code Page</h2>
 		</section>

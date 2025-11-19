@@ -138,12 +138,17 @@ const privateControllers = {
 				return reply.redirect("/home");
 			}
 			const response = await axios.post("https://auth-service:3001/get2FAQrCode", { email: decoded.email });
-			if (!response.data.qrCodeDataURL) {
+			if (response.data.qrCodeDataURL == null && response.data.image == null) {
+				console.error("Entrei aqui auth get2FAQrCode");
 				console.error("Error generating the qrCodeDataURL");
 				return reply.code(500).send("Error generating the qrCode");
 			}
+
 			const qrCodeDataURL = response.data.qrCodeDataURL;
+			const image = response.data.image;
+
 			req.session.qrCodeDataURL = qrCodeDataURL;
+			req.session.image = image;
 			return reply.redirect("/check2FAQrCode");
 		} catch (err) {
 			console.error("get2FAQrCode");
@@ -153,19 +158,18 @@ const privateControllers = {
 	},
 
 	check2FAQrCode: async function check2FAQrCode(req, reply) {
-		if (!req.session.qrCodeDataURL) {
+		if (req.session.qrCodeDataURL == null && req.session.image == null) {
+			console.error("Entrei aqui check2FAQrCode auth");
 			req.session.error = ["You need to follow step by step"];
-			return redirect("/home");
+			return reply.redirect("/home");
 		}
-		const qrCodeDataURL = req.session.qrCodeDataURL;
-		if (!qrCodeDataURL) {
-			req.session.error = ["Error generating the qrcode"];
-			return redirect("/home");
-		}
+		const qrCodeDataURL = req.session.qrCodeDataURL ?? null;
+		const image = req.session.image ?? null;
+
 		const error = req.session.error || [];
 		delete req.session.error;
 		req.session.canValidate = true;
-		return reply.view("check2FAQrCode", { qrCodeDataURL, error } );
+		return reply.view("check2FAQrCode", { qrCodeDataURL, image, error } );
 	},
 
 	validate2FAQrCode: async function validate2FAQrCode(req, reply) {

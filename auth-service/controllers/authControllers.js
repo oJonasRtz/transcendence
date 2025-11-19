@@ -141,25 +141,28 @@ const authControllers = {
 		try {
 			let response = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.body.email });
 			if (!response?.data.twoFactorEnable)
-				return ;
+				return reply.code(400).send("2FA not activated");
 			const twoFactorSecret = await axios.post("https://auth-service:3001/get2FASecret", { email: req.body.email });
 			if (!twoFactorSecret?.data.twoFactorSecret) {
 				const secret2FA = speakeasy.generateSecret({ name: `Transcendence: ${req.body.email}` });
 				const qrCodeDataURL = await qrcode.toDataURL(secret2FA.otpauth_url);
 				await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA.base32 });
-				return reply.code(200).send({ qrCodeDataURL: qrCodeDataURL });
+				return reply.code(200).send({ qrCodeDataURL: qrCodeDataURL, image: null });
 			}
 
-			const otpauth = speakeasy.otpauthURL({
+			/*const otpauth = speakeasy.otpauthURL({
 				secret: twoFactorSecret?.data.twoFactorSecret,
 				label: `Transcendence: ${req.body.email}`,
 				issuer: "Transcendence",
 				encoding: "base32",
 			});
 
-			const qrCodeDataURL = await qrcode.toDataURL(otpauth);
+			const qrCodeDataURL = await qrcode.toDataURL(otpauth);*/
 
-			return reply.code(200).send({ qrCodeDataURL: qrCodeDataURL });
+			const qrCodeDataURL = '/public/images/road_closed.jpg';
+			const image = '/public/images/road_closed.jpg';
+
+			return reply.code(200).send({ qrCodeDataURL: qrCodeDataURL, image: image });
 
 		} catch (err) {
 			console.error("Auth-Service get2FAQrCode:", err);

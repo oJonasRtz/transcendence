@@ -13,6 +13,7 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/formbody": "^8.0.2",
     "@fastify/session": "^11.1.1",
+    "@fastify/static": "^8.3.0",
     "@fastify/view": "^11.1.1",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
@@ -20,7 +21,8 @@
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.10",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "svg": "^0.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
