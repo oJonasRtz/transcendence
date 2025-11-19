@@ -13,6 +13,7 @@ import session from '@fastify/session';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import fastifyStatic from "@fastify/static";
+import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 
 dotenv.config();
 
@@ -35,6 +36,13 @@ const app = fastify({
 app.register(fastifyStatic, {
 	root: path.join(__dirname, "public"),
 	prefix: "/public/"
+});
+
+errorHandler(app);
+notFoundHandler(app);
+
+app.get("/boom", (req, reply) => {
+	throw new Error("Errão");
 });
 
 const isProduction = process.env.NODE_ENV === 'production';
