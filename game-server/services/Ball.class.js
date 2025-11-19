@@ -1,7 +1,11 @@
-import { FRAME_TIME, gameMap, types } from "../server.shared.js";
+import { FRAME_TIME, INTERVALS, stats, types } from "../server.shared.js";
 
 export class Ball {
   #direction = { x: 0, y: 0 };
+  #size = {
+	width: stats?.ball?.width ?? 20,
+	height: stats?.ball?.height ?? 20,
+  }
   #speed = {
     moveSpeed: 5,
     speedIncrement: 1,
@@ -13,7 +17,7 @@ export class Ball {
   #margin = 10;
   #start = false;
   #networkBuffer = FRAME_TIME;
-  #position = { x: gameMap.width / 2, y: gameMap.height / 2 };
+  #position = { x: stats?.map?.width / 2, y: stats?.map?.height / 2 };
  
   constructor(lastScorer) {
     const dir = { left: -1, right: 1 };
@@ -35,6 +39,23 @@ export class Ball {
   get position() {
     return { x: this.#position.x, y: this.#position.y };
   }
+  get hitBox() {
+	const halfHeight = this.#size.height / 2;
+	const halfWidth = this.#size.width / 2;
+
+	const top = this.#position.y - halfHeight;
+	const bot = this.#position.y + halfHeight;
+	const x = {
+		1: this.#position.x + halfWidth,
+		"-1": this.#position.x - halfWidth,
+	};
+
+	return {
+		top,
+		bot,
+		x: x[this.#direction.x],
+	}
+  }
 
   #getRandom() {
     return Math.random() < 0.5 ? -1 : 1;
@@ -45,7 +66,7 @@ export class Ball {
     this.#position.y += this.#direction.y * this.#speed.moveSpeed;
 
     const hitLeft = this.#position.x <= this.#margin;
-    const hitRight = this.#position.x >= gameMap.width - this.#margin;
+    const hitRight = this.#position.x >= stats?.map?.width - this.#margin;
     const i = hitLeft - hitRight;
     const scorer = {
       0: null,
@@ -62,7 +83,7 @@ export class Ball {
     this.#interval = setInterval(() => {
       if (!this.#start) return;
       const scorer = this.#updatePosition();
-      if (this.#position.y <= 0 || this.#position.y >= gameMap.height)
+      if (this.#position.y <= 0 || this.#position.y >= stats?.map?.height)
         this.bounce("y");
       if (scorer) {
         clearInterval(this.#interval);

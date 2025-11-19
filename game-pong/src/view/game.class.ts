@@ -1,6 +1,6 @@
 import * as ex from 'excalibur';
 import { Paddle } from './actors/paddle';
-import { connection, gameState } from '../globals';
+import { connection, gameState, stats } from '../globals';
 import { Ball } from './actors/ball';
 
 export class Game {
@@ -9,8 +9,8 @@ export class Game {
 	private ball: ex.Actor | null = null;
 	constructor() {
 		this.engine = new ex.Engine({
-			width: 800,
-			height: 600,
+			width: stats?.game?.width ?? 800,
+			height: stats?.game?.height ?? 600,
 			backgroundColor: ex.Color.Black,
 			displayMode: ex.DisplayMode.FitScreen,
 		});

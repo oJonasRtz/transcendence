@@ -1,22 +1,26 @@
 import { checkVerticalCollision } from "../controllers/checkVerticalCollision.js";
-import { FRAME_TIME, gameMap } from "../server.shared.js";
+import { FRAME_TIME, stats, types } from "../server.shared.js";
 
 export class Paddle {
 	#speed = 8;
-	#borderMargin = 10;
+	#borderMargin = stats?.margin ?? 10;
 	#spawnMargin = 50;
 	#position = {x: 0, y: 0}
 	#direction = {up: false, down: false};
-	#size = {width: 20, height: 100};
+	#size = {width: stats?.paddle?.width ?? 20, height: stats?.paddle?.height ?? 100};
 	#interval = null;
-	#networkBuffer = FRAME_TIME;	
+	#networkBuffer = FRAME_TIME;
+	#side = null;
 
 	constructor(side) {
 		const pos = {
-			left: {x: this.#spawnMargin, y: gameMap.height / 2},
-			right: {x: gameMap.width - this.#spawnMargin, y: gameMap.height / 2},
+			left: {x: this.#spawnMargin, y: stats?.map?.height / 2},
+			right: {x: stats?.map?.width - this.#spawnMargin, y: stats?.map?.height / 2},
 		}
 
+		if (!(side in pos))
+			throw new Error(types.error.TYPE_ERROR);
+		this.#side = side;
 		this.#position = {...pos[side]};
 	}
 
@@ -34,6 +38,23 @@ export class Paddle {
 	}
 	get size() {
 		return {width: this.#size.width, height: this.#size.height};
+	}
+	get hitBox() {
+		const halfHeight = this.#size.height / 2;
+		const halfWidth = this.#size.width / 2;
+
+		const top = this.#position.y - halfHeight;
+		const bot = this.#position.y + halfHeight;
+		const x = {
+			left: this.#position.x + halfWidth,
+			right: this.#position.x - halfWidth,
+		}
+
+		return {
+			top,
+			bot,
+			x: x[this.#side],
+		}
 	}
 
 	stop() {

@@ -32,7 +32,6 @@ export class Lobby {
 				return;
 			}
 
-			console.log(`Lobby.connect: received id: ${id} and pass: ${pass}`);
 			if (pass !== this.#pass || id !== this.#id) {
 				this.#connectionError(ws, types.error.PERMISSION_ERROR);
 				return;

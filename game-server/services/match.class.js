@@ -6,6 +6,7 @@ import {
   INTERVALS,
   lobby,
   matches,
+  stats,
   types,
 } from "../server.shared.js";
 import { Ball } from "./Ball.class.js";
@@ -19,7 +20,7 @@ export class Match {
   #matchDuration = 0;
   #timer = null;
   #maxPlayers = 2;
-  #maxScore = 11;
+  #maxScore = stats?.maxScore ?? 11;
   #gameEnded = false;
   #timeout = null;
   #timeFormated = "00:00";
@@ -268,8 +269,8 @@ export class Match {
     }
   }
   #newBall() {
-    if (this.#ball)
-      this.#ball = null;
+    // if (this.#ball)
+    //   this.#ball = null;
 
     this.#ball = new Ball(this.#lastScorer);
     console.log(

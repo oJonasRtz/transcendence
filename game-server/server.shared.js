@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import { Lobby } from './services/lobby.class.js';
+import { loadJson } from './controllers/loadJson.js';
 
 export const matches = {};
 export const lobby = new Lobby();
 
-export const gameMap = { width: 800, height: 600 };
+export const stats = await loadJson('./gameStats.json') ?? {};
 
 /*
 	messages: used to manage types on sending

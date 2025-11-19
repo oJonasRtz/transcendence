@@ -1,12 +1,12 @@
 import * as ex from 'excalibur';
-import { gameState } from '../../globals';
+import { gameState, stats } from '../../globals';
 
 export class Ball extends ex.Actor {
 
 	constructor(x: number, y: number) {
 		super({
-			width: 20,
-			height: 20,
+			width: stats?.game?.ball?.size ?? 20,
+			height: stats?.game?.ball?.size ?? 20,
 			color: ex.Color.White,
 			collisionType: ex.CollisionType.Passive,
 			pos: new ex.Vector(x, y),
