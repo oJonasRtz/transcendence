@@ -158,16 +158,12 @@ export async function require2faHook(req, reply) {
 	try {
 		if (!token)
 			return reply.redirect("/login");
-		const is2faEnable = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.user.email });
-		const is2faSecret = await axios.post("https://auth-service:3001/get2FASecret", { email: req.user.email });
-		if (!is2faSecret) {
-			const qrCodeDataURL = await axios.post("https://auth-service:3001/get2FAQrCode", { email: req.user.email });
-			req.session.qrCodeDataURL = qrCodeDataURL;
-		}
-		if (is2faEnable) {
+		const twoFactorEnable = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.user.email });
+		if (twoFactorEnable?.data.twoFactorEnable) {
 			const is2faValidate = await axios.post("https://auth-service:3001/get2FAValidate", { email: req.user.email });
-			if (!is2faValidate) {
-				req.session.error = ["You need to pass by 2FA authenticator process"];
+			if (!is2faValidate?.data.twoFactorValidate) {
+				const qrCodeDataURL = await axios.post("https://auth-service:3001/get2FAQrCode", { email: req.user.email });
+				req.session.qrCodeDataURL = qrCodeDataURL?.data.qrCodeDataURL;
 				return reply.redirect("/check2FAQrCode");
 			}
 		}
