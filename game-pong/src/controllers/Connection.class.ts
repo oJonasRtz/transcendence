@@ -5,7 +5,7 @@ type Handler = (data: any) => void;
 export class Connection {
   private socket: WebSocket | null = null;
   private server = {
-    ip: "game-server",
+    ip: "10.13.1.1",
     port: 8443,
   };
   private handlers: Record<string, Handler> = {

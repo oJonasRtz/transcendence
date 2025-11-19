@@ -5,8 +5,7 @@ import { loadJson } from './controllers/loadJson.js';
 export const matches = {};
 export const lobby = new Lobby();
 
-export const stats = await loadJson('./game-s
-	tats.json') ?? {};
+export const stats = await loadJson('./game-stats.json') ?? {};
 
 /*
 	messages: used to manage types on sending
