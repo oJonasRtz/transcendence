@@ -158,8 +158,12 @@ export async function require2faHook(req, reply) {
 	try {
 		if (!token)
 			return reply.redirect("/login");
-		console.log("req.user da require2faHook:", req.user);
 		const is2faEnable = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.user.email });
+		const is2faSecret = await axios.post("https://auth-service:3001/get2FASecret", { email: req.user.email });
+		if (!is2faSecret) {
+			const qrCodeDataURL = await axios.post("https://auth-service:3001/get2FAQrCode", { email: req.user.email });
+			req.session.qrCodeDataURL = qrCodeDataURL;
+		}
 		if (is2faEnable) {
 			const is2faValidate = await axios.post("https://auth-service:3001/get2FAValidate", { email: req.user.email });
 			if (!is2faValidate) {
@@ -174,10 +178,8 @@ export async function require2faHook(req, reply) {
 				// The user must do 2FA again
 				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 			}
-			console.error("JWT Error:", err);
 			return reply.redirect("/login");
 		}
-		console.error("require2faHook ERROR:", err);
 		return reply.code(500).send("Internal Server Error Hook");
 	}
 	return ;

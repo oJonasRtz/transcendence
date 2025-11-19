@@ -146,7 +146,7 @@ const privateControllers = {
 			req.session.qrCodeDataURL = qrCodeDataURL;
 			return reply.redirect("/check2FAQrCode");
 		} catch (err) {
-			console.error("get2FAQrCode", err);
+			console.error("get2FAQrCode");
 			req.session.error = ["Error getting get2FAQrCode"];
 			return reply.redirect("/home");
 		}
