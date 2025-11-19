@@ -164,7 +164,7 @@ const databaseControllers = {
 
 	set2FASecret: async function set2FASecret(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email || !req.body.secret)
+			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
 			await databaseModels.set2FASecret(fastify, req.body.email, req.body.secret);
 			return reply.code(200).send("Secret set successfully");

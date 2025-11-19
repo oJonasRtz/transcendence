@@ -228,9 +228,15 @@ const publicControllers = {
 		}
 
 		try {
+			if (req.body.new2FA === undefined)
+				req.body.new2FA = false;
+			else
+				req.body.new2FA = true;
 			req.body.email = req.session.email;
 			await axios.post("https://auth-service:3001/newPassword", req.body);
 			req.session.success = ["Password changed successfully"];
+			if (req.body.new2FA)
+				await axios.post("https://auth-service:3001/set2FASecret", { email: req.body.email, secret: null });
 			return reply.redirect("/login");
 		} catch (err) {
 			if (err?.response?.status === 409) {

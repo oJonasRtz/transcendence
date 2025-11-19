@@ -219,6 +219,20 @@ const authControllers = {
 		}
 	},
 
+	set2FASecret: async function set2FASecret(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email");
+			if (req.body.secret === undefined)
+				req.body.secret = null;
+			await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: req.body.secret });
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("Auth-Service set2FASecret:", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");
