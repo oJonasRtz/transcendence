@@ -34,17 +34,21 @@ export class Player {
 			connected: this.#connected,
 		}
 	}
-	get paddlePos() {
-		return {
-			pos: {...this.#paddle.position},
-			size: {...this.#paddle.size},
-		};
+	get hitBox() {
+		return this.#paddle.hitBox;
 	}
 	get connected() {
 		return this.#connected;
 	}
 	get side() {
 		return this.#side;
+	}
+	get score() {
+		return this.#score;
+	}
+	set score(value) {
+		if (typeof value === 'number' && value >= 0)
+			this.#score = value;
 	}
 	get notifyEnd() {
 		return this.#notifyEnd;

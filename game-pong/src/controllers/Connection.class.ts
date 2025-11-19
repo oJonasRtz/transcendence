@@ -5,7 +5,7 @@ type Handler = (data: any) => void;
 export class Connection {
   private socket: WebSocket | null = null;
   private server = {
-    ip: "localhost",
+    ip: "game-server",
     port: 8443,
   };
   private handlers: Record<string, Handler> = {
@@ -30,8 +30,7 @@ export class Connection {
       gameState.getLatency((msg) => this.send(msg));
       gameState.setConnection(true);
     };
-
-    gameState.checkKeys((msg) => this.send(msg));
+  gameState.checkKeys((msg) => this.send(msg));
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);

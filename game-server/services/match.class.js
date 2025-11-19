@@ -6,6 +6,7 @@ import {
   INTERVALS,
   lobby,
   matches,
+  RIGHT,
   stats,
   types,
 } from "../server.shared.js";
@@ -269,8 +270,7 @@ export class Match {
     }
   }
   #newBall() {
-    // if (this.#ball)
-    //   this.#ball = null;
+	if (this.#gameEnded) return;
 
     this.#ball = new Ball(this.#lastScorer);
     console.log(
@@ -280,28 +280,51 @@ export class Match {
   }
   //wip - this don not work yet
   #bounce() {
-    if (!this.#ball) return;
+    if (!this.#ball) return false;
 
-    const paddles = Object.values(this.#players).map((p) => p.paddlePos);
-    const ball = this.#ball.position;
+	const ball = this.#ball.hitBox;
+	const paddles = Object.values(this.#players).map(p => p.hitBox);
+    
+	for (const p of paddles) {
+		const overlapX = ball.right >= p.left && ball.left <= p.right;
+		const overlapY = ball.bot >= p.top && ball.top <= p.bot;
 
-    this.#ball.bounce(axis);
+		if (!overlapX || !overlapY) continue;
+
+		const goingRight = this.#ball.direction.x === RIGHT;
+		const hit = (
+			(goingRight && ball.right >= p.left) ||
+			(!goingRight && ball.left <= p.right)
+		);
+		if (hit)
+			return (true);
+	}
+
+	return (false);
   }
-  #updateBall() {
-    if (!this.#ball) return;
-
-    this.#ball.updateState((scorer) => {
+  #onScore(scorer) {
       this.#lastScorer = scorer;
+	  this.#ball.stop();
+	  this.#ball = null;
       Object.values(this.#players).forEach((p) => {
-        if (p.side === scorer && p.score < this.#maxScore) {
-          p.score++;
+        if (!this.#gameEnded && p.side === scorer && p.score < this.#maxScore) {
+          p.score = p.score + 1;
           this.#newBall();
         }
         if (p.score >= this.#maxScore) this.endGame(p.name);
       });
 
-      console.log(`Ball scored for match ${this.#id}`);
-    });
+      console.log(`Ball scored for match ${this.#id} side ${scorer}`);
+	  console.log("-- Placar --");
+	  Object.values(this.#players).forEach((p) => {
+		const info = p.info;
+		console.log(`Player ${info.name} - Score: ${info.score}`);
+	  });
+    }
+  #updateBall() {
+    if (!this.#ball) return;
+
+    this.#ball.start(this.#onScore.bind(this), this.#bounce.bind(this));
   }
   // --- Cleanup ---
   destroy() {

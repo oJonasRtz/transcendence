@@ -3,7 +3,7 @@ import { Identity } from "./controllers/Identity.class";
 import { loadJson } from "./controllers/loadJson";
 import { State } from "./controllers/State.class";
 
-export const stats = await loadJson('../gameStats.json') ?? {};
+export const stats = await loadJson('../game-stats.json') ?? {};
 export const identity = new Identity();
 export const MAXSCORE: number = stats?.game?.maxScore ?? 11;
 export const RECONNECTION__DELAY: number = 5000; //10 seconds

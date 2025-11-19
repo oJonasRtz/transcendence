@@ -24,7 +24,6 @@ export class Game {
 
 	private ballReset() {
 		const {exist} = gameState.getBall();
-		const {gameEnd} = gameState.getGame();
 		
 		if (!exist) {
 			if (this.ball) {

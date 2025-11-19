@@ -1,7 +1,8 @@
-import { FRAME_TIME, INTERVALS, stats, types } from "../server.shared.js";
+import { FRAME_TIME, INTERVALS, LEFT, RIGHT, stats, types } from "../server.shared.js";
 
 export class Ball {
   #direction = { x: 0, y: 0 };
+  #margin = stats?.margin ?? 10;
   #size = {
 	width: stats?.ball?.width ?? 20,
 	height: stats?.ball?.height ?? 20,
@@ -14,7 +15,6 @@ export class Ball {
   #lastBounce = null;
   #DELAY = 100;
   #interval = null;
-  #margin = 10;
   #start = false;
   #networkBuffer = FRAME_TIME;
   #position = { x: stats?.map?.width / 2, y: stats?.map?.height / 2 };
@@ -35,26 +35,24 @@ export class Ball {
       console.log("Ball started moving");
     }, startTime);
   }
+  get direction() {
+	return { ...this.#direction };
+  }
 
   get position() {
     return { x: this.#position.x, y: this.#position.y };
   }
+  
   get hitBox() {
 	const halfHeight = this.#size.height / 2;
 	const halfWidth = this.#size.width / 2;
 
-	const top = this.#position.y - halfHeight;
-	const bot = this.#position.y + halfHeight;
-	const x = {
-		1: this.#position.x + halfWidth,
-		"-1": this.#position.x - halfWidth,
-	};
-
 	return {
-		top,
-		bot,
-		x: x[this.#direction.x],
-	}
+		top: this.#position.y - halfHeight,
+		bot: this.#position.y + halfHeight,
+		right: this.#position.x + halfWidth,
+		left: this.#position.x - halfWidth,
+	};
   }
 
   #getRandom() {
@@ -70,21 +68,32 @@ export class Ball {
     const i = hitLeft - hitRight;
     const scorer = {
       0: null,
-      1: "right",
-      "-1": "left",
+      [RIGHT]: "right",
+      [LEFT]: "left",
     };
 
     return scorer[i];
   }
 
-  updateState(onScore) {
+  start(onScore, onCollision) {
     if (this.#interval) return;
+	const col = {
+		1: 'y',
+		'-1': 'x',
+		0: null,
+	}
 
     this.#interval = setInterval(() => {
       if (!this.#start) return;
       const scorer = this.#updatePosition();
-      if (this.#position.y <= 0 || this.#position.y >= stats?.map?.height)
-        this.bounce("y");
+
+
+	  const colWall = this.#position.y <= this.#margin || this.#position.y >= stats?.map?.height - this.#margin
+      const colPaddle = onCollision();
+	  const axis = colWall - colPaddle;
+
+	  this.bounce(col[axis]);
+
       if (scorer) {
         clearInterval(this.#interval);
         this.#interval = null;
@@ -93,7 +102,15 @@ export class Ball {
     }, this.#networkBuffer);
   }
 
+  stop() {
+	if (!this.#interval) return;
+	clearInterval(this.#interval);
+	this.#interval = null;
+  }
+
+
   bounce(axis) {
+	if (!axis || (axis !== 'x' && axis !== 'y')) return;
     const now = Date.now();
 
     if (!this.#lastBounce) this.#lastBounce = { axis, time: now - this.#DELAY };

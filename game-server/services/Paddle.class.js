@@ -5,7 +5,7 @@ export class Paddle {
 	#speed = 8;
 	#borderMargin = stats?.margin ?? 10;
 	#spawnMargin = 50;
-	#position = {x: 0, y: 0}
+	#position = {x: 0, y: 0};
 	#direction = {up: false, down: false};
 	#size = {width: stats?.paddle?.width ?? 20, height: stats?.paddle?.height ?? 100};
 	#interval = null;
@@ -43,18 +43,12 @@ export class Paddle {
 		const halfHeight = this.#size.height / 2;
 		const halfWidth = this.#size.width / 2;
 
-		const top = this.#position.y - halfHeight;
-		const bot = this.#position.y + halfHeight;
-		const x = {
-			left: this.#position.x + halfWidth,
-			right: this.#position.x - halfWidth,
-		}
-
 		return {
-			top,
-			bot,
-			x: x[this.#side],
-		}
+			top: this.#position.y - halfHeight,
+			bot: this.#position.y + halfHeight,
+			right: this.#position.x + halfWidth,
+			left: this.#position.x - halfWidth,
+		};
 	}
 
 	stop() {

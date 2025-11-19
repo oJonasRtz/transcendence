@@ -5,7 +5,8 @@ import { loadJson } from './controllers/loadJson.js';
 export const matches = {};
 export const lobby = new Lobby();
 
-export const stats = await loadJson('./gameStats.json') ?? {};
+export const stats = await loadJson('./game-s
+	tats.json') ?? {};
 
 /*
 	messages: used to manage types on sending
@@ -57,3 +58,5 @@ export const DISCONNECT_TIMEOUT = 60000; // 1 minute
 export const INTERVALS = 1000; //1 second
 export const FPS = 60;
 export const FRAME_TIME = 1000 / FPS;
+export const LEFT = -1;
+export const RIGHT = 1;
