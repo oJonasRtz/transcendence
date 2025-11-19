@@ -72,7 +72,7 @@ app.register(publicRoutes, {});
 
 app.register(async (privateScope) => {
 	privateScope.addHook('preHandler', authHook);
-	//privateScope.addHook('preHandler', require2faHook);
+	privateScope.addHook('preHandler', require2faHook);
 	privateScope.register(privateRoutes, {});
 });
 
