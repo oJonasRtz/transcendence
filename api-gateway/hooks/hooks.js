@@ -1,6 +1,6 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
-
+import { checkNameSecurity } from '../utils/apiCheckUsername.js';
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
@@ -101,13 +101,25 @@ export async function validatorHook(req, reply) {
 		{
 			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
 			message: "Invalid nickname"
-		}
+		}	
 	];
 
 	check.forEach((item) => {
 		if (item.condition)
 			error.push(item.message);
 	});
+
+	if (req.body.username) {
+		const nsfw = await checkNameSecurity(req.body.username);
+		if (nsfw)
+			error.push("Innapropriate username");
+	}
+
+	if (req.body.nickname) {
+		const nsfw = await checkNameSecurity(req.body.nickname);
+		if (nsfw)
+			error.push("Innapropriate nickname");
+	}
 
 	if (!error.length) return ;
 

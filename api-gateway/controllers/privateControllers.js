@@ -139,8 +139,6 @@ const privateControllers = {
 			}
 			const response = await axios.post("https://auth-service:3001/get2FAQrCode", { email: decoded.email });
 			if (response.data.qrCodeDataURL == null && response.data.image == null) {
-				console.error("Entrei aqui auth get2FAQrCode");
-				console.error("Error generating the qrCodeDataURL");
 				return reply.code(500).send("Error generating the qrCode");
 			}
 
@@ -158,6 +156,12 @@ const privateControllers = {
 	},
 
 	check2FAQrCode: async function check2FAQrCode(req, reply) {
+		const isValidate = await axios.post("https://auth-service:3001/get2FAValidate", { email: req.user.email });
+		if (isValidate?.data.twoFactorValidate) {
+			req.session.success = ["You already done the 2FA :)"];
+			return reply.redirect("/home");
+		}
+
 		if (req.session.qrCodeDataURL == null && req.session.image == null) {
 			console.error("Entrei aqui check2FAQrCode auth");
 			req.session.error = ["You need to follow step by step"];
