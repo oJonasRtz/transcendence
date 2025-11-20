@@ -15,7 +15,7 @@ build:
 	@echo "Building all the services"
 	@docker compose build
 
-# erase everything, but not delete the volumes
+# erase everything, but not delete the volumesentao
 
 clean: down
 	@echo "Cleaning the services"

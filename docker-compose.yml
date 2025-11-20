@@ -46,6 +46,8 @@ services:
       - "8443:8443"
     networks:
       - "transcendence"
+    volumes:
+      - ./shared:/app
   game-pong:
     build: ./game-pong
     image: game-pong:1.0.0
@@ -56,6 +58,8 @@ services:
       - game-server
     networks:
       - "transcendence"
+    volumes:
+      - ./shared:/app
 volumes:
   sqlite-db:
   users-service:
