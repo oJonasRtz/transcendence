@@ -4,3 +4,6 @@ app.log
 .env
 node_modules
 *subject*
+*.pem
+*.cert
+*.key
