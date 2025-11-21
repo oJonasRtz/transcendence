@@ -1,6 +1,6 @@
 import axios from 'axios';
 import fs from 'fs';
-import FormData from 'from-data';
+import FormData from 'form-data';
 
 export async function checkImageSafety(localPath) {
 	try {

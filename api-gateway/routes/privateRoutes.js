@@ -21,4 +21,5 @@ export default async function privateRoutes(fastify, options) {
 	fastify.get("/check2FAQrCode", privateControllers.check2FAQrCode);
 
 	fastify.post("/validate2FAQrCode", privateControllers.validate2FAQrCode);
+	fastify.post("/upload", privateControllers.upload);
 };

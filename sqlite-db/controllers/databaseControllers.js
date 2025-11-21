@@ -236,7 +236,7 @@ const databaseControllers = {
 
 	setUserAvatar: async function setUserAvatar(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.emaili || !req.body.avatar)
+			if (!req.body || !req.body.email || !req.body.avatar)
 				return reply.code(400).send("You need to inform an email and avatar here");
 			const response = await databaseModels.setUserAvatar(fastify, req.body);
 			return reply.code(200).send(response?.data.avatar ?? {});

@@ -15,6 +15,14 @@
 				</nav>
 			</header>
 			<section>
+				<img src="<%= avatar %>" alt="avatar">
+				<form action="/upload" method="POST" enctype="multipart/form-data">
+                                        <label for="avatar">ChangeAvatar:</label><br>
+                                        <input type="file" id="avatar" name="avatar" accept="image/*" placeholder="choose an image" required><br><br>
+                                        <button type="submit">Change Avatar</button>
+                                </form>
+			</section>
+			<section>
 				<h2>Welcome to your exclusive account <strong><%= username %></strong> !!!</h2>
 			</section>
 			<section>

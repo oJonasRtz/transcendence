@@ -9,4 +9,8 @@ export default async function usersRoutes(fastify, options) {
 	fastify.post("/getIsOnline", usersControllers.getIsOnline);
 
 	fastify.post("/setIsOnline", usersControllers.setIsOnline);
+
+	fastify.post("/getUserAvatar", usersControllers.getUserAvatar);
+
+	fastify.post("/setUserAvatar", usersControllers.setUserAvatar);
 };

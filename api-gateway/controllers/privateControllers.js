@@ -5,8 +5,12 @@ import speakeasy from 'speakeasy';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import fs from 'fs';
+import fs from 'node:fs';
+import { mkdir, unlink } from 'node:fs/promises';
 import { pipeline } from "stream/promises";
+import svg from 'svg';
+import { checkImageSafety } from '../utils/apiCheckImages.js';
+import { fileTypeFromFile } from 'file-type';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,9 +44,18 @@ const privateControllers = {
 
 			req.user.isOnline = true;
 
+			//get the user's avatar
+			const response = axios.post("https://users-service:3003/getUserAvatar", { email: req.user.email });
+			const avatar = response?.data.avatar;
+
+			console.log("avatar:", avatar);
+
+			//get the user's status
 			const isOnline = req.user.isOnline;
+
 			await axios.post("http://users-service:3003/setIsOnline", req.user);
-			return reply.view("home", { username, success, error, isOnline } );
+
+			return reply.view("home", { username, success, avatar, error, isOnline } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
 			return reply.redirect("/login");
@@ -234,14 +247,65 @@ const privateControllers = {
 				req.session.error = ["You need to send an image"];
 				return reply.redirect("/home");
 			}
+
 			const uploadDir = path.join(__dirname, "public", "uploads");
-			fs.mkdirSync(uploadDir, { recursive: true });
+			await mkdir(uploadDir, { recursive: true });
+
+			const allowed_extensions = [".png", ".webp", ".jpg", ".jpeg"];
 
 			const user_id = req.user.user_id;
 			const ext = path.extname(file.filename);
-			const filePath = path.join(uploadDir, `avatar_${user_id}${ext}`);
+
+			if (!allowed_extensions.includes(ext)) {
+				req.session.error = ["Forbidden extension detected"];
+				return reply.redirect("/home");
+			}
+
+			// temporary file to check nsfw and also format it
+
+			const filePath = path.join(uploadDir, `avatar_${user_id}.tmp`);
 
 			await pipeline(file.file, fs.createWriteStream(filePath));
+
+			const type = await fileTypeFromFile(filePath);
+
+			if (!type || !type.mime.startsWith("image/")) {
+				await unlink(filePath);
+				req.session.error = ["The file is not a valid image"];
+				return reply.redirect("/home");
+			}
+
+			// api check starts here and erase the temporary file if fails
+			const response = await checkImageSafety(filePath);
+
+			if (response.nsfw) {
+				await unlink(filePath); // destroy the innapropriate file
+				req.session.error = ["Innapropriate image detected! Be careful choosing images!"];
+				return reply.redirect("/home");
+			}
+
+			const avatarFile = path.join(uploadDir, `avatar_${user_id}.png`);
+
+			// svg starts here and erase the temporary file, setting the new in the database, redirecting to the users' home
+
+			await sharp(filePath)
+                        .resize(350, 350)
+                        .png()
+                        .composite([{
+                                input: Buffer.from(
+                                        `<svg><circle cx="175" cy="175" r="175"/></svg>`
+                                ),
+                                blend: "dest-in"
+                        }])
+                        .toFile(avatarFile);
+
+			// erase the last temporary file
+		
+			await unlink(filePath);
+
+			const avatarDb = `/public/uploads/avatar_${user_id}.png`;
+			await axios.post("https://sqlite-db:3002/setUserAvatar", { email: req.user.email, avatar: avatarDb });
+
 			req.session.success = ["Upload successfully"];
 			return reply.redirect("/home");
 		} catch (err) {

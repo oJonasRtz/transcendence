@@ -34,6 +34,8 @@ const app = fastify({
     }
 });
 
+// To allow uploads with the limit of 2MB filesize
+
 app.register(multipart, {
 	limits: {
 		fileSize: 2 * 1024 * 1024 // 2MB
