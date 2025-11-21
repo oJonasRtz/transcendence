@@ -3,6 +3,7 @@ app.log
 .vscode/*
 .env
 node_modules
+blacklist.txt
 *subject*
 *.pem
 *.cert
