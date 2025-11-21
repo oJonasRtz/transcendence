@@ -14,7 +14,7 @@ const __dirname = dirname(__filename);
 const privateControllers = {
 	helloDb: async function testPrivateRoute(req, reply) {
                 try {
-                        const result = await axios.get("https://auth-service:3001/helloDb");
+                        const result = await axios.get("http://auth-service:3001/helloDb");
                         return reply.send(`API GATEWAY - auth: ${result.data}`);
                 } catch (err) {
                         return reply.send(`Unfortunately, the auth-service cannot access the database: ${err.message}`);
@@ -41,7 +41,7 @@ const privateControllers = {
 			req.user.isOnline = true;
 
 			const isOnline = req.user.isOnline;
-			await axios.post("https://users-service:3003/setIsOnline", req.user);
+			await axios.post("http://users-service:3003/setIsOnline", req.user);
 			return reply.view("home", { username, success, error, isOnline } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
@@ -58,14 +58,14 @@ const privateControllers = {
 
 		req.user.isOnline = false;
 
-		await axios.post("https://users-service:3003/setIsOnline", req.user);
+		await axios.post("http://users-service:3003/setIsOnline", req.user);
 
 		await req.session.destroy();
 
 		reply.clearCookie("jwt");
 		reply.clearCookie("session");
 
-		await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+		await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 		return reply.redirect("/login");
 	},
 
@@ -75,7 +75,7 @@ const privateControllers = {
 			const decoded = jwt.verify(token, process.env.JWT_SECRET);
 			const email = decoded.email;
 
-			const response = await axios.get("https://auth-service:3001/getCaptcha");
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
 			const { code, data } = response.data;
 
 			delete req.session.captcha;
@@ -125,7 +125,7 @@ const privateControllers = {
 			const token = req.cookies.jwt;
 			const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-			await axios.post("https://users-service:3003/validateUserEmail", { email: decoded.email });
+			await axios.post("http://users-service:3003/validateUserEmail", { email: decoded.email });
 
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
@@ -140,12 +140,12 @@ const privateControllers = {
 		try {
 			const token = req.cookies.jwt;
 			const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-			const res = await axios.post("https://auth-service:3001/get2FAEnable", { email: decoded.email });
+			const res = await axios.post("http://auth-service:3001/get2FAEnable", { email: decoded.email });
 			if (!res.data.twoFactorEnable) {
 				req.session.error = ["You do not have 2FA activated at the moment"];
 				return reply.redirect("/home");
 			}
-			const response = await axios.post("https://auth-service:3001/get2FAQrCode", { email: decoded.email });
+			const response = await axios.post("http://auth-service:3001/get2FAQrCode", { email: decoded.email });
 			if (response.data.qrCodeDataURL == null && response.data.image == null) {
 				return reply.code(500).send("Error generating the qrCode");
 			}
@@ -164,7 +164,7 @@ const privateControllers = {
 	},
 
 	check2FAQrCode: async function check2FAQrCode(req, reply) {
-		const isValidate = await axios.post("https://auth-service:3001/get2FAValidate", { email: req.user.email });
+		const isValidate = await axios.post("http://auth-service:3001/get2FAValidate", { email: req.user.email });
 		if (isValidate?.data.twoFactorValidate) {
 			req.session.success = ["You already done the 2FA :)"];
 			return reply.redirect("/home");
@@ -197,7 +197,7 @@ const privateControllers = {
 			}
 			const token = req.cookies.jwt;
 			const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-			const response = await axios.post("https://auth-service:3001/get2FASecret", { email: decoded.email });
+			const response = await axios.post("http://auth-service:3001/get2FASecret", { email: decoded.email });
 			if (!response.data.twoFactorSecret) {
 				req.session.error = ["You cannot have 2FA activate"];
 				return reply.redirect("/home");
@@ -217,7 +217,7 @@ const privateControllers = {
 				return reply.redirect("/check2FAQrCode");
 			}
 			req.session.success = ["2FA passed successfully"];
-			await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: true });
+			await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: true });
 			return reply.redirect("/home");
 		} catch (err) {
 			console.error("Validate2FAQrCode Api-Gateway", err);

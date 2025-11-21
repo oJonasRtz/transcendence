@@ -13,7 +13,7 @@ export async function checkNameSecurity(name) {
 		});
 
 		const response = await axios.post(
-			"https://api.sightengine.com/1.0/text/check.json",
+			"http://api.sightengine.com/1.0/text/check.json",
 			params,
 			{ headers: { "Content-Type" : "application/x-www-form-urlencoded" } }
 		);

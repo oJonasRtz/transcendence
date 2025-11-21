@@ -70,7 +70,7 @@ const authControllers = {
 
 			await authModels.registerNewUser(req.body);
 
-			await axios.post("https://users-service:3003/createNewUser", req.body);
+			await axios.post("http://users-service:3003/createNewUser", req.body);
 
 			success.push(`User ${username} ${nickname} added successfully`);
 			return reply.code(200).send({ success, error });
@@ -106,7 +106,7 @@ const authControllers = {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email, please");
 
-			await axios.post("https://sqlite-db:3002/checkEmail", req.body);
+			await axios.post("http://sqlite-db:3002/checkEmail", req.body);
 
 			return reply.code(200).send("E-mail confirmed");
 		}
@@ -126,7 +126,7 @@ const authControllers = {
 			return reply.code(403).send("Password and ConfirmPassword mismatch");
 
 		try {
-			await axios.post("https://sqlite-db:3002/newPassword", req.body);
+			await axios.post("http://sqlite-db:3002/newPassword", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
 			if (err?.response?.status === 409)
@@ -139,14 +139,14 @@ const authControllers = {
 		if (!req.body || !req.body.email)
 			return reply.code(400).send("You need to inform an username here");
 		try {
-			let response = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.body.email });
+			let response = await axios.post("http://auth-service:3001/get2FAEnable", { email: req.body.email });
 			if (!response?.data.twoFactorEnable)
 				return reply.code(400).send("2FA not activated");
-			const twoFactorSecret = await axios.post("https://auth-service:3001/get2FASecret", { email: req.body.email });
+			const twoFactorSecret = await axios.post("http://auth-service:3001/get2FASecret", { email: req.body.email });
 			if (!twoFactorSecret?.data.twoFactorSecret) {
 				const secret2FA = speakeasy.generateSecret({ name: `Transcendence: ${req.body.email}` });
 				const qrCodeDataURL = await qrcode.toDataURL(secret2FA.otpauth_url);
-				await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA.base32 });
+				await axios.post("http://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: secret2FA.base32 });
 				return reply.code(200).send({ qrCodeDataURL: qrCodeDataURL, image: null });
 			}
 
@@ -174,7 +174,7 @@ const authControllers = {
 		try {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an e-mail here");
-			const result = await axios.post("https://sqlite-db:3002/get2FAEnable", req.body);
+			const result = await axios.post("http://sqlite-db:3002/get2FAEnable", req.body);
 			return reply.code(200).send({ twoFactorEnable: result?.data?.twoFactorEnable ?? null });
 		} catch (err) {
 			console.error("Auth-Service get2FAEnable", err);
@@ -186,7 +186,7 @@ const authControllers = {
 		try {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an e-mail here");
-			const result = await axios.post("https://sqlite-db:3002/get2FASecret", req.body);
+			const result = await axios.post("http://sqlite-db:3002/get2FASecret", req.body);
 			console.log("o result da auth secret:", result);
 			return reply.code(200).send({ twoFactorSecret: result?.data?.twoFactorSecret ?? null });
 		} catch (err) {
@@ -199,7 +199,7 @@ const authControllers = {
 		try {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an e-mail here");
-			const result = await axios.post("https://sqlite-db:3002/get2FAValidate", req.body);
+			const result = await axios.post("http://sqlite-db:3002/get2FAValidate", req.body);
 			return reply.code(200).send({ twoFactorValidate: result?.data?.twoFactorValidate ?? null });
 		} catch (err) {
 			console.error("Auth-Service get2FAValidate", err);
@@ -211,7 +211,7 @@ const authControllers = {
 		try {
 			if (!req.body || !req.body.email || req.body.signal === undefined)
 				return reply.code(400).send("You need to inform an email and signal here");
-			await axios.post("https://sqlite-db:3002/set2FAValidate", req.body);
+			await axios.post("http://sqlite-db:3002/set2FAValidate", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("Sqlite-db set2FAValidate", err);
@@ -225,7 +225,7 @@ const authControllers = {
 				return reply.code(400).send("You need to inform an email");
 			if (req.body.secret === undefined)
 				req.body.secret = null;
-			await axios.post("https://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: req.body.secret });
+			await axios.post("http://sqlite-db:3002/set2FASecret", { email: req.body.email, secret: req.body.secret });
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("Auth-Service set2FASecret:", err);
@@ -240,7 +240,7 @@ const authControllers = {
 
 	helloDb: async function testCommunicationAuthWithDatabase(req, reply) {
 		try {
-                        const response = await axios.get("https://sqlite-db:3002/hello");
+                        const response = await axios.get("http://sqlite-db:3002/hello");
                         return reply.send(`Auth-service confirms communication with sqlite-db ${response.data}`);
                         console.log("Success communicating with database");
                 } catch(err) {

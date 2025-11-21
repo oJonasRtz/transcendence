@@ -11,14 +11,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // It is a temporary configuration
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const app = fastify({
-    https: {
-        key: fs.readFileSync('./ssl/server.key'),
-        cert: fs.readFileSync('./ssl/server.cert')
-    }
-});
+const app = fastify();
 
 app.register(cookie, {
 	secret: process.env.COOKIE_SECRET || "purpleVoid",

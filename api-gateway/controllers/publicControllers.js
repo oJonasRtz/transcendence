@@ -25,7 +25,7 @@ const publicControllers = {
 		delete req.session.error;
 
 		try {
-			const response = await axios.get("https://auth-service:3001/getCaptcha");
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
 			const { code, data } = response.data;
 			req.session.captcha = code;
 			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
@@ -52,7 +52,7 @@ const publicControllers = {
 		delete req.session.error;
 
 		try {
-			const response = await axios.get("https://auth-service:3001/getCaptcha");
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
 			const { code, data } = response.data;
 			req.session.captcha = code;
 			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
@@ -70,7 +70,7 @@ const publicControllers = {
 		let success = [];
 		let error = [];
 		try {
-			const response = await axios.post("https://auth-service:3001/checkRegister", req.body);
+			const response = await axios.post("http://auth-service:3001/checkRegister", req.body);
 
 			success = response.data.success || [];
 			error = response.data.error || [];
@@ -94,7 +94,7 @@ const publicControllers = {
 		let success = [];
 		let error = [];
 		try {
-			const response = await axios.post("https://auth-service:3001/checkLogin", req.body);
+			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
 
 			const token = response.data.token;
 			if (!token) 
@@ -146,11 +146,11 @@ const publicControllers = {
 				return reply.redirect("/forgotPassword");
 			}
 
-			await axios.post("https://auth-service:3001/checkEmail", req.body);
+			await axios.post("http://auth-service:3001/checkEmail", req.body);
 
 			req.session.email = req.body.email;
 
-                        const response = await axios.get("https://auth-service:3001/getCaptcha");
+                        const response = await axios.get("http://auth-service:3001/getCaptcha");
                         const { code, data } = response.data;
                         req.session.captcha = code;
                         req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
@@ -233,10 +233,10 @@ const publicControllers = {
 			else
 				req.body.new2FA = true;
 			req.body.email = req.session.email;
-			await axios.post("https://auth-service:3001/newPassword", req.body);
+			await axios.post("http://auth-service:3001/newPassword", req.body);
 			req.session.success = ["Password changed successfully"];
 			if (req.body.new2FA)
-				await axios.post("https://auth-service:3001/set2FASecret", { email: req.body.email, secret: null });
+				await axios.post("http://auth-service:3001/set2FASecret", { email: req.body.email, secret: null });
 			return reply.redirect("/login");
 		} catch (err) {
 			if (err?.response?.status === 409) {
@@ -251,7 +251,7 @@ const publicControllers = {
 	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {
-                        const result = await axios.get("https://auth-service:3001/hello");
+                        const result = await axios.get("http://auth-service:3001/hello");
                         return reply.send(`API GATEWAY - auth: ${result.data}`);
                 } catch (err) {
                         console.error("Unfortunately, the api-gateway failed to communicate with auth-service by:", err.message);
@@ -261,7 +261,7 @@ const publicControllers = {
 
 	checkDb: async function testGatewayConnectionWithSqlite (req, reply) {
                 try {
-                        const result = await axios.get("https://sqlite-db:3002/hello");
+                        const result = await axios.get("http://sqlite-db:3002/hello");
                         return reply.send(`API GATEWAY - sqlite: ${result.data}`);
                 } catch (err) {
                         console.error("Unfortunately, the api-gateway failed to communicate with sqlite-db by:", err.message);

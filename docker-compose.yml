@@ -9,6 +9,8 @@ services:
       - auth-service
     networks:
       - "transcendence"
+    volumes:
+      - ./shared/ssl:/app/ssl:ro
   auth-service:
     build: ./auth-service
     image: auth-service:1.0.0
@@ -47,7 +49,8 @@ services:
     networks:
       - "transcendence"
     volumes:
-      - ./shared:/app
+      - ./shared/ssl:/app/ssl:ro
+      - ./shared/game-stats.json:/app/game-stats.json
   game-pong:
     build: ./game-pong
     image: game-pong:1.0.0
@@ -59,7 +62,7 @@ services:
     networks:
       - "transcendence"
     volumes:
-      - ./shared:/app
+      - ./shared/game-stats.json:/app/game-stats.json:ro
 volumes:
   sqlite-db:
   users-service:

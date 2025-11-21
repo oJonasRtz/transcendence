@@ -10,9 +10,11 @@ import { ddosDetect, removeConnection } from './controllers/ddosDetector.js';
 //.env nao esta funcionando ainda verificar futuramente
 const PORT = process.env.PORT || 8443;
 const HOST = process.env.HOST || 'localhost';
+const ca = fs.readFileSync('./ssl/rootCA.pem');
 const server = https.createServer({
 	key: fs.readFileSync('./ssl/server.key'),
-	cert: fs.readFileSync('./ssl/server.cert')
+	cert: fs.readFileSync('./ssl/server.cert'),
+	ca: ca
 });
 const wss = new WebSocketServer({ server });
 

@@ -1,7 +1,13 @@
 # Start all services
-up: build
+up: tsl build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
+
+# generate tsl certificates
+
+tsl:
+	@echo "Generating TLS certificates"
+	@sudo bash ./shared/ssl/mkcert.sh
 
 # Shutdown all services
 
@@ -40,4 +46,4 @@ remake: clean up
 game-logs:
 	@docker compose logs -f game-server
 
-.PHONY: up down build clean fclean re remake
+.PHONY: up down build clean fclean re remake tsl

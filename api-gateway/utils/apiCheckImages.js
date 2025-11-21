@@ -10,7 +10,7 @@ export async function checkImageSafety(localPath) {
 		form.append("api_user", process.env.SIGHTENGINE_USER);
 		form.append("api_secret", process.env.SIGHTENGINE_SECRET);
 
-		const response = await axios.post("https://api.sightengine.com/1.0/check.json",form, {
+		const response = await axios.post("http://api.sightengine.com/1.0/check.json",form, {
 			headers: form.getHeaders()
 		});
 

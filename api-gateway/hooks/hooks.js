@@ -87,6 +87,7 @@ export async function validatorHook(req, reply) {
 
 	let error = [];
 	let success = [];
+
 	const check = [
 		{
 			condition: req.body.password && !passwordRegex.test(req.body.password),
@@ -115,7 +116,7 @@ export async function validatorHook(req, reply) {
 		{
 			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
 			message: "Invalid nickname"
-		}	
+		}
 	];
 
 	check.forEach((item) => {
@@ -165,9 +166,9 @@ export async function authHook(req, reply) {
 			req.user.isOnline = false;
 			if (err.name === "TokenExpiredError") {
 				// The user must do 2FA again
-				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+				await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 				// Put the user as offline
-				await axios.post("https://users-service:3003/setIsOnline", req.user);
+				await axios.post("http://users-service:3003/setIsOnline", req.user);
 			}
 			console.error("JWT ERROR:", err);
 			reply.redirect("/login");
@@ -188,11 +189,11 @@ export async function require2faHook(req, reply) {
 		if (!token)
 			return reply.redirect("/login");
 		decoded = jwt.verify(token, process.env.JWT_SECRET) ?? {};
-		const twoFactorEnable = await axios.post("https://auth-service:3001/get2FAEnable", { email: req.user.email });
+		const twoFactorEnable = await axios.post("http://auth-service:3001/get2FAEnable", { email: req.user.email });
 		if (twoFactorEnable?.data.twoFactorEnable) {
-			const twoFactorValidate = await axios.post("https://auth-service:3001/get2FAValidate", { email: req.user.email });
+			const twoFactorValidate = await axios.post("http://auth-service:3001/get2FAValidate", { email: req.user.email });
 			if (!twoFactorValidate?.data.twoFactorValidate) {
-				const qrCodeDataURL = await axios.post("https://auth-service:3001/get2FAQrCode", { email: req.user.email });
+				const qrCodeDataURL = await axios.post("http://auth-service:3001/get2FAQrCode", { email: req.user.email });
 				req.session.qrCodeDataURL = qrCodeDataURL?.data.qrCodeDataURL;
 				return reply.redirect("/check2FAQrCode");
 			}
@@ -203,7 +204,7 @@ export async function require2faHook(req, reply) {
 			req.user.isOnline = false;
 			if (err.name === "TokenExpiredError") {
 				// The user must do 2FA again
-				await axios.post("https://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+				await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 			}
 			return reply.redirect("/login");
 		}
