@@ -11,6 +11,7 @@ services:
       - "transcendence"
     volumes:
       - ./shared/ssl:/app/ssl:ro
+      - api-gateway:/app/public
   auth-service:
     build: ./auth-service
     image: auth-service:1.0.0
@@ -67,6 +68,7 @@ services:
 volumes:
   sqlite-db:
   users-service:
+  api-gateway:
 networks:
   transcendence:
     driver: bridge

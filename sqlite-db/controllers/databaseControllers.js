@@ -226,8 +226,9 @@ const databaseControllers = {
 		try {
 			if(!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
-			const response = await databaseModels.getUserAvatar(fastify, req.body);
-			return reply.code(200).send(response?.data ?? {});
+			const avatar = await databaseModels.getUserAvatar(fastify, req.body);
+			console.log("avatar sqlite-db:", avatar);
+			return reply.code(200).send(avatar ?? {});
 		} catch (err) {
 			console.error ("getUserAvatar SQLITE-DB error", err);
 			return reply.code(500).send("An error happened");
@@ -238,8 +239,8 @@ const databaseControllers = {
 		try {
 			if (!req.body || !req.body.email || !req.body.avatar)
 				return reply.code(400).send("You need to inform an email and avatar here");
-			const response = await databaseModels.setUserAvatar(fastify, req.body);
-			return reply.code(200).send(response?.data.avatar ?? {});
+			await databaseModels.setUserAvatar(fastify, req.body);
+			return reply.code(201).send("Success");
 		} catch (err) {
 			console.error("setUserAvatar SQLITE-DB error", err);
 			return reply.code(500).send("An error happened");

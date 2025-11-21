@@ -94,12 +94,16 @@ const databaseModels = {
 
 	getUserAvatar: async function getUserAvatar(fastify, data) {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		if (!user_id)
+			return ({});
 		const avatar = await fastify.db.get("SELECT avatar FROM users WHERE id = ?", [ user_id.id ]);
-		return (avatar ?? {});
+		return (avatar ?? null);
 	},
 
 	setUserAvatar: async function setUserAvatar(fastify, data) {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		if (!user_id)
+			return (null);
 		await fastify.db.run("UPDATE users SET avatar = ? WHERE id = ?", [ data.avatar, user_id.id ]);
 		return (true);
 	}

@@ -64,7 +64,7 @@ export default async function databaseRoutes(fastify, options) {
 		return databaseControllers.setIsOnline(fastify, req, reply);
 	});
 
-	fastify.get("/getUserAvatar", async (req, reply) => {
+	fastify.post("/getUserAvatar", async (req, reply) => {
 		return databaseControllers.getUserAvatar(fastify, req, reply);
 	});
 

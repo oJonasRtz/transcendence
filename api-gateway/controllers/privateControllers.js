@@ -8,9 +8,9 @@ import { dirname } from 'path';
 import fs from 'node:fs';
 import { mkdir, unlink } from 'node:fs/promises';
 import { pipeline } from "stream/promises";
-import svg from 'svg';
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
+import sharp from 'sharp';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,10 +45,11 @@ const privateControllers = {
 			req.user.isOnline = true;
 
 			//get the user's avatar
-			const response = axios.post("https://users-service:3003/getUserAvatar", { email: req.user.email });
+			
+			const response = await axios.post("http://users-service:3003/getUserAvatar", { email: req.user.email });
 			const avatar = response?.data.avatar;
 
-			console.log("avatar:", avatar);
+			console.log("avatar do gateway:", avatar);
 
 			//get the user's status
 			const isOnline = req.user.isOnline;
@@ -248,7 +249,8 @@ const privateControllers = {
 				return reply.redirect("/home");
 			}
 
-			const uploadDir = path.join(__dirname, "public", "uploads");
+			const uploadDir = path.join(__dirname, "..", "public", "uploads");
+			console.log("uploadDir:", uploadDir);
 			await mkdir(uploadDir, { recursive: true });
 
 			const allowed_extensions = [".png", ".webp", ".jpg", ".jpeg"];
@@ -304,11 +306,16 @@ const privateControllers = {
 			await unlink(filePath);
 
 			const avatarDb = `/public/uploads/avatar_${user_id}.png`;
-			await axios.post("https://sqlite-db:3002/setUserAvatar", { email: req.user.email, avatar: avatarDb });
+			await axios.post("http://users-service:3003/setUserAvatar", { email: req.user.email, avatar: avatarDb });
 
 			req.session.success = ["Upload successfully"];
 			return reply.redirect("/home");
 		} catch (err) {
+			/*const uploadDir = path.join(__dirname, "public", "uploads");
+			const filePath = path.join(uploadDir, `avatar_${req.user.user_id}.tmp`);
+
+			await unlink(filePath);*/
+
 			console.error("API-GATEWAY upload error:", err);
 			req.session.error = ["Error in the upload process"];
 			return reply.redirect("/home");

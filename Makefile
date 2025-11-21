@@ -1,5 +1,5 @@
 # Start all services
-up: get-ip tsl build
+up: get-ip build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 

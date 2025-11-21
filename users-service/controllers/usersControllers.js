@@ -59,8 +59,9 @@ const usersControllers = {
 		try {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
-			const response = await axios.post("https://sqlite-db:3002/getUserAvatar", { email: req.body.email });
-			return reply.code(200).send(response?.data ?? {});
+			const avatar = await axios.post("http://sqlite-db:3002/getUserAvatar", { email: req.body.email });
+			console.log("response users-service:", avatar?.data);
+			return reply.code(200).send(avatar?.data ?? null);
 		} catch (err) {
 			console.error("getUserAvatar Error users-service:", err);
 			return reply.code(500).send("An error happened");
@@ -71,7 +72,7 @@ const usersControllers = {
 		try {
 			if (!req.body || !req.body.email || !req.body.avatar)
 				return reply.code(400).send("You need to inform an email and an avatar here");
-			await axios.post("https://sqlite-db:3002/setUserAvatar", { email: req.body.email, avatar: req.body.avatar });
+			await axios.post("http://sqlite-db:3002/setUserAvatar", { email: req.body.email, avatar: req.body.avatar });
 			return reply.code(201).send("Avatar updated successfully");
 		} catch (err) {
 			console.error("setUserAvatar users-service error:", err);
