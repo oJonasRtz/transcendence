@@ -220,6 +220,30 @@ const databaseControllers = {
 			console.error("setIsOnline SQLITE-DB error", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getUserAvatar: async function getUserAvatar(fastify, req, reply) {
+		try {
+			if(!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const response = await databaseModels.getUserAvatar(fastify, req.body);
+			return reply.code(200).send(response?.data ?? {});
+		} catch (err) {
+			console.error ("getUserAvatar SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setUserAvatar: async function setUserAvatar(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.emaili || !req.body.avatar)
+				return reply.code(400).send("You need to inform an email and avatar here");
+			const response = await databaseModels.setUserAvatar(fastify, req.body);
+			return reply.code(200).send(response?.data.avatar ?? {});
+		} catch (err) {
+			console.error("setUserAvatar SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

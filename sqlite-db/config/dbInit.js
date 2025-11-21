@@ -32,7 +32,7 @@ export default async function initDatabase() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
 			experience_points INTEGER DEFAULT 0,
-			avatar TEXT DEFAULT 'assets/images/default.png',
+			avatar TEXT DEFAULT '/public/images/default.png',
 			isOnline BOOLEAN DEFAULT FALSE,
 			description TEXT DEFAULT NULL,
 			isEmailConfirmed BOOLEAN DEFAULT FALSE,

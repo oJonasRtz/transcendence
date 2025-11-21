@@ -90,6 +90,18 @@ const databaseModels = {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
 		await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ?", [ data.isOnline, user_id.id ]);
 		return (true);
+	},
+
+	getUserAvatar: async function getUserAvatar(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		const avatar = await fastify.db.get("SELECT avatar FROM users WHERE id = ?", [ user_id.id ]);
+		return (avatar ?? {});
+	},
+
+	setUserAvatar: async function setUserAvatar(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		await fastify.db.run("UPDATE users SET avatar = ? WHERE id = ?", [ data.avatar, user_id.id ]);
+		return (true);
 	}
 }
 

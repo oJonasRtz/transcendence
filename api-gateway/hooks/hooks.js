@@ -1,6 +1,9 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import { checkNameSecurity } from '../utils/apiCheckUsername.js';
+import { Filter } from 'bad-words';
+import fs from 'fs';
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;
@@ -68,6 +71,17 @@ const redirect = {
 	'/checkEmailCode': "validateEmailCode",
 };
 
+const filter = new Filter();
+
+// Blacklist to add new bad-words
+
+const list = fs.readFileSync("./config/.blacklist.txt", "utf8")
+    .split("\n")
+    .map(w => w.trim())
+    .filter(Boolean);
+
+filter.addWords(...list);
+
 export async function validatorHook(req, reply) {
 	if (!req.body) return ;
 
@@ -110,15 +124,16 @@ export async function validatorHook(req, reply) {
 	});
 
 	if (req.body.username) {
-		const nsfw = await checkNameSecurity(req.body.username);
-		if (nsfw)
+		const response = await checkNameSecurity(req.body.username);
+		if (response.nsfw || filter.isProfane(req.body.username))
 			error.push("Innapropriate username");
 	}
 
 	if (req.body.nickname) {
-		const nsfw = await checkNameSecurity(req.body.nickname);
-		if (nsfw)
+		const response = await checkNameSecurity(req.body.nickname);
+		if (response.nsfw || filter.isProfane(req.body.nickname)) {
 			error.push("Innapropriate nickname");
+		}
 	}
 
 	if (!error.length) return ;

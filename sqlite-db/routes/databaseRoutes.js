@@ -63,4 +63,12 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/setIsOnline", async (req, reply) => {
 		return databaseControllers.setIsOnline(fastify, req, reply);
 	});
+
+	fastify.get("/getUserAvatar", async (req, reply) => {
+		return databaseControllers.getUserAvatar(fastify, req, reply);
+	});
+
+	fastify.post("/setUserAvatar", async (req, reply) => {
+		return databaseControllers.setUserAvatar(fastify, req, reply);
+	});
 };

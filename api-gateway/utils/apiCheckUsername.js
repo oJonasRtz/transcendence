@@ -26,9 +26,12 @@ export async function checkNameSecurity(name) {
 			     (classes.insulting || 0) > 0.3 ||
 			     (classes.violent || 0) > 0.3 ||
 			     (classes.toxic || 0) > 0.3;
-			 
+
+		//console.log("Result CheckNameSecurity:", result);
+
 		return ({ nsfw, data: response.data });
 	} catch (err) {
+		console.error("Error da checkNameSecurity:", err);
 		return ({ nsfw: false, data: null, error: err.message });
 	}
 }
