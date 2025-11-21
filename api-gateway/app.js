@@ -14,6 +14,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import fastifyStatic from "@fastify/static";
 import { errorHandler, notFoundHandler } from './handlers/handlers.js';
+import multipart from '@fastify/multipart';
 
 dotenv.config();
 
@@ -31,6 +32,12 @@ const app = fastify({
         key: fs.readFileSync('./ssl/server.key'),
         cert: fs.readFileSync('./ssl/server.cert')
     }
+});
+
+app.register(multipart, {
+	limits: {
+		fileSize: 2 * 1024 * 1024 // 2MB
+	}
 });
 
 app.register(fastifyStatic, {

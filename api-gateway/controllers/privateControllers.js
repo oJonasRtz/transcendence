@@ -2,6 +2,14 @@ import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import sendMail from '../utils/sendMail.js';
 import speakeasy from 'speakeasy';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import fs from 'fs';
+import { pipeline } from "stream/promises";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const privateControllers = {
 	helloDb: async function testPrivateRoute(req, reply) {
@@ -214,6 +222,31 @@ const privateControllers = {
 		} catch (err) {
 			console.error("Validate2FAQrCode Api-Gateway", err);
 			req.session.error = ["An error happened trying to validate your 2FA Code"];
+			return reply.redirect("/home");
+		}
+	},
+
+	upload: async function upload(req, reply) {
+		try {
+			const file = await req.file();
+
+			if (!file) {
+				req.session.error = ["You need to send an image"];
+				return reply.redirect("/home");
+			}
+			const uploadDir = path.join(__dirname, "public", "uploads");
+			fs.mkdirSync(uploadDir, { recursive: true });
+
+			const user_id = req.user.user_id;
+			const ext = path.extname(file.filename);
+			const filePath = path.join(uploadDir, `avatar_${user_id}${ext}`);
+
+			await pipeline(file.file, fs.createWriteStream(filePath));
+			req.session.success = ["Upload successfully"];
+			return reply.redirect("/home");
+		} catch (err) {
+			console.error("API-GATEWAY upload error:", err);
+			req.session.error = ["Error in the upload process"];
 			return reply.redirect("/home");
 		}
 	}
