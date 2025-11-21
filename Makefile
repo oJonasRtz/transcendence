@@ -1,10 +1,14 @@
 # Start all services
-up: tsl build
+up: get-ip tsl build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 
-# generate tsl certificates
+#get ip
+get-ip:
+	@echo "Getting server IP address"
+	@bash ./shared/ip/getIp.sh
 
+# generate tsl certificates
 tsl:
 	@echo "Generating TLS certificates"
 	@sudo bash ./shared/ssl/mkcert.sh

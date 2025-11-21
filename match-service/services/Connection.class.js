@@ -1,5 +1,8 @@
+import fs from 'fs';
+
 export class Connection {
 	#socket = null;
+	#ca = fs.readFileSync('../ssl/rootCA.pem');
 	#server = {
 		ip: process.env.IP,
 		port: process.env.PORT,
@@ -11,7 +14,9 @@ export class Connection {
 	
 	connect() {
 		this.#reconnection.canReconnect = true;
-		this.#socket = new WebSocket(`ws://${this.#server.ip}:${this.#server.port}`);
+		this.#socket = new WebSocket(`wss://${this.#server.ip}:${this.#server.port}`, {
+			ca: this.#ca
+		});
 
 		this.#socket.onopen = () => {
 			console.log("Connection.connect: Connected to server");

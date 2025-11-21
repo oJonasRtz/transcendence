@@ -1,6 +1,6 @@
 import readline from 'readline';
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+import fs from 'fs';
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export let socket = null;
 const ID = 4002;
@@ -42,7 +42,9 @@ function prompt() {
 
 export function connect() {
 	const serverIp = "localhost";
-	socket = new WebSocket(`wss://${serverIp}:8443`);
+	socket = new WebSocket(`wss://${serverIp}:8443`, {
+		ca: fs.readFileSync('./rootCA.pem')
+	});
 
 	socket.onopen = () => {
 		console.log('Connected to WebSocket server');

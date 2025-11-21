@@ -1,13 +1,15 @@
-import fs from 'fs/promises';
 
 export async function loadJson<T>(file: string): Promise<T | null> {
 	try {
 		if (file.endsWith('.json') === false)
 			throw new Error('Invalid file type');
 		
-		const data = await fs.readFile(file, 'utf-8');
+		const data = await fetch(file);
 
-		return JSON.parse(data);
+		if (!data.ok)
+			throw new Error('Failed to fetch JSON file');
+
+		return await data.json() as T;
 	} catch (error) {
 		return null;
 	}

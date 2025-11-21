@@ -8,3 +8,4 @@ blacklist.txt
 *.pem
 *.cert
 *.key
+*.ip

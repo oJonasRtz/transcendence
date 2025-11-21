@@ -62,7 +62,8 @@ services:
     networks:
       - "transcendence"
     volumes:
-      - ./shared/game-stats.json:/app/game-stats.json:ro
+      - ./shared/ip/server.ip:/app/public/server.ip:ro
+      - ./shared/game-stats.json:/app/public/game-stats.json:ro
 volumes:
   sqlite-db:
   users-service:
