@@ -15,6 +15,9 @@ import sharp from 'sharp';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const DEFAULT_AVATAR_PATH = "/app/public/images/default_avatar.png";
+const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
+
 const privateControllers = {
 	helloDb: async function testPrivateRoute(req, reply) {
                 try {
@@ -47,9 +50,27 @@ const privateControllers = {
 			//get the user's avatar
 			
 			const response = await axios.post("http://users-service:3003/getUserAvatar", { email: req.user.email });
-			const avatar = response?.data.avatar;
+			let avatar = response?.data.avatar;
 
-			console.log("avatar do gateway:", avatar);
+			if (avatar === '/public/images/default.jpg') {
+				try {
+					await fs.access(DEFAULT_AVATAR_PATH);
+				} catch (err) {
+					 await sharp(BASE_IMAGE_PATH)
+                			.resize(350, 350)
+                			.composite([{
+                    			input: Buffer.from(
+                        			`<svg width="350" height="350">
+                            			<circle cx="175" cy="175" r="175" fill="white"/>
+                        			</svg>`
+                    			),
+                    			blend: "dest-in"
+                		}])
+                		.png()
+                		.toFile(DEFAULT_AVATAR_PATH);
+				}			
+				avatar = "/public/images/default_avatar.png";
+			}
 
 			//get the user's status
 			const isOnline = req.user.isOnline;
