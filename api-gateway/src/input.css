@@ -1,2 +1,11 @@
-@import "tailwindcss/utilities";
 @import "tailwindcss/theme";
+@import "tailwindcss/utilities";
+
+@keyframes bgPulse {
+  0%, 100% {
+    filter: brightness(0.6) saturate(0.8);
+  }
+  50% {
+    filter: brightness(1.4) saturate(1.4);
+  }
+}

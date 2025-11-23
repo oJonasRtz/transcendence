@@ -47,12 +47,13 @@ app.register(fastifyStatic, {
 	prefix: "/public/"
 });
 
-errorHandler(app);
-notFoundHandler(app);
 
 app.get("/boom", (req, reply) => {
 	throw new Error("Errão");
 });
+
+errorHandler(app);
+notFoundHandler(app);
 
 const isProduction = process.env.NODE_ENV === 'production';
 

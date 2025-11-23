@@ -14,8 +14,8 @@ const publicControllers = {
                 let success = [];
                 let error = [];
 
-		 success = req.session.success || [];
-		 error = req.session.error || [];
+		 success = req.session.success ?? [];
+		 error = req.session.error ?? [];
 
 		delete req.session.captcha;
 		delete req.session.captchaExpires;
@@ -28,6 +28,7 @@ const publicControllers = {
 			const response = await axios.get("http://auth-service:3001/getCaptcha");
 			const { code, data } = response.data;
 			req.session.captcha = code;
+			req.session.data = data;
 			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
 
                 	return reply.view("login", { success, error, captcha: data });
@@ -41,8 +42,8 @@ const publicControllers = {
                 let success = [];
                 let error = [];
 
-		 success = req.session.success || [];
-		 error = req.session.error || [];
+		 success = req.session.success ?? [];
+		 error = req.session.error ?? [];
 
 		delete req.session.captcha;
 		delete req.session.captchaExpires;
@@ -91,14 +92,17 @@ const publicControllers = {
 	// Authentication
 	
 	checkLogin: async function tryLoginTheUser(req, reply) {
-		let success = [];
-		let error = [];
 		try {
+			console.log("\x1b[94mA response começou\x1b[0m");
 			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
 
-			const token = response.data.token;
-			if (!token) 
+			console.log("\x1b[94mA response acabou\x1b[0m");
+			const token = response?.data?.token;
+			if (!token) {
+				req.session.error = ["Invalid credentials"];
 				return reply.redirect("/login");
+			};
+
 			const isProduction = process.env.NODE_ENV === "production";
 
 			reply.setCookie("jwt", token, {
@@ -111,10 +115,12 @@ const publicControllers = {
 
 			return reply.redirect("/home");
 		} catch (err) {
-			success = err?.response?.data?.success || []; // optional, we are thinking about it
-			error = err?.response?.data?.error || [];
-			req.session.success = success;
-			req.session.error = error;
+			console.log("\x1b[94mEstamos no err da checkLogin\x1b[0m");
+			if (err?.response?.status === 404) {
+				req.session.error = ["Invalid credentials"];
+				return reply.redirect("/login");
+			}
+			req.session.error = ["Invalid credentials"];
 			console.error("Error trying login:", err);
 			return reply.redirect("/login");
 		}
