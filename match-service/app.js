@@ -1,14 +1,22 @@
 import fastify from "fastify";
-import fs from "fs";
+import formbody from '@fastify/formbody';
+import cookie from '@fastify/cookie';
+import { Connection } from "./services/Connection.class";
+import { matchRoutes } from "./routes/matchRoutes";
 
 //Temp config to ignore TLS certificate errors
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const https = {
-	key:  fs.readFileSync('./ssl/server.key'),
-	cert: fs.readFileSync('./ssl/server.cert')
-};
-const	app = fastify({https});
+const	con = new Connection();
+const	app = fastify();
 
+app.register(cookie, {
+		secret: process.env.COOKIE_SECRET || "purpleVoid",
+		hook: "onRequest"
+});
 
-export default app;
+app.register(formbody);
+
+app.register(matchRoutes, {});
+
+export default {app, con};

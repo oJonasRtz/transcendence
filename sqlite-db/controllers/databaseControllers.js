@@ -210,6 +210,16 @@ const databaseControllers = {
 		}
 	},
 
+	getQueue: async function getQueue(fastify, req, reply) {
+		try {
+			const queue = await databaseModels.getQueue(fastify);
+			return reply.code(200).send(queue ?? {});
+		} catch (err) {
+			console.error("getQueue SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	setIsOnline: async function setIsOnline(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.email || req.body.isOnline === undefined)
@@ -231,6 +241,30 @@ const databaseControllers = {
 			return reply.code(200).send(avatar ?? {});
 		} catch (err) {
 			console.error ("getUserAvatar SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setInQueue: async function setInQueue(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.inQueue === undefined)
+				return reply.code(400).send("You need to inform an email and the signal for inQueue here");
+			await databaseModels.setInQueue(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setInQueue SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setRank: async function setRank(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.rank === undefined)
+				return reply.code(400).send("You need to inform an email and the rank here");
+			await databaseModels.setRank(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setRank SQLITE-DB error", err);
 			return reply.code(500).send("An error happened");
 		}
 	},

@@ -41,6 +41,7 @@ services:
       - "db_connection"
     volumes:
       - sqlite-db:/app/database
+      - ./shared/ssl:/app/ssl:ro
   game-server:
     build: ./game-server
     image: game-server:1.0.0
@@ -63,6 +64,7 @@ services:
     networks:
       - "transcendence"
     volumes:
+      - ./shared/ssl:/app/ssl:ro
       - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
 volumes:

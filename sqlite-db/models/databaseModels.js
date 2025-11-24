@@ -14,6 +14,21 @@ const databaseModels = {
 			object = null;
 		return (object);
 	},
+	
+	getQueue: async function getQueue(fastify) {
+		const queue = await fastify.db.all(`
+			SELECT 
+				a.username,
+				u.rank,
+				u.user_id
+			FROM users u
+			JOIN auth a ON a.id = u.user_id
+			WHERE u.isOnline = TRUE
+			AND u.inQueue = TRUE
+		`);
+
+		return queue ?? [];
+	},
 
 	registerNewUser: async function registerNewUser(fastify, data, password_hash) {
 		await fastify.db.run("INSERT INTO auth (username, nickname, password, email, twoFactorEnable) VALUES (?, ?, ?, ?, ?)", 
@@ -92,6 +107,12 @@ const databaseModels = {
 		return (true);
 	},
 
+	setInQueue: async function setInQueue(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		await fastify.db.run("UPDATE users SET inQueue = ? WHERE user_id = ?", [ data.inQueue, user_id.id ]);
+		return (true);
+	},
+
 	getUserAvatar: async function getUserAvatar(fastify, data) {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
 		if (!user_id)
@@ -105,6 +126,31 @@ const databaseModels = {
 		if (!user_id)
 			return (null);
 		await fastify.db.run("UPDATE users SET avatar = ? WHERE id = ?", [ data.avatar, user_id.id ]);
+		return (true);
+	},
+
+	setRank: async function setRank(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		if (!user_id)
+			return (null);
+
+		await fastify.db.run("UPDATE users SET rank = ? WHERE id = ?", [ data.rank, user_id.id ]);
+		return (true);
+	},
+
+	getInGame: async function getInGame(fastify, email) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		if (!user_id)
+			return (null);
+		const inGame = await fastify.db.get("SELECT inGame FROM users WHERE id = ?", [ user_id.id ]);
+		return (inGame ?? null);
+	},
+
+	setInGame: async function setInGame(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		if (!user_id)
+			return (null);
+		await fastify.db.run("UPDATE users SET inGame = ? WHERE id = ?", [ data.inGame, user_id.id ]);
 		return (true);
 	}
 }

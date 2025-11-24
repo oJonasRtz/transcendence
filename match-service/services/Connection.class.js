@@ -1,8 +1,10 @@
-import fs from 'fs';
 
 export class Connection {
 	#socket = null;
-	#ca = fs.readFileSync('../ssl/rootCA.pem');
+	#login = {
+		id: process.env.LOBBY_ID,
+		pass: process.env.LOBBY_PASS,
+	}
 	#server = {
 		ip: process.env.IP,
 		port: process.env.PORT,
@@ -11,15 +13,36 @@ export class Connection {
 		delay: 5000,
 		canReconnect: true,
 	}
+	#types = {
+		recieves: {
+			CONNECTED: "LOBBY_CONNECTED",
+			MATCHCREATED: "MATCH_CREATED",
+			TIMEOUT: "TIMEOUT_REMOVE",
+			GAME_END: "END_GAME",
+			ERROR: "ERROR",
+		},
+		sends: {
+			CONNECT: "CONNECT_LOBBY",
+			NEWMATCH: "NEW_MATCH",
+			REMOVEMATCH: "REMOVE_MATCH",
+		},
+	}
 	
 	connect() {
 		this.#reconnection.canReconnect = true;
-		this.#socket = new WebSocket(`wss://${this.#server.ip}:${this.#server.port}`, {
-			ca: this.#ca
-		});
+		this.#socket = new WebSocket(`wss://${this.#server.ip}:${this.#server.port}`);
 
 		this.#socket.onopen = () => {
-			console.log("Connection.connect: Connected to server");
+			this.#send({
+				type: this.#types.sends.CONNECT,
+				...this.#login,
+			});
+		};
+
+		this.#socket.onmessage = (event) => {
+			const message = JSON.parse(event.data);
+
+			this.#handleMessage(message);
 		};
 
 		this.#socket.onerror = (error) => {
@@ -33,6 +56,23 @@ export class Connection {
 		};
 	}
 
+	#handleMessage(message) {
+		const map = {
+			[this.#types.recieves.CONNECTED]: () => {
+				console.log("Connection.#handleMessage: Connected to lobby server.");
+			}
+		}
+		try {
+			const type = message.type;
+
+			if (type in map) return;
+
+			map[type]();	
+		} catch (error) {
+			console.error("Connection.#handleMessage: Error handling message: ", error);
+		}
+	}
+
 	#reconnect() {
 		if (!this.#reconnection.canReconnect
 			|| !this.#socket
@@ -44,6 +84,11 @@ export class Connection {
 			console.log("Connection.#reconnect: Attempting to reconnect...");
 			this.connect();
 		}, this.#reconnection.delay);
+	}
+
+	#send(message) {
+		if (this.#socket && this.#socket.readyState === WebSocket.OPEN)
+			this.#socket.send(JSON.stringify(message));
 	}
 
 	disconnect() {

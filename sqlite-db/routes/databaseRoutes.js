@@ -36,12 +36,32 @@ export default async function databaseRoutes(fastify, options) {
 		return databaseControllers.validateUserEmail(fastify, req, reply);
 	});
 
+	fastify.post("/getQueue", async (req, reply) => {
+		return databaseControllers.getQueue(fastify, req, reply);
+	});
+
+	fastify.post("/setInQueue", async (req, reply) => {
+		return databaseControllers.setInQueue(fastify, req, reply);
+	});
+
 	fastify.post("/get2FAEnable", async (req, reply) => {
 		return databaseControllers.get2FAEnable(fastify, req, reply);
 	});
 
+	fastify.post("/setRank", async (req, reply) => {
+		return databaseControllers.setRank(fastify, req, reply);
+	});
+
 	fastify.post("/get2FASecret", async (req, reply) => {
 		return databaseControllers.get2FASecret(fastify, req, reply);
+	});
+
+	fastify.post("/getInGame", async (req, reply) => {
+		return databaseControllers.getInGame(fastify, req, reply);
+	});
+
+	fastify.post("/setInGame", async (req, reply) => {
+		return databaseControllers.setInGame(fastify, req, reply);
 	});
 
 	fastify.post("/set2FASecret", async (req, reply) => {
