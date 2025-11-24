@@ -301,9 +301,16 @@ const privateControllers = {
 			// api check starts here and erase the temporary file if fails
 			const response = await checkImageSafety(filePath);
 
+			// Innapropriate image
 			if (response.nsfw) {
 				await unlink(filePath); // destroy the innapropriate file
 				req.session.error = ["Innapropriate image detected! Be careful choosing images!"];
+				return reply.redirect("/home");
+			}
+
+			// Corrupted image
+			if (response.isError) {
+				req.session.error = ["Invalid image"];
 				return reply.redirect("/home");
 			}
 
@@ -332,10 +339,8 @@ const privateControllers = {
 			req.session.success = ["Upload successfully"];
 			return reply.redirect("/home");
 		} catch (err) {
-			/*const uploadDir = path.join(__dirname, "public", "uploads");
-			const filePath = path.join(uploadDir, `avatar_${req.user.user_id}.tmp`);
-
-			await unlink(filePath);*/
+	
+			try { await unlink(`/app/public/uploads/avatar_${req.user.user_id}.tmp`) } catch {};
 
 			console.error("API-GATEWAY upload error:", err);
 			req.session.error = ["Error in the upload process"];

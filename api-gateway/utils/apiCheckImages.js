@@ -36,9 +36,9 @@ export async function checkImageSafety(localPath) {
 		//console.log("nsfw:", nsfw, "data:", data);
 		//console.log("nsfw:", nsfw); // check if pass or not pass
 
-		return { nsfw, details: data };
+		return { nsfw, details: data, isError: false };
 	} catch (err) {
 		console.error("Sightengine API error:", err.message);
-		return ( { nsfw: false, details: { error: err.message } });
+		return ( { nsfw: false, isError: true, details: { error: err.message } });
 	}
 }

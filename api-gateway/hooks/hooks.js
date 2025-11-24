@@ -68,7 +68,7 @@ const redirect = {
 	'/checkRegister': "/register",
 	'/checkLogin': "/login",
 	'/validateUserEmailCode': "/confirmUserEmailCode",
-	'/checkEmailCode': "validateEmailCode",
+	'/checkEmailCode': "validateEmailCode"
 };
 
 const filter = new Filter();
@@ -116,7 +116,7 @@ export async function validatorHook(req, reply) {
 		{
 			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
 			message: "Invalid nickname"
-		}
+		},
 	];
 
 	check.forEach((item) => {
