@@ -2,7 +2,6 @@ import { MatchMaking } from "../services/MatchMaking.class";
 
 const matchMaking = new MatchMaking();
 
-//Template. Fill with routes later
 const routes = [
     {
         path: '/matchMaking',
