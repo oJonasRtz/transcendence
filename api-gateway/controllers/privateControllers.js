@@ -75,9 +75,15 @@ const privateControllers = {
 			//get the user's status
 			const isOnline = req.user.isOnline;
 
+			const myData = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
+
+			const data = myData?.data;
+
+			console.log("data:", data);
+
 			await axios.post("http://users-service:3003/setIsOnline", req.user);
 
-			return reply.view("home", { username, success, avatar, error, isOnline } );
+			return reply.view("home", { username, success, data, avatar, error, isOnline } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
 			return reply.redirect("/login");

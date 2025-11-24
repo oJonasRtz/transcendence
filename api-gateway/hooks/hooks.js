@@ -78,7 +78,7 @@ const filter = new Filter();
 const list = fs.readFileSync("./config/.blacklist.txt", "utf8")
     .split("\n")
     .map(w => w.trim())
-    .filter(Boolean);
+    .filter(Boolean); // check invalid values, ignoring them
 
 filter.addWords(...list);
 
@@ -163,16 +163,14 @@ export async function authHook(req, reply) {
 		req.user.isOnline = true;
 	} catch (err) {
 		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
-			req.user.isOnline = false;
 			if (err.name === "TokenExpiredError") {
 				// The user must do 2FA again
 				await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
 				// Put the user as offline
-				await axios.post("http://users-service:3003/setIsOnline", req.user);
+				await axios.post("http://users-service:3003/setIsOnline", { email: decoded.email, isOnline: false });
 			}
 			console.error("JWT ERROR:", err);
-			reply.redirect("/login");
-			return ;
+			return reply.redirect("/logout");
 		}
 		console.error("AuthHook ERROR:", err);
 		return reply.code(500).send("Authentication internal error");

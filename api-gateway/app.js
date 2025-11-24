@@ -49,7 +49,7 @@ app.register(fastifyStatic, {
 
 
 app.get("/boom", (req, reply) => {
-	throw new Error("Errão");
+	throw new Error("Big Error");
 });
 
 errorHandler(app);

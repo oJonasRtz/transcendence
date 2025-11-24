@@ -152,6 +152,11 @@ const databaseModels = {
 			return (null);
 		await fastify.db.run("UPDATE users SET inGame = ? WHERE id = ?", [ data.inGame, user_id.id ]);
 		return (true);
+	},
+
+	getUserInformation: async function getUserInformation(fastify, data) {
+		const response = await fastify.db.get("SELECT * FROM users WHERE user_id = ?", [ data.user_id ]);
+		return (response ?? null);
 	}
 }
 

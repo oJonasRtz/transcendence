@@ -19,4 +19,6 @@ export default async function usersRoutes(fastify, options) {
 	fastify.post("/setInGame", usersControllers.setInGame);
 
 	fastify.post("/getInGame", usersControllers.getInGame);
+
+	fastify.post("/getUserInformation", usersControllers.getUserInformation);
 };

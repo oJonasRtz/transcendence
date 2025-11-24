@@ -137,6 +137,18 @@ const usersControllers = {
 			return reply.code(500).send("An error happened");
 		}
 	},
+
+	getUserInformation: async function getUserInformation(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform an user_id here");
+			const response = await axios.post("http://sqlite-db:3002/getUserInformation", { user_id: req.body.user_id });
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getUserInformation", err);
+			return reply.code(500).send("An error happened");
+		}
+	}
 }
 
 export default usersControllers;

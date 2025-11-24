@@ -38,6 +38,16 @@
 						<p style="color: red"> <%= err %> </p>
 					<% }) %>
 				<% } %>
+				<% if (data.inQueue) { %>
+					<p style="color: orange"><strong>I am waiting for a match</strong></p>
+				<% } else { %>
+					<p style="color: orange"><strong>I am not waiting for a match</strong></p>
+				<% } %>
+				<% if (data.inGame) { %>
+					<p style="color: purple"><strong>I am in a match</strong></p>
+				<% } else { %>
+					<p style="color: purple"><strong> I am not in a match</strong></p>
+				<% } %>
 			</section>
 			<section>
 				<% if (isOnline) { %>
@@ -45,6 +55,22 @@
 				<% } else { %>
 					<p style="color: orange"><strong>Offline</strong</p>
 				<% } %>
+				<p><strong>Friends:</strong> <%= data.friends %> </p>
+				<% if (data.description) { %>
+					<p><strong>Description:</strong> <%= data.description %> </p>
+				<% } else { %>
+					<p><strong>Description:</strong> You do not have a description </p>
+				<% } %>
+				<p><strong>Ranking:</strong> <%= data.rank %>° </p>
+				<p><strong>Experience Points:</strong> <%= data.experience_points %> </p>
+				<p><strong>Wins:</strong> <%= data.wins %> </p>
+				<p><strong>Losses:</strong> <%= data.losses %> </p>
+				<% if ((Number(data.wins) + Number(data.losses)) === 0) { %>
+					<p><strong>Win rate:</strong> 0%</p>
+				<% } else { %>
+					<p><strong>Win rate:</strong> <%= ((Number(data.wins) / (Number(data.wins) + Number(data.losses))) * 100).toFixed(2) %>% </p>
+				<% } %>
+
 				<p>Pong is a multiplayer game. You can be happy here.</p>
 			</section>
 			<footer>
