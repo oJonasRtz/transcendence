@@ -60,6 +60,9 @@ export class Connection {
 		const map = {
 			[this.#types.recieves.CONNECTED]: () => {
 				console.log("Connection.#handleMessage: Connected to lobby server.");
+			},
+			[this.#types.recieves.GAME_END]: () => {
+				//Chama calculate rank para atualizar o db
 			}
 		}
 		try {
