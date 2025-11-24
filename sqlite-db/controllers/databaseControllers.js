@@ -245,7 +245,80 @@ const databaseControllers = {
 			console.error("setUserAvatar SQLITE-DB error", err);
 			return reply.code(500).send("An error happened");
 		}
-	}
+	},
+
+	getUserInformation: async function getUserInformation(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform your user_id here");
+			const data = await databaseModels.getUserInformation(fastify, req.body);
+			return reply.code(200).send(data ?? {});
+		} catch (err) {
+			console.error("getUserInformation error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setUserDescription: async function setUserDescription(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.description)
+				return reply.code(400).send("You need to inform your user_id here");
+			await databaseModels.setUserDescription(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserDescription SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setUserExperience: async function setUserExperiencePoints(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.experience)
+				return reply.code(400).send("You need to inform your user_id/experience here");
+			await databaseModels.setUserExperience(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserExperience SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setUserFriends: async function setUserFriends(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.friends)
+				return reply.code(400).send("You need to inform your user_id/quantity of new friends here");
+			await databaseModels.setUserFriends(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserFriends SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	// win_rate automatically update here
+	
+	setUserWins: async function setUserWins(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.wins)
+				return reply.code(400).send("You need to inform your user_id and new wins");
+			await databaseModels.setUserWins(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserWins SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setUserLosses: async function setUserLosses(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.losses)
+				return reply.code(400).send("You need to inform your user_id and new losses");
+			await databaseModels.setUserLosses(fastify, req.body);
+		} catch (err) {
+			console.error("setUserLosses SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
 };
 
 export default databaseControllers;
