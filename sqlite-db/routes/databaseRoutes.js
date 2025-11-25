@@ -95,4 +95,28 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/getUserInformation", async (req, reply) => {
 		return databaseControllers.getUserInformation(fastify, req, reply)
 	});
+
+	fastify.post("/setUserDescription", async (req, reply) => {
+		return databaseControllers.setUserDescription(fastify, req, reply);
+	});
+
+	fastify.post("/setUserExperience", async (req, reply) => {
+		return databaseControllers.setUserExperience(fastify, req, reply);
+	});
+
+	fastify.post("/setUserFriends", async (req, reply) => {
+		return databaseControllers.setUserFriends(fastify, req, reply);
+	});
+
+	fastify.post("/setUserWins", async (req, reply) => {
+		return databaseControllers.setUserWins(fastify, req, reply);
+	});
+
+	fastify.post("/setUserLosses", async (req, reply) => {
+		return databaseControllers.setUserLosses(fastify, req, reply);
+	});
+
+	fastify.post("/setUserTitle", async (req, reply) => {
+		return databaseControllers.setUserTitle(fastify, req, reply);
+	});
 };

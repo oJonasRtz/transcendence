@@ -110,11 +110,11 @@ export async function validatorHook(req, reply) {
 			message: "Invalid e-mail"
 		},
 		{
-			condition: req.body.username && (!usernameRegex.test(req.body.username) || req.body.username.length < 3 || req.body.username.length > 15),
+			condition: req.body.username && (!usernameRegex.test(req.body.username) || req.body.username.length < 3 || req.body.username.length > 20),
 			message: "Invalid username"
 		},
 		{
-			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3 || req.body.nickname.length > 15),
+			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3 || req.body.nickname.length > 20),
 			message: "Invalid nickname"
 		},
 	];
@@ -149,11 +149,9 @@ export async function validatorHook(req, reply) {
 
 export async function authHook(req, reply) {
 	const token = req.cookies?.jwt;
-	let decoded = jwt.decode(token) ?? {};
 	// Check if the user has a token
 	if (!token) {
-		reply.redirect("/login");
-		return ;
+		return reply.redirect("/login");
 	}
 
 	try {
@@ -162,17 +160,24 @@ export async function authHook(req, reply) {
 		req.user = data;  // decoded data
 		req.user.isOnline = true;
 	} catch (err) {
-		if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
-			if (err.name === "TokenExpiredError") {
-				// The user must do 2FA again
-				await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
-				// Put the user as offline
-				await axios.post("http://users-service:3003/setIsOnline", { email: decoded.email, isOnline: false });
-			}
-			console.error("JWT ERROR:", err);
-			return reply.redirect("/logout");
+		if (err.name === "TokenExpiredError") {
+
+			const token = req.cookies.jwt;
+                	const data = jwt.decode(token) || {};
+
+                	await axios.post("http://users-service:3003/setIsOnline", { email: data.email, isOnline: false });
+
+                	await req.session.destroy();
+
+                	reply.clearCookie("jwt");
+                	reply.clearCookie("session");
+
+                	await axios.post("http://auth-service:3001/set2FAValidate", { email: data.email, signal: false });
+                	return reply.redirect("/login");
+
+		} else if (err.name === "JsonWebTokenError") {
+			return reply.redirect("/login");
 		}
-		console.error("AuthHook ERROR:", err);
 		return reply.code(500).send("Authentication internal error");
 	}
 	return ;

@@ -293,6 +293,7 @@ const databaseControllers = {
 		}
 	},
 
+	// You need to create the routes below 
 	setUserDescription: async function setUserDescription(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.user_id || !req.body.description)
@@ -329,7 +330,7 @@ const databaseControllers = {
 		}
 	},
 
-	// win_rate automatically update here
+	// win_rate automatically update in frontend
 	
 	setUserWins: async function setUserWins(fastify, req, reply) {
 		try {
@@ -348,11 +349,24 @@ const databaseControllers = {
 			if (!req.body || !req.body.user_id || !req.body.losses)
 				return reply.code(400).send("You need to inform your user_id and new losses");
 			await databaseModels.setUserLosses(fastify, req.body);
+			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setUserLosses SQLITE-DB error:", err);
 			return reply.code(500).send("An error happened");
 		}
 	},
+
+	setUserTitle: async function setUserTitle(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.title)
+				return reply.code(400).send("You need to inform your user_id and a new title");
+			await databaseModels.setUserTitle(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserTitle SQLITE-DB error:", err);
+			return reply.code(500).send("You need to inform your user_id and a new title");
+		}
+	}
 };
 
 export default databaseControllers;

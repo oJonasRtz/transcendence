@@ -133,7 +133,6 @@ const databaseModels = {
 		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
 		if (!user_id)
 			return (null);
-
 		await fastify.db.run("UPDATE users SET rank = ? WHERE id = ?", [ data.rank, user_id.id ]);
 		return (true);
 	},
@@ -157,6 +156,11 @@ const databaseModels = {
 	getUserInformation: async function getUserInformation(fastify, data) {
 		const response = await fastify.db.get("SELECT * FROM users WHERE user_id = ?", [ data.user_id ]);
 		return (response ?? null);
+	},
+
+	setUserTitle: async function setUserTitle(fastify, data) {
+		await fastify.db.run("UPDATE users SET title = ? WHERE user_id = ?", [ data.title, data.user_id ]);
+		return (true);
 	}
 }
 
