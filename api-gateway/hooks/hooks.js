@@ -110,11 +110,11 @@ export async function validatorHook(req, reply) {
 			message: "Invalid e-mail"
 		},
 		{
-			condition: req.body.username && (!usernameRegex.test(req.body.username) || req.body.username.length < 3),
+			condition: req.body.username && (!usernameRegex.test(req.body.username) || req.body.username.length < 3 || req.body.username.length > 15),
 			message: "Invalid username"
 		},
 		{
-			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3),
+			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3 || req.body.nickname.length > 15),
 			message: "Invalid nickname"
 		},
 	];

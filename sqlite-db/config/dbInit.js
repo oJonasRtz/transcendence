@@ -37,12 +37,12 @@ export default async function initDatabase() {
 			inQueue BOOLEAN DEFAULT FALSE,
 			inGame BOOLEAN DEFAULT FALSE,
 			rank INTEGER DEFAULT 0,
+			title TEXT DEFAULT 'Novice',
 			description TEXT DEFAULT NULL,
 			isEmailConfirmed BOOLEAN DEFAULT FALSE,
 			friends INTEGER DEFAULT 0,
 			wins INTEGER DEFAULT 0,
 			losses INTEGER DEFAULT 0,
-			win_rate DECIMAL(10,2) DEFAULT 0.0,
 			created_at DATETIME DEFAULT (datetime('now')),
 			updated_at DATETIME DEFAULT (datetime('now'))
 		);
