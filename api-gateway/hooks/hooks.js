@@ -68,7 +68,8 @@ const redirect = {
 	'/checkRegister': "/register",
 	'/checkLogin': "/login",
 	'/validateUserEmailCode': "/confirmUserEmailCode",
-	'/checkEmailCode': "validateEmailCode"
+	'/checkEmailCode': "/validateEmailCode",
+	'/setAuthUsername': "/changeUsername"
 };
 
 const filter = new Filter();

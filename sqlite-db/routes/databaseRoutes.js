@@ -119,4 +119,24 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/setUserTitle", async (req, reply) => {
 		return databaseControllers.setUserTitle(fastify, req, reply);
 	});
+
+	fastify.post("/getAuthData", async (req, reply) => {
+		return databaseControllers.getAuthData(fastify, req, reply);
+	});
+
+	fastify.post("/setAuthUsername", async (req, reply) => {
+		return databaseControllers.setAuthUsername(fastify, req, reply);
+	});
+
+	fastify.post("/setAuthNickname", async (req, reply) => {
+		return databaseControllers.setAuthNickname(fastify, req, reply);
+	});
+
+	fastify.post("/setAuthEmail", async (req, reply) => {
+		return databaseControllers.setAuthEmail(fastify, req, reply);
+	});
+
+	fastify.post("/setAuthPassword", async (req, reply) => {
+		return databaseControllers.setAuthPassword(fastify, req, reply);
+	});
 };

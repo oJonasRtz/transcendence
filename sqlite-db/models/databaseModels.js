@@ -94,6 +94,9 @@ const databaseModels = {
 		return (true);
 	},
 
+
+	// Users configuration
+	
 	getIsOnline: async function getIsOnline(fastify, email) {
 		const isOnline = await fastify.db.get("SELECT isOnline FROM users WHERE email = ?", [ email ]);
 		if (!isOnline)
@@ -160,6 +163,33 @@ const databaseModels = {
 
 	setUserTitle: async function setUserTitle(fastify, data) {
 		await fastify.db.run("UPDATE users SET title = ? WHERE user_id = ?", [ data.title, data.user_id ]);
+		return (true);
+	},
+
+	// Auth configuration
+
+	getAuthData: async function getAuthData(fastify, data) {
+		const result = await fastify.db.get("SELECT username, nickname, email FROM auth WHERE id = ?", [ data.user_id ]);
+		return (result ?? {});
+	},
+
+	setAuthUsername: async function setAuthUsername(fastify, data) {
+		await fastify.db.run("UPDATE auth SET username = ? WHERE id = ?", [ data.username, data.user_id ]);
+		return (true);
+	},
+
+	setAuthNickname: async function setAuthNickname(fastify, data) {
+		await fastify.db.run("UPDATE auth SET nickname = ? WHERE id = ?", [ data.username, data.user_id ]);
+		return (true);
+	},
+
+	setAuthEmail: async function setAuthEmail(fastify, data) {
+		await fastify.db.run("UPDATE auth SET email = ? WHERE id = ?", [ data.email, data.user_id ]);
+		return (true);
+	},
+
+	setAuthPassword: async function setAuthPassword(fastify, data) {
+		await fastify.db.run("UPDATE auth SET password = ? WHERE id = ?", [ data.password_hash, data.user_id ]);
 		return (true);
 	}
 }

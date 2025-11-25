@@ -277,7 +277,7 @@ const privateControllers = {
 			}
 
 			const uploadDir = path.join(__dirname, "..", "public", "uploads");
-			console.log("uploadDir:", uploadDir);
+
 			await mkdir(uploadDir, { recursive: true });
 
 			const allowed_extensions = [".png", ".webp", ".jpg", ".jpeg"];
@@ -351,6 +351,57 @@ const privateControllers = {
 			console.error("API-GATEWAY upload error:", err);
 			req.session.error = ["Error in the upload process"];
 			return reply.redirect("/home");
+		}
+	},
+
+	changeUsername: async function changeUsername(req, reply) {
+		const success = req.session.success ?? [];
+		const error = req.session.error ?? [];
+
+		delete req.session.success;
+		delete req.session.error;
+
+		return reply.view("changeUsername", { success, error } );
+	},
+
+	setAuthUsername: async function setAuthUsername(req, reply) {
+		try {
+			if (!req.body || !req.body.username) {
+				req.session.error = ["You need to fill everything"];
+				return reply.redirect("/changeUsername");
+			}
+
+			req.body.user_id = req.user.user_id;
+			req.body.email = req.user.email;
+
+			await axios.post("http://auth-service:3001/setAuthUsername", req.body);
+
+			req.session.success = ["Username changed successfully"];
+
+			const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
+
+			const token = response?.data.token;
+
+			if (!token) {
+				req.session.error = ["Error recreating the jwt"];
+				return reply.redirect("/home");
+			}
+
+			const isProduction = process.env.NODE_ENV === "production";
+
+                        reply.setCookie("jwt", token, {
+                                httpOnly: true,
+                                secure: isProduction,
+                                path: "/",
+                                sameSite: "lax",
+                                maxAge: 60 * 60 * 1000 // 1h
+                        });
+
+			return reply.redirect("/home");
+		} catch (err) {
+			console.error("Api-Gateway setAuthUsername:", err);
+			req.session.error = ["Error during setting your new username"];
+			return reply.redirect("/changeUsername");
 		}
 	}
 };

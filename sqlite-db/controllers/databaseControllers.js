@@ -364,7 +364,73 @@ const databaseControllers = {
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setUserTitle SQLITE-DB error:", err);
-			return reply.code(500).send("You need to inform your user_id and a new title");
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getAuthData: async function getAuthData(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform your user_id here");
+			const data = await databaseModels.getAuthData(fastify, req.body);
+			return reply.code(200).send(data ?? {});
+		} catch (err) {
+			console.error("getAuthData SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthUsername: async function setAuthUsername(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.username)
+				return reply.code(400).send("You need to inform your user_id and a new username here");
+			await databaseModels.setAuthUsername(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setAuthUsername SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthNickname: async function setAuthNickname(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.username)
+				return reply.code(400).send("You need to inform your user_id and a new nickname here");
+			await databaseModels.setAuthNickname(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setAuthNickname SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthEmail: async function setAuthEmail(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.email)
+				return reply.code(400).send("You need to inform your user_id and a new email here");
+			await databaseModels.setAuthEmail(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setAuthEmail SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthPassword: async function setAuthPassword(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.email || !req.body.password)
+				return reply.code(400).send("You need to inform your user_id and a new password here");
+			const oldPassword = await databaseModels.getPassword(fastify, req.body);
+			const match = await bcrypt.compare(req.body.password, oldPassword);
+			if (match)
+				return reply.code(400).send("You cannot change your password to the same one");
+			const password_hash = await bcrypt.hash(req.body.password, 12);
+			req.body.password_hash = password_hash;
+			await databaseModels.setAuthPassword(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setAuthPassword SQLITE-DB error:", err);
+			return reply.code(500).send("An error happened");
 		}
 	}
 };

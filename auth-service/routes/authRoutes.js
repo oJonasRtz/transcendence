@@ -29,4 +29,10 @@ export default async function authRoutes(fastify, options) {
 	fastify.post("/set2FASecret", authControllers.set2FASecret);
 
 	fastify.post("/set2FAValidate", authControllers.set2FAValidate);
+
+	fastify.post("/createNewToken", authControllers.createNewToken);
+
+	fastify.post("/getAuthData", authControllers.getAuthData);
+
+	fastify.post("/setAuthUsername", authControllers.setAuthUsername);
 }

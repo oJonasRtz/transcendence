@@ -50,6 +50,22 @@ const authControllers = {
 		}
 	},
 
+	createNewToken: async function createNewToken(req, reply) {
+		try {
+			if (!req.body || !req.body.email || !req.body.user_id || !req.body.username)
+				return reply.code(400).send("Bad request, you need to inform email, user_id and username");
+			const { username, email, user_id } = req.body;
+			const payload = { username, email, user_id };
+			const token = jwt.sign(payload, process.env.JWT_SECRET || "purpleVoid", {
+				expiresIn: process.env.JWT_EXPIRESIN || "1h"
+			});
+			return reply.code(200).send({ token });
+		} catch (err) {
+			console.error("Auth-Service CreateNewToken Error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	checkRegister: async function tryRegisterTheUser(req, reply) {
 		const success = [];
 		const error = [];
@@ -230,6 +246,30 @@ const authControllers = {
 		} catch (err) {
 			console.error("Auth-Service set2FASecret:", err);
 			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	getAuthData: async function getAuthData(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform your user_id");
+			const data = await axios.post("http://sqlite-db:3002/getAuthData", req.body);
+			return reply.code(200).send(data ?? {});
+		} catch (err) {
+			console.error("Auth-service getAuthData error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthUsername: async function setAuthUsername(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.username)
+				return reply.code(400).send("You need to inform your user_id");
+			await axios.post("http://sqlite-db:3002/setAuthUsername", req.body);
+			return reply.code(200).send("Username changed successfully");
+		} catch (err) {
+			console.error("Auth-service setAuthData error:", err);
+			return reply.code(500).send("An error happened");
 		}
 	},
 
