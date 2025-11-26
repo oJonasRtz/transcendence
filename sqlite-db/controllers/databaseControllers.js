@@ -210,6 +210,43 @@ const databaseControllers = {
 		}
 	},
 
+	getUserStatus: async function getUserStatus(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const status = await databaseModels.getUserStatus(fastify, req.body.email);
+			return reply.code(200).send({ status: status });
+		} catch (err) {
+			console.error("getUserStatus SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+
+	getMatchId: async function getMatchId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const match_id = await databaseModels.getMatchId(fastify, req.body.email);
+			return reply.code(200).send({ match_id: match_id });
+		} catch (err) {
+			console.error("getMatchId SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setMatchId: async function setMatchId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.match_id === undefined)
+				return reply.code(400).send("You need to inform an email and the match_id here");
+			await databaseModels.setMatchId(fastify, req.body.email, req.body.match_id);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setMatchId SQLITE-DB error", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	getQueue: async function getQueue(fastify, req, reply) {
 		try {
 			const queue = await databaseModels.getQueue(fastify);

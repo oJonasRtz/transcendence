@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import { stat } from 'node:fs';
 
 const databaseModels = {
 	getUserData: async function getUserData(fastify, email) {
@@ -20,7 +21,8 @@ const databaseModels = {
 			SELECT 
 				a.username,
 				u.rank,
-				u.user_id
+				u.user_id,
+				a.email
 			FROM users u
 			JOIN auth a ON a.id = u.user_id
 			WHERE u.isOnline = TRUE
@@ -28,6 +30,22 @@ const databaseModels = {
 		`);
 
 		return queue ?? [];
+	},
+
+	getMatchId: async function getMatchId(fastify, email) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		if (!user_id)
+			return (null);
+		const match_id = await fastify.db.get("SELECT match_id FROM users WHERE id = ?", [ user_id.id ]);
+		return (match_id?.match_id ?? null);
+	},
+
+	setMatchId: async function setMatchId(fastify, email, match_id) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		if (!user_id)
+			return (null);
+		await fastify.db.run("UPDATE users SET match_id = ? WHERE id = ?", [ match_id, user_id.id ]);
+		return (true);
 	},
 
 	registerNewUser: async function registerNewUser(fastify, data, password_hash) {
@@ -138,6 +156,21 @@ const databaseModels = {
 			return (null);
 		await fastify.db.run("UPDATE users SET rank = ? WHERE id = ?", [ data.rank, user_id.id ]);
 		return (true);
+	},
+
+	getUserStatus: async function getUserStatus(fastify, data) {
+		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		if (!user_id)
+			return ({});
+
+		const status = await fastify.db.get("SELECT isOnline, inQueue, inGame FROM users WHERE id = ?", [ user_id.id ]);
+
+		return (
+			(status.inGame && "IN_GAME") ||
+			(status.inQueue && "IN_QUEUE") ||
+			(status.isOnline && "ONLINE") ||
+			"OFFLINE"
+		);
 	},
 
 	getInGame: async function getInGame(fastify, email) {

@@ -1,12 +1,14 @@
-import { MatchMaking } from "../services/MatchMaking.class";
-
-const matchMaking = new MatchMaking();
+import {matchMaking} from '../app.js';
 
 const routes = [
     {
         path: '/matchMaking',
-        handler: matchMaking.newMatch().bind(matchMaking),
+        handler: matchMaking.newMatch.bind(matchMaking),
     },
+    {
+        path: '/stopMatchMaking',
+        handler: matchMaking.stopQueue.bind(matchMaking),
+    }
 ];
 
 export function matchRoutes(fastify, options) {

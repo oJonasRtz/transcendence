@@ -37,6 +37,7 @@ export default async function initDatabase() {
 			inQueue BOOLEAN DEFAULT FALSE,
 			inGame BOOLEAN DEFAULT FALSE,
 			rank INTEGER DEFAULT 0,
+			match_id INTEGER DEFAULT NULL,
 			title TEXT DEFAULT 'Novice',
 			description TEXT DEFAULT NULL,
 			isEmailConfirmed BOOLEAN DEFAULT FALSE,

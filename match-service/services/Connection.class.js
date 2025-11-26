@@ -1,6 +1,7 @@
 
 export class Connection {
 	#socket = null;
+	#matchPromise = null;
 	#login = {
 		id: process.env.LOBBY_ID,
 		pass: process.env.LOBBY_PASS,
@@ -63,12 +64,24 @@ export class Connection {
 			},
 			[this.#types.recieves.GAME_END]: () => {
 				//Chama calculate rank para atualizar o db
-			}
+			},
+			[this.#types.recieves.MATCHCREATED]: () => {
+				if (this.#matchPromise) {
+					this.#matchPromise(message.matchId);
+					this.#matchPromise = null;
+				}
+			},
+			[this.#types.recieves.TIMEOUT]: () => {
+				console.log(`Connection.#handleMessage: Match ${message.matchId} timed out and was removed.`);
+			},
+			[this.#types.recieves.ERROR]: () => {
+				console.error(`Connection.#handleMessage: Error from server: ${message.error}`);
+			},
 		}
 		try {
 			const type = message.type;
 
-			if (type in map) return;
+			if (!(type in map)) return;
 
 			map[type]();	
 		} catch (error) {
@@ -92,6 +105,20 @@ export class Connection {
 	#send(message) {
 		if (this.#socket && this.#socket.readyState === WebSocket.OPEN)
 			this.#socket.send(JSON.stringify(message));
+	}
+
+	newMatch(players, maxPlayers) {
+		return new Promise((resolve) => {
+			this.#matchPromise = resolve;
+
+			this.#send({
+				type: this.#types.sends.NEWMATCH,
+				players,
+				maxPlayers,
+			});
+
+
+		});
 	}
 
 	disconnect() {

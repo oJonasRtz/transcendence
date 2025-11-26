@@ -53,7 +53,31 @@ const usersControllers = {
 		}
 	},
 
-	setIsQueue: async function setIsQueue(req, reply) {
+	getMatchId: async function getMatchId(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const matchId = await axios.post("http://sqlite-db:3002/getMatchId", req.body);
+			return reply.code(200).send(matchId?.data ?? {});
+		} catch (err) {
+			console.error("Users-Service getMatchId", err);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
+	setMatchId: async function setMatchId(req, reply) {
+		try {
+			if (!req.body || !req.body.email || req.body.match_id === undefined)
+				return reply.code(400).send("You need to inform an email and the match_id");
+			await axios.post("http://sqlite-db:3002/setMatchId", req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("USERS-SERVICE setMatchId", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setInQueue: async function setInQueue(req, reply) {
 		try {
 			if (!req.body || !req.body.email || req.body.inQueue === undefined)
 				return reply.code(400).send("You need to inform an email and the signal for inQueue");
@@ -74,6 +98,18 @@ const usersControllers = {
 		} catch (err) {
 			console.error("USERS-SERVICE setRank", err);
 			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getUserStatus: async function getUserStatus(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const status = await axios.post("http://sqlite-db:3002/getUserStatus", req.body);
+			return reply.code(200).send(status?.data ?? {});
+		} catch (err) {
+			console.error("Users-Service getUserStatus", err);
+			return reply.code(500).send("Internal Server Error");
 		}
 	},
 

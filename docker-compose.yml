@@ -67,6 +67,14 @@ services:
       - ./shared/ssl:/app/ssl:ro
       - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
+  match-service:
+    build: ./match-service
+    image: match-service:1.0.0
+    container_name: match-service
+    depends_on:
+      - game-server
+    networks:
+      - "transcendence"
 volumes:
   sqlite-db:
   users-service:

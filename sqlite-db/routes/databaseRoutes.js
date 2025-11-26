@@ -20,6 +20,18 @@ export default async function databaseRoutes(fastify, options) {
 		return databaseControllers.getUserData(fastify, req, reply);
 	});
 
+	fastify.post('/getMatchId', async (req, reply) => {
+		return databaseControllers.getMatchId(fastify, req, reply);
+	});
+
+	fastify.post('/setMatchId', async (req, reply) => {
+		return databaseControllers.setMatchId(fastify, req, reply);
+	});
+
+	fastify.post("/getUserStatus", async (req, reply) => {
+		return databaseControllers.getUserStatus(fastify, req, reply);
+	});
+
 	fastify.post("/checkEmail", async (req, reply) => {
 		return databaseControllers.checkEmail(fastify, req, reply);
 	});
