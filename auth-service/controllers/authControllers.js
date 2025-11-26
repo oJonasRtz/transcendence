@@ -297,6 +297,20 @@ const authControllers = {
 		}
 	},
 
+	setAuthPassword: async function setAuthPassword(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.password)
+				return reply.code(400).send("You need to inform your user_id and the new password");
+			await axios.post("http://sqlite-db:3002/setAuthPassword", req.body);
+			return reply.code(200).send("Password changed successfully");
+		} catch (err) {
+			if (err?.response.status === 400)
+				return reply.code(400).send("You cannot change to the same password");
+			console.error("Auth-service setAuthPassword error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

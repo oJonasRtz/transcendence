@@ -455,9 +455,12 @@ const databaseControllers = {
 	setAuthPassword: async function setAuthPassword(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.user_id || !req.body.email || !req.body.password)
-				return reply.code(400).send("You need to inform your user_id and a new password here");
-			const oldPassword = await databaseModels.getPassword(fastify, req.body);
-			const match = await bcrypt.compare(req.body.password, oldPassword);
+				return reply.code(400).send("You need to inform your user_id, email and a new password here");
+			const object = await databaseModels.getUserPassword(fastify, req.body.email);
+			if (!object || !object.password)
+				return reply.code(404).send("Invalid credentials");
+			console.log("object:", object);
+			const match = await bcrypt.compare(req.body.password, object.password);
 			if (match)
 				return reply.code(400).send("You cannot change your password to the same one");
 			const password_hash = await bcrypt.hash(req.body.password, 12);

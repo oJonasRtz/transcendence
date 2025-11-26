@@ -384,6 +384,44 @@ const privateControllers = {
 		return reply.view("changeEmail", { success, error } );
 	},
 
+	changePassword: async function changePassword(req, reply) {
+		const success = req.session.success ?? [];
+		const error = req.session.error ?? [];
+
+		delete req.session.success;
+		delete req.session.error;
+
+		return reply.view("changePassword", { success, error } );
+	},
+
+	setAuthPassword: async function setAuthPassword(req, reply) {
+		try {
+			if (!req.body || !req.body.password || !req.body.confirmPassword) {
+				req.session.error = ["You need to fill all input boxes"];
+				return reply.redirect("/changeYourPassword");
+			}
+			if (req.body.confirmPassword !== req.body.password) {
+				req.session.error = ["Password mismatch"];
+				return reply.redirect("/changeYourPassword");
+			}
+
+			req.body.user_id = req.user.user_id;
+			req.body.email = req.user.email;
+
+			await axios.post("http://auth-service:3001/setAuthPassword", req.body);
+			req.session.success = ["Password changed"];
+			return reply.redirect("/home");
+		} catch (err) {
+			if (err?.response.status === 400) {
+				req.session.error = ["You cannot change to the same password you have now"];
+				return reply.redirect("/home");
+			}
+			console.error("setAuthPassword Api-gateway error:", err);
+			req.session.error = ["Error trying to change your password"];
+			return reply.redirect("/home");
+		}
+	},
+
 	setAuthEmail: async function setAuthEmail(req, reply) {
 		try {
 			if (!req.body || !req.body.email) { 
