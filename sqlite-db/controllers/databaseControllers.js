@@ -459,7 +459,6 @@ const databaseControllers = {
 			const object = await databaseModels.getUserPassword(fastify, req.body.email);
 			if (!object || !object.password)
 				return reply.code(404).send("Invalid credentials");
-			console.log("object:", object);
 			const match = await bcrypt.compare(req.body.password, object.password);
 			if (match)
 				return reply.code(400).send("You cannot change your password to the same one");
