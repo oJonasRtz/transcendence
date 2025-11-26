@@ -4,8 +4,12 @@ WORKDIR /app
 COPY package*.json ./
 # RUN apt-get update -y && apt-get upgrade -y && apt-get install nodejs npm net-tools curl iputils-ping -y
 
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
 RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
-    nodejs npm net-tools curl iputils-ping python3-setuptools
+    net-tools iputils-ping python3-setuptools
 
 #install mkcert
 # RUN curl -L -o /usr/local/bin/mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64 && \
