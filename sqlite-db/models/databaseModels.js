@@ -179,7 +179,7 @@ const databaseModels = {
 	},
 
 	setAuthNickname: async function setAuthNickname(fastify, data) {
-		await fastify.db.run("UPDATE auth SET nickname = ? WHERE id = ?", [ data.username, data.user_id ]);
+		await fastify.db.run("UPDATE auth SET nickname = ? WHERE id = ?", [ data.nickname, data.user_id ]);
 		return (true);
 	},
 

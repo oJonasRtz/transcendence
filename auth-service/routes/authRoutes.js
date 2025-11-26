@@ -35,4 +35,8 @@ export default async function authRoutes(fastify, options) {
 	fastify.post("/getAuthData", authControllers.getAuthData);
 
 	fastify.post("/setAuthUsername", authControllers.setAuthUsername);
+
+	fastify.post("/setAuthNickname", authControllers.setAuthNickname);
+
+	fastify.post("/setAuthEmail", authControllers.setAuthEmail);
 }

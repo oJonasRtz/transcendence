@@ -364,6 +364,110 @@ const privateControllers = {
 		return reply.view("changeUsername", { success, error } );
 	},
 
+	changeNickname: async function changeNickname(req, reply) {
+		const success = req.session.success ?? [];
+		const error = req.session.error ?? [];
+
+		delete req.session.success;
+		delete req.session.error;
+		
+		return reply.view("changeNickname", { success, error } );
+	},
+
+	changeEmail: async function changeEmail(req, reply) {
+		const success = req.session.success ?? [];
+		const error = req.session.error ?? [];
+
+		delete req.session.success;
+		delete req.session.error;
+
+		return reply.view("changeEmail", { success, error } );
+	},
+
+	setAuthEmail: async function setAuthEmail(req, reply) {
+		try {
+			if (!req.body || !req.body.email) { 
+				req.session.error = ["You need to fill everything"];
+				return reply.redirect("/changeEmail");
+			}
+
+			req.body.user_id = req.user.user_id;
+                        req.body.username = req.user.username;
+
+                        await axios.post("http://auth-service:3001/setAuthEmail", req.body);
+
+                        req.session.success = ["Email changed successfully"];
+
+                        const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
+
+                        const token = response?.data.token;
+
+                        if (!token) {
+                                req.session.error = ["Error recreating the jwt"];
+                                return reply.redirect("/home");
+                        }
+
+                        const isProduction = process.env.NODE_ENV === "production";
+
+                        reply.setCookie("jwt", token, {
+                                httpOnly: true,
+                                secure: isProduction,
+                                path: "/",
+                                sameSite: "lax",
+                                maxAge: 60 * 60 * 1000 // 1h
+                        });
+
+                        return reply.redirect("/home");
+
+                } catch (err) {
+                        console.error("API-GATEWAY setAuthEmail error:", err);
+                        req.session.error = ["Error trying to change your nickname"];
+                        return reply.redirect("/home");
+                }
+	},
+
+	setAuthNickname: async function setAuthNickname(req, reply) {
+		try {
+			if (!req.body || !req.body.nickname) {
+				req.session.error = ["You need to fill everything"];
+				return reply.redirect("/changeNickname");
+			}
+			req.body.user_id = req.user.user_id;
+                        req.body.email = req.user.email;
+			req.body.username = req.user.username;
+
+                        await axios.post("http://auth-service:3001/setAuthNickname", req.body);
+
+                        req.session.success = ["Nickname changed successfully"];
+
+                        const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
+
+                        const token = response?.data.token;
+
+                        if (!token) {
+                                req.session.error = ["Error recreating the jwt"];
+                                return reply.redirect("/home");
+                        }
+
+                        const isProduction = process.env.NODE_ENV === "production";
+
+                        reply.setCookie("jwt", token, {
+                                httpOnly: true,
+                                secure: isProduction,
+                                path: "/",
+                                sameSite: "lax",
+                                maxAge: 60 * 60 * 1000 // 1h
+                        });
+
+                        return reply.redirect("/home");
+
+		} catch (err) {
+			console.error("API-GATEWAY setAuthNickname error:", err);
+			req.session.error = ["Error trying to change your nickname"];
+			return reply.redirect("/home");
+		}
+	},
+
 	setAuthUsername: async function setAuthUsername(req, reply) {
 		try {
 			if (!req.body || !req.body.username) {

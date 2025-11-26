@@ -264,11 +264,35 @@ const authControllers = {
 	setAuthUsername: async function setAuthUsername(req, reply) {
 		try {
 			if (!req.body || !req.body.user_id || !req.body.username)
-				return reply.code(400).send("You need to inform your user_id");
+				return reply.code(400).send("You need to inform your user_id and username");
 			await axios.post("http://sqlite-db:3002/setAuthUsername", req.body);
 			return reply.code(200).send("Username changed successfully");
 		} catch (err) {
 			console.error("Auth-service setAuthData error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthNickname: async function setAuthNickname(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.nickname)
+				return reply.code(400).send("You need to inform your user_id and nickname");
+			await axios.post("http://sqlite-db:3002/setAuthNickname", req.body);
+			return reply.code(200).send("Nickname changed successfully");
+		} catch (err) {
+			console.error("Auth-service setAuthNickname error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAuthEmail: async function setAuthEmail(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.email)
+				return reply.code(400).send("You need to inform your user_id and e-mail");
+			await axios.post("http://sqlite-db:3002/setAuthEmail", req.body);
+			return reply.code(200).send("Nickname changed successfully");
+		} catch (err) {
+			console.error("Auth-service setAuthEmail error:", err);
 			return reply.code(500).send("An error happened");
 		}
 	},

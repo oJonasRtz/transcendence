@@ -237,7 +237,6 @@ const databaseControllers = {
 			if(!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
 			const avatar = await databaseModels.getUserAvatar(fastify, req.body);
-			console.log("avatar sqlite-db:", avatar);
 			return reply.code(200).send(avatar ?? {});
 		} catch (err) {
 			console.error ("getUserAvatar SQLITE-DB error", err);

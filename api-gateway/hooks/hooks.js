@@ -69,7 +69,9 @@ const redirect = {
 	'/checkLogin': "/login",
 	'/validateUserEmailCode': "/confirmUserEmailCode",
 	'/checkEmailCode': "/validateEmailCode",
-	'/setAuthUsername': "/changeUsername"
+	'/setAuthUsername': "/changeUsername",
+	'/setAuthNickname': "/changeNickname",
+	'/setAuthEmail': "/changeEmail"
 };
 
 const filter = new Filter();

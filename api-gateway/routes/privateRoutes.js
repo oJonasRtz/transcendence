@@ -26,4 +26,12 @@ export default async function privateRoutes(fastify, options) {
 	fastify.get("/changeUsername", privateControllers.changeUsername);
 
 	fastify.post("/setAuthUsername", privateControllers.setAuthUsername);
-};
+
+	fastify.get("/changeNickname", privateControllers.changeNickname);
+
+	fastify.post("/setAuthNickname", privateControllers.setAuthNickname);
+
+	fastify.get("/changeEmail", privateControllers.changeEmail);
+
+	fastify.post("/setAuthEmail", privateControllers.setAuthEmail);
+}
