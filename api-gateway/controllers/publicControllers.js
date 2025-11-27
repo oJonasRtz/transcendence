@@ -1,6 +1,7 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
 import sendMail from '../utils/sendMail.js';
+import { randomUUID } from 'crypto';
 
 const publicControllers = {
 	
@@ -71,6 +72,7 @@ const publicControllers = {
 		let success = [];
 		let error = [];
 		try {
+			req.body.user_id = randomUUID();
 			const response = await axios.post("http://auth-service:3001/checkRegister", req.body);
 
 			success = response.data.success || [];
@@ -93,10 +95,8 @@ const publicControllers = {
 	
 	checkLogin: async function tryLoginTheUser(req, reply) {
 		try {
-			console.log("\x1b[94mA response começou\x1b[0m");
 			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
 
-			console.log("\x1b[94mA response acabou\x1b[0m");
 			const token = response?.data?.token;
 			if (!token) {
 				req.session.error = ["Invalid credentials"];
@@ -166,7 +166,7 @@ const publicControllers = {
                         const webPage = `
                                 <h2>Forgot Password - Your Pong Transcendence</h2>
                                 <p>Please, you need to inform the code below to change the password of your account</p>
-                                <p>The code is ${code}. Type it in the checkEmailCode page to validate it</p>
+                                <p>The code is <strong>${code}</strong>. Type it in the checkEmailCode page to validate it</p>
                         `;
                         await sendMail(receiver, subject, webPage);
 
@@ -217,7 +217,6 @@ const publicControllers = {
 
 	changePassword: async function validateEmailCode(req, reply) {
 		if (!req.session.email || !req.session.permission) {
-
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/login");
 		}

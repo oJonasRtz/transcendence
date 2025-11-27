@@ -35,6 +35,7 @@ const databaseControllers = {
 				return reply.code(400).send("You need to fill all the fields");
 
 			const object = await databaseModels.getUserPassword(fastify, email);
+			console.log("object tryLogin: sqlite", object);
 			if (!object || !object.password)
 				return reply.code(404).send("The user does not exist");
 			const match = await bcrypt.compare(password, object.password);
@@ -54,10 +55,10 @@ const databaseControllers = {
 
 			if (!email)
 				return reply.code(400).send("You need to give the email to make that request");
-			const { username, id } = await databaseModels.getUserData(fastify, email);
-			if (!username || !id)
+			const { username, user_id } = await databaseModels.getUserData(fastify, email);
+			if (!username || !user_id)
 				return reply.code(404).send("Not found the user");
-			return (reply.code(200).send({ username: username, id: id }));
+			return (reply.code(200).send({ username: username, user_id: user_id }));
 		} catch (err) {
 			console.error("getUserData SQlite-db:", err);
 			console.error("Error during getting the user data:", err);
@@ -101,7 +102,6 @@ const databaseControllers = {
 			if (match)
 				return reply.code(409).send("You cannot put the same password as a new one");
 
-			console.log("new password hash:", password_hash);
 			await databaseModels.newPassword(fastify, email, password_hash);
 
 			return reply.code(200).send("success");
@@ -113,9 +113,9 @@ const databaseControllers = {
 
 	createNewUser: async function createNewUser(fastify, req, reply) {
 		try {
-			const { username } = req.body;
+			const { username, user_id } = req.body;
 
-			const user_id = await databaseModels.getUserId(fastify, username);
+			console.log("user_id createNewUser sqlite controller:", user_id);
 			await databaseModels.createNewUser(fastify, user_id);
 			return reply.code(201).send("Success");
 		} catch (err) {
@@ -271,8 +271,8 @@ const databaseControllers = {
 
 	getUserAvatar: async function getUserAvatar(fastify, req, reply) {
 		try {
-			if(!req.body || !req.body.email)
-				return reply.code(400).send("You need to inform an email here");
+			if(!req.body || !req.body.user_id || !req.body.email)
+				return reply.code(400).send("You need to inform an email and user_id here");
 			const avatar = await databaseModels.getUserAvatar(fastify, req.body);
 			return reply.code(200).send(avatar ?? {});
 		} catch (err) {
@@ -307,8 +307,8 @@ const databaseControllers = {
 
 	setUserAvatar: async function setUserAvatar(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email || !req.body.avatar)
-				return reply.code(400).send("You need to inform an email and avatar here");
+			if (!req.body || !req.body.user_id || !req.body.avatar)
+				return reply.code(400).send("You need to inform an user_id and avatar here");
 			await databaseModels.setUserAvatar(fastify, req.body);
 			return reply.code(201).send("Success");
 		} catch (err) {

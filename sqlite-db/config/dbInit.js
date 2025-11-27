@@ -15,6 +15,7 @@ export default async function initDatabase() {
         await db.exec(`
                 CREATE TABLE IF NOT EXISTS auth (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id TEXT NOT NULL,
                         username TEXT UNIQUE NOT NULL,
                         nickname TEXT UNIQUE NOT NULL,
                         email TEXT UNIQUE NOT NULL,
@@ -30,7 +31,7 @@ export default async function initDatabase() {
 	await db.exec(`
 		CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id INTEGER NOT NULL,
+			user_id TEXT NOT NULL,
 			experience_points INTEGER DEFAULT 0,
 			avatar TEXT DEFAULT '/public/images/default.jpg',
 			isOnline BOOLEAN DEFAULT FALSE,

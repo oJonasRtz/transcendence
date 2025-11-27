@@ -49,7 +49,8 @@ const privateControllers = {
 
 			//get the user's avatar
 			
-			const response = await axios.post("http://users-service:3003/getUserAvatar", { email: req.user.email });
+			console.log("user_id home:", req.user.user_id)
+			const response = await axios.post("http://users-service:3003/getUserAvatar", { user_id: req.user.user_id, email: req.user.email });
 			let avatar = response?.data.avatar;
 
 			if (avatar === '/public/images/default.jpg') {
@@ -340,7 +341,7 @@ const privateControllers = {
 			await unlink(filePath);
 
 			const avatarDb = `/public/uploads/avatar_${user_id}.png`;
-			await axios.post("http://users-service:3003/setUserAvatar", { email: req.user.email, avatar: avatarDb });
+			await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatarDb });
 
 			req.session.success = ["Upload successfully"];
 			return reply.redirect("/home");

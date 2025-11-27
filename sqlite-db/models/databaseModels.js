@@ -1,9 +1,10 @@
 import bcrypt from 'bcrypt';
 import { stat } from 'node:fs';
+import { randomUUID } from 'crypto';
 
 const databaseModels = {
 	getUserData: async function getUserData(fastify, email) {
-		let object = await fastify.db.get("SELECT username, id FROM auth WHERE email = ?", [ email ]);
+		let object = await fastify.db.get("SELECT username, user_id FROM auth WHERE email = ?", [ email ]);
 		if (!object)
 			object = null;
 		return (object);
@@ -33,24 +34,25 @@ const databaseModels = {
 	},
 
 	getMatchId: async function getMatchId(fastify, email) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ email ]);
 		if (!user_id)
 			return (null);
-		const match_id = await fastify.db.get("SELECT match_id FROM users WHERE id = ?", [ user_id.id ]);
+		const match_id = await fastify.db.get("SELECT match_id FROM users WHERE user_id = ?", [ user_id.id ]);
 		return (match_id?.match_id ?? null);
 	},
 
 	setMatchId: async function setMatchId(fastify, email, match_id) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ email ]);
 		if (!user_id)
 			return (null);
-		await fastify.db.run("UPDATE users SET match_id = ? WHERE id = ?", [ match_id, user_id.id ]);
+		await fastify.db.run("UPDATE users SET match_id = ? WHERE user_id = ?", [ match_id, user_id.id ]);
 		return (true);
 	},
 
 	registerNewUser: async function registerNewUser(fastify, data, password_hash) {
-		await fastify.db.run("INSERT INTO auth (username, nickname, password, email, twoFactorEnable) VALUES (?, ?, ?, ?, ?)", 
-			[ data.username, data.nickname, password_hash, data.email, data.is2faEnable ]);
+		console.log("Models sqlite-db user_id:", data.user_id);
+		await fastify.db.run("INSERT INTO auth (user_id, username, nickname, password, email, twoFactorEnable) VALUES (?, ?, ?, ?, ?, ?)", 
+			[ data.user_id, data.username, data.nickname, password_hash, data.email, data.is2faEnable ]);
 	},
 
 	checkEmail: async function checkEmail(fastify, email) {
@@ -69,7 +71,7 @@ const databaseModels = {
 	},
 
 	getUserId: async function getUserId(fastify, username) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE username = ?", [ username ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ username ]);
 		return (user_id.id ?? null);
 	},
 
@@ -123,47 +125,42 @@ const databaseModels = {
 	},
 
 	setIsOnline: async function setIsOnline(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ data.email ]);
 		await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ?", [ data.isOnline, user_id.id ]);
 		return (true);
 	},
 
 	setInQueue: async function setInQueue(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ data.email ]);
 		await fastify.db.run("UPDATE users SET inQueue = ? WHERE user_id = ?", [ data.inQueue, user_id.id ]);
 		return (true);
 	},
 
 	getUserAvatar: async function getUserAvatar(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
-		if (!user_id)
-			return ({});
-		const avatar = await fastify.db.get("SELECT avatar FROM users WHERE id = ?", [ user_id.id ]);
+		console.log("data user_id getuserAvatar:", data.user_id);
+		const avatar = await fastify.db.get("SELECT avatar FROM users WHERE user_id = ?", [ data.user_id ]);
 		return (avatar ?? null);
 	},
 
 	setUserAvatar: async function setUserAvatar(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
-		if (!user_id)
-			return (null);
-		await fastify.db.run("UPDATE users SET avatar = ? WHERE id = ?", [ data.avatar, user_id.id ]);
+		await fastify.db.run("UPDATE users SET avatar = ? WHERE user_id = ?", [ data.avatar, data.user_id ]);
 		return (true);
 	},
 
 	setRank: async function setRank(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ data.email ]);
 		if (!user_id)
 			return (null);
-		await fastify.db.run("UPDATE users SET rank = ? WHERE id = ?", [ data.rank, user_id.id ]);
+		await fastify.db.run("UPDATE users SET rank = ? WHERE user_id = ?", [ data.rank, user_id.id ]);
 		return (true);
 	},
 
 	getUserStatus: async function getUserStatus(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ data.email ]);
 		if (!user_id)
 			return ({});
 
-		const status = await fastify.db.get("SELECT isOnline, inQueue, inGame FROM users WHERE id = ?", [ user_id.id ]);
+		const status = await fastify.db.get("SELECT isOnline, inQueue, inGame FROM users WHERE user_id = ?", [ user_id.id ]);
 
 		return (
 			(status.inGame && "IN_GAME") ||
@@ -174,18 +171,18 @@ const databaseModels = {
 	},
 
 	getInGame: async function getInGame(fastify, email) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ email ]);
 		if (!user_id)
 			return (null);
-		const inGame = await fastify.db.get("SELECT inGame FROM users WHERE id = ?", [ user_id.id ]);
+		const inGame = await fastify.db.get("SELECT inGame FROM users WHERE user_id = ?", [ user_id.id ]);
 		return (inGame ?? null);
 	},
 
 	setInGame: async function setInGame(fastify, data) {
-		const user_id = await fastify.db.get("SELECT id FROM auth WHERE email = ?", [ data.email ]);
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ data.email ]);
 		if (!user_id)
 			return (null);
-		await fastify.db.run("UPDATE users SET inGame = ? WHERE id = ?", [ data.inGame, user_id.id ]);
+		await fastify.db.run("UPDATE users SET inGame = ? WHERE user_id = ?", [ data.inGame, user_id.id ]);
 		return (true);
 	},
 
@@ -202,27 +199,27 @@ const databaseModels = {
 	// Auth configuration
 
 	getAuthData: async function getAuthData(fastify, data) {
-		const result = await fastify.db.get("SELECT username, nickname, email FROM auth WHERE id = ?", [ data.user_id ]);
+		const result = await fastify.db.get("SELECT username, nickname, email FROM auth WHERE user_id = ?", [ data.user_id ]);
 		return (result ?? {});
 	},
 
 	setAuthUsername: async function setAuthUsername(fastify, data) {
-		await fastify.db.run("UPDATE auth SET username = ? WHERE id = ?", [ data.username, data.user_id ]);
+		await fastify.db.run("UPDATE auth SET username = ? WHERE user_id = ?", [ data.username, data.user_id ]);
 		return (true);
 	},
 
 	setAuthNickname: async function setAuthNickname(fastify, data) {
-		await fastify.db.run("UPDATE auth SET nickname = ? WHERE id = ?", [ data.nickname, data.user_id ]);
+		await fastify.db.run("UPDATE auth SET nickname = ? WHERE user_id = ?", [ data.nickname, data.user_id ]);
 		return (true);
 	},
 
 	setAuthEmail: async function setAuthEmail(fastify, data) {
-		await fastify.db.run("UPDATE auth SET email = ? WHERE id = ?", [ data.email, data.user_id ]);
+		await fastify.db.run("UPDATE auth SET email = ? WHERE user_id = ?", [ data.email, data.user_id ]);
 		return (true);
 	},
 
 	setAuthPassword: async function setAuthPassword(fastify, data) {
-		await fastify.db.run("UPDATE auth SET password = ? WHERE id = ?", [ data.password_hash, data.user_id ]);
+		await fastify.db.run("UPDATE auth SET password = ? WHERE user_id = ?", [ data.password_hash, data.user_id ]);
 		return (true);
 	}
 }

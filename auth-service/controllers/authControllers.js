@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import svgCaptcha from 'svg-captcha';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
+import { randomUUID } from 'crypto';
 
 // AUTH-SERVICE CONTROLLERS
 
@@ -25,9 +26,9 @@ const authControllers = {
 
 			await authModels.tryLoginTheUser(req.body);
 
-			const { username, id } = await authModels.getUserData(email);
+			const { username, user_id } = await authModels.getUserData(email);
 
-			const user_id = id;
+			console.log("user_id: auth-service", user_id);
 			const payload = { username, user_id, email };
 
 			const token = jwt.sign(payload, process.env.JWT_SECRET || "purpleVoid", {
@@ -70,9 +71,9 @@ const authControllers = {
 		const success = [];
 		const error = [];
 		try {
-			const { username, nickname, email, password, confirmPassword } = req.body;
+			const { user_id, username, nickname, email, password, confirmPassword } = req.body;
 
-			if (!username || !nickname || !email || !password || !confirmPassword) {
+			if (!user_id || !username || !nickname || !email || !password || !confirmPassword) {
 				error.push("Please, fill all fields");
 				return reply.code(400).send({ success, error });
 			}
