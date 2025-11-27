@@ -151,4 +151,8 @@ export default async function databaseRoutes(fastify, options) {
 	fastify.post("/setAuthPassword", async (req, reply) => {
 		return databaseControllers.setAuthPassword(fastify, req, reply);
 	});
+
+	fastify.post("/setUsersDescription", async (req, reply) => {
+		return databaseControllers.setUsersDescription(fastify, req, reply);
+	});
 };

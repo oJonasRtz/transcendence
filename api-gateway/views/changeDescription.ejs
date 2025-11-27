@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="time do balacobaco">
+		<link rel="stylesheet" href="/public/css/styles.css">
+		<title>Change Description</title>
+	</head>
+	<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]">
+                <div class="z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
+		<main>
+		<header>
+			<nav>
+				<a href="/login">Sign In</a>
+				<a href="/register">Sign Up</a>
+			</nav>
+		</header>
+		<section>
+			<h2>Change Description Page</h2>
+		</section>
+		<section>
+			<% if (success && success.length > 0) { %>
+				<% success.forEach(suc => { %>
+					<p style="color: green"> <%= suc %> </p>
+				<% }) %>
+			<% } %>
+			<% if (error && error.length > 0) { %>
+				<% error.forEach(err => { %>
+					<p style="color: red"> <%= err %> </p>
+				<% }) %>
+			<% } %>
+			<form action="/setUserDescription" method="POST">
+				<label>Type your description here:</label><br>
+				<!-- New knowledge, how to make textarea :) -->
+				<textarea name="description" placeholder="Type your description here" class="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500" rows=5 required></textarea><br><br>
+				<button type="submit">Submit</button>
+			</form>
+		</section>
+		<footer>
+			<h6>Time do balacobaco</h6>
+		</footer>
+		</div>
+	</body>
+</html>

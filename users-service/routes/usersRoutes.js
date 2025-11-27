@@ -31,4 +31,6 @@ export default async function usersRoutes(fastify, options) {
 	fastify.post('/getMatchId', usersControllers.getMatchId);
 
 	fastify.post("/getUserInformation", usersControllers.getUserInformation);
+
+	fastify.post("/setUserDescription", usersControllers.setUserDescription);
 };

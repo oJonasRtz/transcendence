@@ -72,7 +72,8 @@ const redirect = {
 	'/setAuthUsername': "/changeUsername",
 	'/setAuthNickname': "/changeNickname",
 	'/setAuthEmail': "/changeEmail",
-	'/setAuthPassword': "/changeYourPassword"
+	'/setAuthPassword': "/changeYourPassword",
+	'/setUserDescription': "/changeDescription"
 };
 
 const filter = new Filter();

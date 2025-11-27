@@ -221,6 +221,11 @@ const databaseModels = {
 	setAuthPassword: async function setAuthPassword(fastify, data) {
 		await fastify.db.run("UPDATE auth SET password = ? WHERE user_id = ?", [ data.password_hash, data.user_id ]);
 		return (true);
+	},
+
+	setUserDescription: async function setUserDescription(fastify, data) {
+		await fastify.db.run("UPDATE users SET description = ? WHERE user_id = ?", [ data.description, data.user_id ]);
+		return (true);
 	}
 }
 

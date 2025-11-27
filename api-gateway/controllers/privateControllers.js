@@ -385,6 +385,33 @@ const privateControllers = {
 		return reply.view("changeEmail", { success, error } );
 	},
 
+	changeDescription: async function changeDescription(req, reply) {
+		const success = req.session.success ?? [];
+		const error = req.session.error ?? [];
+
+		delete req.session.success;
+		delete req.session.error;
+
+		return reply.view("changeDescription", { success, error } );
+	},
+
+	setUserDescription: async function setUserDescription(req, reply) {
+		try {
+			if (!req.body || !req.body.description) {
+				req.session.error = ["You need to fill all information"];
+				return reply.redirect("/changeDescription");
+			}
+			req.body.user_id = req.user.user_id;
+			await axios.post("http://users-service:3003/setUserDescription", req.body);
+			req.session.success = ["Description changed successfully"];
+			return reply.redirect("/home");
+		} catch (err) {
+			console.error("API-GATEWAY setUserDescription Error:", err);
+			req.session.error = ["Error setting your new description"];
+			return reply.redirect("/changeDescription");
+		}
+	},
+
 	changePassword: async function changePassword(req, reply) {
 		const success = req.session.success ?? [];
 		const error = req.session.error ?? [];

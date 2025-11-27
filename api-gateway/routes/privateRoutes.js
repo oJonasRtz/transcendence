@@ -38,4 +38,8 @@ export default async function privateRoutes(fastify, options) {
 	fastify.get("/changeYourPassword", privateControllers.changePassword);
 
 	fastify.post("/setAuthPassword", privateControllers.setAuthPassword);
+
+	fastify.get("/changeDescription", privateControllers.changeDescription);
+
+	fastify.post("/setUserDescription", privateControllers.setUserDescription);
 }
