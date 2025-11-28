@@ -226,6 +226,12 @@ const databaseModels = {
 	setUserDescription: async function setUserDescription(fastify, data) {
 		await fastify.db.run("UPDATE users SET description = ? WHERE user_id = ?", [ data.description, data.user_id ]);
 		return (true);
+	},
+
+	getAllUsersInformation: async function getAllUsersInformation(fastify) {
+		// We are using JOIN here to combine using a common element here the user_id from auth and also from users table
+		const users = await fastify.db.all("SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id");
+		return (users ?? null);
 	}
 }
 

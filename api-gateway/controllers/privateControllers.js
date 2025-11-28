@@ -595,7 +595,12 @@ const privateControllers = {
 			delete req.session.success;
 			delete req.session.error;
 
-			return reply.view("seeAllUsers", { success, error });
+			const response = await axios.post("http://users-service:3003/getAllUsersInformation");
+
+			const users = response?.data ?? [];
+			console.log("users:", users);
+
+			return reply.view("seeAllUsers", { success, error, users });
 		} catch (err) {
 			console.error("API-GATEWAY seeAllUsers:", err);
 			req.session.error = ["Error opening the page to see all users"];

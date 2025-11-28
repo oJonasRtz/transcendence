@@ -18,6 +18,7 @@ const routes = [
 	{ method: 'POST', url: '/getMatchId', handler: usersControllers.getMatchId },
 	{ method: 'POST', url: '/getUserInformation', handler: usersControllers.getUserInformation },
 	{ method: 'POST', url: '/setUserDescription', handler: usersControllers.setUserDescription },
+	{ method: 'GET', url: '/getAllUserInformation', handler: usersControllers.getAllUsersInformation }
 ];
 
 export default async function usersRoutes(fastify, options) {

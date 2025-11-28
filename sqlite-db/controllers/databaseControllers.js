@@ -470,6 +470,16 @@ const databaseControllers = {
 			console.error("setAuthPassword SQLITE-DB error:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getAllUsersInformation: async function getAllUsersInformation(fastify, req, reply) {
+		try {
+			const object = await databaseModels.getUsersAllInformation(fastify);
+			return reply.code(200).send(object ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getAllUsersInformation:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

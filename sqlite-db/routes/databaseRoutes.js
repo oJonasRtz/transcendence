@@ -42,6 +42,7 @@ const routes = [
 	{ method: 'POST', url: '/setAuthEmail', handler: databaseControllers.setAuthEmail },
 	{ method: 'POST', url: '/setAuthPassword', handler: databaseControllers.setAuthPassword },
 	{ method: 'POST', url: '/setUsersDescription', handler: databaseControllers.setUsersDescription },
+	{ method: 'GET', url: '/getAllUsersInformation', handler: databaseControllers.getAllUsersInformation }
 ];
 
 export default async function databaseRoutes(fastify, options) {

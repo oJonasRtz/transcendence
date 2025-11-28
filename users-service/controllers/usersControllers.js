@@ -196,6 +196,16 @@ const usersControllers = {
 			console.error("USERS-SERVICE setUserDescription");
 			return reply.code(500).send(response?.data ?? null);
 		}
+	},
+
+	getAllUsersInformation: async function getAllUsersInformation(req, reply) {
+		try {
+			const response = await axios.get("http://sqlite-db:3002/getAllUsersInformation");
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getAllUsersInformation", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 }
 

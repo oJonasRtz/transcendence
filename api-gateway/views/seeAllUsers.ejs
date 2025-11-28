@@ -17,10 +17,26 @@
 			</header>
 			<section>
 				<h1>All users page</h1>
-				<p id="msg"></p>
-				<script type="module">
-					import { helloWorld } from '/public/js/hello.js';
-					helloWorld();
+				<% if (users && users.length > 0) { %>
+					<% users.forEach(user => { %>
+					<li style="display: flex; align-items: center; gap:10px;">
+						<img src="<%= user.avatar %>" width="60" height="60">
+						<% if (user.isOnline) { %>
+							<strong><p style="color: green">Online</p>
+						<% } else { %>
+							<strong><p style="color: red">Offline</p>
+						<% } %>
+						<a href="/seeProfile?username=<%=encodeURIComponent(user.username)%>">
+							<strong><%= user.username %></strong>
+						</a>
+						<% if (user.description) { %>
+							<p><% user.description %> </p>
+						<% }) else { %>
+							<p>The user cannot has a description</p>
+						<% }) %>
+					</li>
+					<% }) %>
+				<% } %>
 				</script>
 			</section>
 		</main>
