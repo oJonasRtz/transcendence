@@ -585,6 +585,22 @@ const privateControllers = {
 			req.session.error = ["Error during setting your new username"];
 			return reply.redirect("/changeUsername");
 		}
+	},
+
+	seeAllUsers: async function(req, reply) {
+		try {
+			const success = req.session.success ?? [];
+			const error = req.session.error ?? [];
+
+			delete req.session.success;
+			delete req.session.error;
+
+			return reply.view("seeAllUsers", { success, error });
+		} catch (err) {
+			console.error("API-GATEWAY seeAllUsers:", err);
+			req.session.error = ["Error opening the page to see all users"];
+			return reply.redirect("/home");
+		}
 	}
 };
 
