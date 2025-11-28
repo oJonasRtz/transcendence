@@ -21,7 +21,14 @@ const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 const privateControllers = {
 
 	match: async function match(req, reply) {
-		reply.view("matchMaking");
+		const ip = fs.readFileSync('/app/shared/server.ip', 'utf-8').trim();
+
+		console.log("ip: ", ip);
+		return reply.view("matchMaking", {
+			email: req.user.email,
+			user_id: req.user.user_id,
+			ws_host: ip,
+		});
 	},
 
 	helloDb: async function testPrivateRoute(req, reply) {

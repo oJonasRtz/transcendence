@@ -1,4 +1,4 @@
-import db from '../app.js';
+import {db} from '../app.js';
 
 export class Client {
 	#ws;
@@ -8,10 +8,24 @@ export class Client {
 		name: null,
 		id: null,
 	};
-	constructor(ws, email) {
+	constructor({ws, email, id}) {
 		this.#ws = ws;
 		this.#userInfo.email = email;
+		this.#userInfo.id = id;
 		db.setInQueue(email, true);
+
+		const userData = db.getUserInformation(email);
+		try {
+			this.#userInfo.rank = userData.rank;
+			this.#userInfo.name = userData.name;
+		} catch (error) {}
+	}
+
+	get rank() {
+		return this.#userInfo.rank;
+	}
+	get email() {
+		return this.#userInfo.email;
 	}
 
 	#send(data) {
@@ -19,8 +33,12 @@ export class Client {
 		this.#ws.send(JSON.stringify(data));
 	}
 
-	check(ws) {
-		return this.#ws === ws;
+	checkRank(rank) {
+		// const diff = Math.abs(rank - this.#userInfo.rank);
+		// const cap = this.#userInfo.rank * .1; // 10% of player's rank
+
+		// return diff <= cap;
+		return true;
 	}
 
 	matchFound(matchId) {

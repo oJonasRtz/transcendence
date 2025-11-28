@@ -7,10 +7,47 @@
 		<link rel="stylesheet" href="/public/css/styles.css">
 		<title>Match Making</title>
     </head>
-    <body class="bg-black text-white">
-        <div class="min-h-screen flex flex-col justify-center items-center">
+    <body class="min-h-screen flex justify-center items-center text-white">
+        <div class="relative flex flex-col border bg-slate-700 justify-center items-center rounded-xl shadow-md p-6">
             <button id="joinQueueBtn" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3 mb-4">Join Queue</button>
             <button id="leaveQueueBtn" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3">Quit Queue</button>
         </div>
+        <div id="wsMessages" class="text-center mt-6 border bg-red-600"></div>
+        <script>
+            let ws = null;
+
+            const join = document.getElementById('joinQueueBtn');
+            const leave = document.getElementById('leaveQueueBtn');
+
+            join.addEventListener('click', () => {
+                if (ws && ws.readyState === WebSocket.OPEN) return;
+
+                const ip = "<%= ws_host %>"
+                ws = new WebSocket(`wss://${ip}:3004`);
+                ws.onopen = () => {
+                    console.log("Connected to the matchmaking server.");
+                    ws.send(JSON.stringify({ type: "ENQUEUE", email: "<%= email %>", user_id: "<%= user_id %>" }));
+                };
+                ws.onmessage = (event) => {
+                    const message = JSON.parse(event.data);
+                    console.log("Message from server:", message);
+                    const box = document.getElementById("wsMessages");
+                    box.textContent = message.matchId;
+                };
+                ws.onerror = (error) => {
+                    console.error("WebSocket error:", error);
+                };
+                ws.onclose = () => {
+                    console.log("Disconnected from the matchmaking server.");
+                };
+            })
+
+            leave.addEventListener('click', () => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: "DEQUEUE", email: "<%= email %>", user_id: "<%= user_id %>" }));
+                    ws.close();
+                }
+            });
+        </script>
     </body>
 </html>

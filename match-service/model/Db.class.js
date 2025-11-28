@@ -28,4 +28,8 @@ export class DataBase {
     async setMatchId(email, match_id) {
         return (this.#sendRequest("setMatchId", { email: email, match_id: match_id }));
     }
+
+    async getUserInformation(user_id) {
+        return (this.#sendRequest("getUserInformation", { user_id: user_id }));
+    }
 }

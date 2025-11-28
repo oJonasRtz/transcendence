@@ -21,7 +21,7 @@ const routes = [
 	{ method: 'POST', url: '/setAuthPassword', handler: privateControllers.setAuthPassword },
 	{ method: 'GET', url: '/changeDescription', handler: privateControllers.changeDescription },
 	{ method: 'POST', url: '/setUserDescription', handler: privateControllers.setUserDescription },
-	{ method: 'POST', url: '/match', handler: privateControllers.match },
+	{ method: 'GET', url: '/match', handler: privateControllers.match },
 ];
 
 export default async function privateRoutes(fastify, options) {

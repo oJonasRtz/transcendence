@@ -10,8 +10,9 @@ services:
     networks:
       - "transcendence"
     volumes:
-      - ./shared/ssl:/app/ssl:ro
+      - ./shared/ssl:/app/shared/ssl:ro
       - api-gateway:/app/public
+      - ./shared/ip/server.ip:/app/shared/server.ip:ro
   auth-service:
     build: ./auth-service
     image: auth-service:1.0.0
@@ -49,6 +50,7 @@ services:
     ports:
       - "8443:8443"
     networks:
+      - "game"
       - "transcendence"
     volumes:
       - ./shared/ssl:/app/ssl:ro
@@ -63,6 +65,7 @@ services:
       - game-server
     networks:
       - "transcendence"
+      - "game"
     volumes:
       - ./shared/ssl:/app/ssl:ro
       - ./shared/ip/server.ip:/app/public/server.ip:ro
@@ -73,13 +76,23 @@ services:
     container_name: match-service
     depends_on:
       - game-server
+    ports:
+      - "3004:3004"
     networks:
+      - "game"
       - "transcendence"
+    env_file:
+      - ./match-service/.env
+    volumes:
+      - ./shared/ip/server.ip:/app/shared/server.ip:ro
+      - ./shared/ssl:/app/shared/ssl:ro
 volumes:
   sqlite-db:
   users-service:
   api-gateway:
 networks:
+  game:
+    driver: bridge
   transcendence:
     driver: bridge
   db_connection:

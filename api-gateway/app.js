@@ -29,8 +29,9 @@ const __dirname = dirname(__filename);
 
 const app = fastify({
     https: {
-        key: fs.readFileSync('./ssl/server.key'),
-        cert: fs.readFileSync('./ssl/server.cert')
+        key: fs.readFileSync('./shared/ssl/server.key'),
+        cert: fs.readFileSync('./shared/ssl/server.cert'),
+		ca: fs.readFileSync('./shared/ssl/rootCA.pem')
     }
 });
 

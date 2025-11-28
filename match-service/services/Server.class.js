@@ -2,15 +2,23 @@ import fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import formbody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
-import { Client } from './Client.class';
+import { Client } from './Client.class.js';
+import fs from 'fs';
+import { lobby } from '../app.js';
 
 export class Server {
-	#app = fastify();
+	#app = fastify({
+		https: {
+			key: fs.readFileSync('./shared/ssl/server.key'),
+			cert: fs.readFileSync('./shared/ssl/server.cert')
+		}
+	});
 	#queue = new Map(); // <-- key[email] = Client
 	#services = {
 		ENQUEUE: this.#enqueue.bind(this),
 		DEQUEUE: this.#dequeue.bind(this),
 	}
+	#intervalMatchMaking = null;
 
 	constructor() {
 		this.#app.register(cookie, {
@@ -27,10 +35,10 @@ export class Server {
 					const data = JSON.parse(message.toString());
 					const type = data.type;
 
-					if (!type || !data.email || !this.#services[type])
+					if (!type || !data.email || !data.user_id || !this.#services[type])
 						throw new Error('INVALID_FORMAT');
 
-					this.#services[type]({ ws: connection.socket, email: data.email });
+					this.#services[type]({ ws: connection.socket, email: data.email, id: data.user_id });
 				} catch (error) {
 					connection.socket.send(JSON.stringify({ 
 						type: 'ERROR',
@@ -40,6 +48,8 @@ export class Server {
 				}
 			});
 		});
+
+		this.#matchMaking();
 	}
 
 	listen(port = 3004) {
@@ -52,16 +62,42 @@ export class Server {
 		});
 	}
 
-	#matchMaking() {}
+	#matchMaking() {
+		if (this.#intervalMatchMaking)
+			return;
 
-	#enqueue({ws, email}) {
+		const TIMER = 5000; // 5 seconds
+
+		this.#intervalMatchMaking = setInterval(() => {
+			const queueSize = this.#queue.size;
+			if (queueSize < 2)
+				return;
+
+			const queue = Array.from(this.#queue.values());
+			for (let i = 0; i < Math.floor(queueSize / 2); i++) {
+				const clientA = queue[i * 2];
+				const clientB = queue[i * 2 + 1];
+
+				//Match not found, continue
+				if (!clientA.checkRank(clientB.rank)) continue;
+
+				//Match found
+				// const matchId = lobby.newMatch([clientA, clientB]);
+				const matchId = 42;
+				clientA.matchFound(matchId);
+				clientB.matchFound(matchId);
+				this.#queue.delete(clientA.email);
+				this.#queue.delete(clientB.email);
+			}
+		}, TIMER);
+	}
+
+	#enqueue({ws, email, id}) {
 		if (this.#queue.has(email))
 			this.#queue.get(email).destroy();
 
-		const client = new Client(ws, email);
+		const client = new Client({ws, email, id});
 		this.#queue.set(email, client);
-
-		//this.#matchMaking();
 	}
 
 	#dequeue({email}) {

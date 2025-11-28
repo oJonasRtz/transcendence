@@ -1,3 +1,5 @@
+import WebSocket from "ws";
+import fs from "fs";
 
 export class Connection {
 	#socket = null;
@@ -7,7 +9,7 @@ export class Connection {
 		pass: process.env.LOBBY_PASS,
 	}
 	#server = {
-		ip: process.env.IP_LOBBY,
+		ip: fs.readFileSync('/app/shared/server.ip', 'utf-8').trim(),
 		port: process.env.PORT_LOBBY,
 	};
 	#reconnection = {
