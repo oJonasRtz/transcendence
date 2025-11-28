@@ -1,26 +1,33 @@
-import {app, con } from "./app.js";
+// import {app, con } from "./app.js";
 
-const PORT = 3004;
+import { lobby, server } from "./app.js";
 
-try {
-    await app.listen({ port: PORT, host: "0.0.0.0"});
-    console.log(`The match-service is listening on port ${PORT}`);
-} catch (error) {
-    console.error("Error starting the match-service:", error);
-    process.exit(1);
-}
+// const PORT = 3004;
 
-//Connect to game server
-con.connect();
+// try {
+//     await app.listen({ port: PORT, host: "0.0.0.0"});
+//     console.log(`The match-service is listening on port ${PORT}`);
+// } catch (error) {
+//     console.error("Error starting the match-service:", error);
+//     process.exit(1);
+// }
 
-process.on("uncaughtException", (exception) => {
-    console.error("Unhandled Exception:", exception);
-});
+// //Connect to game server
+// con.connect();
 
-process.on("unhandledRejection", (reason) => {
-    console.error("Unhandled rejection:", reason);
-});
+// process.on("uncaughtException", (exception) => {
+//     console.error("Unhandled Exception:", exception);
+// });
 
-app.server.on('close', () => {
-    console.log('Fastify server closed');
-});
+// process.on("unhandledRejection", (reason) => {
+//     console.error("Unhandled rejection:", reason);
+// });
+
+// app.server.on('close', () => {
+//     console.log('Fastify server closed');
+// });
+
+const PORT = process.env.PORT || 3004;
+
+server.listen(PORT);
+lobby.connect();

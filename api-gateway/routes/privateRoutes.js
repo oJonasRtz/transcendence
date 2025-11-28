@@ -1,45 +1,31 @@
-import axios from 'axios';
 import privateControllers from '../controllers/privateControllers.js';
 
-// AUTH-SERVICE
+const routes = [
+	{ method: 'GET', url: '/helloDb', handler: privateControllers.helloDb },
+	{ method: 'GET', url: '/home', handler: privateControllers.getHomePage },
+	{ method: 'GET', url: '/logout', handler: privateControllers.logout },
+	{ method: 'GET', url: '/confirmUserEmail', handler: privateControllers.confirmUserEmail },
+	{ method: 'GET', url: '/confirmUserEmailCode', handler: privateControllers.confirmUserEmailCode },
+	{ method: 'POST', url: '/validateUserEmailCode', handler: privateControllers.validateUserEmailCode },
+	{ method: 'GET', url: '/get2FAQrCode', handler: privateControllers.get2FAQrCode },
+	{ method: 'GET', url: '/check2FAQrCode', handler: privateControllers.check2FAQrCode },
+	{ method: 'POST', url: '/validate2FAQrCode', handler: privateControllers.validate2FAQrCode },
+	{ method: 'POST', url: '/upload', handler: privateControllers.upload },
+	{ method: 'GET', url: '/changeUsername', handler: privateControllers.changeUsername },
+	{ method: 'POST', url: '/setAuthUsername', handler: privateControllers.setAuthUsername },
+	{ method: 'GET', url: '/changeNickname', handler: privateControllers.changeNickname },
+	{ method: 'POST', url: '/setAuthNickname', handler: privateControllers.setAuthNickname },
+	{ method: 'GET', url: '/changeEmail', handler: privateControllers.changeEmail },
+	{ method: 'POST', url: '/setAuthEmail', handler: privateControllers.setAuthEmail },
+	{ method: 'GET', url: '/changeYourPassword', handler: privateControllers.changePassword },
+	{ method: 'POST', url: '/setAuthPassword', handler: privateControllers.setAuthPassword },
+	{ method: 'GET', url: '/changeDescription', handler: privateControllers.changeDescription },
+	{ method: 'POST', url: '/setUserDescription', handler: privateControllers.setUserDescription },
+	{ method: 'POST', url: '/match', handler: privateControllers.match },
+];
 
 export default async function privateRoutes(fastify, options) {
-	fastify.get("/helloDb", privateControllers.helloDb);
-
-	fastify.get("/home", privateControllers.getHomePage);
-
-	fastify.get("/logout", privateControllers.logout);
-
-	fastify.get("/confirmUserEmail", privateControllers.confirmUserEmail);
-
-	fastify.get("/confirmUserEmailCode", privateControllers.confirmUserEmailCode);
-
-	fastify.post("/validateUserEmailCode", privateControllers.validateUserEmailCode);
-
-	fastify.get("/get2FAQrCode", privateControllers.get2FAQrCode);
-
-	fastify.get("/check2FAQrCode", privateControllers.check2FAQrCode);
-
-	fastify.post("/validate2FAQrCode", privateControllers.validate2FAQrCode);
-	fastify.post("/upload", privateControllers.upload);
-
-	fastify.get("/changeUsername", privateControllers.changeUsername);
-
-	fastify.post("/setAuthUsername", privateControllers.setAuthUsername);
-
-	fastify.get("/changeNickname", privateControllers.changeNickname);
-
-	fastify.post("/setAuthNickname", privateControllers.setAuthNickname);
-
-	fastify.get("/changeEmail", privateControllers.changeEmail);
-
-	fastify.post("/setAuthEmail", privateControllers.setAuthEmail);
-
-	fastify.get("/changeYourPassword", privateControllers.changePassword);
-
-	fastify.post("/setAuthPassword", privateControllers.setAuthPassword);
-
-	fastify.get("/changeDescription", privateControllers.changeDescription);
-
-	fastify.post("/setUserDescription", privateControllers.setUserDescription);
+	for (const route of routes) {
+		fastify.route(route);
+	}
 }

@@ -7,8 +7,8 @@ export class Connection {
 		pass: process.env.LOBBY_PASS,
 	}
 	#server = {
-		ip: process.env.IP,
-		port: process.env.PORT,
+		ip: process.env.IP_LOBBY,
+		port: process.env.PORT_LOBBY,
 	};
 	#reconnection = {
 		delay: 5000,

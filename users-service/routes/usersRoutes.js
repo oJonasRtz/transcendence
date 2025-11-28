@@ -1,36 +1,27 @@
 import axios from 'axios';
 import usersControllers from '../controllers/usersControllers.js';
 
+const routes = [
+	{ method: 'POST', url: '/createNewUser', handler: usersControllers.createNewUser },
+	{ method: 'POST', url: '/validateUserEmail', handler: usersControllers.validateUserEmail },
+	{ method: 'POST', url: '/getIsOnline', handler: usersControllers.getIsOnline },
+	{ method: 'POST', url: '/getQueue', handler: usersControllers.getQueue },
+	{ method: 'POST', url: '/setIsOnline', handler: usersControllers.setIsOnline },
+	{ method: 'POST', url: '/getUserAvatar', handler: usersControllers.getUserAvatar },
+	{ method: 'POST', url: '/setUserAvatar', handler: usersControllers.setUserAvatar },
+	{ method: 'POST', url: '/setInGame', handler: usersControllers.setInGame },
+	{ method: 'POST', url: '/getInGame', handler: usersControllers.getInGame },
+	{ method: 'POST', url: '/setInQueue', handler: usersControllers.setInQueue },
+	{ method: 'POST', url: '/setRank', handler: usersControllers.setRank },
+	{ method: 'POST', url: '/getUserStatus', handler: usersControllers.getUserStatus },
+	{ method: 'POST', url: '/setMatchId', handler: usersControllers.setMatchId },
+	{ method: 'POST', url: '/getMatchId', handler: usersControllers.getMatchId },
+	{ method: 'POST', url: '/getUserInformation', handler: usersControllers.getUserInformation },
+	{ method: 'POST', url: '/setUserDescription', handler: usersControllers.setUserDescription },
+];
+
 export default async function usersRoutes(fastify, options) {
-	fastify.post("/createNewUser", usersControllers.createNewUser);
-
-	fastify.post("/validateUserEmail", usersControllers.validateUserEmail);
-
-	fastify.post("/getIsOnline", usersControllers.getIsOnline);
-
-	fastify.post("/getQueue", usersControllers.getQueue);
-
-	fastify.post("/setIsOnline", usersControllers.setIsOnline);
-
-	fastify.post("/getUserAvatar", usersControllers.getUserAvatar);
-
-	fastify.post("/setUserAvatar", usersControllers.setUserAvatar);
-
-	fastify.post("/setInGame", usersControllers.setInGame);
-
-	fastify.post("/getInGame", usersControllers.getInGame);
-
-	fastify.post("/setInQueue", usersControllers.setInQueue);
-
-	fastify.post("/setRank", usersControllers.setRank);
-
-	fastify.post("/getUserStatus", usersControllers.getUserStatus);
-
-	fastify.post('/setMatchId', usersControllers.setMatchId);
-
-	fastify.post('/getMatchId', usersControllers.getMatchId);
-
-	fastify.post("/getUserInformation", usersControllers.getUserInformation);
-
-	fastify.post("/setUserDescription", usersControllers.setUserDescription);
-};
+	for (const route of routes) {
+		fastify.route(route);
+	}
+}

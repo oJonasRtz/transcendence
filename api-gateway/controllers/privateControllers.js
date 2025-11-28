@@ -19,6 +19,11 @@ const DEFAULT_AVATAR_PATH = "/app/public/images/default_avatar.png";
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 
 const privateControllers = {
+
+	match: async function match(req, reply) {
+		reply.view("matchMaking");
+	},
+
 	helloDb: async function testPrivateRoute(req, reply) {
                 try {
                         const result = await axios.get("http://auth-service:3001/helloDb");

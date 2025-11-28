@@ -3,34 +3,26 @@ import publicControllers from '../controllers/publicControllers.js';
 
 // AUTH-SERVICE
 
-export default async function publicRoutes(fastify, options) {
-
-	fastify.get("/", publicControllers.homePage);
-
-	fastify.get("/login", publicControllers.login);
-
-	fastify.get("/register", publicControllers.register);
-
-	fastify.post("/checkRegister", publicControllers.checkRegister);
-
-	fastify.post("/checkLogin", publicControllers.checkLogin);
-
-	fastify.get("/hello", publicControllers.hello);
-
-	fastify.get("/forgotPassword", publicControllers.forgotPasswordPage);
-
-	fastify.post("/checkEmail", publicControllers.checkEmail);
-
-	fastify.get("/validateEmailCode", publicControllers.validateEmailCode);
-
-	fastify.get("/checkEmailCode", publicControllers.checkEmailCode);
-
-	fastify.post("/checkEmailCode", publicControllers.checkEmailCode);
-
-	fastify.get("/changePassword", publicControllers.changePassword);
-
-	fastify.post("/newPassword", publicControllers.newPassword);
-
+const routes = [
+	{ method: 'GET', url: '/', handler: publicControllers.homePage },
+	{ method: 'GET', url: '/login', handler: publicControllers.login },
+	{ method: 'GET', url: '/register', handler: publicControllers.register },
+	{ method: 'POST', url: '/checkRegister', handler: publicControllers.checkRegister },
+	{ method: 'POST', url: '/checkLogin', handler: publicControllers.checkLogin },
+	{ method: 'GET', url: '/hello', handler: publicControllers.hello },
+	{ method: 'GET', url: '/forgotPassword', handler: publicControllers.forgotPasswordPage },
+	{ method: 'POST', url: '/checkEmail', handler: publicControllers.checkEmail },
+	{ method: 'GET', url: '/validateEmailCode', handler: publicControllers.validateEmailCode },
+	{ method: 'GET', url: '/checkEmailCode', handler: publicControllers.checkEmailCode },
+	{ method: 'POST', url: '/checkEmailCode', handler: publicControllers.checkEmailCode },
+	{ method: 'GET', url: '/changePassword', handler: publicControllers.changePassword },
+	{ method: 'POST', url: '/newPassword', handler: publicControllers.newPassword },
 	// TESTING BAD ROUTES
-	fastify.get("/checkDb", publicControllers.checkDb);
+	{ method: 'GET', url: '/checkDb', handler: publicControllers.checkDb },
+];
+
+export default async function publicRoutes(fastify, options) {
+	for (const route of routes) {
+		fastify.route(route);
+	}	
 };
