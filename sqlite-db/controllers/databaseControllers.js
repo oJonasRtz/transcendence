@@ -259,7 +259,7 @@ const databaseControllers = {
 
 	setIsOnline: async function setIsOnline(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email || req.body.isOnline === undefined)
+			if (!req.body || !req.body.user_id || req.body.isOnline === undefined)
 				return reply.code(400).send("You need to inform an email here");
 			await databaseModels.setIsOnline(fastify, req.body);
 			return reply.code(200).send("Success");
@@ -474,7 +474,7 @@ const databaseControllers = {
 
 	getAllUsersInformation: async function getAllUsersInformation(fastify, req, reply) {
 		try {
-			const object = await databaseModels.getUsersAllInformation(fastify);
+			const object = await databaseModels.getAllUsersInformation(fastify);
 			return reply.code(200).send(object ?? null);
 		} catch (err) {
 			console.error("SQLITE-DB getAllUsersInformation:", err);

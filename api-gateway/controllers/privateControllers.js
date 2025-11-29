@@ -61,7 +61,6 @@ const privateControllers = {
 
 			//get the user's avatar
 			
-			console.log("user_id home:", req.user.user_id)
 			const response = await axios.post("http://users-service:3003/getUserAvatar", { user_id: req.user.user_id, email: req.user.email });
 			let avatar = response?.data.avatar;
 
@@ -83,20 +82,14 @@ const privateControllers = {
                 		.toFile(DEFAULT_AVATAR_PATH);
 				}			
 				avatar = "/public/images/default_avatar.png";
+				await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatar });
 			}
-
-			//get the user's status
-			const isOnline = req.user.isOnline;
 
 			const myData = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
 
 			const data = myData?.data;
 
-			console.log("data:", data);
-
-			await axios.post("http://users-service:3003/setIsOnline", req.user);
-
-			return reply.view("home", { username, success, data, avatar, error, isOnline } );
+			return reply.view("home", { username, success, data, avatar, error } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
 			return reply.redirect("/login");
@@ -595,7 +588,7 @@ const privateControllers = {
 			delete req.session.success;
 			delete req.session.error;
 
-			const response = await axios.post("http://users-service:3003/getAllUsersInformation");
+			const response = await axios.get("http://users-service:3003/getAllUsersInformation");
 
 			const users = response?.data ?? [];
 			console.log("users:", users);

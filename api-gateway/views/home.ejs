@@ -57,10 +57,10 @@
 				<% } %>
 			</section>
 			<section>
-				<% if (isOnline) { %>
+				<% if (data.isOnline) { %>
 					<p style="color: green"><strong>Online</strong></p>
 				<% } else { %>
-					<p style="color: orange"><strong>Offline</strong</p>
+					<p style="color: red"><strong>Offline</strong</p>
 				<% } %>
 				<p><strong>Friends:</strong> <%= data.friends %> </p>
 				<% if (data.description) { %>

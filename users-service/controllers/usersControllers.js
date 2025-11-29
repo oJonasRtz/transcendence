@@ -115,7 +115,7 @@ const usersControllers = {
 
 	setIsOnline: async function setIsOnline(req, reply) {
 		try {
-			if (!req.body || !req.body.email || req.body.isOnline === undefined)
+			if (!req.body || !req.body.user_id || req.body.isOnline === undefined)
 				return reply.code(400).send("You need to inform an email and the signal for isOnline");
 			await axios.post("http://sqlite-db:3002/setIsOnline", req.body);
 			return reply.code(200).send("Success");
@@ -130,7 +130,6 @@ const usersControllers = {
 			if (!req.body || !req.body.user_id || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
 			const avatar = await axios.post("http://sqlite-db:3002/getUserAvatar", { user_id: req.body.user_id, email: req.body.email });
-			console.log("response users-service:", avatar?.data);
 			return reply.code(200).send(avatar?.data ?? null);
 		} catch (err) {
 			console.error("getUserAvatar Error users-service:", err);

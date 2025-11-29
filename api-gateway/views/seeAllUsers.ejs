@@ -17,27 +17,28 @@
 			</header>
 			<section>
 				<h1>All users page</h1>
+				<ul class="space-y-6 mt-6">
 				<% if (users && users.length > 0) { %>
 					<% users.forEach(user => { %>
-					<li style="display: flex; align-items: center; gap:10px;">
+					<li class="bg-gray-900 rounded-lg shadow-md hover:bg-gray-800 transition">
 						<img src="<%= user.avatar %>" width="60" height="60">
 						<% if (user.isOnline) { %>
-							<strong><p style="color: green">Online</p>
+							<strong><p style="color: green">Online</p></strong>
 						<% } else { %>
-							<strong><p style="color: red">Offline</p>
+							<strong><p style="color: red">Offline</p></strong>
 						<% } %>
-						<a href="/seeProfile?username=<%=encodeURIComponent(user.username)%>">
+						<a href="/seeProfile?username=<%=encodeURIComponent(user.username)%>" class="text-blue-400 font-bold hover:underline">
 							<strong><%= user.username %></strong>
 						</a>
 						<% if (user.description) { %>
-							<p><% user.description %> </p>
-						<% }) else { %>
-							<p>The user cannot has a description</p>
-						<% }) %>
+							<strong><p><%= user.description %> </p></strong>
+						<% } else { %>
+							<p class="text-gray-300 text-sm">This user has no description</p>
+						<% } %>
 					</li>
 					<% }) %>
 				<% } %>
-				</script>
+				</ul>
 			</section>
 		</main>
 		</div>
