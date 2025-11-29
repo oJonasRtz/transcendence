@@ -18,7 +18,8 @@ const routes = [
 	{ method: 'POST', url: '/getMatchId', handler: usersControllers.getMatchId },
 	{ method: 'POST', url: '/getUserInformation', handler: usersControllers.getUserInformation },
 	{ method: 'POST', url: '/setUserDescription', handler: usersControllers.setUserDescription },
-	{ method: 'GET', url: '/getAllUsersInformation', handler: usersControllers.getAllUsersInformation }
+	{ method: 'GET', url: '/getAllUsersInformation', handler: usersControllers.getAllUsersInformation },
+	{ method: 'POST', url: '/getDataByPublicId', handler: usersControllers.getDataByPublicId }
 ];
 
 export default async function usersRoutes(fastify, options) {

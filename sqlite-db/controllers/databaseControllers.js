@@ -35,7 +35,6 @@ const databaseControllers = {
 				return reply.code(400).send("You need to fill all the fields");
 
 			const object = await databaseModels.getUserPassword(fastify, email);
-			console.log("object tryLogin: sqlite", object);
 			if (!object || !object.password)
 				return reply.code(404).send("The user does not exist");
 			const match = await bcrypt.compare(password, object.password);
@@ -92,8 +91,6 @@ const databaseControllers = {
 			if (!password || !email)
 				throw new Error("You forgot password or email");
 
-			console.log("password:", password, "email", email);
-
 			const password_hash = await bcrypt.hash(password, 12);
 
 			const object = await databaseModels.getPassword(fastify, email);
@@ -115,7 +112,6 @@ const databaseControllers = {
 		try {
 			const { username, user_id } = req.body;
 
-			console.log("user_id createNewUser sqlite controller:", user_id);
 			await databaseModels.createNewUser(fastify, user_id);
 			return reply.code(201).send("Success");
 		} catch (err) {
@@ -478,6 +474,18 @@ const databaseControllers = {
 			return reply.code(200).send(object ?? null);
 		} catch (err) {
 			console.error("SQLITE-DB getAllUsersInformation:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getDataByPublicId: async function getDataByPublicId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.public_id)
+				return reply.code(400).send("You need to inform the public_id here");
+			const object = await databaseModels.getDataByPublicId(fastify, req.body);
+			return reply.code(200).send(object ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getDataByPublicId ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
 	}

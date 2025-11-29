@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { stat } from 'node:fs';
 import { randomUUID } from 'crypto';
+import { nanoid } from 'nanoid';
 
 const databaseModels = {
 	getUserData: async function getUserData(fastify, email) {
@@ -50,7 +51,6 @@ const databaseModels = {
 	},
 
 	registerNewUser: async function registerNewUser(fastify, data, password_hash) {
-		console.log("Models sqlite-db user_id:", data.user_id);
 		await fastify.db.run("INSERT INTO auth (user_id, username, nickname, password, email, twoFactorEnable) VALUES (?, ?, ?, ?, ?, ?)", 
 			[ data.user_id, data.username, data.nickname, password_hash, data.email, data.is2faEnable ]);
 	},
@@ -76,7 +76,8 @@ const databaseModels = {
 	},
 
 	createNewUser: async function createNewUser(fastify, user_id) {
-		await fastify.db.run("INSERT INTO users (user_id) VALUES (?)", [ user_id ]);
+		const nanoId = nanoid();
+		await fastify.db.run("INSERT INTO users (user_id, public_id) VALUES (?, ?)", [ user_id, nanoId ]);
 	},
 
 	activateEmail: async function validateUserEmail(fastify, email) {
@@ -231,6 +232,12 @@ const databaseModels = {
 		// We are using JOIN here to combine using a common element here the user_id from auth and also from users table
 		const users = await fastify.db.all("SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id");
 		return (users ?? null);
+	},
+
+	getDataByPublicId: async function getAllUsersInformation(fastify, body) {
+		const user_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ body.public_id ]);
+		const data = await fastify.db.get("SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?", [ user_id.user_id ]);
+		return (data ?? null);
 	}
 }
 

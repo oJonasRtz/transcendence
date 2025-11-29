@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="Time do balacobaco">
+		<link rel="stylesheet" href="/public/css/styles.css">
+		<title>Public Profile</title>
+	</head>
+	<body class="bg-cover bg-fixed bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]">
+                <div class="z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
+		<header>
+			<nav>
+				<a href="/home">Home</a>
+				<a href="/seeAllUsers">See All Users</a>
+			</nav>
+		</header>
+		<h2>Public Profile</h2>
+		<img src="<%= data.avatar %>" alt="avatar">
+		<section>
+                        <form action="/friendInvite" method="POST">
+                                <input type="hidden" name="public_id" value="<%= data.public_id %>">
+                                <button type="submit" class="cursor-pointer bg-green-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-200">Invite to a friend</button>
+                        </form>
+                </section>
+		<h2><strong><%= data.username %></strong></h2>
+		<% if (data.isOnline) { %>
+			<p style="color: green"><strong>Online</strong></p>
+		<% } else { %>
+			<p style="color: red"><strong>Offline</strong></p>
+		<% } %>
+		<p><strong>Title: <%= data.title %></strong></p>
+		<p><strong>Ranking: <%= data.rank %>°</strong></p>
+		<p><strong>Experience Points: <%= data.experience_points %> </p>
+		<p><strong>Wins: <%= data.wins %></p>
+		<p><strong>Losses: <%= data.losses %></p>
+		<% if ((Number(data.wins) + Number(data.losses)) === 0) { %>
+                        <p><strong>Win rate:</strong> 0%</p>
+                <% } else { %>
+                        <p><strong>Win rate:</strong> <%= ((Number(data.wins) / (Number(data.wins) + Number(data.losses))) * 100).toFixed(2) %>% </p>
+                <% } %>
+		<% if (data.description) { %>
+			<p><strong><%= data.description %></strong></p>
+		<% } else { %>
+			<p><strong>The user has no description</strong></p>
+		<% } %>
+		</div>
+	</body>
+</html>

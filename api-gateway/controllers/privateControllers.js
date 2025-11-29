@@ -599,6 +599,19 @@ const privateControllers = {
 			req.session.error = ["Error opening the page to see all users"];
 			return reply.redirect("/home");
 		}
+	},
+
+	seeProfile: async function(req,reply) {
+		try {
+			const { user } = req.query;
+			const response = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: user });
+			const data = response?.data;
+			return reply.view("publicProfile", { data } );
+		} catch (err) {
+			console.error("API-GATEWAY seeProfile Error:", err);
+			req.session.error = ["Error trying to see the profile of the target user"];
+			return reply.redirect("/home");
+		}
 	}
 };
 

@@ -38,6 +38,7 @@ export default async function initDatabase() {
 			inQueue BOOLEAN DEFAULT FALSE,
 			inGame BOOLEAN DEFAULT FALSE,
 			rank INTEGER DEFAULT 0,
+			public_id TEXT UNIQUE NOT NULL,
 			match_id INTEGER DEFAULT NULL,
 			title TEXT DEFAULT 'Novice',
 			description TEXT DEFAULT NULL,

@@ -205,6 +205,18 @@ const usersControllers = {
 			console.error("USERS-SERVICE getAllUsersInformation", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getDataByPublicId: async function getDataByPublicId(req, reply) {
+		try {
+			if (!req.body || !req.body.public_id)
+				return reply.code(400).send("You need to inform the public_id");
+			const response = await axios.post("http://sqlite-db:3002/getDataByPublicId", req.body);
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getDataByPublicId ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 }
 

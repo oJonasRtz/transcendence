@@ -22,7 +22,8 @@ const routes = [
 	{ method: 'GET', url: '/changeDescription', handler: privateControllers.changeDescription },
 	{ method: 'POST', url: '/setUserDescription', handler: privateControllers.setUserDescription },
 	{ method: 'GET', url: '/match', handler: privateControllers.match },
-	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers }
+	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers },
+	{ method: 'GET', url: '/seeProfile', handler: privateControllers.seeProfile }
 ];
 
 export default async function privateRoutes(fastify, options) {

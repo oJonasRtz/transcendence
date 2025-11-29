@@ -122,6 +122,10 @@ export async function validatorHook(req, reply) {
 			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3 || req.body.nickname.length > 20),
 			message: "Invalid nickname"
 		},
+		{
+			condition: req.body.description && req.body.description.length > 100,
+			message: "Description too large"
+		}
 	];
 
 	check.forEach((item) => {
