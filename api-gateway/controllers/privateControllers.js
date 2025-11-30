@@ -11,12 +11,14 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
+import matchClient from '../utils/MatchClient.class.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const DEFAULT_AVATAR_PATH = "/app/public/images/default_avatar.png";
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
+let inQueue = false;
 
 const privateControllers = {
 
@@ -29,6 +31,31 @@ const privateControllers = {
 			user_id: req.user.user_id,
 			ws_host: ip,
 		});
+	},
+
+	joinQueue: async function joinQueue(req, reply) {
+		if (inQueue) return;
+
+		const payload = {
+			type: "ENQUEUE",
+			email: req.user.email,
+			user_id: req.user.user_id,
+		};
+
+		matchClient.sendMessage(payload);
+		inQueue = true;
+	},
+
+	leaveQueue: async function leaveQueue(req, reply) {
+		if (!inQueue) return;
+	
+		const payload = {
+			type: "DEQUEUE",
+			email: req.user.email,
+			user_id: req.user.user_id,
+		};
+		matchClient.sendMessage(payload);
+		inQueue = false;
 	},
 
 	helloDb: async function testPrivateRoute(req, reply) {

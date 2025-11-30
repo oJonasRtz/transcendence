@@ -14,39 +14,15 @@
         </div>
         <div id="wsMessages" class="text-center mt-6 border bg-red-600"></div>
         <script>
-            let ws = null;
-
             const join = document.getElementById('joinQueueBtn');
             const leave = document.getElementById('leaveQueueBtn');
 
-            join.addEventListener('click', () => {
-                if (ws && ws.readyState === WebSocket.OPEN) return;
-
-                const ip = "<%= ws_host %>"
-                ws = new WebSocket(`wss://${ip}:3004`);
-                ws.onopen = () => {
-                    console.log("Connected to the matchmaking server.");
-                    ws.send(JSON.stringify({ type: "ENQUEUE", email: "<%= email %>", user_id: "<%= user_id %>" }));
-                };
-                ws.onmessage = (event) => {
-                    const message = JSON.parse(event.data);
-                    console.log("Message from server:", message);
-                    const box = document.getElementById("wsMessages");
-                    box.textContent = message.matchId;
-                };
-                ws.onerror = (error) => {
-                    console.error("WebSocket error:", error);
-                };
-                ws.onclose = () => {
-                    console.log("Disconnected from the matchmaking server.");
-                };
+            join.addEventListener('click', async () => {
+                await fetch('/match/join', {method: 'POST'});
             })
 
-            leave.addEventListener('click', () => {
-                if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ type: "DEQUEUE", email: "<%= email %>", user_id: "<%= user_id %>" }));
-                    ws.close();
-                }
+            leave.addEventListener('click', async () => {
+                await fetch('/match/leave', {method: 'POST'});
             });
         </script>
     </body>
