@@ -591,7 +591,6 @@ const privateControllers = {
 			const response = await axios.get("http://users-service:3003/getAllUsersInformation");
 
 			const users = response?.data ?? [];
-			console.log("users:", users);
 
 			return reply.view("seeAllUsers", { success, error, users });
 		} catch (err) {

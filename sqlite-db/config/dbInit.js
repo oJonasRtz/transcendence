@@ -51,6 +51,25 @@ export default async function initDatabase() {
 		);
 	`);
 
+	await db.exec(`CREATE TABLE IF NOT EXISTS messages (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        content TEXT NOT NULL,
+                        sender_id INTEGER NOT NULL,
+                        receiver_id INTEGER NULL DEFAULT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+	`);
+
+	await db.exec(`
+                        CREATE TABLE IF NOT EXISTS friends (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        owner_id INTEGER NOT NULL,
+                        friend_id INTEGER NOT NULL,
+                        accepted BOOLEAN DEFAULT FALSE,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+	`);
+
 	// TRIGGERS -> event listener, it can help us to do an action if we detect an event happened
 
 	await db.exec(`CREATE TRIGGER IF NOT EXISTS update_users_datetime

@@ -54,6 +54,14 @@ services:
       - "db_connection"
     volumes:
       - sqlite-db:/app/database
+      - ./shared/ssl:/app/ssl:ro
+  chat-service:
+    build: ./chat-service
+    image: chat-service:1.0.0
+    container_name: chat-service
+    networks:
+      - "transcendence"
+      - "db_connection"
   game-server:
     build: ./game-server
     image: game-server:1.0.0
