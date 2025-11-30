@@ -15,7 +15,6 @@ import fs from 'fs';
 import fastifyStatic from "@fastify/static";
 import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
-import http from 'http';
 
 dotenv.config();
 
