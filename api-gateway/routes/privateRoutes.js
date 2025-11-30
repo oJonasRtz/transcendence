@@ -24,6 +24,7 @@ const routes = [
 	{ method: 'GET', url: '/match', handler: privateControllers.match },
 	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers },
 	{ method: 'GET', url: '/seeProfile', handler: privateControllers.seeProfile },
+	{ method: 'GET', url: '/chatAllUsers', handler: privateControllers.chatAllUsers },
 	//{ method: 'POST', url: '/match/join', handler: privateControllers.joinMatch },
 	//{ method: 'POST', url: '/match/leave', handler: privateControllers.leaveMatch },
 ];

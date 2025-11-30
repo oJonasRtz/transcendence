@@ -245,7 +245,6 @@ const privateControllers = {
 		}
 
 		if (req.session.qrCodeDataURL == null && req.session.image == null) {
-			console.error("Entrei aqui check2FAQrCode auth");
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/home");
 		}
@@ -607,7 +606,7 @@ const privateControllers = {
 		}
 	},
 
-	seeAllUsers: async function(req, reply) {
+	seeAllUsers: async function seeAllUsers(req, reply) {
 		try {
 			const success = req.session.success ?? [];
 			const error = req.session.error ?? [];
@@ -627,7 +626,7 @@ const privateControllers = {
 		}
 	},
 
-	seeProfile: async function(req,reply) {
+	seeProfile: async function seeProfile(req,reply) {
 		try {
 			const { user } = req.query;
 			const response = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: user });
@@ -638,6 +637,10 @@ const privateControllers = {
 			req.session.error = ["Error trying to see the profile of the target user"];
 			return reply.redirect("/home");
 		}
+	},
+
+	chatAllUsers: async function chatAllUsers(req, reply) {
+		return reply.view("chatAllUsers", {} );
 	}
 };
 
