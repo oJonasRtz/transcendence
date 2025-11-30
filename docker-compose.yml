@@ -1,4 +1,17 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api-gateway
+    networks:
+      - "transcendence"
   api-gateway:
     build: ./api-gateway
     image: api-gateway:1.0.0
@@ -10,7 +23,6 @@ services:
     networks:
       - "transcendence"
     volumes:
-      - ./shared/ssl:/app/shared/ssl:ro
       - api-gateway:/app/public
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
   auth-service:
@@ -42,7 +54,6 @@ services:
       - "db_connection"
     volumes:
       - sqlite-db:/app/database
-      - ./shared/ssl:/app/ssl:ro
   game-server:
     build: ./game-server
     image: game-server:1.0.0
@@ -53,7 +64,6 @@ services:
       - "game"
       - "transcendence"
     volumes:
-      - ./shared/ssl:/app/ssl:ro
       - ./shared/game-stats.json:/app/game-stats.json
   game-pong:
     build: ./game-pong
@@ -67,7 +77,6 @@ services:
       - "transcendence"
       - "game"
     volumes:
-      - ./shared/ssl:/app/ssl:ro
       - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
   match-service:
@@ -85,7 +94,6 @@ services:
       - ./match-service/.env
     volumes:
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
-      - ./shared/ssl:/app/shared/ssl:ro
 volumes:
   sqlite-db:
   users-service:

@@ -1,5 +1,5 @@
 # Start all services
-up: get-ip build
+up: tsl get-ip build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 
@@ -11,7 +11,8 @@ get-ip:
 # generate tsl certificates
 tsl:
 	@echo "Generating TLS certificates"
-	@sudo bash ./shared/ssl/mkcert.sh
+	@chmod +x ./nginx/ssl/mkcert.sh
+	@bash ./nginx/ssl/mkcert.sh
 
 # Shutdown all services
 

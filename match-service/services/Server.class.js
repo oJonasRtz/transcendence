@@ -3,16 +3,10 @@ import fastifyWebsocket from '@fastify/websocket';
 import formbody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
 import { Client } from './Client.class.js';
-import fs from 'fs';
 import { lobby } from '../app.js';
 
 export class Server {
-	#app = fastify({
-		https: {
-			key: fs.readFileSync('./shared/ssl/server.key'),
-			cert: fs.readFileSync('./shared/ssl/server.cert')
-		}
-	});
+	#app = fastify();
 	#queue = new Map(); // <-- key[email] = Client
 	#services = {
 		ENQUEUE: this.#enqueue.bind(this),

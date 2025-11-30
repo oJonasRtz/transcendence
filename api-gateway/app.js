@@ -19,7 +19,7 @@ import multipart from '@fastify/multipart';
 dotenv.config();
 
 // It is a temporary configuration
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,13 +27,7 @@ const __dirname = dirname(__filename);
 //console.log(__filename);
 //console.log(__dirname);
 
-const app = fastify({
-    https: {
-        key: fs.readFileSync('./shared/ssl/server.key'),
-        cert: fs.readFileSync('./shared/ssl/server.cert'),
-		ca: fs.readFileSync('./shared/ssl/rootCA.pem')
-    }
-});
+const app = fastify();
 
 // To allow uploads with the limit of 2MB filesize
 
