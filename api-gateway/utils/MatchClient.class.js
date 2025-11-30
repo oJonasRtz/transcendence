@@ -1,4 +1,4 @@
-import WebSocket from 'ws';
+/*import WebSocket from 'ws';
 
 class MatchClient {
 	#ws = null;
@@ -21,4 +21,4 @@ class MatchClient {
 	}
 }
 
-export default new MatchClient('ws://match-service:3004');
+export default new MatchClient('ws://match-service:3004');*/

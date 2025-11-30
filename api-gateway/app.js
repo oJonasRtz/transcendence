@@ -15,6 +15,7 @@ import fs from 'fs';
 import fastifyStatic from "@fastify/static";
 import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
+import http from 'http';
 
 dotenv.config();
 
@@ -27,7 +28,14 @@ const __dirname = dirname(__filename);
 //console.log(__filename);
 //console.log(__dirname);
 
-const app = fastify();
+const app = fastify({
+	serverFactory: (handler, opts) => {
+		const server = http.createServer((req, res) => {
+			handler(req, res);
+		});
+		return server;
+	}
+});
 
 // To allow uploads with the limit of 2MB filesize
 
@@ -42,12 +50,11 @@ app.register(fastifyStatic, {
 	prefix: "/public/"
 });
 
-
 app.get("/boom", (req, reply) => {
 	throw new Error("Big Error");
 });
 
-//errorHandler(app);
+errorHandler(app);
 notFoundHandler(app);
 
 const isProduction = process.env.NODE_ENV === 'production';
