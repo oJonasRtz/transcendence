@@ -1,3 +1,4 @@
+import { io } from "socket.io-client";
 export function chat() {
     const SOCKET_URL = "http://localhost:3000";
     const username = document.body.dataset.username;
@@ -10,6 +11,15 @@ export function chat() {
         socket.emit("join", username);
     });
     socket.on("serverMessage", (msg) => {
+        const messagesDiv = document.getElementById("messages");
+        if (!messagesDiv)
+            return;
+        const p = document.createElement("p");
+        p.style.fontWeight = "bold";
+        p.style.padding = "4px 0";
+        p.textContent = msg;
+        messagesDiv.appendChild(p);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
         console.log("SERVER MESSAGE:", msg);
     });
     socket.on("updateUsers", (users) => {

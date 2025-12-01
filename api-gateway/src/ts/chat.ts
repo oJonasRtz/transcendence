@@ -17,7 +17,19 @@ socket.on("connect", () => {
 });
 
 socket.on("serverMessage", (msg: string) => {
-    console.log("SERVER MESSAGE:", msg);
+	const messagesDiv = document.getElementById("messages");
+	
+	if (!messagesDiv) return ;
+
+	const p = document.createElement("p");
+	p.style.fontWeight = "bold";
+	p.style.padding = "4px 0";
+	p.textContent = msg;
+
+	messagesDiv.appendChild(p);
+	messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+	console.log("SERVER MESSAGE:", msg);
 });
 
 socket.on("updateUsers", (users: string[]) => {

@@ -27,6 +27,7 @@ export default async function registerServer(io) {
 			users.set(socket.id, name);
 			//await reloadEverything();
 			console.log(`system: ${name} joined to the chat`);
+			socket.broadcast.emit("serverMessage", `system: ${name} joined to the chat`);
 		})
 		//disconnection
 		socket.on("disconnect", () => {
@@ -34,6 +35,8 @@ export default async function registerServer(io) {
 			users.delete(socket.id);
 			//await reloadEverything;
 			console.log(`system: ${name} left the chat`);
+			socket.broadcast.emit("serverMessage", `system: ${name} left the chat`);
 		})
 	});
+
 }
