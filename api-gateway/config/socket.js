@@ -24,9 +24,12 @@ export default async function registerServer(io) {
 		// connection
 		socket.on("join", async (user) => {
 			let name = user?.trim() || "Anonymous";
+			const exist = Array.from(users.values()).includes(name);
+			if (exist) return ;
 			users.set(socket.id, name);
 			//await reloadEverything();
 			console.log(`system: ${name} joined to the chat`);
+			io.emit("updateUsers", Array.from(users.values()));
 			socket.broadcast.emit("serverMessage", `system: ${name} joined to the chat`);
 		})
 		//disconnection
@@ -35,6 +38,7 @@ export default async function registerServer(io) {
 			users.delete(socket.id);
 			//await reloadEverything;
 			console.log(`system: ${name} left the chat`);
+			io.emit("updateUsers", Array.from(users.values()));
 			socket.broadcast.emit("serverMessage", `system: ${name} left the chat`);
 		})
 	});

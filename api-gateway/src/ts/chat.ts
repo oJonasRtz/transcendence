@@ -1,5 +1,3 @@
-import { io } from "socket.io-client";
-
 export function chat() {
 
 const SOCKET_URL = "http://localhost:3000";
@@ -33,6 +31,21 @@ socket.on("serverMessage", (msg: string) => {
 });
 
 socket.on("updateUsers", (users: string[]) => {
+	const usersDiv = document.getElementById("users");
+
+	if (!usersDiv) return ;
+
+	usersDiv.innerHTML = "";
+
+	users.forEach(user => {
+		const p = document.createElement("p");
+		p.style.fontWeight = "bold";
+		p.style.padding = "4px 0";
+		p.textContent = user;
+		usersDiv.appendChild(p);
+		usersDiv.scrollTop = usersDiv.scrollHeight;
+	})
+	
     console.log("USERS:", users);
 });
 
