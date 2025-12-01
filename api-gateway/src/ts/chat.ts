@@ -3,7 +3,10 @@ export function chat() {
 const SOCKET_URL = "http://localhost:3000";
 
 const username = document.body.dataset.username;
+const public_id = document.body.dataset.public_id;
+
 console.log("O username:", username);
+console.log("Public_id:", public_id);
 
 const socket = io(SOCKET_URL, {
     transports: ["websocket"], 
@@ -11,7 +14,7 @@ const socket = io(SOCKET_URL, {
 
 socket.on("connect", () => {
     console.log("Connected:", socket.id, "as", username);
-    socket.emit("join", username);
+    socket.emit("join", { username, public_id });
 });
 
 socket.on("serverMessage", (msg: string) => {
@@ -30,7 +33,7 @@ socket.on("serverMessage", (msg: string) => {
 	console.log("SERVER MESSAGE:", msg);
 });
 
-socket.on("updateUsers", (users: string[]) => {
+socket.on("updateUsers", (users: chatUser[]) => {
 	const usersDiv = document.getElementById("users");
 
 	if (!usersDiv) return ;
@@ -38,11 +41,13 @@ socket.on("updateUsers", (users: string[]) => {
 	usersDiv.innerHTML = "";
 
 	users.forEach(user => {
-		const p = document.createElement("p");
-		p.style.fontWeight = "bold";
-		p.style.padding = "4px 0";
-		p.textContent = user;
-		usersDiv.appendChild(p);
+		const a = document.createElement("a");
+		a.textContent = `${user.name}`;
+		a.href = `/seeProfile?user=${user.public_id}`;
+		a.style.fontWeight = "bold";
+		a.style.padding = "4px 0";
+		usersDiv.appendChild(a);
+		usersDiv.appendChild(document.createElement("br"));
 		usersDiv.scrollTop = usersDiv.scrollHeight;
 	})
 	

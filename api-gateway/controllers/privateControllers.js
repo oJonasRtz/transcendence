@@ -636,7 +636,14 @@ const privateControllers = {
 	},
 
 	chatAllUsers: async function chatAllUsers(req, reply) {
-		return reply.view("chatAllUsers", { username: req.user.username } );
+		try {
+			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
+			return reply.view("chatAllUsers", { public_id: response?.data.public_id, username: req.user.username } );
+		} catch (err) {
+			console.error("API-GATEWAY chatAllUsers:", err);
+			req.session.error = ["Error opening the chat"];
+			return reply.redirect("/home");
+		}
 	},
 
 	deleteUserAccount: async function deleteUserAccount(req, reply) {

@@ -22,11 +22,11 @@ export default async function registerServer(io) {
 	io.on("connection", (socket) => {
 		socket.currentChannel = null; // the first channel is not a channel :D
 		// connection
-		socket.on("join", async (user) => {
-			let name = user?.trim() || "Anonymous";
-			const exist = Array.from(users.values()).includes(name);
+		socket.on("join", async ({ username, public_id }) => {
+			let name = username?.trim() || "Anonymous";
+			const exist = Array.from(users.values()).some(u => u.name === name);
 			if (exist) return ;
-			users.set(socket.id, name);
+			users.set(socket.id, { name, public_id });
 			//await reloadEverything();
 			console.log(`system: ${name} joined to the chat`);
 			io.emit("updateUsers", Array.from(users.values()));
@@ -34,12 +34,14 @@ export default async function registerServer(io) {
 		})
 		//disconnection
 		socket.on("disconnect", () => {
-			let name = users.get(socket.id) || "Anonymous"; 
+			let data = users.get(socket.id);
+			if (!data)
+				data = { name: "Anonymous" };
 			users.delete(socket.id);
 			//await reloadEverything;
-			console.log(`system: ${name} left the chat`);
+			console.log(`system: ${data.name} left the chat`);
 			io.emit("updateUsers", Array.from(users.values()));
-			socket.broadcast.emit("serverMessage", `system: ${name} left the chat`);
+			socket.broadcast.emit("serverMessage", `system: ${data.name} left the chat`);
 		})
 	});
 
