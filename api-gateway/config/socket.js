@@ -7,8 +7,8 @@ export default async function registerServer(io) {
 
 	async function reloadEverything () {
                 try {
-                        responseMessages = await axios.get("http://chat-service:3005/getAllMessages");
-                        responseChannels = await axios.get("http://chat-service:3005/getAllChannels");
+                        const responseMessages = await axios.get("http://chat-service:3005/getAllMessages");
+                        const responseChannels = await axios.get("http://chat-service:3005/getAllChannels");
 			messages = responseMessages?.data ?? [];
 			channels = responseChannels?.data ?? [];
                         console.log("got all messages and channels");
@@ -17,13 +17,23 @@ export default async function registerServer(io) {
                 }
         };
 
+	// connection and disconnection are the pattern, do not change the names!!!
+
 	io.on("connection", (socket) => {
-		socket.currentChannel = null;
+		socket.currentChannel = null; // the first channel is not a channel :D
+		// connection
 		socket.on("join", async (user) => {
 			let name = user?.trim() || "Anonymous";
 			users.set(socket.id, name);
-			await reloadEverything();
-			console.log(`${name} joined to the chat`);
+			//await reloadEverything();
+			console.log(`system: ${name} joined to the chat`);
+		})
+		//disconnection
+		socket.on("disconnect", () => {
+			let name = users.get(socket.id) || "Anonymous"; 
+			users.delete(socket.id);
+			//await reloadEverything;
+			console.log(`system: ${name} left the chat`);
 		})
 	});
 }

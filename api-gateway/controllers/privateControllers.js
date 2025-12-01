@@ -626,7 +626,7 @@ const privateControllers = {
 		}
 	},
 
-	seeProfile: async function seeProfile(req,reply) {
+	seeProfile: async function seeProfile(req, reply) {
 		try {
 			const { user } = req.query;
 			const response = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: user });
@@ -640,7 +640,7 @@ const privateControllers = {
 	},
 
 	chatAllUsers: async function chatAllUsers(req, reply) {
-		return reply.view("chatAllUsers", {} );
+		return reply.view("chatAllUsers", { username: req.user.username } );
 	}
 };
 

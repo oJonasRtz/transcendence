@@ -2,16 +2,18 @@ import { io } from "socket.io-client";
 
 export function chat() {
 
-const SOCKET_URL = "https://localhost";
+const SOCKET_URL = "http://localhost:3000";
+
+const username = document.body.dataset.username;
+console.log("O username:", username);
 
 const socket = io(SOCKET_URL, {
     transports: ["websocket"], 
 });
 
 socket.on("connect", () => {
-    console.log("Connected with id:", socket.id);
-
-    socket.emit("join");
+    console.log("Connected:", socket.id, "as", username);
+    socket.emit("join", username);
 });
 
 socket.on("serverMessage", (msg: string) => {
