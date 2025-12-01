@@ -238,6 +238,12 @@ const databaseModels = {
 		const user_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ body.public_id ]);
 		const data = await fastify.db.get("SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?", [ user_id.user_id ]);
 		return (data ?? null);
+	},
+
+	deleteUserAccount: async function deleteUserAccount(fastify, data) {
+		await fastify.db.run("DELETE FROM auth WHERE user_id = ?", [ data.user_id ]);
+		await fastify.db.run("DELETE FROM users WHERE user_id = ?", [ data.user_id ]);
+		return (true);
 	}
 }
 

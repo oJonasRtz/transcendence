@@ -312,6 +312,18 @@ const authControllers = {
 		}
 	},
 
+	deleteUserAccount: async function deleteUserAccount(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform your user_id here");
+			await axios.post("http://sqlite-db:3002/deleteUserAccount", req.body);
+			return reply.code(204).send();
+		} catch (err) {
+			console.error("AUTH-SERVICE deleteUserAccount error:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

@@ -637,6 +637,22 @@ const privateControllers = {
 
 	chatAllUsers: async function chatAllUsers(req, reply) {
 		return reply.view("chatAllUsers", { username: req.user.username } );
+	},
+
+	deleteUserAccount: async function deleteUserAccount(req, reply) {
+		try {
+			await axios.post("http://auth-service:3001/deleteUserAccount", { user_id: req.user.user_id });
+			await req.session.destroy();
+
+			reply.clearCookie("jwt");
+                	reply.clearCookie("session");
+
+			console.log("The account was successfully deleted");
+			return reply.redirect("/login");
+		} catch (err) {
+			console.error("API-GATEWAY deleteUserAccount ERROR:", err);
+			return reply.redirect("/login");
+		}
 	}
 };
 
