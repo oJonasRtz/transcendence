@@ -19,6 +19,7 @@ const routes = [
 	{ method: 'POST', url: '/newPassword', handler: publicControllers.newPassword },
 	// TESTING BAD ROUTES
 	{ method: 'GET', url: '/checkDb', handler: publicControllers.checkDb },
+	{ method: 'GET', url: '/favicon.ico', handler: publicControllers.getIcon },
 ];
 
 export default async function publicRoutes(fastify, options) {

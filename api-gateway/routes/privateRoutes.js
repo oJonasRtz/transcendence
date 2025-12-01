@@ -25,8 +25,8 @@ const routes = [
 	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers },
 	{ method: 'GET', url: '/seeProfile', handler: privateControllers.seeProfile },
 	{ method: 'GET', url: '/chatAllUsers', handler: privateControllers.chatAllUsers },
-	//{ method: 'POST', url: '/match/join', handler: privateControllers.joinMatch },
-	//{ method: 'POST', url: '/match/leave', handler: privateControllers.leaveMatch },
+	{ method: 'POST', url: '/match/join', handler: privateControllers.joinQueue },
+	{ method: 'POST', url: '/match/leave', handler: privateControllers.leaveQueue },
 ];
 
 export default async function privateRoutes(fastify, options) {

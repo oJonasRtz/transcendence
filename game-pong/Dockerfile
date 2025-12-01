@@ -11,5 +11,5 @@ RUN apt-get update -y && apt-get upgrade -y && \
 
 RUN npm install
 COPY . .
-EXPOSE 5173
+EXPOSE 3005
 CMD [ "npm", "run", "dev", "--", "--host" ]

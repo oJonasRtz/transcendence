@@ -11,7 +11,7 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
-//import matchClient from '../utils/MatchClient.class.js'
+import matchClient from '../utils/MatchClient.class.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,13 +23,9 @@ let inQueue = false;
 const privateControllers = {
 
 	match: async function match(req, reply) {
-		const ip = fs.readFileSync('/app/shared/server.ip', 'utf-8').trim();
-
-		console.log("ip: ", ip);
 		return reply.view("matchMaking", {
 			email: req.user.email,
 			user_id: req.user.user_id,
-			ws_host: ip,
 		});
 	},
 

@@ -1,12 +1,17 @@
-/*import WebSocket from 'ws';
+import WebSocket from 'ws';
 
 class MatchClient {
 	#ws = null;
 	#messages = [];
 	constructor(url) {
 		this.#ws = new WebSocket(url);
-		this.#ws.on('message', (data) => {
-			this.#messages.push(data.toString());
+		console.log("MatchClient: Connecting to ", url);
+		this.#ws.on('open', () => {
+			console.log("MatchClient: Connected to match-service");
+
+			this.#ws.on('message', (data) => {
+				this.#messages.push(data.toString());
+			});
 		});
 	}
 
@@ -21,4 +26,4 @@ class MatchClient {
 	}
 }
 
-export default new MatchClient('ws://match-service:3004');*/
+export default new MatchClient('ws://match-service:3004/ws');

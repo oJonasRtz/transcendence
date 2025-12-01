@@ -38,7 +38,7 @@ export class Server {
 						type: 'ERROR',
 						message: error.message
 					}));
-					connection.socket.close();
+					return;
 				}
 			});
 		});
@@ -47,7 +47,7 @@ export class Server {
 	}
 
 	listen(port = 3004) {
-		this.#app.listen({ port }, (err, address) => {
+		this.#app.listen({ port, host: '0.0.0.0' }, (err, address) => {
 			if (err) {
 				console.error(err);
 				process.exit(1);
@@ -100,5 +100,17 @@ export class Server {
 
 		this.#queue.get(email).destroy();
 		this.#queue.delete(email);
+	}
+
+	calculateRankPoints(score1, score2, winner = true) {
+		const min = 15;
+		const max = 25;
+		const scale = Math.max(score1, score2);
+		const diff = Math.abs(score1 - score2);
+		const ratio = Math.min(diff / scale, 1);
+
+		const finalRank = min + (max - min) * ratio;
+
+		return winner ? finalRank : -finalRank;
 	}
 }

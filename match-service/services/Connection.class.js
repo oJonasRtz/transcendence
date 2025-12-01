@@ -1,5 +1,4 @@
 import WebSocket from "ws";
-import fs from "fs";
 
 export class Connection {
 	#socket = null;
@@ -9,7 +8,7 @@ export class Connection {
 		pass: process.env.LOBBY_PASS,
 	}
 	#server = {
-		ip: fs.readFileSync('/app/shared/server.ip', 'utf-8').trim(),
+		ip: "game-server",
 		port: process.env.PORT_LOBBY,
 	};
 	#reconnection = {
@@ -33,7 +32,7 @@ export class Connection {
 	
 	connect() {
 		this.#reconnection.canReconnect = true;
-		this.#socket = new WebSocket(`wss://${this.#server.ip}:${this.#server.port}`);
+		this.#socket = new WebSocket(`ws://${this.#server.ip}:${this.#server.port}/ws/game`);
 
 		this.#socket.onopen = () => {
 			this.#send({

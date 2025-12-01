@@ -1,14 +1,11 @@
 import { gameState, RECONNECTION__DELAY, types } from "../globals";
-import { loadFile } from "./loadFile";
 
 type Handler = (data: any) => void;
-
-const g_ip: string = await loadFile('/server.ip') || "localhost";
 
 export class Connection {
   private socket: WebSocket | null = null;
   private server = {
-    ip: g_ip,
+    ip: "game-server",
     port: 8443,
   };
   private handlers: Record<string, Handler> = {
@@ -24,8 +21,8 @@ export class Connection {
   };
 
   public connect(): void {
-    console.log(`Connecting to WebSocket server at wss://${this.server.ip}:${this.server.port}...`);
-    this.socket = new WebSocket(`wss://${this.server.ip}:${this.server.port}`);
+    console.log(`Connecting to WebSocket server at ws://${this.server.ip}:${this.server.port}...`);
+    this.socket = new WebSocket(`ws://${this.server.ip}:${this.server.port}/ws`);
 
     this.socket.onopen = () => {
       const { matchId, name, id, playerId } = gameState.getIdentity();

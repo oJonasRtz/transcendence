@@ -6,6 +6,10 @@ import { randomUUID } from 'crypto';
 const publicControllers = {
 	
 	//GETTERS
+
+	getIcon: function getIcon(req, reply) {
+		return reply.sendFile("favicon.ico");
+	},
 	
 	homePage: function getHomePage(req, reply) {
 		return reply.view("homePage");

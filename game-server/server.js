@@ -9,9 +9,8 @@ import { ddosDetect, removeConnection } from './controllers/ddosDetector.js';
 //port 8443 for tests with wss, change to 443  for production
 //.env nao esta funcionando ainda verificar futuramente
 const PORT = process.env.PORT || 8443;
-const HOST = process.env.HOST || 'localhost';
+const HOST = "0.0.0.0";
 const wss = new WebSocketServer({ port: PORT, host: HOST });
-
 
 wss.on("connection", (ws) => {
 	ws.player = null;
@@ -52,9 +51,4 @@ wss.on("connection", (ws) => {
 			console.error("Error during disconnection:", error.message);
 		}
 	});
-});
-
-server.listen(PORT, () => {
-	console.log(`WebSocket server is running on wss://${HOST}:${PORT}`);
-	console.log(`got matches: ${Object.keys(matches)}`);
 });
