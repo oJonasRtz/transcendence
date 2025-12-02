@@ -2,6 +2,23 @@ export function chat() {
 
 const SOCKET_URL = "http://localhost:3000";
 
+// Capture the form and also the input
+
+const form = document.getElementById("sendForm") as HTMLFormElement;
+const input = document.getElementById("message") as HTMLInputElement;
+
+// e === event
+
+form.addEventListener("submit", (e) => {
+	e.preventDefault(); // Avoid to load again the webpage and make the HTTP request
+	
+	const msg = input.value.trim();
+	if (!msg) return ;
+
+	socket.emit("sendMessage", msg);
+	input.value = ""; // erase the value
+});
+
 const username = document.body.dataset.username;
 const public_id = document.body.dataset.public_id;
 
@@ -17,7 +34,7 @@ socket.on("connect", () => {
     socket.emit("join", { username, public_id });
 });
 
-socket.on("serverMessage", (msg: string) => {
+/*socket.on("serverMessage", (msg: string) => {
 	const messagesDiv = document.getElementById("messages");
 	
 	if (!messagesDiv) return ;
@@ -31,7 +48,7 @@ socket.on("serverMessage", (msg: string) => {
 	messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
 	console.log("SERVER MESSAGE:", msg);
-});
+});*/
 
 socket.on("updateUsers", (users: chatUser[]) => {
 	const usersDiv = document.getElementById("users");
@@ -54,8 +71,21 @@ socket.on("updateUsers", (users: chatUser[]) => {
     console.log("USERS:", users);
 });
 
-socket.on("sendMessage", (messages: any[]) => {
-    console.log("MESSAGES:", messages);
+socket.on("updateMessages", (msgs: any[]) => {
+
+	const messagesDiv = document.getElementById("messages");
+
+	messagesDiv.innerHTML = ""; // extremely IMPORTANT!!! You need to clean everything before to add more
+
+	msgs.forEach(msg => {
+		const p = document.createElement("p");
+		p.textContent = msg;
+		p.style.fontWeight = "bold";
+		p.style.padding = "4px 0";
+		messagesDiv.appendChild(p);
+	});
+
+	console.log("MESSAGES:", msgs);
 });
 
 socket.on("updateChannels", (channels: any[]) => {

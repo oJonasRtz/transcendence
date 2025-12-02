@@ -24,14 +24,16 @@ export default async function registerServer(io) {
 		// connection
 		socket.on("join", async ({ username, public_id }) => {
 			let name = username?.trim() || "Anonymous";
+			socket.name = name; // use the socket.name name
 			const exist = Array.from(users.values()).some(u => u.name === name);
 			if (exist) return ;
 			users.set(socket.id, { name, public_id });
 			//await reloadEverything();
-			console.log(`system: ${name} joined to the chat`);
+			messages.push(`system: ${name} joined to the chat`);
 			io.emit("updateUsers", Array.from(users.values()));
-			socket.broadcast.emit("serverMessage", `system: ${name} joined to the chat`);
-		})
+			io.emit("updateMessages", messages); // send the current messages to the user 
+		});
+
 		//disconnection
 		socket.on("disconnect", () => {
 			let data = users.get(socket.id);
@@ -39,10 +41,18 @@ export default async function registerServer(io) {
 				data = { name: "Anonymous" };
 			users.delete(socket.id);
 			//await reloadEverything;
-			console.log(`system: ${data.name} left the chat`);
+			messages.push(`system: ${data.name} left the chat`);
 			io.emit("updateUsers", Array.from(users.values()));
-			socket.broadcast.emit("serverMessage", `system: ${data.name} left the chat`);
-		})
-	});
-
+			io.emit("updateMessages", messages); // send the current messages to the user 
+		});
+		
+		// Specif events only happens on socket
+		socket.on("sendMessage", (msg) => {
+			let input = msg?.trim();
+			if (!input) return ;
+			input = `${socket.name}: ${input}`;
+			messages.push(input);
+			io.emit("updateMessages", messages);
+		});
+});
 }

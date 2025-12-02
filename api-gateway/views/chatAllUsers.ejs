@@ -11,6 +11,10 @@
 	</head>
 	<body data-username="<%= username %>" data-public_id="<%= public_id %>" class="bg-cover bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]" style="animation: bgPulse 6s ease-in-out infinite;">
                 <div class="z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
+			<script type="module">
+				import { chat } from "/public/js/chat.js";
+				chat();
+			</script>
 			<section>
 				<nav>
 					<a href="/home">Home</a>
@@ -24,10 +28,13 @@
 			<p>Messages:</p>
 			<div id="messages" style="border: 2px solid">
                                 </div><br>
-			<script type="module">
-				import { chat } from "/public/js/chat.js";
-				chat();
-			</script>
+			<form id="sendForm">
+				<label>
+					Send:
+					<input id="message" type="text" name="message" required><br><br>
+					<button type="submit" style="display:none"></button>
+				</label>
+			</form>
 			<h6>Time do balacobaco</h6>
 		</div>
 	</body>
