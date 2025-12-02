@@ -4,10 +4,6 @@ type Handler = (data: any) => void;
 
 export class Connection {
   private socket: WebSocket | null = null;
-  private server = {
-    ip: "game-server",
-    port: 8443,
-  };
   private handlers: Record<string, Handler> = {
     [types.PING]: this.updateState.bind(this),
     [types.PONG]: () => {
@@ -20,9 +16,18 @@ export class Connection {
     },
   };
 
+  private getWdUrl():string {
+    const protocol: string = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    return `${protocol}://${window.location.host}/pong-server`;
+  }
+
+
   public connect(): void {
-    console.log(`Connecting to WebSocket server at ws://${this.server.ip}:${this.server.port}...`);
-    this.socket = new WebSocket(`ws://${this.server.ip}:${this.server.port}/ws`);
+
+    const url: string = this.getWdUrl();
+    console.log(`Connecting to WebSocket server at ${url}...`);
+    this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
       const { matchId, name, id, playerId } = gameState.getIdentity();

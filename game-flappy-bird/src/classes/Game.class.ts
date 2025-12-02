@@ -58,7 +58,6 @@ export class Game {
 
 		pipePair.on('kill', () => {
 			this.pipes = this.pipes?.filter(pipe => pipe !== pipePair) || null;
-			console.table(this.pipes);
 		});
 
 		this.pipes?.push(pipePair) || (this.pipes = [pipePair]);

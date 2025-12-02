@@ -1,6 +1,4 @@
 import { WebSocketServer } from "ws";
-import fs from "fs";
-import https from "https";
 import { lobby, matches } from "./server.shared.js";
 import { handleTypes } from "./controllers/handleTypes.js";
 import 'dotenv/config';

@@ -32,7 +32,7 @@ export class Connection {
 	
 	connect() {
 		this.#reconnection.canReconnect = true;
-		this.#socket = new WebSocket(`ws://${this.#server.ip}:${this.#server.port}/ws/game`);
+		this.#socket = new WebSocket(`ws://${this.#server.ip}:${this.#server.port}/`);
 
 		this.#socket.onopen = () => {
 			this.#send({

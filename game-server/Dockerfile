@@ -13,5 +13,5 @@ RUN npm install
 COPY . .
 #generate ssl certificates
 # RUN cd ssl/ && bash ./mkcert.sh
-EXPOSE 8443
+EXPOSE 3007
 CMD ["node", "server.js"]
