@@ -504,8 +504,14 @@ const databaseControllers = {
 
 	storeMessage: async function storeMessage(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.user_id || !req.body.msg)
-				return reply.code(400).send("You need to inform the user_id and the message here");
+			if (!req.body || !req.body.name || !req.body.msg)
+				return reply.code(400).send("You need to inform the name and the message here");
+			const user_id = await databaseModels.getUserId(fastify, req.body.name);
+			if (!user_id) {
+				console.error("What is the user_id?", user_id);
+				throw new Error("What is the user_id, my friend?");
+			}
+			req.body.user_id = user_id;
 			await databaseModels.storeMessage(fastify, req.body);
 			return reply.code(204).send();
 		} catch (err) {

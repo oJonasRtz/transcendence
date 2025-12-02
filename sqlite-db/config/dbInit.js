@@ -54,8 +54,8 @@ export default async function initDatabase() {
 	await db.exec(`CREATE TABLE IF NOT EXISTS messages (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         content TEXT NOT NULL,
-                        sender_id INTEGER NOT NULL,
-                        receiver_id INTEGER NULL DEFAULT NULL,
+                        sender_id TEXT NOT NULL,
+                        receiver_id TEXT NULL DEFAULT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
 	`);
@@ -63,8 +63,8 @@ export default async function initDatabase() {
 	await db.exec(`
                         CREATE TABLE IF NOT EXISTS friends (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        owner_id INTEGER NOT NULL,
-                        friend_id INTEGER NOT NULL,
+                        owner_id TEXT NOT NULL,
+                        friend_id TEXT NOT NULL,
                         accepted BOOLEAN DEFAULT FALSE,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );

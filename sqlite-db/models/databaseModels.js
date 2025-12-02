@@ -72,7 +72,7 @@ const databaseModels = {
 
 	getUserId: async function getUserId(fastify, username) {
 		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ username ]);
-		return (user_id.id ?? null);
+		return (user_id.user_id ?? null);
 	},
 
 	createNewUser: async function createNewUser(fastify, user_id) {
@@ -137,7 +137,6 @@ const databaseModels = {
 	},
 
 	getUserAvatar: async function getUserAvatar(fastify, data) {
-		console.log("data user_id getuserAvatar:", data.user_id);
 		const avatar = await fastify.db.get("SELECT avatar FROM users WHERE user_id = ?", [ data.user_id ]);
 		return (avatar ?? null);
 	},

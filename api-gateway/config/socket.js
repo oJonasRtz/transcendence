@@ -50,7 +50,7 @@ export default async function registerServer(io) {
 		socket.on("sendMessage", async (msg) => {
 			let input = msg?.trim();
 			if (!input) return ;
-			// await axios.post("http://chat-service:3005/storeMessage", { msg: input } );
+			await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, msg: input } );
 			input = `${socket.name}: ${input}`;
 			messages.push(input);
 			io.emit("updateMessages", messages);
