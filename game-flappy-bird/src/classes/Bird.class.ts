@@ -1,5 +1,4 @@
 import * as ex from 'excalibur';
-import { Pipe } from './Pipe.class';
 
 export class Birb extends ex.Actor{
 	private jumpForce = 400;
@@ -32,21 +31,24 @@ export class Birb extends ex.Actor{
 		engine.input.pointers.primary.on('down', () => this.jump());
 
 		this.on('collisionstart', (evt) => {
-			const other = evt.other;
+			const other: ex.Actor = evt.other.owner as ex.Actor;
 
-			if (other instanceof Pipe)
-				this.kill();
+			if (other.hasTag && other.hasTag('pipe')) {
+				console.log('[Birb] Colidiu com um cano! Game Over!');
+				this.emit('kill');
+			}
 		});
 	}
 
-	onPostUpdate(engine: ex.Engine, delta: number): void {
+	onPostUpdate(engine: ex.Engine): void {
 		const halfH = this.height / 2;
 		const checkPosY = [
 			{ condition: this.pos.y - halfH < 0, handler: () => {
 				this.pos.y = halfH;
 				this.body.vel.y = 0;
 			}},
-			{ condition: this.pos.y + halfH > engine.drawHeight, handler: () => this.kill() }
+			{ condition: this.pos.y + halfH > engine.drawHeight, handler: () => this.kill() },
+			{ condition: this.pos.x < 0, handler: () => this.kill() }
 		];
 
 

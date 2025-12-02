@@ -42,7 +42,10 @@ export class State {
 		return this.score;
 	}
 	public incrementScore(points: number) {
+		console.log('fui chamado');
 		if (!this.gameStarted || this.gameEnded) return;
 		this.score += points;
+
+		console.log(`[Score] Pontos: ${this.score}`);
 	}
 }
