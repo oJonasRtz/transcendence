@@ -44,7 +44,8 @@ const routes = [
 	{ method: 'POST', url: '/setUsersDescription', handler: databaseControllers.setUsersDescription },
 	{ method: 'GET', url: '/getAllUsersInformation', handler: databaseControllers.getAllUsersInformation },
 	{ method: 'POST', url: '/getDataByPublicId', handler: databaseControllers.getDataByPublicId },
-	{ method: 'POST', url: '/deleteUserAccount', handler: databaseControllers.deleteUserAccount }
+	{ method: 'POST', url: '/deleteUserAccount', handler: databaseControllers.deleteUserAccount },
+	{ method: 'POST', url: '/storeMessage', handler: databaseControllers.storeMessage }
 ];
 
 export default async function databaseRoutes(fastify, options) {

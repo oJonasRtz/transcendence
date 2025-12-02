@@ -47,9 +47,10 @@ export default async function registerServer(io) {
 		});
 		
 		// Specif events only happens on socket
-		socket.on("sendMessage", (msg) => {
+		socket.on("sendMessage", async (msg) => {
 			let input = msg?.trim();
 			if (!input) return ;
+			// await axios.post("http://chat-service:3005/storeMessage", { msg: input } );
 			input = `${socket.name}: ${input}`;
 			messages.push(input);
 			io.emit("updateMessages", messages);

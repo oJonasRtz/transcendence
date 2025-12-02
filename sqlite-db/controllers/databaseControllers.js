@@ -500,6 +500,18 @@ const databaseControllers = {
 			console.error("SQLITE-DB deleteUserAccount ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	storeMessage: async function storeMessage(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.msg)
+				return reply.code(400).send("You need to inform the user_id and the message here");
+			await databaseModels.storeMessage(fastify, req.body);
+			return reply.code(204).send();
+		} catch (err) {
+			console.error("SQLITE-DB storeMessage ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

@@ -1,1 +1,6 @@
-export default async function chatRoutes(fastify, options) {};
+import chatControllers from '../controllers/chatControllers.js';
+
+export default async function chatRoutes(fastify, options) {
+
+	fastify.post("/storeMessage", chatControllers.storeMessage);
+};
