@@ -18,11 +18,11 @@
             const leave = document.getElementById('leaveQueueBtn');
 
             join.addEventListener('click', async () => {
-                await fetch('/match/join', {method: 'POST'});
+                await fetch('/match/join/', {method: 'POST'});
             })
 
             leave.addEventListener('click', async () => {
-                await fetch('/match/leave', {method: 'POST'});
+                await fetch('/match/leave/', {method: 'POST'});
             });
         </script>
     </body>

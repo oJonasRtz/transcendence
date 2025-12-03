@@ -23,7 +23,7 @@ export class Server {
 		this.#app.register(formbody);
 		this.#app.register(fastifyWebsocket);
 
-		this.#app.get('/ws', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
+		this.#app.get('/', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
 			connection.socket.on('message', (message) => {
 				try {
 					const data = JSON.parse(message.toString());
