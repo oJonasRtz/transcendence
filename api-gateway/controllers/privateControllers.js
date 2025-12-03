@@ -11,7 +11,7 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
-//import matchClient from '../utils/MatchClient.class.js'
+import matchClient from '../utils/MatchClient.class.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,6 +40,7 @@ const privateControllers = {
 
 		matchClient.sendMessage(payload);
 		inQueue = true;
+		console.log(`User ${req.user.email} joined the queue`);
 	},
 
 	leaveQueue: async function leaveQueue(req, reply) {
@@ -52,6 +53,7 @@ const privateControllers = {
 		};
 		matchClient.sendMessage(payload);
 		inQueue = false;
+		console.log(`User ${req.user.email} left the queue`);
 	},
 
 	helloDb: async function testPrivateRoute(req, reply) {

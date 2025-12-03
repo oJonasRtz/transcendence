@@ -92,6 +92,8 @@ export class Server {
 
 		const client = new Client({ws, email, id});
 		this.#queue.set(email, client);
+
+		console.log(`Client ${email} enqueued for matchmaking.`);
 	}
 
 	#dequeue({email}) {
@@ -100,6 +102,7 @@ export class Server {
 
 		this.#queue.get(email).destroy();
 		this.#queue.delete(email);
+		console.log(`Client ${email} dequeued from matchmaking.`);
 	}
 
 	calculateRankPoints(score1, score2, winner = true) {
