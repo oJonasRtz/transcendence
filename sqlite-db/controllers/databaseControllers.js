@@ -518,6 +518,16 @@ const databaseControllers = {
 			console.error("SQLITE-DB storeMessage ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getAllMessages: async function getAllMessages(fastify, req, reply) {
+		try {
+			const messages = await databaseModels.getAllMessages(fastify);
+			return reply.code(200).send(messages ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getAllMessages ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

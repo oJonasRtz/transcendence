@@ -248,6 +248,11 @@ const databaseModels = {
 	storeMessage: async function storeMessage(fastify, data) {
 		await fastify.db.run("INSERT INTO messages (content, sender_id) VALUES (?, ?)", [ data.msg, data.user_id ]);
 		return (true);
+	},
+
+	getAllMessages: async function getAllMessages(fastify) {
+		const object = await fastify.db.all("SELECT messages.*, auth.username FROM messages JOIN auth ON auth.user_id = messages.sender_id");
+		return (object ?? null);
 	}
 }
 

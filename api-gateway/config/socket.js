@@ -3,15 +3,17 @@ import axios from 'axios';
 export default async function registerServer(io) {
 	const users = new Map();
 	let messages = [];
-	let channels = [];
 
 	async function reloadEverything () {
                 try {
                         const responseMessages = await axios.get("http://chat-service:3005/getAllMessages");
-                        const responseChannels = await axios.get("http://chat-service:3005/getAllChannels");
-			messages = responseMessages?.data ?? [];
-			channels = responseChannels?.data ?? [];
-                        console.log("got all messages and channels");
+			let tmp = responseMessages?.data ?? [];
+			messages.length = 0; // erase the list
+			tmp.forEach(msg => {
+				let input = `${msg.username}: ${msg.content}`;
+				messages.push(input);
+			});
+                        console.log("got all messages");
                 } catch (err) {
                         console.error(err);
                 }
@@ -28,19 +30,19 @@ export default async function registerServer(io) {
 			const exist = Array.from(users.values()).some(u => u.name === name);
 			if (exist) return ;
 			users.set(socket.id, { name, public_id });
-			//await reloadEverything();
+			await reloadEverything();
 			messages.push(`system: ${name} joined to the chat`);
 			io.emit("updateUsers", Array.from(users.values()));
 			io.emit("updateMessages", messages); // send the current messages to the user 
 		});
 
 		//disconnection
-		socket.on("disconnect", () => {
+		socket.on("disconnect", async () => {
 			let data = users.get(socket.id);
 			if (!data)
 				data = { name: "Anonymous" };
 			users.delete(socket.id);
-			//await reloadEverything;
+			await reloadEverything;
 			messages.push(`system: ${data.name} left the chat`);
 			io.emit("updateUsers", Array.from(users.values()));
 			io.emit("updateMessages", messages); // send the current messages to the user 
@@ -51,8 +53,9 @@ export default async function registerServer(io) {
 			let input = msg?.trim();
 			if (!input) return ;
 			await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, msg: input } );
-			input = `${socket.name}: ${input}`;
-			messages.push(input);
+			//input = `${socket.name}: ${input}`;
+			await reloadEverything(); // reload everything using the database
+			//messages.push(input);
 			io.emit("updateMessages", messages);
 		});
 });
