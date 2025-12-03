@@ -30,9 +30,15 @@ export class Connection {
 		},
 	}
 	
+	#getUrl() {
+		return `ws://${this.#server.ip}:${this.#server.port}/`;
+	}
+
 	connect() {
 		this.#reconnection.canReconnect = true;
-		this.#socket = new WebSocket(`ws://${this.#server.ip}:${this.#server.port}/`);
+		const url = this.#getUrl();
+		console.log(`Connection.connect: Connecting to lobby server at ${url}...`);
+		this.#socket = new WebSocket(url);
 
 		this.#socket.onopen = () => {
 			this.#send({

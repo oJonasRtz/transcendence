@@ -28,11 +28,14 @@ export class Lobby {
 		try {
 			console.log("Lobby.connect: attempting to connect lobby");
 			if (this.#connected) {
+				console.log("Lobby.connect: lobby already connected");
 				this.#connectionError(ws, types.error.PERMISSION_ERROR);
 				return;
 			}
 
+			id = Number(id);
 			if (pass !== this.#pass || id !== this.#id) {
+				console.log("Lobby.connect: invalid credentials");
 				this.#connectionError(ws, types.error.PERMISSION_ERROR);
 				return;
 			}
