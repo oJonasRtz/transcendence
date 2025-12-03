@@ -1,13 +1,17 @@
 import * as ex from 'excalibur';
+import { GAME_HEIGHT } from '../globals';
 
 export class Birb extends ex.Actor{
-	private jumpForce = 400;
+	private BASE_JUMP_FORCE: number = 400;
+	private BASE_GRAVITY: number = 800;
+	private SCALE: number = 1;
+	private jumpForce: number = this.BASE_JUMP_FORCE;
 	private keyBindings: ex.Keys[] = [
 		ex.Keys.Space,
 		ex.Keys.Up
 	];
 
-	constructor(x: number, y: number){
+	constructor(x: number, y: number, drawHeight: number) {
 		super({
 			x: x,
 			y: y,
@@ -15,7 +19,15 @@ export class Birb extends ex.Actor{
 			height: 32,
 			color: ex.Color.Yellow
 		});
-		this.body.acc.y = 800; // Gravity
+		this.SCALE = drawHeight / GAME_HEIGHT;
+
+		this.jumpForce *= this.SCALE;
+		if (this.jumpForce > this.BASE_JUMP_FORCE)
+			this.jumpForce = this.BASE_JUMP_FORCE;
+		this.body.acc.y = this.BASE_GRAVITY * this.SCALE; // Gravity
+		if (this.body.acc.y > this.BASE_GRAVITY)
+			this.body.acc.y = this.BASE_GRAVITY;
+
 		this.body.collisionType = ex.CollisionType.Active;
 	}
 

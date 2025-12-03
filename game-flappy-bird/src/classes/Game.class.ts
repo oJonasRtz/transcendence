@@ -2,6 +2,7 @@ import * as ex from 'excalibur';
 import { Birb } from './Bird.class';
 import { State } from './State.class';
 import { PipePair } from './PipePair.class';
+import { GAME_HEIGHT, GAME_WIDTH } from '../globals';
 
 export class Game {
 	private engine: ex.Engine;
@@ -14,12 +15,12 @@ export class Game {
 
 	constructor() {
 		this.engine = new ex.Engine({
-			width: 800,
-			height: 600,
+			width: GAME_WIDTH,
+			height: GAME_HEIGHT,
 			backgroundColor: ex.Color.Blue,
-			displayMode: ex.DisplayMode.FitScreen,
+			displayMode: ex.DisplayMode.FillScreen,
 		});
-		this.player = new Birb(this.playerPosX, this.engine.drawHeight / 2);
+		this.player = new Birb(this.playerPosX, this.engine.drawHeight / 2, this.engine.drawHeight);
 
 		this.addToGame([this.player]);
 

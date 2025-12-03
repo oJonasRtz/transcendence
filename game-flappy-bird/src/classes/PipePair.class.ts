@@ -54,7 +54,6 @@ export class PipePair extends ex.Actor {
 		const i = this.choose(keys);
 		const {up, down} = map[i as keyof typeof map];
 
-
 		return [
 			new Pipe(up.x, up.y, up.width, up.height, this.playerPosX),
 			new Pipe(down.x, down.y, down.width, down.height, this.playerPosX),
