@@ -7,7 +7,7 @@ export class Game {
 	private engine: ex.Engine;
 	private player: Birb | null = null;
 	private pipes: PipePair[] | null = null;
-	private pipeSpawnInterval = 2000; // milliseconds
+	private pipeSpawnInterval = 1000; // milliseconds
 	private state: State = new State();
 	private pointsPerPipe: number = 1;
 	private playerPosX: number = 100;

@@ -40,6 +40,17 @@ fclean: down
 	@echo "Erasing everything"
 	@docker system prune -a -f --volumes
 
+# Restart an individual service
+# how to use:
+# make restart-service
+# example:
+# make restart-game-server
+restart-%:
+	@echo "Restarting service $*"
+	@docker compose down $*
+	@docker compose build $*
+	@docker compose up -d $*
+
 # Restart all the services (RESTART, MAN)
 
 re: down up
