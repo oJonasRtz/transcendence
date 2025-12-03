@@ -51,6 +51,18 @@ restart-%:
 	@docker compose build $*
 	@docker compose up -d $*
 
+# Aliases for individual services (short commands)
+nginx: restart-nginx
+api: restart-api-gateway
+auth: restart-auth-service
+users: restart-users-service
+sqlite: restart-sqlite-db
+chat: restart-chat-service
+server: restart-game-server
+pong: restart-game-pong
+flappy: restart-game-flappy-bird
+match: restart-match-service
+
 # Restart all the services (RESTART, MAN)
 
 re: down up
