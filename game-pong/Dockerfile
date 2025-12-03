@@ -4,10 +4,17 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
+RUN npm install -g javascript-obfuscator
 
 COPY . .
 #generate dist/
 RUN npm run build
+RUN javascript-obfuscator /app/dist \
+	--output /app/dist \
+	--compact true \
+	--dead-code-injection true \
+	--string-array true \
+	--string-array-encoding base64
 
 # -- production stage --
 FROM nginx:alpine
