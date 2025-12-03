@@ -24,40 +24,40 @@ export class PipePair extends ex.Actor {
 		});
 	}
 
-	// private choose<T>(arr: T[]): T{
-	// 	const index = Math.floor(Math.random() * arr.length);
-	// 	return arr[index];
-	// }
+	private choose<T>(arr: T[]): T{
+		const index = Math.floor(Math.random() * arr.length);
+		return arr[index];
+	}
 
 	private getPipePos(width: number, drawHeight: number, drawWidth: number): Pipe[] {
-		const gap: number = 130;
-		const screenH: number = drawHeight;
-		const pipeX: number = drawWidth + 50; //Spawn off screen
-		const height: number = screenH - gap;
+		const gap: number = drawHeight * .20; //Gap between pipes
+		const pipeX: number = drawWidth + gap; //Spawn off screen
+		// Pipes hight calculations
+		const smallHeight: number = gap;
+		const bigHeight: number = drawHeight - (smallHeight + gap);
 		const map = {
 			top: {
-				up: { x: pipeX, y: 0, width, height: height - 25 },
-				down: { x: pipeX, y: (height - 25) + gap, width, height: height - (height - 25 + gap) },
-			},
-			mid: {
-				up: { x: pipeX, y: 0, width: width, height: 210 },
-				down: { x: pipeX, y: 210 + gap, width: width, height: screenH - (210 + gap) },
+				up: { x: pipeX, y: 0, width, height: smallHeight},
+				down: { x: pipeX, y: smallHeight + gap, width, height: bigHeight  },
 			},
 			bot: {
-				up: { x: pipeX, y: 0, width: width, height: 320 },
-				down: { x: pipeX, y: 320 + gap, width: width, height: screenH - (320 + gap) },
+				up: { x: pipeX, y: 0, width, height: bigHeight },
+				down: { x: pipeX, y: bigHeight + gap, width, height: smallHeight },
+			},
+			mid: {
+				up: {x: pipeX, y: 0, width, height: (drawHeight - gap) / 2 },
+				down: { x: pipeX, y: ((drawHeight - gap) / 2) + gap, width, height: (drawHeight - gap) / 2 },
 			}
 		};
 
-		// const keys = Object.keys(map);
-		// const i = this.choose(keys);
-		// const choice = map[i as keyof typeof map];
+		const keys = Object.keys(map);
+		const i = this.choose(keys);
+		const {up, down} = map[i as keyof typeof map];
 
-		const choice = map.top;
 
 		return [
-			new Pipe(choice.up.x, choice.up.y, choice.up.width, choice.up.height, this.playerPosX),
-			new Pipe(choice.down.x, choice.down.y, choice.down.width, choice.down.height, this.playerPosX),
+			new Pipe(up.x, up.y, up.width, up.height, this.playerPosX),
+			new Pipe(down.x, down.y, down.width, down.height, this.playerPosX),
 		];
 	}
 }

@@ -12,6 +12,9 @@ export class Pipe extends ex.Actor {
 			height: height,
 			color: ex.Color.Green
 		});
+
+		this.pos.y += height / 2; // Adjust position to top-center origin
+
 		this.addTag('pipe');
 		this.playerPos = playerX;
 
