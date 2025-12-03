@@ -71,6 +71,15 @@ export default async function initDatabase() {
                         );
 	`);
 
+	await db.exec(`
+			CREATE TABLE IF NOT EXISTS blacklist (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			owner_id TEXT NOT NULL,
+			target_id TEXT NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			);
+	`);
+
 	// TRIGGERS -> event listener, it can help us to do an action if we detect an event happened
 
 	await db.exec(`CREATE TRIGGER IF NOT EXISTS update_users_datetime

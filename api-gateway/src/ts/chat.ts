@@ -21,9 +21,11 @@ form.addEventListener("submit", (e) => {
 
 const username = document.body.dataset.username;
 const public_id = document.body.dataset.public_id;
+const avatar = document.body.dataset.avatar;
 
-console.log("O username:", username);
+console.log("Username:", username);
 console.log("Public_id:", public_id);
+console.log("Avatar:", avatar);
 
 const socket = io(SOCKET_URL, {
     transports: ["websocket"], 

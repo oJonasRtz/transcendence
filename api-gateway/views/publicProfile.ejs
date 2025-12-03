@@ -17,11 +17,15 @@
 		</header>
 		<h2>Public Profile</h2>
 		<img src="<%= data.avatar %>" alt="avatar">
-		<section>
+		<section class="flex gap-4">
                         <form action="/friendInvite" method="POST">
                                 <input type="hidden" name="public_id" value="<%= data.public_id %>">
                                 <button type="submit" class="cursor-pointer bg-green-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-200">Invite to a friend</button>
                         </form>
+			<form action="/blockTheUser" method="POST">
+				<input type="hidden" name="public_id" value="<%= data.public_id %>">
+				<button type="submit" class="cursor-pointer bg-red-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-200">Block/Unblock the user</button>
+			</form>
                 </section>
 		<h2><strong><%= data.username %></strong></h2>
 		<% if (data.isOnline) { %>

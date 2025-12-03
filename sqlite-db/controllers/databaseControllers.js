@@ -528,6 +528,20 @@ const databaseControllers = {
 			console.error("SQLITE-DB getAllMessages ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	blockTheUser: async function blockTheUser(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id and public_id");
+			const result = await databaseModels.blockTheUser(fastify, req.body);
+			if (result === "Block")
+				return reply.code(201).send();
+			return reply.code(204).send();
+		} catch (err) {
+			console.error("SQLITE-DB blockTheUser ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

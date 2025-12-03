@@ -242,6 +242,7 @@ const databaseModels = {
 	deleteUserAccount: async function deleteUserAccount(fastify, data) {
 		await fastify.db.run("DELETE FROM auth WHERE user_id = ?", [ data.user_id ]);
 		await fastify.db.run("DELETE FROM users WHERE user_id = ?", [ data.user_id ]);
+		await fastify.db.run("DELETE FROM messages WHERE sender_id = ?", [ data.user_id ]);
 		return (true);
 	},
 
@@ -253,6 +254,19 @@ const databaseModels = {
 	getAllMessages: async function getAllMessages(fastify) {
 		const object = await fastify.db.all("SELECT messages.*, auth.username FROM messages JOIN auth ON auth.user_id = messages.sender_id");
 		return (object ?? null);
+	},
+
+	blockTheUser: async function blockTheUser(fastify, data) {
+		const target_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+		if (!target_id || !target_id.user_id)
+			throw new Error("USER_DOES_NOT_EXIST");
+		const object = await fastify.db.get("SELECT * FROM blacklist WHERE owner_id = ? AND target_id = ?", [ data.user_id, target_id.user_id ]);
+		if (object) {
+			await fastify.db.run("DELETE FROM blacklist WHERE owner_id = ? AND target_id = ?", [ data.user_id, target_id.user_id ]);
+		return ("Unblock");
+	}
+		await fastify.db.run("INSERT INTO blacklist (owner_id, target_id) VALUES (?, ?)", [ data.user_id, target_id.user_id ]);
+		return ("Block");
 	}
 }
 

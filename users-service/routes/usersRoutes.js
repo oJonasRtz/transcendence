@@ -19,7 +19,8 @@ const routes = [
 	{ method: 'POST', url: '/getUserInformation', handler: usersControllers.getUserInformation },
 	{ method: 'POST', url: '/setUserDescription', handler: usersControllers.setUserDescription },
 	{ method: 'GET', url: '/getAllUsersInformation', handler: usersControllers.getAllUsersInformation },
-	{ method: 'POST', url: '/getDataByPublicId', handler: usersControllers.getDataByPublicId }
+	{ method: 'POST', url: '/getDataByPublicId', handler: usersControllers.getDataByPublicId },
+	{ method: 'POST', url: '/blockTheUser', handler: usersControllers.blockTheUser }
 ];
 
 export default async function usersRoutes(fastify, options) {

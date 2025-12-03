@@ -30,7 +30,7 @@ export default async function registerServer(io) {
 	io.on("connection", (socket) => {
 		socket.currentChannel = null; // the first channel is not a channel :D
 		// connection
-		socket.on("join", async ({ username, public_id }) => {
+		socket.on("join", async ({ username, public_id, avatar }) => {
 			let name = username?.trim() || "Anonymous";
 			socket.name = name; // use the socket.name name
 			const exist = Array.from(users.values()).some(u => u.name === name);

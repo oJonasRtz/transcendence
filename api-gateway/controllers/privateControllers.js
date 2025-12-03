@@ -676,6 +676,26 @@ const privateControllers = {
 			console.error("API-GATEWAY deleteUserAccount ERROR:", err);
 			return reply.redirect("/login");
 		}
+	},
+
+	blockTheUser: async function blockUserAccount(req, reply) {
+		try {
+			if (!req.body || !req.body.public_id) {
+				req.session.error = ["An error happened trying to block the user"];
+				return reply.redirect("/home");
+			}
+			req.body.user_id = req.user.user_id;
+			const response = await axios.post("http://users-service:3003/blockTheUser", req.body);
+			if (response?.status === 201)
+				req.session.success = ["Target blocked"];
+			else
+				req.session.success = ["Target user unblocked"];
+			return reply.redirect("/home");
+		} catch (err) {
+			console.error("API-GATEWAY blockTheUser");
+			req.session.error = ["Error trying to block the user"];
+			return reply.redirect("/home");
+		}
 	}
 };
 
