@@ -77,6 +77,8 @@ const publicControllers = {
 		let error = [];
 		try {
 			req.body.user_id = randomUUID();
+			if (!req.body.username || !req.body.nickname || req.body.username.toLowerCase() === "system" || req.body.nickname.toLowerCase() === "system")
+				throw new Error("Fill everything or Forbidden Username/Nickname");
 			const response = await axios.post("http://auth-service:3001/checkRegister", req.body);
 
 			success = response.data.success || [];

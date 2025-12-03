@@ -3,14 +3,20 @@ import axios from 'axios';
 export default async function registerServer(io) {
 	const users = new Map();
 	let messages = [];
+	let notifications = [];
 
 	async function reloadEverything () {
                 try {
                         const responseMessages = await axios.get("http://chat-service:3005/getAllMessages");
 			let tmp = responseMessages?.data ?? [];
+			let input;
 			messages.length = 0; // erase the list
 			tmp.forEach(msg => {
-				let input = `${msg.username}: ${msg.content}`;
+				if (!msg.isSystem)
+					input = `${msg.username}: ${msg.content}`;
+				else
+					input = `${msg.content}`;
+
 				messages.push(input);
 			});
                         console.log("got all messages");
@@ -30,8 +36,12 @@ export default async function registerServer(io) {
 			const exist = Array.from(users.values()).some(u => u.name === name);
 			if (exist) return ;
 			users.set(socket.id, { name, public_id });
-			await reloadEverything();
-			messages.push(`system: ${name} joined to the chat`);
+			try {
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${name}`, isSystem: true, msg: `system: ${name} joined to the chat` } );
+				await reloadEverything();
+			} catch (err) { 
+				console.error(`Error updating status of the user ${name}`);
+			}
 			io.emit("updateUsers", Array.from(users.values()));
 			io.emit("updateMessages", messages); // send the current messages to the user 
 		});
@@ -42,8 +52,12 @@ export default async function registerServer(io) {
 			if (!data)
 				data = { name: "Anonymous" };
 			users.delete(socket.id);
-			await reloadEverything;
-			messages.push(`system: ${data.name} left the chat`);
+			try {
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${data.name}`, isSystem: false, msg: `system: ${data.name} left the chat` } );
+				await reloadEverything;
+			} catch (err) {
+				console.error(`Error updating status of the user ${data.name}`);
+			}
 			io.emit("updateUsers", Array.from(users.values()));
 			io.emit("updateMessages", messages); // send the current messages to the user 
 		});
@@ -51,12 +65,18 @@ export default async function registerServer(io) {
 		// Specif events only happens on socket
 		socket.on("sendMessage", async (msg) => {
 			let input = msg?.trim();
-			if (!input) return ;
-			await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, msg: input } );
-			//input = `${socket.name}: ${input}`;
-			await reloadEverything(); // reload everything using the database
-			//messages.push(input);
+			if (!input || input.length > 200) {
+				console.error("Invalid input or message above to the allowed length");
+				return ;
+			}
+			try {
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: input } );
+				await reloadEverything(); // reload everything using the database
+			} catch (err) {
+				console.error(`Error trying to send the message of user ${socket.name}`);
+			}
 			io.emit("updateMessages", messages);
+			io.emit("updateUsers", Array.from(users.values()));
 		});
 });
 }

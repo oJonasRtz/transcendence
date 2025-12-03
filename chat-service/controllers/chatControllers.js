@@ -5,6 +5,8 @@ const chatControllers = {
 		try {
 			if (!req.body || !req.body.name ||!req.body.msg)
 				return reply.code(400).send("You need to inform the msg and name here");
+			if (req.body.isSystem === undefined)
+				req.body.isSystem = false;
 			await axios.post("http://sqlite-db:3002/storeMessage", req.body);
 			return reply.code(204).send();
 		} catch (err) {

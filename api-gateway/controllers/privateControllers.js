@@ -515,7 +515,7 @@ const privateControllers = {
                 } catch (err) {
                         console.error("API-GATEWAY setAuthEmail error:", err);
                         req.session.error = ["Error trying to change your nickname"];
-                        return reply.redirect("/home");
+                        return reply.redirect("/changeUsername");
                 }
 	},
 
@@ -528,6 +528,9 @@ const privateControllers = {
 			req.body.user_id = req.user.user_id;
                         req.body.email = req.user.email;
 			req.body.username = req.user.username;
+
+			if (req.body.nickname.toLowerCase() === "system")
+				throw new Error ("You cannot use that nickname");
 
                         await axios.post("http://auth-service:3001/setAuthNickname", req.body);
 
@@ -555,6 +558,10 @@ const privateControllers = {
                         return reply.redirect("/home");
 
 		} catch (err) {
+			if (err.message === "You cannot use that nickname") {
+				req.session.error = ["Forbidden nickname"];
+				return reply.redirect("/changeNickname");
+			}
 			console.error("API-GATEWAY setAuthNickname error:", err);
 			req.session.error = ["Error trying to change your nickname"];
 			return reply.redirect("/home");
@@ -570,6 +577,9 @@ const privateControllers = {
 
 			req.body.user_id = req.user.user_id;
 			req.body.email = req.user.email;
+
+			if (req.body.username.toLowerCase() === "system")
+				throw new Error("You cannot use that username");
 
 			await axios.post("http://auth-service:3001/setAuthUsername", req.body);
 
@@ -596,6 +606,10 @@ const privateControllers = {
 
 			return reply.redirect("/home");
 		} catch (err) {
+			if (err.message === "You cannot use that username") {
+				req.session.error = ["Forbidden username"];
+				return reply.redirect("/changeUsername");
+			}
 			console.error("Api-Gateway setAuthUsername:", err);
 			req.session.error = ["Error during setting your new username"];
 			return reply.redirect("/changeUsername");

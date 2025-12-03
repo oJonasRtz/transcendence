@@ -246,7 +246,7 @@ const databaseModels = {
 	},
 
 	storeMessage: async function storeMessage(fastify, data) {
-		await fastify.db.run("INSERT INTO messages (content, sender_id) VALUES (?, ?)", [ data.msg, data.user_id ]);
+		await fastify.db.run("INSERT INTO messages (content, sender_id, isSystem) VALUES (?, ?, ?)", [ data.msg, data.user_id, data.isSystem ]);
 		return (true);
 	},
 

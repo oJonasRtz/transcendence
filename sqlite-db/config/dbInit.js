@@ -56,6 +56,7 @@ export default async function initDatabase() {
                         content TEXT NOT NULL,
                         sender_id TEXT NOT NULL,
                         receiver_id TEXT NULL DEFAULT NULL,
+			isSystem BOOLEAN DEFAULT false,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
 	`);
