@@ -6,6 +6,9 @@ import { randomUUID } from 'crypto';
 const publicControllers = {
 	
 	//GETTERS
+	goFlappyBird: function goFlappyBird(req, reply) {
+		return reply.redirect('/flappy-bird/');
+	},
 
 	getIcon: function getIcon(req, reply) {
 		return reply.sendFile("favicon.ico");

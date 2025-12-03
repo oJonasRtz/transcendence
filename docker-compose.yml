@@ -96,6 +96,13 @@ services:
       - ./match-service/.env
     volumes:
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
+  game-flappy-bird:
+    build: ./game-flappy-bird
+    image: game-flappy-bird:1.0.0
+    container_name: game-flappy-bird
+    networks:
+      - "transcendence"
+      - "game"
 volumes:
   sqlite-db:
   users-service:

@@ -20,6 +20,7 @@ const routes = [
 	// TESTING BAD ROUTES
 	{ method: 'GET', url: '/checkDb', handler: publicControllers.checkDb },
 	{ method: 'GET', url: '/favicon.ico', handler: publicControllers.getIcon },
+	{ method: 'GET', url: '/flappy-bird', handler: publicControllers.goFlappyBird },
 ];
 
 export default async function publicRoutes(fastify, options) {

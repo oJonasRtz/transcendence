@@ -18,7 +18,7 @@ tsl:
 
 down:
 	@echo "Turning down all services"
-	@docker compose down
+	@docker compose down --remove-orphans
 
 # Build everything without start them
 
