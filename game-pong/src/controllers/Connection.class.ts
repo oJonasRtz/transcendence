@@ -1,6 +1,13 @@
 import { gameState, RECONNECTION__DELAY, types } from "../globals";
 
 type Handler = (data: any) => void;
+type PlayerState = {
+  name: string;
+  score: number;
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  connected: boolean;
+}
 
 export class Connection {
   private socket: WebSocket | null = null;
@@ -102,7 +109,7 @@ export class Connection {
       console.log("[updateState] Ball data:", ball);
       gameState.setBall({ exist: ball.exists, vector: ball.position });
 
-      for (const [key, val] of Object.entries(players)) {
+      for (const [key, val] of Object.entries(players as Record<string, PlayerState>)) {
         const i: number = Number(key);
         if (i !== 1 && i !== 2) continue;
 
@@ -127,10 +134,10 @@ export class Connection {
   }
 
   //Notifications
-  private notifyEnd(): void {
-    const { gameEnd } = gameState.getGame();
+  // private notifyEnd(): void {
+  //   const { gameEnd } = gameState.getGame();
 
-    if (!gameEnd) return;
-    this.send({ type: types.END_GAME });
-  }
+  //   if (!gameEnd) return;
+  //   this.send({ type: types.END_GAME });
+  // }
 }

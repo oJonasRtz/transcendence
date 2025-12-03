@@ -1,6 +1,6 @@
 import * as ex from 'excalibur';
 import { Paddle } from './actors/paddle';
-import { connection, gameState, stats } from '../globals';
+import { gameState, stats } from '../globals';
 import { Ball } from './actors/ball';
 
 export class Game {
@@ -28,7 +28,6 @@ export class Game {
 		if (!exist) {
 			if (this.ball) {
 				this.engine.remove(this.ball);
-				delete this.ball;
 				this.ball = null;
 				console.log("Ball removed from the game");
 			}
@@ -36,7 +35,7 @@ export class Game {
 		}
 
 		if (!this.ball) {
-			this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2, connection.notifyBounce);
+			this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
 			this.addToGame([this.ball]);
 			console.log("Ball added to the game");
 		}

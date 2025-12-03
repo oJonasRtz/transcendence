@@ -1,15 +1,17 @@
-FROM debian:trixie
+# -- build stage --
+FROM node:20 AS build
 WORKDIR /app
+
 COPY package*.json ./
-#install node
-RUN apt-get update -y && apt-get upgrade -y && \
-    apt-get install -y nodejs npm net-tools curl iputils-ping libnss3-tools openssl
-
-#install mkcert
-# RUN curl -L -o /usr/local/bin/mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64 && \
-#     chmod +x /usr/local/bin/mkcert
-
 RUN npm install
+
 COPY . .
+#generate dist/
+RUN npm run build
+
+# -- production stage --
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3005
-CMD [ "npm", "run", "dev", "--", "--host" ]
+CMD ["nginx", "-g", "daemon off;"]

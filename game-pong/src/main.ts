@@ -1,5 +1,5 @@
 import { Game } from "./view/game.class";
-import { connection, gameState, identity } from "./globals";
+import { connection, gameState } from "./globals";
 import type { StartType } from "./types";
 
 const temp = {
@@ -28,21 +28,27 @@ export function waitGameStart(): Promise<void> {
   })
 }
 
-// async function startPong(data: StartType): Promise<void> {
-//   gameState.setIdentity(data);
-//   await waitGameStart();
-//   const game = new Game();
+async function startPong(data: StartType): Promise<void> {
+  gameState.setIdentity(data);
+  await waitGameStart();
+  const game = new Game();
 
-//   game.start();
-// }
+  game.start();
+}
 
-// (async() => {
-//   const match = Number(prompt("match id:"));
-//   const id: 1 | 2 = Number(prompt("you are player (1 or 2):"));
+//Puxar as infos via url futuramente, essa é so pra teste
+(async() => {
+  const match = Number(prompt("match id:"));
+  let temp_id: number = Number(prompt("you are player (1 or 2):"));
 
-//   await startPong({
-//     matchId: match,
-//     name: temp[id].name,
-//     playerId: temp[id].playerId,
-//   });
-// })();
+  while (temp_id !== 1 && temp_id !== 2)
+    temp_id = Number(prompt("you are player (1 or 2):"));
+  
+  const id = temp_id as 1 | 2;
+
+  await startPong({
+    matchId: match,
+    name: temp[id].name,
+    playerId: temp[id].playerId,
+  });
+})();

@@ -4,11 +4,17 @@ import sendMail from '../utils/sendMail.js';
 import { randomUUID } from 'crypto';
 
 const publicControllers = {
-	
-	//GETTERS
+
+	//Game  routes
+	//Vamos manter publicar temporariamente para testes
 	goFlappyBird: function goFlappyBird(req, reply) {
 		return reply.redirect('/flappy-bird/');
 	},
+
+	goPong: function goPong(req, reply) {
+		return reply.redirect('/pong/');
+	},
+	//GETTERS
 
 	getIcon: function getIcon(req, reply) {
 		return reply.sendFile("favicon.ico");
