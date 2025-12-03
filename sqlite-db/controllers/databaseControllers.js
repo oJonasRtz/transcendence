@@ -542,6 +542,22 @@ const databaseControllers = {
 			console.error("SQLITE-DB blockTheUser ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	friendInvite: async function friendInvite(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id and public_id");
+			const result = await databaseModels.friendInvite(fastify, req.body);
+			if (result === "invited")
+				return reply.code(201).send();
+			return reply.code(200).send();
+		} catch (err) {
+			if (err?.message === "SAME_USER")
+				return reply.code(403).send("SAME_USER");
+			console.error("SQLITE-DB friendInvite ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

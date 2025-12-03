@@ -229,6 +229,20 @@ const usersControllers = {
 			console.error("USERS-SERVICE blockTheUser ERROR:", err);
 			return reply.code(500).send();
 		}
+	},
+
+	friendInvite: async function friendInvite(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform the user_id and public_id");
+			const response = await axios.post("http://sqlite-db:3002/friendInvite", req.body);
+			return reply.code(response?.status ?? 204).send();
+		} catch (err) {
+			if (err?.response?.status === 403 || err?.response?.data === "SAME_USER")
+				return reply.code(403).send("SAME_USER");
+			console.error("USERS-SERVICE friendInvite ERROR:", err);
+			return reply.code(500).send();
+		}
 	}
 }
 

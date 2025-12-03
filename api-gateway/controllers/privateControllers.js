@@ -696,6 +696,30 @@ const privateControllers = {
 			req.session.error = ["Error trying to block the user"];
 			return reply.redirect("/home");
 		}
+	},
+
+	friendInvite: async function friendInvite(req, reply) {
+		try {
+			if (!req.body || !req.body.public_id) {
+				req.session.error = ["An error happened trying to invite the user"];
+				return reply.redirect("/home");
+			}
+			req.body.user_id = req.user.user_id;
+			const response = await axios.post("http://users-service:3003/friendInvite", req.body);
+			if (response?.status === 201)
+				req.session.success = ["Friend request sent successfully"];
+			else
+				req.session.success = ["You already sent the request, do not need another :)"];
+			return reply.redirect("/home");
+		} catch (err) {
+			if (err?.response?.data === "SAME_USER" || err?.response?.status === 403) {
+				req.session.error = ["You cannot invite yourself as a friend"];
+				return reply.redirect("/home");
+			}
+			console.error("API-GATEWAY friendInvite ERROR:", err);
+			req.session.error = ["An error happened inviting the user as a friend"];
+			return reply.redirect("/home");
+		}
 	}
 };
 
