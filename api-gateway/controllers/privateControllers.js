@@ -735,7 +735,7 @@ const privateControllers = {
 			const response_friends = await axios.post("http://users-service:3003/getAllFriends", { user_id: req.user.user_id });
 			const response_pendencies = await axios.post("http://users-service:3003/getAllPendencies", { user_id: req.user.user_id });
 
-			return reply.view("handlerFriendsPage", { friends: response_friends?.data ?? [], pendencies: response_pendencies?.data ?? [] });
+			return reply.view("handlerFriendsPage", { friends: response_friends?.data ?? [], pendings: response_pendencies?.data ?? [] });
 		} catch (err) {
 			console.error("API-GATEWAY handlerFriendsPage ERROR:", err);
 			req.session.error = ["Error trying to opening the handlerFriendsPage"];

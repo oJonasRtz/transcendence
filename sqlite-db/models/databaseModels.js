@@ -285,12 +285,12 @@ const databaseModels = {
 	},
 
 	getAllFriends: async function getAllFriends(fastify, data) {
-		const object = await fastify.db.all("SELECT * FROM friends WHERE owner_id = ? AND accepted = TRUE", [ data.user_id ]);
+		const object = await fastify.db.all("SELECT friends.*, auth.username, users.isOnline, users.avatar, users.public_id FROM friends JOIN auth ON auth.user_id = friends.friend_id JOIN users ON users.user_id = friends.friend_id WHERE friends.owner_id = ? AND friends.accepted = TRUE", [ data.user_id ]);
 		return (object ?? null);
 	},
 
 	getAllPendencies: async function getAllPendencies(fastify, data) {
-		const object = await fastify.db.all("SELECT * FROM friends WHERE friend_id = ? AND accepted = FALSE", [ data.user_id ]);
+		const object = await fastify.db.all("SELECT friends.*, auth.username, users.isOnline, users.avatar, users.public_id FROM friends JOIN auth ON auth.user_id = friends.friend_id JOIN users ON users.user_id = friends.friend_id WHERE friends.owner_id = ? AND friends.accepted = FALSE", [ data.user_id ]);
 		return (object ?? null);
 	},
 
@@ -301,7 +301,14 @@ const databaseModels = {
 		if (friend_id.user_id === data.user_id)
 			throw new Error("SAME_USER");
 		const object = await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.user_id, friend_id.user_id ]);
-		return (object ?? null);
+		let newNumber = 0;
+		const r1 = await fastify.db.get("SELECT friends FROM users WHERE user_id = ?", [ data.user_id ]);
+		newNumber = r1.friends + 1;
+		await fastify.db.run("UPDATE users SET friends = ? WHERE user_id = ?", [ newNumber, data.user_id ]);
+		const r2 = await fastify.db.get("SELECT friends FROM users WHERE user_id = ?", [ friend_id.user_id ]);
+		newNumber = r2.friends + 1;
+		await fastify.db.run("UPDATE users SET friends = ? WHERE user_id = ?", [ newNumber, friend_id.user_id ]);
+		return (true);
 	},
 
 	deleteAFriend: async function deleteAFriend(fastify, data) {
