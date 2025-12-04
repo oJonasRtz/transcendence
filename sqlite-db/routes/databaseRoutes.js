@@ -48,7 +48,11 @@ const routes = [
 	{ method: 'POST', url: '/storeMessage', handler: databaseControllers.storeMessage },
 	{ method: 'GET', url: '/getAllMessages', handler: databaseControllers.getAllMessages },
 	{ method: 'POST', url: '/blockTheUser', handler: databaseControllers.blockTheUser },
-	{ method: 'POST', url: '/friendInvite', handler: databaseControllers.friendInvite }
+	{ method: 'POST', url: '/friendInvite', handler: databaseControllers.friendInvite },
+	{ method: 'POST', url: '/getAllFriends', handler: databaseControllers.getAllFriends },
+	{ method: 'POST', url: '/getAllPendencies', handler: databaseControllers.getAllPendencies },
+	{ method: 'POST', url: '/setAcceptFriend', handler: databaseControllers.setAcceptFriend },
+	{ method: 'POST', url: '/deleteAFriend', handler: databaseControllers.deleteAFriend }
 ];
 
 export default async function databaseRoutes(fastify, options) {

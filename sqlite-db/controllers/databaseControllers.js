@@ -539,6 +539,8 @@ const databaseControllers = {
 				return reply.code(201).send();
 			return reply.code(204).send();
 		} catch (err) {
+			if (err?.response?.status === 403 || err?.response?.message === "SAME_USER") 
+				return reply.code(403).send("SAME_USER");
 			console.error("SQLITE-DB blockTheUser ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
@@ -556,6 +558,54 @@ const databaseControllers = {
 			if (err?.message === "SAME_USER")
 				return reply.code(403).send("SAME_USER");
 			console.error("SQLITE-DB friendInvite ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getAllFriends: async function getAllFriends(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id");
+			const result = await databaseModels.getAllFriends(fastify, req.body);
+			return reply.code(200).send(result ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getAllFriends ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getAllPendencies: async function getAllPendencies(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id");
+			const result = await databaseModels.getAllPendencies(fastify, req.body);
+			return reply.code(200).send(result ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getAllPendencies ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAcceptFriend: async function setAcceptFriend(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id || !req.body.accept)
+				return reply.code(400).send("You need to inform user_id");
+			await databaseModels.setAcceptFriend(fastify, req.body);
+			return reply.code(204).send();
+		} catch (err) {
+			console.error("SQLITE-DB setAcceptFriend", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	deleteAFriend: async function deleteAFriend(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id");
+			await databaseModels.deleteAFriend(fastify, req.body);
+			return (true);
+		} catch (err) {
+			console.error("SQLITE-DB deleteAFriend", err);
 			return reply.code(500).send("An error happened");
 		}
 	}

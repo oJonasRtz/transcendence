@@ -32,7 +32,7 @@ const routes = [
 	{ method: 'POST', url: '/friendInvite', handler: privateControllers.friendInvite },
 	{ method: 'GET', url: '/flappy-bird', handler: privateControllers.goFlappyBird },
 	{ method: 'GET', url: '/flappy-bird/', handler: privateControllers.goFlappyBird },
-
+	{ method: 'GET', url: '/handlerFriendsPage', handler: privateControllers.handlerFriendsPage }
 ];
 
 export default async function privateRoutes(fastify, options) {

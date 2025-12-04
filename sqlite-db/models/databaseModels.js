@@ -260,6 +260,8 @@ const databaseModels = {
 		const target_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
 		if (!target_id || !target_id.user_id)
 			throw new Error("USER_DOES_NOT_EXIST");
+		if (target_id.user_id === data.user_id)
+			throw new Error("SAME_USER");
 		const object = await fastify.db.get("SELECT * FROM blacklist WHERE owner_id = ? AND target_id = ?", [ data.user_id, target_id.user_id ]);
 		if (object) {
 			await fastify.db.run("DELETE FROM blacklist WHERE owner_id = ? AND target_id = ?", [ data.user_id, target_id.user_id ]);
@@ -280,6 +282,36 @@ const databaseModels = {
 			return ("Already exists");
 		await fastify.db.run("INSERT INTO friends (owner_id, friend_id) VALUES (?, ?)", [ data.user_id, friend_id.user_id ]);
 		return ("invited");
+	},
+
+	getAllFriends: async function getAllFriends(fastify, data) {
+		const object = await fastify.db.all("SELECT * FROM friends WHERE owner_id = ? AND accepted = TRUE", [ data.user_id ]);
+		return (object ?? null);
+	},
+
+	getAllPendencies: async function getAllPendencies(fastify, data) {
+		const object = await fastify.db.all("SELECT * FROM friends WHERE friend_id = ? AND accepted = FALSE", [ data.user_id ]);
+		return (object ?? null);
+	},
+
+	setAcceptFriend: async function setAcceptFriend(fastify, data) {
+		const friend_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+		if (!friend_id || !friend_id.user_id)
+			throw new Error("USER_DOES_NOT_EXIST");
+		if (friend_id.user_id === data.user_id)
+			throw new Error("SAME_USER");
+		const object = await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.user_id, friend_id.user_id ]);
+		return (object ?? null);
+	},
+
+	deleteAFriend: async function deleteAFriend(fastify, data) {
+		const friend_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+		if (!friend_id || !friend_id.user_id)
+			throw new Error("USER_DOES_NOT_EXIST");
+		if (friend_id.user_id === data.user_id)
+			throw new Error("SAME_USER");
+		await fastify.db.run("DELETE FROM friends WHERE friend_id = ? AND owner_id = ?", [ friend_id.user_id, data.user_id ]);
+		return (true);
 	}
 }
 

@@ -696,6 +696,10 @@ const privateControllers = {
 				req.session.success = ["Target user unblocked"];
 			return reply.redirect("/home");
 		} catch (err) {
+			if (err?.response?.status === 403 || err?.response?.message === "SAME_USER") {
+				req.session.error = ["You cannot block yourself"];
+				return reply.redirect("/home");
+			}
 			console.error("API-GATEWAY blockTheUser");
 			req.session.error = ["Error trying to block the user"];
 			return reply.redirect("/home");
@@ -722,6 +726,19 @@ const privateControllers = {
 			}
 			console.error("API-GATEWAY friendInvite ERROR:", err);
 			req.session.error = ["An error happened inviting the user as a friend"];
+			return reply.redirect("/home");
+		}
+	},
+
+	handlerFriendsPage: async function handlerFriendsPage(req, reply) {
+		try {
+			const response_friends = await axios.post("http://users-service:3003/getAllFriends", { user_id: req.user.user_id });
+			const response_pendencies = await axios.post("http://users-service:3003/getAllPendencies", { user_id: req.user.user_id });
+
+			return reply.view("handlerFriendsPage", { friends: response_friends?.data ?? [], pendencies: response_pendencies?.data ?? [] });
+		} catch (err) {
+			console.error("API-GATEWAY handlerFriendsPage ERROR:", err);
+			req.session.error = ["Error trying to opening the handlerFriendsPage"];
 			return reply.redirect("/home");
 		}
 	}

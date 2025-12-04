@@ -21,7 +21,11 @@ const routes = [
 	{ method: 'GET', url: '/getAllUsersInformation', handler: usersControllers.getAllUsersInformation },
 	{ method: 'POST', url: '/getDataByPublicId', handler: usersControllers.getDataByPublicId },
 	{ method: 'POST', url: '/blockTheUser', handler: usersControllers.blockTheUser },
-	{ method: 'POST', url: '/friendInvite', handler: usersControllers.friendInvite }
+	{ method: 'POST', url: '/friendInvite', handler: usersControllers.friendInvite },
+	{ method: 'POST', url: '/getAllFriends', handler: usersControllers.getAllFriends },
+	{ method: 'POST', url: '/getAllPendencies', handler: usersControllers.getAllPendencies },
+	{ method: 'POST', url: '/setAcceptFriend', handler: usersControllers.setAcceptFriend },
+	{ method: 'POST', url: '/deleteAFriend', handler: usersControllers.deleteAFriend }
 ];
 
 export default async function usersRoutes(fastify, options) {

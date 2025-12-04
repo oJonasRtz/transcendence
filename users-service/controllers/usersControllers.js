@@ -226,6 +226,8 @@ const usersControllers = {
 			const response = await axios.post("http://sqlite-db:3002/blockTheUser", req.body);
 			return reply.code(response?.status ?? 204).send();
 		} catch (err) {
+			if (err?.response?.status === 403 || err?.response?.message === "SAME_USER")
+				return reply.code(403).send("SAME_USER");
 			console.error("USERS-SERVICE blockTheUser ERROR:", err);
 			return reply.code(500).send();
 		}
@@ -242,6 +244,54 @@ const usersControllers = {
 				return reply.code(403).send("SAME_USER");
 			console.error("USERS-SERVICE friendInvite ERROR:", err);
 			return reply.code(500).send();
+		}
+	},
+
+	getAllFriends: async function getAllFriends(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform the user_id");
+			const response = await axios.post("http://sqlite-db:3002/getAllFriends", req.body);
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getAllFriends ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getAllPendencies: async function getAllPendencies(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform the user_id");
+			const response = await axios.post("http://sqlite-db:3002/getAllPendencies", req.body);
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getAllPendencies ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	setAcceptFriend: async function setAcceptFriend(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.accept || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id, acceptFlag and public_id");
+			await axios.post("http://sqlite-db:3002/setAcceptFriend", req.body);
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE setAcceptFriend ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	deleteAFriend: async function deleteAFriend(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id, acceptFlag and public_id");
+			await axios.post("http://sqlite-db:3002/deleteAFriend", req.body);
+			return reply.code(204).send();
+		} catch (err) {
+			console.error("USERS-SERVICE deleteAFriend ERROR:", err);
+			return reply.code(500).send("An error happened");
 		}
 	}
 }
