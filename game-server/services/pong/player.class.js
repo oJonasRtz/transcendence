@@ -1,4 +1,4 @@
-import { lobby, types } from "../server.shared.js";
+import { lobby, types } from "../../server.shared.js";
 import { Paddle } from "./Paddle.class.js";
 
 export class Player {

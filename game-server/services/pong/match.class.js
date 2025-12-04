@@ -1,4 +1,4 @@
-import { createId } from "../controllers/createId.js";
+import { createId } from "../../controllers/createId.js";
 import { Player } from "./player.class.js";
 import {
   DISCONNECT_TIMEOUT,
@@ -9,7 +9,7 @@ import {
   RIGHT,
   stats,
   types,
-} from "../server.shared.js";
+} from "../../server.shared.js";
 import { Ball } from "./Ball.class.js";
 
 export class Match {

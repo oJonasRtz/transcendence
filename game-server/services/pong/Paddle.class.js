@@ -1,5 +1,5 @@
-import { checkVerticalCollision } from "../controllers/checkVerticalCollision.js";
-import { FRAME_TIME, stats, types } from "../server.shared.js";
+import { checkVerticalCollision } from "../../controllers/checkVerticalCollision.js";
+import { FRAME_TIME, stats, types } from "../../server.shared.js";
 
 export class Paddle {
 	#speed = 8;

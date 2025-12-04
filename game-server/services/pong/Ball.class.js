@@ -1,4 +1,4 @@
-import { FRAME_TIME, INTERVALS, LEFT, RIGHT, stats, types } from "../server.shared.js";
+import { FRAME_TIME, INTERVALS, LEFT, RIGHT, stats, types } from "../../server.shared.js";
 
 export class Ball {
   #direction = { x: 0, y: 0 };

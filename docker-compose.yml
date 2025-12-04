@@ -22,9 +22,11 @@ services:
       - auth-service
     networks:
       - "transcendence"
+      - "game"
     volumes:
       - api-gateway:/app/public
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
+      - flappy-bird-dist:/app/public/flappy-bird
   auth-service:
     build: ./auth-service
     image: auth-service:1.0.0
@@ -101,16 +103,33 @@ services:
     image: game-flappy-bird:1.0.0
     container_name: game-flappy-bird
     networks:
-      - "transcendence"
       - "game"
+    volumes:
+      - flappy-bird-dist:/usr/share/nginx/html
 volumes:
   sqlite-db:
   users-service:
   api-gateway:
+  flappy-bird-dist:
 networks:
   game:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.29.0.0/16
+          gateway: 172.29.0.1
+
   transcendence:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
+
   db_connection:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1
+

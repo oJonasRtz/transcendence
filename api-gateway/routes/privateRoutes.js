@@ -29,9 +29,10 @@ const routes = [
 	{ method: 'POST', url: '/match/leave', handler: privateControllers.leaveQueue },
 	{ method: 'GET', url: '/deleteUserAccount', handler: privateControllers.deleteUserAccount },
 	{ method: 'POST', url: '/blockTheUser', handler: privateControllers.blockTheUser },
-	{ method: 'POST', url: '/friendInvite', handler: privateControllers.friendInvite }
-	//{ method: 'POST', url: '/match/join', handler: privateControllers.joinMatch },
-	//{ method: 'POST', url: '/match/leave', handler: privateControllers.leaveMatch },
+	{ method: 'POST', url: '/friendInvite', handler: privateControllers.friendInvite },
+	{ method: 'GET', url: '/flappy-bird', handler: privateControllers.goFlappyBird },
+	{ method: 'GET', url: '/flappy-bird/', handler: privateControllers.goFlappyBird },
+
 ];
 
 export default async function privateRoutes(fastify, options) {

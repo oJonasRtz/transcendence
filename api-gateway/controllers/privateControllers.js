@@ -22,6 +22,10 @@ let inQueue = false;
 
 const privateControllers = {
 
+	goFlappyBird: function goFlappyBird(req, reply) {
+		return reply.sendFile("flappy-bird/index.html");
+	},
+
 	match: async function match(req, reply) {
 		return reply.view("matchMaking", {
 			email: req.user.email,

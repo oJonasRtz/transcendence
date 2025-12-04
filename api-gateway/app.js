@@ -50,6 +50,13 @@ app.register(fastifyStatic, {
 	prefix: "/public/"
 });
 
+app.register(fastifyStatic, {
+  root: path.join(__dirname, "public"),
+  prefix: "/",
+  decorateReply: false
+});
+
+
 app.get("/boom", (req, reply) => {
 	throw new Error("Big Error");
 });

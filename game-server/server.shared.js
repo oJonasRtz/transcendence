@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { Lobby } from './services/lobby.class.js';
 import { loadJson } from './controllers/loadJson.js';
 
+export const flappyMatches = {};
 export const matches = {};
 export const lobby = new Lobby();
 

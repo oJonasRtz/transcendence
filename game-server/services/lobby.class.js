@@ -1,4 +1,4 @@
-import { Match } from "./match.class.js";
+import { Match } from "./pong/match.class.js";
 import { closeCodes, lobby, matches, types } from "../server.shared.js"
 import { sendError } from '../controllers/sendError.js'
 import { showMatches } from "../controllers/showMatches.log.js";
