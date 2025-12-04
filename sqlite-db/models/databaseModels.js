@@ -261,7 +261,7 @@ const databaseModels = {
 		if (!target_id || !target_id.user_id)
 			throw new Error("USER_DOES_NOT_EXIST");
 		if (target_id.user_id === data.user_id)
-			throw new Error("SAME_USER");
+			return ("SAME_USER");
 		const object = await fastify.db.get("SELECT * FROM blacklist WHERE owner_id = ? AND target_id = ?", [ data.user_id, target_id.user_id ]);
 		if (object) {
 			await fastify.db.run("DELETE FROM blacklist WHERE owner_id = ? AND target_id = ?", [ data.user_id, target_id.user_id ]);

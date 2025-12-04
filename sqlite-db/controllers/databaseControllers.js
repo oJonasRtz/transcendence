@@ -537,6 +537,8 @@ const databaseControllers = {
 			const result = await databaseModels.blockTheUser(fastify, req.body);
 			if (result === "Block")
 				return reply.code(201).send();
+			else if (result === "SAME_USER")
+				return reply.code(403).send("SAME_USER");
 			return reply.code(204).send();
 		} catch (err) {
 			if (err?.response?.status === 403 || err?.response?.message === "SAME_USER") 
