@@ -731,15 +731,56 @@ const privateControllers = {
 	},
 
 	handlerFriendsPage: async function handlerFriendsPage(req, reply) {
+		let success = req.session.success ?? [];
+		let error = req.session.error ?? [];
+
+		delete req.session.success;
+		delete req.session.error;
+
 		try {
 			const response_friends = await axios.post("http://users-service:3003/getAllFriends", { user_id: req.user.user_id });
 			const response_pendencies = await axios.post("http://users-service:3003/getAllPendencies", { user_id: req.user.user_id });
 
-			return reply.view("handlerFriendsPage", { friends: response_friends?.data ?? [], pendings: response_pendencies?.data ?? [] });
+			return reply.view("handlerFriendsPage", { success, error, friends: response_friends?.data ?? [], pendings: response_pendencies?.data ?? [] });
 		} catch (err) {
 			console.error("API-GATEWAY handlerFriendsPage ERROR:", err);
 			req.session.error = ["Error trying to opening the handlerFriendsPage"];
 			return reply.redirect("/home");
+		}
+	},
+
+	setAcceptFriend: async function setAcceptFriend(req, reply) {
+		try {
+			if (!req.body || !req.body.public_id) {
+				req.session.error = ["Invalid action"];
+				return reply.redirect("/handlerFriendsPage");
+			}
+			req.body.user_id = req.user.user_id;
+			req.body.accept = true;
+			await axios.post("http://users-service:3003/setAcceptFriend", req.body);
+			req.session.success = ["Friend added successfully"];
+			return reply.redirect("/handlerFriendsPage");
+		} catch (err) {
+			console.error("API-GATEWAY setAcceptFriend ERROR:", err);
+			req.session.error = ["An error happened trying to accept that person"];
+			return reply.redirect("/handlerFriendsPage");
+		}
+	},
+
+	deleteAFriend: async function deleteAFriend(req, reply) {
+		try {
+			if (!req.body || !req.body.public_id) {
+				req.session.error = ["Invalid action"];
+				return reply.redirect("/handlerFriendsPage");
+			}
+			req.body.user_id = req.user.user_id;
+			await axios.post("http://users-service:3003/deleteAFriend", req.body);
+			req.session.success = ["User relation deleted successfully"];
+			return reply.redirect("/handlerFriendsPage");
+		} catch (err) {
+			console.error("API-GATEWAY deleteAFriend ERROR:", err);
+			req.session.error = ["An error happened trying to delete that person friendship"];
+			return reply.redirect("/handlerFriendsPage");
 		}
 	}
 };

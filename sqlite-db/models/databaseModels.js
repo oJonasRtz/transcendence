@@ -300,7 +300,10 @@ const databaseModels = {
 			throw new Error("USER_DOES_NOT_EXIST");
 		if (friend_id.user_id === data.user_id)
 			throw new Error("SAME_USER");
-		const object = await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.user_id, friend_id.user_id ]);
+		const match = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ?");
+		if (match)
+			return (true);
+		const object = await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.accept, data.user_id, friend_id.user_id ]);
 		let newNumber = 0;
 		const r1 = await fastify.db.get("SELECT friends FROM users WHERE user_id = ?", [ data.user_id ]);
 		newNumber = r1.friends + 1;

@@ -17,6 +17,16 @@
 					<br>
 				</nav>
 			</section>
+			<% if (error && error.length > 0) { %>
+				<% error.forEach(err => { %>
+					<p style="color: red"><strong><%= err %> </strong></p>
+				<% }) %>
+			<% } %>
+			<% if (success && success.length > 0) { %>
+				<% error.forEach(suc => { %>
+					<p style="color: green"><strong><%= suc %> </strong></p>
+				<% }) %>
+			<% } %>
 			<% if (friends && friends.length > 0) { %>
 				<% friends.forEach(fri => { %>
 					<div class="flex gap-4 items-center min-w-100 z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
@@ -51,6 +61,11 @@
 							<input type="hidden" name="public_id" value="<%= ped.public_id %>">
 							
 							<button type="submit" class="cursor-pointer bg-green-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-200"><strong>Accept</strong></button>
+						</form>
+						<form action="/deleteAFriend" method="POST">
+							<input type="hidden" name="public_id" value="<%= ped.public_id %>">
+							<button type="submit" class="cursor-pointer bg-red-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-200"><strong>Reject</strong></button>
+
 						</form>
 					</div>
 				<% }) %>

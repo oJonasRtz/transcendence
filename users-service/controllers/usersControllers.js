@@ -276,7 +276,7 @@ const usersControllers = {
 			if (!req.body || !req.body.user_id || !req.body.accept || !req.body.public_id)
 				return reply.code(400).send("You need to inform user_id, acceptFlag and public_id");
 			await axios.post("http://sqlite-db:3002/setAcceptFriend", req.body);
-			return reply.code(200).send(response?.data ?? null);
+			return reply.code(204).send();
 		} catch (err) {
 			console.error("USERS-SERVICE setAcceptFriend ERROR:", err);
 			return reply.code(500).send("An error happened");
