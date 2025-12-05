@@ -277,20 +277,20 @@ const databaseModels = {
 			throw new Error("USER_DOES_NOT_EXIST");
 		if (friend_id.user_id === data.user_id)
 			throw new Error("SAME_USER");
-		const object = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ?", [ data.user_id, friend_id.user_id ]);
+		const object = await fastify.db.get("SELECT * FROM friends WHERE (owner_id = ? AND friend_id = ?) OR (owner_id = ? AND friend_id = ?)", [ friend_id.user_id, data.user_id, data.user_id, friend_id.user_id ]);
 		if (object)
 			return ("Already exists");
-		await fastify.db.run("INSERT INTO friends (owner_id, friend_id) VALUES (?, ?)", [ data.user_id, friend_id.user_id ]);
+		await fastify.db.run("INSERT INTO friends (owner_id, friend_id) VALUES (?, ?), (?, ?)", [ data.user_id, friend_id.user_id, friend_id.user_id, data.user_id ]);
 		return ("invited");
 	},
 
 	getAllFriends: async function getAllFriends(fastify, data) {
-		const object = await fastify.db.all("SELECT friends.*, auth.username, users.isOnline, users.avatar, users.public_id FROM friends JOIN auth ON auth.user_id = friends.friend_id JOIN users ON users.user_id = friends.friend_id WHERE friends.owner_id = ? AND friends.accepted = TRUE", [ data.user_id ]);
+		const object = await fastify.db.all("SELECT friends.*, auth.username, users.isOnline, users.avatar, users.public_id FROM friends JOIN auth ON auth.user_id = friends.friend_id JOIN users ON users.user_id = friends.friend_id WHERE friends.owner_id = ? AND friends.accepted = TRUE AND EXISTS ( SELECT 1 FROM friends friends2 WHERE friends2.owner_id = friends.friend_id AND friends2.friend_id = friends.owner_id AND friends2.accepted = TRUE )", [ data.user_id ]);
 		return (object ?? null);
 	},
 
 	getAllPendencies: async function getAllPendencies(fastify, data) {
-		const object = await fastify.db.all("SELECT friends.*, auth.username, users.isOnline, users.avatar, users.public_id FROM friends JOIN auth ON auth.user_id = friends.friend_id JOIN users ON users.user_id = friends.friend_id WHERE friends.owner_id = ? AND friends.accepted = FALSE", [ data.user_id ]);
+		const object = await fastify.db.all("SELECT friends.*, auth.username, users.isOnline, users.avatar, users.public_id FROM friends JOIN auth ON auth.user_id = friends.owner_id JOIN users ON users.user_id = friends.owner_id WHERE friends.friend_id = ? AND friends.accepted = FALSE", [ data.user_id ]);
 		return (object ?? null);
 	},
 
@@ -300,17 +300,11 @@ const databaseModels = {
 			throw new Error("USER_DOES_NOT_EXIST");
 		if (friend_id.user_id === data.user_id)
 			throw new Error("SAME_USER");
-		const match = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ?");
-		if (match)
-			return (true);
-		const object = await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.accept, data.user_id, friend_id.user_id ]);
-		let newNumber = 0;
-		const r1 = await fastify.db.get("SELECT friends FROM users WHERE user_id = ?", [ data.user_id ]);
-		newNumber = r1.friends + 1;
-		await fastify.db.run("UPDATE users SET friends = ? WHERE user_id = ?", [ newNumber, data.user_id ]);
-		const r2 = await fastify.db.get("SELECT friends FROM users WHERE user_id = ?", [ friend_id.user_id ]);
-		newNumber = r2.friends + 1;
-		await fastify.db.run("UPDATE users SET friends = ? WHERE user_id = ?", [ newNumber, friend_id.user_id ]);
+		await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.accept, data.user_id, friend_id.user_id ]);
+		const match = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true", [ friend_id.user_id, data.user_id ]);
+		if (match) {
+			await fastify.db.run("UPDATE users SET friends = friends + 1 WHERE (user_id = ?) OR (user_id = ?)", [ friend_id.user_id, data.user_id ]);
+		}
 		return (true);
 	},
 
@@ -320,7 +314,11 @@ const databaseModels = {
 			throw new Error("USER_DOES_NOT_EXIST");
 		if (friend_id.user_id === data.user_id)
 			throw new Error("SAME_USER");
-		await fastify.db.run("DELETE FROM friends WHERE friend_id = ? AND owner_id = ?", [ friend_id.user_id, data.user_id ]);
+		const match = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true", [ friend_id.user_id, data.user_id ]);
+		const match2 = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true", [ data.user_id, friend_id.user_id ]);
+		if (match && match2)
+			await fastify.db.run("UPDATE users SET friends = friends - 1 WHERE (user_id = ?) OR (user_id = ?)", [ friend_id.user_id, data.user_id ]);
+		await fastify.db.run("DELETE FROM friends WHERE (friend_id = ? AND owner_id = ?) OR (friend_id = ? AND owner_id = ?)", [ friend_id.user_id, data.user_id, data.user_id, friend_id.user_id ]);
 		return (true);
 	}
 }
