@@ -30,8 +30,12 @@ const routes = [
 	{ method: 'GET', url: '/deleteUserAccount', handler: privateControllers.deleteUserAccount },
 	{ method: 'POST', url: '/blockTheUser', handler: privateControllers.blockTheUser },
 	{ method: 'POST', url: '/friendInvite', handler: privateControllers.friendInvite },
+	// -- Games --
 	{ method: 'GET', url: '/flappy-bird', handler: privateControllers.goFlappyBird },
 	{ method: 'GET', url: '/flappy-bird/', handler: privateControllers.goFlappyBird },
+	{ method: 'GET', url: '/pong', handler: privateControllers.goPong },
+	{ method: 'GET', url: '/pong/', handler: privateControllers.goPong },
+
 	{ method: 'GET', url: '/handlerFriendsPage', handler: privateControllers.handlerFriendsPage },
 	{ method: 'POST', url: '/setAcceptFriend', handler: privateControllers.setAcceptFriend },
 	{ method: 'POST', url: '/deleteAFriend', handler: privateControllers.deleteAFriend }

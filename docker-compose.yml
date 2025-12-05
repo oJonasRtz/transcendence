@@ -27,6 +27,7 @@ services:
       - api-gateway:/app/public
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
       - flappy-bird-dist:/app/public/flappy-bird
+      - pong-dist:/app/public/pong
   auth-service:
     build: ./auth-service
     image: auth-service:1.0.0
@@ -80,11 +81,11 @@ services:
     depends_on:
       - game-server
     networks:
-      - "transcendence"
       - "game"
     volumes:
       - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
+      - pong-dist:/usr/share/nginx/html
   match-service:
     build: ./match-service
     image: match-service:1.0.0
@@ -111,6 +112,7 @@ volumes:
   users-service:
   api-gateway:
   flappy-bird-dist:
+  pong-dist:
 networks:
   game:
     driver: bridge

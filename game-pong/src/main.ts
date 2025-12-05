@@ -41,8 +41,6 @@ async function startPong(data: StartType): Promise<void> {
   const match = Number(prompt("match id:"));
   let temp_id: number = Number(prompt("you are player (1 or 2):"));
 
-  while (temp_id !== 1 && temp_id !== 2)
-    temp_id = Number(prompt("you are player (1 or 2):"));
   
   const id = temp_id as 1 | 2;
 

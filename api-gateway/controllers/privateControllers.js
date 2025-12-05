@@ -26,6 +26,10 @@ const privateControllers = {
 		return reply.sendFile("flappy-bird/index.html");
 	},
 
+	goPong: function goPong(req, reply) {
+		return reply.sendFile("pong/index.html");
+	},
+
 	match: async function match(req, reply) {
 		return reply.view("matchMaking", {
 			email: req.user.email,

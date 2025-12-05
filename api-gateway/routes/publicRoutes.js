@@ -20,9 +20,6 @@ const routes = [
 	// TESTING BAD ROUTES
 	{ method: 'GET', url: '/checkDb', handler: publicControllers.checkDb },
 	{ method: 'GET', url: '/favicon.ico', handler: publicControllers.getIcon },
-	//rotas temporarias, elas vao para as privadas dps
-	// { method: 'GET', url: '/flappy-bird', handler: publicControllers.goFlappyBird },
-	{ method: 'GET', url: '/pong', handler: publicControllers.goPong },
 ];
 
 export default async function publicRoutes(fastify, options) {
