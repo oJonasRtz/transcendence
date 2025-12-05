@@ -302,7 +302,8 @@ const databaseModels = {
 			throw new Error("SAME_USER");
 		await fastify.db.run("UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?", [ data.accept, data.user_id, friend_id.user_id ]);
 		const match = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true", [ friend_id.user_id, data.user_id ]);
-		if (match) {
+		const match2 = await fastify.db.get("SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true", [ data.user_id, friend_id.user_id ]);
+		if (match && match2) {
 			await fastify.db.run("UPDATE users SET friends = friends + 1 WHERE (user_id = ?) OR (user_id = ?)", [ friend_id.user_id, data.user_id ]);
 		}
 		return (true);
