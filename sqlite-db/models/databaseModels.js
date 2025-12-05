@@ -126,7 +126,10 @@ const databaseModels = {
 	},
 
 	setIsOnline: async function setIsOnline(fastify, data) {
-		await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ?", [ data.isOnline, data.user_id ]);
+		if (data.isOnline === true)
+			await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ? AND isOnline = false", [ data.isOnline, data.user_id ]);
+		else if (data.isOnline === false)
+			await fastify.db.run("UPDATE users SET isOnline = ? WHERE user_id = ? AND isOnline = true", [ data.isOnline, data.user_id ]);
 		return (true);
 	},
 

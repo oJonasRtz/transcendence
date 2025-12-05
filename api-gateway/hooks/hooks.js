@@ -112,10 +112,7 @@ export async function authHook(req, reply) {
 		req.jwt = token; // original jwt
 		req.user = data;  // decoded data
 		req.user.isOnline = true;
-		if (!req.session.check) {
-			req.session.check = true;
-			await axios.post("http://users-service:3003/setIsOnline", { user_id: data.user_id, isOnline: true });
-		}
+		await axios.post("http://users-service:3003/setIsOnline", { user_id: data.user_id, isOnline: true });
 	} catch (err) {
 		if (err.name === "TokenExpiredError") {
 
