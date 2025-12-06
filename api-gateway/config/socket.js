@@ -53,7 +53,7 @@ export default async function registerServer(io) {
 				data = { name: "Anonymous" };
 			users.delete(socket.id);
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${data.name}`, isSystem: false, msg: `system: ${data.name} left the chat` } );
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${data.name}`, isSystem: true, msg: `system: ${data.name} left the chat` } );
 				await reloadEverything();
 			} catch (err) {
 				console.error(`Error updating status of the user ${data.name}`);
