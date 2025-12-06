@@ -28,13 +28,18 @@
 			<p>Messages:</p>
 			<div id="messages" style="border: 2px solid">
                                 </div><br>
-			<form id="sendForm">
-				<label>
-					Send:
-					<input id="message" type="text" name="message" required><br><br>
-					<button type="submit" style="display:none"></button>
-				</label>
-			</form>
+			<div class="flex gap-4">
+				<form id="sendForm">
+					<label>
+						<strong>Send:</strong>
+						<input id="message" type="text" name="message" required><br><br>
+						<button type="submit" style="display:none"></button>
+					</label>
+				</form>
+				<form id="sendInvite">
+					<button type="submit"><strong>Invite</strong></button>
+                        	</form>
+			</div>
 			<h6>Time do balacobaco</h6>
 		</div>
 	</body>

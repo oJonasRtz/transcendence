@@ -61,6 +61,17 @@ export default async function registerServer(io) {
 			io.emit("updateUsers", Array.from(users.values()));
 			io.emit("updateMessages", messages); // send the current messages to the user 
 		});
+
+		socket.on("sendInvite", async () => {
+			try {
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: `invite you to a Pong match =D` } );
+				await reloadEverything();
+			} catch (err) {
+				console.error(`Error sending the pong invite match, user: ${socket.name}`);
+			}
+			io.emit("updateUsers", Array.from(users.values()));
+			io.emit("updateMessages", messages);
+		});
 		
 		// Specif events only happens on socket
 		socket.on("sendMessage", async (msg) => {

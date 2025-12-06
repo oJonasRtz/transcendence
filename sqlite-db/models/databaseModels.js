@@ -246,6 +246,7 @@ const databaseModels = {
 		await fastify.db.run("DELETE FROM auth WHERE user_id = ?", [ data.user_id ]);
 		await fastify.db.run("DELETE FROM users WHERE user_id = ?", [ data.user_id ]);
 		await fastify.db.run("DELETE FROM messages WHERE sender_id = ?", [ data.user_id ]);
+		await fastify.db.run("DELETE FROM friends WHERE (owner_id = ?) OR (friend_id = ?)", [ data.user_id, data.user_id ]);
 		return (true);
 	},
 

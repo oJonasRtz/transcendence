@@ -6,26 +6,37 @@ const SOCKET_URL = "http://localhost:3000";
 
 const form = document.getElementById("sendForm") as HTMLFormElement;
 const input = document.getElementById("message") as HTMLInputElement;
+const invite = document.getElementById("sendInvite") as HTMLFormElement;
 
 // e === event
 
-form.addEventListener("submit", (e) => {
-	e.preventDefault(); // Avoid to load again the webpage and make the HTTP request
-	
-	const msg = input.value.trim();
-	if (!msg) return ;
+if (invite instanceof HTMLFormElement) {
+	invite.addEventListener("submit", (e) => {
+		e.preventDefault();
 
-	socket.emit("sendMessage", msg);
-	input.value = ""; // erase the value
-});
+		socket.emit("sendInvite");
+	});
+}
+
+if (form instanceof HTMLFormElement && input instanceof HTMLInputElement) {
+	form.addEventListener("submit", (e) => {
+		e.preventDefault(); // Avoid to load again the webpage and make the HTTP request
+	
+		const msg = input.value.trim();
+		if (!msg) return ;
+
+		socket.emit("sendMessage", msg);
+		input.value = ""; // erase the value
+	});
+}
 
 const username = document.body.dataset.username;
 const public_id = document.body.dataset.public_id;
-const avatar = document.body.dataset.avatar;
+//const avatar = document.body.dataset.avatar;
 
 console.log("Username:", username);
 console.log("Public_id:", public_id);
-console.log("Avatar:", avatar);
+//console.log("Avatar:", avatar);
 
 const socket = io(SOCKET_URL, {
     transports: ["websocket"], 
