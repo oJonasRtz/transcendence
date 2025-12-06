@@ -325,6 +325,11 @@ const databaseModels = {
 			await fastify.db.run("UPDATE users SET friends = friends - 1 WHERE (user_id = ?) OR (user_id = ?)", [ friend_id.user_id, data.user_id ]);
 		await fastify.db.run("DELETE FROM friends WHERE (friend_id = ? AND owner_id = ?) OR (friend_id = ? AND owner_id = ?)", [ friend_id.user_id, data.user_id, data.user_id, friend_id.user_id ]);
 		return (true);
+	},
+
+	getAllBlacklist: async function getAllBlacklist(fastify, data) {
+		const blacklist = await fastify.db.all("SELECT * FROM blacklist");
+		return (blacklist ?? null);
 	}
 }
 

@@ -610,6 +610,16 @@ const databaseControllers = {
 			console.error("SQLITE-DB deleteAFriend", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getAllBlacklist: async function getAllBlacklist(fastify, req, reply) {
+		try {
+			const blacklist = await databaseModels.getAllBlacklist(fastify, req.body);
+			return (blacklist ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getAllBlacklist ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

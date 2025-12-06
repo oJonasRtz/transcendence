@@ -293,6 +293,16 @@ const usersControllers = {
 			console.error("USERS-SERVICE deleteAFriend ERROR:", err);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getAllBlacklist: async function getAllBlacklist(req, reply) {
+		try {
+			const blacklist = await axios.get("http://sqlite-db:3002/getAllUsers");
+			return (blacklist ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getAllBlacklist ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
 	}
 }
 
