@@ -75,8 +75,13 @@ export default async function registerServer(io) {
 		
 		// Specif events only happens on socket
 		socket.on("sendMessage", async (msg) => {
+			const blacklist = await axios.get("http://users-service:3003/getAllBlacklist");
+			console.log("blacklist:", blacklist?.data);
 			let input = msg?.trim();
 			if (!input || input.length > 200) {
+				messages.push("system: You cannot type a message above 200 characters");
+				socket.emit("updateMessages", messages);
+				io.emit("updateUsers", Array.from(users.values()));
 				console.error("Invalid input or message above to the allowed length");
 				return ;
 			}

@@ -10,7 +10,7 @@ const usersControllers = {
 
 			return reply.code(201).send("New user account created");
 		} catch (err) {
-			console.error(`users-service USERS: ${err}`);
+			console.error(`users-service USERS: ${err?.response?.data || err.message}`);
 			return reply.code(500).send("Error creating user account");
 		}
 	},
@@ -26,7 +26,7 @@ const usersControllers = {
 
                         return reply.code(200).send("Success");
                 } catch (err) {
-                        console.error("validateUserEmail USERS", err);
+                        console.error("validateUserEmail USERS", err?.response?.data || err.message);
                         return reply.code(500).send("Internal Server Error");
                 }
         },
@@ -38,7 +38,7 @@ const usersControllers = {
 			const isOnline = await axios.post("http://sqlite-db:3002/getIsOnline", req.body);
 			return reply.code(200).send(isOnline ?? {});
 		} catch (err) {
-			console.error("Users-Service getIsOnline", err);
+			console.error("Users-Service getIsOnline", err?.response?.data || err.message);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -47,8 +47,8 @@ const usersControllers = {
 		try {
 			const queue = await axios.post("http://sqlite-db:3002/getQueue", {});
 			return reply.code(200).send(queue?.data ?? {});
-		} catch (error) {
-			console.error("Users-Service getQueue", error);
+		} catch (err) {
+			console.error("Users-Service getQueue", err?.response?.data || err.messageor);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -60,7 +60,7 @@ const usersControllers = {
 			const matchId = await axios.post("http://sqlite-db:3002/getMatchId", req.body);
 			return reply.code(200).send(matchId?.data ?? {});
 		} catch (err) {
-			console.error("Users-Service getMatchId", err);
+			console.error("Users-Service getMatchId", err?.response?.data || err.message);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -72,7 +72,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setMatchId", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("USERS-SERVICE setMatchId", err);
+			console.error("USERS-SERVICE setMatchId", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -84,7 +84,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setInQueue", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("USERS-SERVICE setIsQueue", err);
+			console.error("USERS-SERVICE setIsQueue", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -96,7 +96,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setRank", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("USERS-SERVICE setRank", err);
+			console.error("USERS-SERVICE setRank", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -108,7 +108,7 @@ const usersControllers = {
 			const status = await axios.post("http://sqlite-db:3002/getUserStatus", req.body);
 			return reply.code(200).send(status?.data ?? {});
 		} catch (err) {
-			console.error("Users-Service getUserStatus", err);
+			console.error("Users-Service getUserStatus", err?.response?.data || err.message);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -120,7 +120,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setIsOnline", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("USERS-SERVICE setIsOnline", err);
+			console.error("USERS-SERVICE setIsOnline", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -132,7 +132,7 @@ const usersControllers = {
 			const avatar = await axios.post("http://sqlite-db:3002/getUserAvatar", { user_id: req.body.user_id, email: req.body.email });
 			return reply.code(200).send(avatar?.data ?? null);
 		} catch (err) {
-			console.error("getUserAvatar Error users-service:", err);
+			console.error("getUserAvatar Error users-service:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -144,7 +144,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setUserAvatar", { user_id: req.body.user_id, avatar: req.body.avatar });
 			return reply.code(201).send("Avatar updated successfully");
 		} catch (err) {
-			console.error("setUserAvatar users-service error:", err);
+			console.error("setUserAvatar users-service error:", err?.response?.data || err.message);
 			return reply.code(500).send("Error setting an avatar");
 		}
 	},
@@ -156,7 +156,7 @@ const usersControllers = {
 			const inGame = await axios.post("http://sqlite-db:3002/getInGame", req.body);
 			return reply.code(200).send(inGame ?? {});
 		} catch (err) {
-			console.error("Users-Service getInGame", err);
+			console.error("Users-Service getInGame", err?.response?.data || err.message);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -168,7 +168,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setInGame", req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("USERS-SERVICE setInGame", err);
+			console.error("USERS-SERVICE setInGame", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -180,7 +180,7 @@ const usersControllers = {
 			const response = await axios.post("http://sqlite-db:3002/getUserInformation", { user_id: req.body.user_id });
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
-			console.error("USERS-SERVICE getUserInformation", err);
+			console.error("USERS-SERVICE getUserInformation", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -202,7 +202,7 @@ const usersControllers = {
 			const response = await axios.get("http://sqlite-db:3002/getAllUsersInformation");
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
-			console.error("USERS-SERVICE getAllUsersInformation", err);
+			console.error("USERS-SERVICE getAllUsersInformation", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -214,7 +214,7 @@ const usersControllers = {
 			const response = await axios.post("http://sqlite-db:3002/getDataByPublicId", req.body);
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
-			console.error("USERS-SERVICE getDataByPublicId ERROR:", err);
+			console.error("USERS-SERVICE getDataByPublicId ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -228,7 +228,7 @@ const usersControllers = {
 		} catch (err) {
 			if (err?.response?.status === 403 || err?.response?.message === "SAME_USER")
 				return reply.code(403).send("SAME_USER");
-			console.error("USERS-SERVICE blockTheUser ERROR:", err);
+			console.error("USERS-SERVICE blockTheUser ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send();
 		}
 	},
@@ -242,7 +242,7 @@ const usersControllers = {
 		} catch (err) {
 			if (err?.response?.status === 403 || err?.response?.data === "SAME_USER")
 				return reply.code(403).send("SAME_USER");
-			console.error("USERS-SERVICE friendInvite ERROR:", err);
+			console.error("USERS-SERVICE friendInvite ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send();
 		}
 	},
@@ -254,7 +254,7 @@ const usersControllers = {
 			const response = await axios.post("http://sqlite-db:3002/getAllFriends", req.body);
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
-			console.error("USERS-SERVICE getAllFriends ERROR:", err);
+			console.error("USERS-SERVICE getAllFriends ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -266,7 +266,7 @@ const usersControllers = {
 			const response = await axios.post("http://sqlite-db:3002/getAllPendencies", req.body);
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
-			console.error("USERS-SERVICE getAllPendencies ERROR:", err);
+			console.error("USERS-SERVICE getAllPendencies ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -278,7 +278,7 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/setAcceptFriend", req.body);
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("USERS-SERVICE setAcceptFriend ERROR:", err);
+			console.error("USERS-SERVICE setAcceptFriend ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -290,17 +290,17 @@ const usersControllers = {
 			await axios.post("http://sqlite-db:3002/deleteAFriend", req.body);
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("USERS-SERVICE deleteAFriend ERROR:", err);
+			console.error("USERS-SERVICE deleteAFriend ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
 
 	getAllBlacklist: async function getAllBlacklist(req, reply) {
 		try {
-			const blacklist = await axios.get("http://sqlite-db:3002/getAllUsers");
-			return (blacklist ?? null);
+			const blacklist = await axios.get("http://sqlite-db:3002/getAllBlacklist");
+			return reply.code(200).send(blacklist?.data ?? null);
 		} catch (err) {
-			console.error("USERS-SERVICE getAllBlacklist ERROR:", err);
+			console.error("USERS-SERVICE getAllBlacklist ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	}

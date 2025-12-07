@@ -20,7 +20,7 @@ const databaseControllers = {
 
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("registerNewUser SQlite-db:", err);
+			console.error("registerNewUser SQlite-db:", err?.response?.data || err.message);
 			if (err.code === 'SQLITE_CONSTRAINT')
 				return reply.code(409).send("USER_ALREADY_EXISTS");
 			return reply.code(500).send("INTERNAL_SERVER_ERROR");
@@ -42,8 +42,7 @@ const databaseControllers = {
 				return reply.code(401).send("User/Password incorrect");
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("tryLoginTheUser SQlite-db:", err);
-			console.error("Error trying login the user:", err.message);
+			console.error("tryLoginTheUser SQlite-db:", err?.response?.data || err.message);
 			return reply.code(500).send(err.message);
 		}
 	},
@@ -59,8 +58,7 @@ const databaseControllers = {
 				return reply.code(404).send("Not found the user");
 			return (reply.code(200).send({ username: username, user_id: user_id }));
 		} catch (err) {
-			console.error("getUserData SQlite-db:", err);
-			console.error("Error during getting the user data:", err);
+			console.error("getUserData SQlite-db:", err?.response?.data || err.message);
 			return reply.code(500).send("Internal server error");
 		}
 	},
@@ -79,7 +77,7 @@ const databaseControllers = {
 
 			return reply.code(200).send("That is a valid e-mail");
 		} catch (err) {
-			console.error("Error na sqlite-db checkEmail:", err.message);
+			console.error("Error na sqlite-db checkEmail:", err?.response?.data || err.message.message);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -103,7 +101,7 @@ const databaseControllers = {
 
 			return reply.code(200).send("success");
 		} catch (err) {
-			console.error("Sqlite-db (newPassword) Error in newPassword changing password", err);
+			console.error("Sqlite-db (newPassword) Error in newPassword changing password", err?.response?.data || err.message);
 			return reply.code(500).send("Fatal error");
 		}
 	},
@@ -115,7 +113,7 @@ const databaseControllers = {
 			await databaseModels.createNewUser(fastify, user_id);
 			return reply.code(201).send("Success");
 		} catch (err) {
-			console.error(`SQLITE-DB ERROR createNewUser ${err}`);
+			console.error(`SQLITE-DB ERROR createNewUser ${err?.response?.data || err.message}`);
 			return reply.code(500).send("Error creating the user");
 		}
 	},
@@ -128,7 +126,7 @@ const databaseControllers = {
 
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error(`validateUserEmail Sqlite-db: ${err}`);
+			console.error(`validateUserEmail Sqlite-db: ${err?.response?.data || err.message}`);
 			return reply.code(500).send("An error happened trying to validate your e-mail");
 		}
 	},
@@ -140,7 +138,7 @@ const databaseControllers = {
 			const result = await databaseModels.get2FAEnable(fastify, req.body.email);
 			return reply.code(200).send(result ?? {});
 		} catch (err) {
-			console.error("Sqlite-db get2FAEnable:", err);
+			console.error("Sqlite-db get2FAEnable:", err?.response?.data || err.message);
 			return reply.code(500).send("Internal server error");
 		}
 	},
@@ -153,7 +151,7 @@ const databaseControllers = {
 			const result = await databaseModels.get2FASecret(fastify, req.body.email);
 			return reply.code(200).send(result ?? {});
 		} catch (err) {
-			console.error("Sqlite-db get2FASecret:", err);
+			console.error("Sqlite-db get2FASecret:", err?.response?.data || err.message);
 			return reply.code(500).send("Internal server error");
 		}
 	},
@@ -165,7 +163,7 @@ const databaseControllers = {
 			await databaseModels.set2FASecret(fastify, req.body.email, req.body.secret);
 			return reply.code(200).send("Secret set successfully");
 		} catch (err) {
-			console.error("set2FASecret SQLITE-DB error:", err);
+			console.error("set2FASecret SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -177,7 +175,7 @@ const databaseControllers = {
 			const result = await databaseModels.get2FAValidate(fastify, req.body.email);
 			return reply.code(200).send(result ?? null);
 		} catch (err) {
-			console.error("get2FAValidate ERROR", err);
+			console.error("get2FAValidate ERROR", err?.response?.data || err.message);
 			return reply.code(500).send("Internal Server Error");
 		}
 	},
@@ -189,7 +187,7 @@ const databaseControllers = {
 			await databaseModels.set2FAValidate(fastify, req.body.email, req.body.signal);
 			return reply.code(200).send("Signal updated successfully");
 		} catch (err) {
-			console.error("set2FAValidate SQLITE-DB error:", err);
+			console.error("set2FAValidate SQLITE-DB err?.response?.data || err.messageor:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -201,7 +199,7 @@ const databaseControllers = {
 			const isOnline = await databaseModels.getIsOnline(fastify, req.body.email);
 			return reply.code(200).send(isOnline ?? {});
 		} catch (err) {
-			console.error("getIsOnline SQLITE-DB error", err);
+			console.error("getIsOnline SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -213,7 +211,7 @@ const databaseControllers = {
 			const status = await databaseModels.getUserStatus(fastify, req.body.email);
 			return reply.code(200).send({ status: status });
 		} catch (err) {
-			console.error("getUserStatus SQLITE-DB error", err);
+			console.error("getUserStatus SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -226,7 +224,7 @@ const databaseControllers = {
 			const match_id = await databaseModels.getMatchId(fastify, req.body.email);
 			return reply.code(200).send({ match_id: match_id });
 		} catch (err) {
-			console.error("getMatchId SQLITE-DB error", err);
+			console.error("getMatchId SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -238,7 +236,7 @@ const databaseControllers = {
 			await databaseModels.setMatchId(fastify, req.body.email, req.body.match_id);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setMatchId SQLITE-DB error", err);
+			console.error("setMatchId SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -248,7 +246,7 @@ const databaseControllers = {
 			const queue = await databaseModels.getQueue(fastify);
 			return reply.code(200).send(queue ?? {});
 		} catch (err) {
-			console.error("getQueue SQLITE-DB error", err);
+			console.error("getQueue SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -260,7 +258,7 @@ const databaseControllers = {
 			await databaseModels.setIsOnline(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setIsOnline SQLITE-DB error", err);
+			console.error("setIsOnline SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -272,7 +270,7 @@ const databaseControllers = {
 			const avatar = await databaseModels.getUserAvatar(fastify, req.body);
 			return reply.code(200).send(avatar ?? {});
 		} catch (err) {
-			console.error ("getUserAvatar SQLITE-DB error", err);
+			console.error ("getUserAvatar SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -284,7 +282,7 @@ const databaseControllers = {
 			await databaseModels.setInQueue(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setInQueue SQLITE-DB error", err);
+			console.error("setInQueue SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -296,7 +294,7 @@ const databaseControllers = {
 			await databaseModels.setRank(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setRank SQLITE-DB error", err);
+			console.error("setRank SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -308,7 +306,7 @@ const databaseControllers = {
 			await databaseModels.setUserAvatar(fastify, req.body);
 			return reply.code(201).send("Success");
 		} catch (err) {
-			console.error("setUserAvatar SQLITE-DB error", err);
+			console.error("setUserAvatar SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -320,7 +318,7 @@ const databaseControllers = {
 			const data = await databaseModels.getUserInformation(fastify, req.body);
 			return reply.code(200).send(data ?? {});
 		} catch (err) {
-			console.error("getUserInformation error:", err);
+			console.error("getUserInformation error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -333,7 +331,7 @@ const databaseControllers = {
 			await databaseModels.setUserDescription(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setUserDescription SQLITE-DB error", err);
+			console.error("setUserDescription SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -345,7 +343,7 @@ const databaseControllers = {
 			await databaseModels.setUserExperience(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setUserExperience SQLITE-DB error:", err);
+			console.error("setUserExperience SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -357,7 +355,7 @@ const databaseControllers = {
 			await databaseModels.setUserFriends(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setUserFriends SQLITE-DB error:", err);
+			console.error("setUserFriends SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -371,7 +369,7 @@ const databaseControllers = {
 			await databaseModels.setUserWins(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setUserWins SQLITE-DB error:", err);
+			console.error("setUserWins SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -383,7 +381,7 @@ const databaseControllers = {
 			await databaseModels.setUserLosses(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setUserLosses SQLITE-DB error:", err);
+			console.error("setUserLosses SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -395,7 +393,7 @@ const databaseControllers = {
 			await databaseModels.setUserTitle(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setUserTitle SQLITE-DB error:", err);
+			console.error("setUserTitle SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -407,7 +405,7 @@ const databaseControllers = {
 			const data = await databaseModels.getAuthData(fastify, req.body);
 			return reply.code(200).send(data ?? {});
 		} catch (err) {
-			console.error("getAuthData SQLITE-DB error:", err);
+			console.error("getAuthData SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -419,7 +417,7 @@ const databaseControllers = {
 			await databaseModels.setAuthUsername(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setAuthUsername SQLITE-DB error:", err);
+			console.error("setAuthUsername SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -431,7 +429,7 @@ const databaseControllers = {
 			await databaseModels.setAuthNickname(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setAuthNickname SQLITE-DB error:", err);
+			console.error("setAuthNickname SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -443,7 +441,7 @@ const databaseControllers = {
 			await databaseModels.setAuthEmail(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setAuthEmail SQLITE-DB error:", err);
+			console.error("setAuthEmail SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -463,7 +461,7 @@ const databaseControllers = {
 			await databaseModels.setAuthPassword(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
-			console.error("setAuthPassword SQLITE-DB error:", err);
+			console.error("setAuthPassword SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -485,7 +483,7 @@ const databaseControllers = {
 			const object = await databaseModels.getDataByPublicId(fastify, req.body);
 			return reply.code(200).send(object ?? null);
 		} catch (err) {
-			console.error("SQLITE-DB getDataByPublicId ERROR:", err);
+			console.error("SQLITE-DB getDataByPublicId ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -497,7 +495,7 @@ const databaseControllers = {
 			await databaseModels.deleteUserAccount(fastify, req.body);
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("SQLITE-DB deleteUserAccount ERROR:", err);
+			console.error("SQLITE-DB deleteUserAccount ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -515,7 +513,7 @@ const databaseControllers = {
 			await databaseModels.storeMessage(fastify, req.body);
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("SQLITE-DB storeMessage ERROR:", err);
+			console.error("SQLITE-DB storeMessage ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -525,7 +523,7 @@ const databaseControllers = {
 			const messages = await databaseModels.getAllMessages(fastify);
 			return reply.code(200).send(messages ?? null);
 		} catch (err) {
-			console.error("SQLITE-DB getAllMessages ERROR:", err);
+			console.error("SQLITE-DB getAllMessages ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -543,7 +541,7 @@ const databaseControllers = {
 		} catch (err) {
 			if (err?.response?.status === 403 || err?.response?.message === "SAME_USER") 
 				return reply.code(403).send("SAME_USER");
-			console.error("SQLITE-DB blockTheUser ERROR:", err);
+			console.error("SQLITE-DB blockTheUser ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -559,7 +557,7 @@ const databaseControllers = {
 		} catch (err) {
 			if (err?.message === "SAME_USER")
 				return reply.code(403).send("SAME_USER");
-			console.error("SQLITE-DB friendInvite ERROR:", err);
+			console.error("SQLITE-DB friendInvite ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -571,7 +569,7 @@ const databaseControllers = {
 			const result = await databaseModels.getAllFriends(fastify, req.body);
 			return reply.code(200).send(result ?? null);
 		} catch (err) {
-			console.error("SQLITE-DB getAllFriends ERROR:", err);
+			console.error("SQLITE-DB getAllFriends ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -583,7 +581,7 @@ const databaseControllers = {
 			const result = await databaseModels.getAllPendencies(fastify, req.body);
 			return reply.code(200).send(result ?? null);
 		} catch (err) {
-			console.error("SQLITE-DB getAllPendencies ERROR:", err);
+			console.error("SQLITE-DB getAllPendencies ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -595,7 +593,7 @@ const databaseControllers = {
 			await databaseModels.setAcceptFriend(fastify, req.body);
 			return reply.code(204).send();
 		} catch (err) {
-			console.error("SQLITE-DB setAcceptFriend", err);
+			console.error("SQLITE-DB setAcceptFriend", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -607,7 +605,7 @@ const databaseControllers = {
 			await databaseModels.deleteAFriend(fastify, req.body);
 			return (true);
 		} catch (err) {
-			console.error("SQLITE-DB deleteAFriend", err);
+			console.error("SQLITE-DB deleteAFriend", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -615,9 +613,9 @@ const databaseControllers = {
 	getAllBlacklist: async function getAllBlacklist(fastify, req, reply) {
 		try {
 			const blacklist = await databaseModels.getAllBlacklist(fastify, req.body);
-			return (blacklist ?? null);
+			return reply.code(200).send(blacklist ?? null);
 		} catch (err) {
-			console.error("SQLITE-DB getAllBlacklist ERROR:", err);
+			console.error("SQLITE-DB getAllBlacklist ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	}
