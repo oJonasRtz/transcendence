@@ -46,7 +46,7 @@ const routes = [
 	{ method: 'POST', url: '/getDataByPublicId', handler: databaseControllers.getDataByPublicId },
 	{ method: 'POST', url: '/deleteUserAccount', handler: databaseControllers.deleteUserAccount },
 	{ method: 'POST', url: '/storeMessage', handler: databaseControllers.storeMessage },
-	{ method: 'GET', url: '/getAllMessages', handler: databaseControllers.getAllMessages },
+	{ method: 'POST', url: '/getAllMessages', handler: databaseControllers.getAllMessages },
 	{ method: 'POST', url: '/blockTheUser', handler: databaseControllers.blockTheUser },
 	{ method: 'POST', url: '/friendInvite', handler: databaseControllers.friendInvite },
 	{ method: 'POST', url: '/getAllFriends', handler: databaseControllers.getAllFriends },

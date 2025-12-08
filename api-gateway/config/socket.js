@@ -5,9 +5,11 @@ export default async function registerServer(io) {
 	let messages = [];
 	let notifications = [];
 
-	async function reloadEverything () {
+	async function reloadEverything (owner) {
                 try {
-                        const responseMessages = await axios.get("http://chat-service:3005/getAllMessages");
+			if (!owner) return ;
+			console.log("owner:", owner);
+                        const responseMessages = await axios.post("http://chat-service:3005/getAllMessages", { username: owner });
 			let tmp = responseMessages?.data ?? [];
 			let input;
 			messages.length = 0; // erase the list
@@ -38,12 +40,30 @@ export default async function registerServer(io) {
 			users.set(socket.id, { name, public_id });
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${name}`, isSystem: true, msg: `system: ${name} joined to the chat` } );
-				await reloadEverything();
+				await reloadEverything(socket.name);
 			} catch (err) { 
 				console.error(`Error updating status of the user ${name}`);
 			}
+			const response = await axios.get("http://users-service:3003/getAllBlacklist");
+                        const blacklist = response?.data ?? {};
+
+                        const sender = users.get(socket.id); // who are you, sender?
+                        const senderName = sender.name;
+
+                        if (!sender || !senderName) return ;
+
+                        const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+
+                        for (const [socketId, user] of users.entries()) {
+                                console.log(`${socket.name} is starting filter ${user.name}`);
+                                if (blockUserTargets.includes(user.name)) {
+                                        console.log("Blocked:", user.name);
+                                        continue ;
+                                }
+                                console.log(`${socket.name} is sending messages to ${user.name}`);
+                                io.to(socketId).emit("updateMessages", messages);
+                        }
 			io.emit("updateUsers", Array.from(users.values()));
-			io.emit("updateMessages", messages); // send the current messages to the user 
 		});
 
 		//disconnection
@@ -54,29 +74,63 @@ export default async function registerServer(io) {
 			users.delete(socket.id);
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${data.name}`, isSystem: true, msg: `system: ${data.name} left the chat` } );
-				await reloadEverything();
+				await reloadEverything(data.name);
 			} catch (err) {
 				console.error(`Error updating status of the user ${data.name}`);
 			}
-			io.emit("updateUsers", Array.from(users.values()));
-			io.emit("updateMessages", messages); // send the current messages to the user 
+			const response = await axios.get("http://users-service:3003/getAllBlacklist");
+                        const blacklist = response?.data ?? {};
+
+                        const sender = users.get(socket.id); // who are you, sender?
+                        const senderName = sender.name;
+
+                        if (!sender || !senderName) return ;
+
+                        const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+
+                        for (const [socketId, user] of users.entries()) {
+                                if (blockUserTargets.includes(user.name)) {
+                                        console.log("Blocked:", user.name);
+                                        continue ;
+                                }
+                                io.to(socketId).emit("updateMessages", messages);
+                        }
+                        io.emit("updateUsers", Array.from(users.values()));
 		});
 
 		socket.on("sendInvite", async () => {
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: `invite you to a Pong match =D` } );
-				await reloadEverything();
+				await reloadEverything(socket.name);
 			} catch (err) {
 				console.error(`Error sending the pong invite match, user: ${socket.name}`);
 			}
+
+			const response = await axios.get("http://users-service:3003/getAllBlacklist");
+                        const blacklist = response?.data ?? {};
+
+			const sender = users.get(socket.id); // who are you, sender?
+                        const senderName = sender.name;
+
+                        if (!sender || !senderName) return ;
+
+                        const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+
+			for (const [socketId, user] of users.entries()) {
+                                if (blockUserTargets.includes(user.name)) {
+                                        console.log("Blocked:", user.name);
+                                        continue ;
+                                }
+                                io.to(socketId).emit("updateMessages", messages);
+                        }
 			io.emit("updateUsers", Array.from(users.values()));
-			io.emit("updateMessages", messages);
 		});
 		
 		// Specif events only happens on socket
 		socket.on("sendMessage", async (msg) => {
-			const blacklist = await axios.get("http://users-service:3003/getAllBlacklist");
-			console.log("blacklist:", blacklist?.data);
+			const response = await axios.get("http://users-service:3003/getAllBlacklist");
+			const blacklist = response?.data ?? {};
+
 			let input = msg?.trim();
 			if (!input || input.length > 200) {
 				messages.push("system: You cannot type a message above 200 characters");
@@ -85,13 +139,29 @@ export default async function registerServer(io) {
 				console.error("Invalid input or message above to the allowed length");
 				return ;
 			}
+			const sender = users.get(socket.id); // who are you, sender?
+			const senderName = sender.name;
+
+			if (!sender || !senderName) return ;
+
+			const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
+
+
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: input } );
-				await reloadEverything(); // reload everything using the database
+				await reloadEverything(socket.name); // reload everything using the database
 			} catch (err) {
 				console.error(`Error trying to send the message of user ${socket.name}`);
 			}
-			io.emit("updateMessages", messages);
+
+			for (const [socketId, user] of users.entries()) {
+				if (blockUserTargets.includes(user.name)) {
+					continue ;
+				}
+                                io.to(socketId).emit("updateMessages", messages);
+			}
+
+			//io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
 		});
 });

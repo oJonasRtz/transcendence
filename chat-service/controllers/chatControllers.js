@@ -17,7 +17,10 @@ const chatControllers = {
 
 	getAllMessages: async function getAllMessages(req, reply) {
 		try {
-			const response = await axios.get("http://sqlite-db:3002/getAllMessages");
+			console.log ("username chat-service:", req.body.username);
+			if (!req.body || !req.body.username)
+				return reply.code(400).send("You need to inform the username here");
+			const response = await axios.post("http://sqlite-db:3002/getAllMessages", { username: req.body.username });
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
 			console.error("CHAT-SERVICE getAllMessages ERROR:", err);

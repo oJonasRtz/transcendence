@@ -520,7 +520,9 @@ const databaseControllers = {
 
 	getAllMessages: async function getAllMessages(fastify, req, reply) {
 		try {
-			const messages = await databaseModels.getAllMessages(fastify);
+			if (!req.body || !req.body.username)
+				return reply.code(400).send("You need to inform who you are here");
+			const messages = await databaseModels.getAllMessages(fastify, req.body);
 			return reply.code(200).send(messages ?? null);
 		} catch (err) {
 			console.error("SQLITE-DB getAllMessages ERROR:", err?.response?.data || err.message);
