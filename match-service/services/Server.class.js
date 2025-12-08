@@ -6,12 +6,18 @@ import { Client } from './Client.class.js';
 import { lobby } from '../app.js';
 
 export class Server {
+	#invites = new Map();
+	#usersInvited = new Map();
 	#app = fastify();
 	#queue = new Map(); // <-- key[email] = Client
 	#services = {
 		ENQUEUE: this.#enqueue.bind(this),
 		DEQUEUE: this.#dequeue.bind(this),
 	}
+	#routes = [
+		{ method: 'POST', url: '/invite', handler: this.#sendInvite.bind(this) },
+		{ method: 'POST', url: '/accept-invite', handler: this.#acceptInvite.bind(this) },
+	];
 	#intervalMatchMaking = null;
 
 	constructor() {
@@ -42,8 +48,86 @@ export class Server {
 				}
 			});
 		});
-
+		
+		this.#routes_def();
 		this.#matchMaking();
+		this.#checkInviteValidity();
+	}
+
+	#checkInviteValidity() {
+		const INVITE_VALIDITY = 1000 * 60; // 1 minute
+
+		setInterval(() => {
+			if (this.#invites.size === 0)
+				return;
+
+			const now = Date.now();
+			for (const invite of this.#invites.values()) {
+				if (now - invite.timestamp > INVITE_VALIDITY) {
+					console.log(`Invite ${invite.inviteId} expired.`);
+					this.#invites.delete(invite.inviteId);
+					this.#usersInvited.delete(invite.public_id);
+				}
+			}
+		}, INVITE_VALIDITY);
+	} 
+
+	#sendInvite(req, reply) {
+		if (!req.body || !req.body.public_id || !req.body.userName)
+			return reply.status(400).send({ error: 'INVALID_FORMAT' });
+		
+
+		const {public_id, userName} = req.body;
+		
+		if (this.#usersInvited.has(public_id))
+			return reply.status(400).send({ error: 'WAIT_TO_INVITE_AGAIN' });
+
+		const inviteId = crypto.randomUUID();
+
+		this.#usersInvited.set(public_id, inviteId);
+		this.#invites.set(inviteId, {
+			inviteId,
+			public_id,
+			userName,
+			timestamp: Date.now(),
+		})
+
+		const link = 'http://match-service:3004/accept-invite?inviteId=' + inviteId;
+
+		return reply.status(200).send({ link });
+	}
+	#acceptInvite(req, reply) {
+		const inviteId = req.query.inviteId;
+		const { public_id, userName } = req.body;
+
+		if (!inviteId || !public_id || !userName)
+			return reply.status(400).send({ error: 'INVALID_FORMAT' });
+
+		if (!this.#invites.has(inviteId))
+			return reply.status(400).send({ error: 'INVALID_INVITE' });
+
+		const invite = this.#invites.get(inviteId);
+
+		if (invite.public_id === public_id)
+			return reply.status(400).send({ error: 'CANNOT_INVITE_YOURSELF' });
+
+		//create a new match with both users
+		const matchId = 42; 
+
+		const match = {
+			type: 'INVITE_ACCEPTED',
+			id: matchId,
+			inviteId,
+			players: {
+				[invite.public_id]: { userName: invite.userName },
+				[public_id]: { userName },
+			}
+		};
+
+		this.#invites.delete(inviteId);
+		this.#usersInvited.delete(invite.public_id);
+
+		return reply.status(200).send( match );
 	}
 
 	listen(port = 3004) {
@@ -54,6 +138,11 @@ export class Server {
 			}
 			console.log(`Server listening at ${address}`);
 		});
+	}
+
+	#routes_def() {
+		for (const route of this.#routes)
+			this.#app.route(route);
 	}
 
 	#matchMaking() {

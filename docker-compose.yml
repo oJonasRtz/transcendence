@@ -90,6 +90,8 @@ services:
     build: ./match-service
     image: match-service:1.0.0
     container_name: match-service
+    ports:
+      - "3004:3004"
     depends_on:
       - game-server
     networks:
