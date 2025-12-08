@@ -74,13 +74,13 @@ export class Server {
 
 	#sendInvite(req, reply) {
 		if (!req.body || !req.body.public_id || !req.body.userName)
-			return reply.status(400).send({ error: 'INVALID_FORMAT' });
+			return reply.status(400).send({ type: "ERROR", reason: 'INVALID_FORMAT' });
 		
 
 		const {public_id, userName} = req.body;
 		
 		if (this.#usersInvited.has(public_id))
-			return reply.status(400).send({ error: 'WAIT_TO_INVITE_AGAIN' });
+			return reply.status(400).send({ type: "ERROR", reason: 'WAIT_TO_INVITE_AGAIN' });
 
 		const inviteId = crypto.randomUUID();
 
@@ -94,22 +94,22 @@ export class Server {
 
 		const link = 'http://match-service:3004/accept-invite?inviteId=' + inviteId;
 
-		return reply.status(200).send({ link });
+		return reply.status(200).send({ type: "INVITE_CREATED" , link });
 	}
 	#acceptInvite(req, reply) {
 		const inviteId = req.query.inviteId;
 		const { public_id, userName } = req.body;
 
 		if (!inviteId || !public_id || !userName)
-			return reply.status(400).send({ error: 'INVALID_FORMAT' });
+			return reply.status(400).send({ type: "ERROR", reason: 'INVALID_FORMAT' });
 
 		if (!this.#invites.has(inviteId))
-			return reply.status(400).send({ error: 'INVALID_INVITE' });
+			return reply.status(400).send({ type: "ERROR", reason: 'INVALID_INVITE' });
 
 		const invite = this.#invites.get(inviteId);
 
 		if (invite.public_id === public_id)
-			return reply.status(400).send({ error: 'CANNOT_INVITE_YOURSELF' });
+			return reply.status(400).send({ type: "ERROR", reason: 'CANNOT_INVITE_YOURSELF' });
 
 		//create a new match with both users
 		const matchId = 42; 
