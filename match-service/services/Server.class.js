@@ -96,7 +96,7 @@ export class Server {
 
 		return reply.status(200).send({ type: "INVITE_CREATED" , link });
 	}
-	#acceptInvite(req, reply) {
+	async #acceptInvite(req, reply) {
 		const inviteId = req.query.inviteId;
 		const { public_id, userName } = req.body;
 
@@ -112,7 +112,11 @@ export class Server {
 			return reply.status(400).send({ type: "ERROR", reason: 'CANNOT_INVITE_YOURSELF' });
 
 		//create a new match with both users
-		const matchId = 42; 
+		const players = {
+			1: { name: invite.userName, id: invite.public_id },
+			2: { name: userName, id: public_id },
+		};
+		const matchId = await lobby.newMatch(players, Object.keys(players).length); 
 
 		const match = {
 			type: 'INVITE_ACCEPTED',

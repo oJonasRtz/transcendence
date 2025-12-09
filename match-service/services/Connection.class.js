@@ -2,7 +2,7 @@ import WebSocket from "ws";
 
 export class Connection {
 	#socket = null;
-	#matchPromise = null;
+	#matchQueue = [];
 	#login = {
 		id: process.env.LOBBY_ID,
 		pass: process.env.LOBBY_PASS,
@@ -73,10 +73,8 @@ export class Connection {
 				//Chama calculate rank para atualizar o db
 			},
 			[this.#types.recieves.MATCHCREATED]: () => {
-				if (this.#matchPromise) {
-					this.#matchPromise(message.matchId);
-					this.#matchPromise = null;
-				}
+				const next = this.#matchQueue.shift();
+				if (next) next(message.matchId);
 			},
 			[this.#types.recieves.TIMEOUT]: () => {
 				console.log(`Connection.#handleMessage: Match ${message.matchId} timed out and was removed.`);
@@ -116,7 +114,7 @@ export class Connection {
 
 	newMatch(players, maxPlayers) {
 		return new Promise((resolve) => {
-			this.#matchPromise = resolve;
+			this.#matchQueue.push(resolve);
 
 			this.#send({
 				type: this.#types.sends.NEWMATCH,
