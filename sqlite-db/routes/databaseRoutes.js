@@ -53,7 +53,9 @@ const routes = [
 	{ method: 'POST', url: '/getAllPendencies', handler: databaseControllers.getAllPendencies },
 	{ method: 'POST', url: '/setAcceptFriend', handler: databaseControllers.setAcceptFriend },
 	{ method: 'POST', url: '/deleteAFriend', handler: databaseControllers.deleteAFriend },
-	{ method: 'GET', url: '/getAllBlacklist', handler: databaseControllers.getAllBlacklist }
+	{ method: 'GET', url: '/getAllBlacklist', handler: databaseControllers.getAllBlacklist },
+	{ method: 'POST', url: '/getAllPrivateMessages', handler: databaseControllers.getAllPrivateMessages },
+	{ method: 'POST', url: '/storePrivateMessage', handler: databaseControllers.storePrivateMessage }
 ];
 
 export default async function databaseRoutes(fastify, options) {

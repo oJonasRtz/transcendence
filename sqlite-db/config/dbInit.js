@@ -55,11 +55,20 @@ export default async function initDatabase() {
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         content TEXT NOT NULL,
                         sender_id TEXT NOT NULL,
-                        receiver_id TEXT NULL DEFAULT NULL,
 			isSystem BOOLEAN DEFAULT false,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
 	`);
+
+	await db.exec(`CREATE TABLE IF NOT EXISTS privateMessages (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			content TEXT NOT NULL,
+			sender_id TEXT NOT NULL,
+			receiver_id TEXT NULL DEFAULT NULL,
+			isSystem BOOLEAN DEFAULT false,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			);
+		`);
 
 	await db.exec(`
                         CREATE TABLE IF NOT EXISTS friends (

@@ -1,4 +1,4 @@
-export function chat() {
+export function direct() {
 
 const SOCKET_URL = "http://localhost:3000";
 
@@ -28,7 +28,7 @@ if (form instanceof HTMLFormElement && input instanceof HTMLInputElement) {
 		const msg = input.value.trim();
 		if (!msg) return ;
 
-		socket.emit("sendMessage", msg);
+		socket.emit("sendPrivateMessage", msg, public_id);
 		input.value = ""; // erase the value
 	});
 }
@@ -47,22 +47,6 @@ socket.on("connect", () => {
     console.log("Connected:", socket.id, "as", username);
     socket.emit("join", { username, public_id });
 });
-
-/*socket.on("serverMessage", (msg: string) => {
-	const messagesDiv = document.getElementById("messages");
-	
-	if (!messagesDiv) return ;
-
-	const p = document.createElement("p");
-	p.style.fontWeight = "bold";
-	p.style.padding = "4px 0";
-	p.textContent = msg;
-
-	messagesDiv.appendChild(p);
-	messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-	console.log("SERVER MESSAGE:", msg);
-});*/
 
 socket.on("updateUsers", (users: chatUser[]) => {
 	const usersDiv = document.getElementById("users");
@@ -85,7 +69,7 @@ socket.on("updateUsers", (users: chatUser[]) => {
     console.log("USERS:", users);
 });
 
-socket.on("updateMessages", (msgs: any[]) => {
+socket.on("updateDirectMessages", (msgs: any[]) => {
 
 	const messagesDiv = document.getElementById("messages");
 

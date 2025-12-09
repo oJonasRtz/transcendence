@@ -8,7 +8,6 @@ export default async function registerServer(io) {
 	async function reloadEverything (owner) {
                 try {
 			if (!owner) return ;
-			console.log("owner:", owner);
                         const responseMessages = await axios.post("http://chat-service:3005/getAllMessages", { username: owner });
 			let tmp = responseMessages?.data ?? [];
 			let input;
@@ -35,6 +34,7 @@ export default async function registerServer(io) {
 		socket.on("join", async ({ username, public_id, avatar }) => {
 			let name = username?.trim() || "Anonymous";
 			socket.name = name; // use the socket.name name
+			socket.public_id = public_id;
 			const exist = Array.from(users.values()).some(u => u.name === name);
 			if (exist) return ;
 			users.set(socket.id, { name, public_id });
@@ -64,6 +64,11 @@ export default async function registerServer(io) {
                                 io.to(socketId).emit("updateMessages", messages);
                         }
 			io.emit("updateUsers", Array.from(users.values()));
+			for (const [socketId, user] of users.entries()) {
+                              if (user.name === `${socket.name}` || user.public_id === public_id) {
+                                    io.to(socketId).emit("updateDirectMessages", privateMessages);
+                              }
+                        }
 		});
 
 		//disconnection
@@ -100,7 +105,13 @@ export default async function registerServer(io) {
 
 		socket.on("sendInvite", async () => {
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: `invite you to a Pong match =D` } );
+				const response = await axios.post("http://localhost:3004/invite", { userName: socket.name, public_id: socket.public_id });
+				if (!response?.data) {
+					messages.push(`system: You need to wait time to send another link`);
+					await reloadEverything(socket.name);
+					socket.emit("updateMessages", messages);
+				}
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: response?.data } );
 				await reloadEverything(socket.name);
 			} catch (err) {
 				console.error(`Error sending the pong invite match, user: ${socket.name}`);
@@ -146,7 +157,6 @@ export default async function registerServer(io) {
 
 			const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
 
-
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: input } );
 				await reloadEverything(socket.name); // reload everything using the database
@@ -163,6 +173,28 @@ export default async function registerServer(io) {
 
 			//io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
+		});
+
+		socket.on("sendPrivateMessage", async (msg, public_id) => {
+			try {
+				await axios.post("http://chat-service:3005/storePrivateMessage", { username: `${socket.name}`, msg: msg, public_id: public_id });
+				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { username: `${socket.name}`, public_id: public_id });
+				const dataPrivateMessages = response?.data || [];
+
+				let privateMessages = [];
+				dataPrivateMessages.forEach(msg => {
+                                        let input = `${msg.sender_username}: ${msg.content}`; 
+                                	privateMessages.push(input);
+                        	});
+
+				for (const [socketId, user] of users.entries()) {
+                                	if (user.name === `${socket.name}` || user.public_id === public_id) {
+                                        	io.to(socketId).emit("updateDirectMessages", privateMessages);
+                                	}
+                        	}
+			} catch (err) {
+				console.error("Unfortunately we cannot send the private Message");
+			}
 		});
 });
 }

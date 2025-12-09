@@ -1,4 +1,4 @@
-export function chat() {
+export function direct() {
     const SOCKET_URL = "http://localhost:3000";
     // Capture the form and also the input
     const username = document.body.dataset.username;
@@ -19,7 +19,7 @@ export function chat() {
             const msg = input.value.trim();
             if (!msg)
                 return;
-            socket.emit("sendMessage", msg);
+            socket.emit("sendPrivateMessage", msg, public_id);
             input.value = ""; // erase the value
         });
     }
@@ -34,21 +34,6 @@ export function chat() {
         console.log("Connected:", socket.id, "as", username);
         socket.emit("join", { username, public_id });
     });
-    /*socket.on("serverMessage", (msg: string) => {
-        const messagesDiv = document.getElementById("messages");
-        
-        if (!messagesDiv) return ;
-    
-        const p = document.createElement("p");
-        p.style.fontWeight = "bold";
-        p.style.padding = "4px 0";
-        p.textContent = msg;
-    
-        messagesDiv.appendChild(p);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    
-        console.log("SERVER MESSAGE:", msg);
-    });*/
     socket.on("updateUsers", (users) => {
         const usersDiv = document.getElementById("users");
         if (!usersDiv)
@@ -66,7 +51,7 @@ export function chat() {
         });
         console.log("USERS:", users);
     });
-    socket.on("updateMessages", (msgs) => {
+    socket.on("updateDirectMessages", (msgs) => {
         const messagesDiv = document.getElementById("messages");
         messagesDiv.innerHTML = ""; // extremely IMPORTANT!!! You need to clean everything before to add more
         msgs.forEach(msg => {

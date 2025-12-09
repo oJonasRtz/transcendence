@@ -620,6 +620,30 @@ const databaseControllers = {
 			console.error("SQLITE-DB getAllBlacklist ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getAllPrivateMessages: async function getAllPrivateMessages(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.username || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id and public_id here");
+			const privateMessages = await databaseModels.getPrivateMessages(fastify, req.body);
+			return reply.code(200).send(privateMessages ?? []);
+		} catch (err) {
+			console.log("SQLITE-DB getAllPrivateMessages ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	storePrivateMessage: async function storePrivateMessage(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.username || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id and public_id here");
+			await databaseModels.storePrivateMessage(fastify, req.body);
+			return reply.code(201).send("Created");
+		} catch (err) {
+			console.error("SQLITE-DB storePrivateMessage ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

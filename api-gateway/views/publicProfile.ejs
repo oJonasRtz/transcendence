@@ -26,6 +26,10 @@
 				<input type="hidden" name="public_id" value="<%= data.public_id %>">
 				<button type="submit" class="cursor-pointer bg-red-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-200">Block/Unblock the user</button>
 			</form>
+			<form action="/directMessage" method="GET">
+				<input type="hidden" name="public_id" value="<%= data.public_id %>">
+				<button type="submit" class="cursor-pointer bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200">Chat</button>
+			</form>
                 </section>
 		<h2><strong><%= data.username %></strong></h2>
 		<% if (data.isOnline) { %>

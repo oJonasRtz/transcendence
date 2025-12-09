@@ -17,13 +17,36 @@ const chatControllers = {
 
 	getAllMessages: async function getAllMessages(req, reply) {
 		try {
-			console.log ("username chat-service:", req.body.username);
 			if (!req.body || !req.body.username)
 				return reply.code(400).send("You need to inform the username here");
 			const response = await axios.post("http://sqlite-db:3002/getAllMessages", { username: req.body.username });
 			return reply.code(200).send(response?.data ?? null);
 		} catch (err) {
 			console.error("CHAT-SERVICE getAllMessages ERROR:", err);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getAllPrivateMessages: async function getAllPrivateMessages(req, reply) {
+		try {
+			if (!req.body || !req.body.username || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id and public_id here");
+			const response = await axios.post("http://sqlite-db:3002/getAllPrivateMessages", req.body);
+			return reply.code(200).send(response?.data ?? []);
+		} catch (err) {
+			console.error("CHAT-SERVICE getAllPrivateMessages ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	storePrivateMessage: async function storePrivateMessage(req, reply) {
+		try {
+			if (!req.body || !req.body.username || !req.body.msg || !req.body.public_id)
+				return reply.code(400).send("You need to inform username and public_id here");
+			await axios.post("http://sqlite-db:3002/storePrivateMessage", req.body);
+			return reply.code(201).send("Success");
+		} catch (err) {
+			console.error("CHAT-SERVICE storePrivateMessage ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	}
