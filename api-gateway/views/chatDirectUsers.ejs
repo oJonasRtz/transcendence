@@ -9,7 +9,7 @@
 		<script src="/socket.io/socket.io.js"></script>
 		<title>Chat</title>
 	</head>
-	<body data-username="<%= username %>" data-public_id="<%= public_id %>" class="bg-cover bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]" style="animation: bgPulse 6s ease-in-out infinite;">
+	<body data-owner_id="<%= owner_id %>" data-username="<%= username %>" data-target_id="<%= target_id %>" class="bg-cover bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]" style="animation: bgPulse 6s ease-in-out infinite;">
                 <div class="z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
 			<script type="module">
 				import { direct } from "/public/js/direct.js";

@@ -1,8 +1,12 @@
 export function direct() {
     const SOCKET_URL = "http://localhost:3000";
+    const socket = io(SOCKET_URL, {
+        transports: ["websocket"],
+    });
     // Capture the form and also the input
     const username = document.body.dataset.username;
-    const public_id = document.body.dataset.public_id;
+    const owner_id = document.body.dataset.owner_id;
+    const target_id = document.body.dataset.target_id;
     const form = document.getElementById("sendForm");
     const input = document.getElementById("message");
     const invite = document.getElementById("sendInvite");
@@ -19,22 +23,16 @@ export function direct() {
             const msg = input.value.trim();
             if (!msg)
                 return;
-            socket.emit("sendPrivateMessage", msg, public_id);
+            socket.emit("sendPrivateMessage", msg, target_id);
             input.value = ""; // erase the value
         });
     }
     //const avatar = document.body.dataset.avatar;
-    console.log("Username:", username);
-    console.log("Public_id:", public_id);
-    //console.log("Avatar:", avatar);
-    const socket = io(SOCKET_URL, {
-        transports: ["websocket"],
-    });
     socket.on("connect", () => {
-        console.log("Connected:", socket.id, "as", username);
-        socket.emit("join", { username, public_id });
+        console.log("Private Connected:", socket.id, "as", username);
+        socket.emit("joinPrivate", { username, owner_id, target_id });
     });
-    socket.on("updateUsers", (users) => {
+    socket.on("updatePrivateUsers", (users) => {
         const usersDiv = document.getElementById("users");
         if (!usersDiv)
             return;
@@ -67,6 +65,6 @@ export function direct() {
         console.log("CHANNELS:", channels);
     });
     socket.on("disconnect", () => {
-        console.log("Disconnected.");
+        console.log("Disconnecting...");
     });
 }

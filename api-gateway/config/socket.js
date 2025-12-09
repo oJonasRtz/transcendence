@@ -2,6 +2,8 @@ import axios from 'axios';
 
 export default async function registerServer(io) {
 	const users = new Map();
+	const privateUsers = new Map();
+
 	let messages = [];
 	let notifications = [];
 
@@ -31,6 +33,19 @@ export default async function registerServer(io) {
 	io.on("connection", (socket) => {
 		socket.currentChannel = null; // the first channel is not a channel :D
 		// connection
+
+		socket.on("joinPrivate", async ({ username, owner_id, target_id }) => {
+			let name = username?.trim();
+			socket.name = name;
+			socket.public_id = owner_id;
+			const exist = Array.from(privateUsers.values()).some(u => u.name === name);
+			if (exist) return ;
+			let public_id = owner_id;
+			privateUsers.set(socket.id, { name, public_id });
+			console.log("privateUsers:", Array.from(privateUsers.values()));
+			io.emit("updatePrivateUsers", Array.from(privateUsers.values()));
+		});
+
 		socket.on("join", async ({ username, public_id, avatar }) => {
 			let name = username?.trim() || "Anonymous";
 			socket.name = name; // use the socket.name name
@@ -64,16 +79,18 @@ export default async function registerServer(io) {
                                 io.to(socketId).emit("updateMessages", messages);
                         }
 			io.emit("updateUsers", Array.from(users.values()));
-			for (const [socketId, user] of users.entries()) {
-                              if (user.name === `${socket.name}` || user.public_id === public_id) {
-                                    io.to(socketId).emit("updateDirectMessages", privateMessages);
-                              }
-                        }
 		});
 
 		//disconnection
+
 		socket.on("disconnect", async () => {
 			let data = users.get(socket.id);
+			const exist = privateUsers.get(socket.id);
+			if (exist) {
+				privateUsers.delete(socket.id);
+				io.emit("updatePrivateUsers", Array.from(privateUsers.values()));
+				return ;
+			}
 			if (!data)
 				data = { name: "Anonymous" };
 			users.delete(socket.id);
@@ -129,7 +146,6 @@ export default async function registerServer(io) {
 
 			for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {
-                                        console.log("Blocked:", user.name);
                                         continue ;
                                 }
                                 io.to(socketId).emit("updateMessages", messages);
@@ -182,18 +198,26 @@ export default async function registerServer(io) {
 				const dataPrivateMessages = response?.data || [];
 
 				let privateMessages = [];
+
 				dataPrivateMessages.forEach(msg => {
-                                        let input = `${msg.sender_username}: ${msg.content}`; 
+                                       	let input = `${msg.sender_username}: ${msg.content}`; 
                                 	privateMessages.push(input);
                         	});
 
-				for (const [socketId, user] of users.entries()) {
-                                	if (user.name === `${socket.name}` || user.public_id === public_id) {
+				const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: public_id });
+				const target_name = res?.data.username;
+
+				console.log("target_id do sender:", public_id);
+				console.log("owner_name:", socket.name);
+				console.log("target_name:", target_name);
+
+				for (const [socketId, user] of privateUsers.entries()) {
+                                	if (user.name === `${socket.name}` || user.name === target_name) {
                                         	io.to(socketId).emit("updateDirectMessages", privateMessages);
                                 	}
                         	}
 			} catch (err) {
-				console.error("Unfortunately we cannot send the private Message");
+				console.error("Unfortunately we cannot send the private Message:", err);
 			}
 		});
 });

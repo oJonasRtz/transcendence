@@ -336,7 +336,15 @@ const databaseModels = {
 	getPrivateMessages: async function getAllPrivateMessages(fastify, data) {
 		const getter = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ data.username ]);
 		const sender_id = getter.user_id;
-		const receiver_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ])
+		const getTwo = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+		const receiver_id = getTwo.user_id;
+
+		console.log("sender_id:", sender_id);
+		console.log("receiver_id:", receiver_id);
+
+		if (!sender_id || !receiver_id)
+			return ([]);
+
 		const privateMessages = await fastify.db.all(`SELECT privateMessages.*, sender.username AS sender_username FROM privateMessages JOIN auth AS sender ON sender.user_id = privateMessages.sender_id WHERE (privateMessages.sender_id = ? AND privateMessages.receiver_id = ?) OR (privateMessages.sender_id = ? AND privateMessages.receiver_id = ?)`, [ sender_id, receiver_id, receiver_id, sender_id ]);
 		return (privateMessages ?? []);
 	},
@@ -344,7 +352,9 @@ const databaseModels = {
 	storePrivateMessage: async function storePrivateMessage(fastify, data) {
 		const getter = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ data.username ]);
 		const sender_id = getter.user_id;
-		const receiver_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ])
+		const getTwo = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+		const receiver_id = getTwo.user_id;
+
 		await fastify.db.run(`INSERT INTO privateMessages (sender_id, content, receiver_id) VALUES (?,?,?)`, [ sender_id, data.msg, receiver_id ]);
 		return (true);
 	}

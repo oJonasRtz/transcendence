@@ -794,8 +794,9 @@ const privateControllers = {
 				req.session.error = ["Error opening direct Messages Page"];
 				return reply.redirect("/home");
 			}
-                        const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: 			req.user.user_id }); 
-                        return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, username: req.user.username, public_id: req.query.public_id } );
+
+			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
+                        return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, username: req.user.username, target_id: req.query.public_id } );
                 } catch (err) {
                         console.error("API-GATEWAY chatAllUsers:", err);
                         req.session.error = ["Error opening the chat"];
