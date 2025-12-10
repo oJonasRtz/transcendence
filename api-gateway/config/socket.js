@@ -192,14 +192,14 @@ export default async function registerServer(io) {
 
 		socket.on("sendInvite", async () => {
 			try {
-				const response = await axios.post("http://localhost:3004/invite", { userName: socket.username, public_id: socket.public_id });
+				const response = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: socket.public_id });
 				if (!response?.data) {
 					messages.push(`system: You need to wait time to send another link`);
 					await reloadEverything(socket.username);
 					socket.emit("updateMessages", messages);
 				}
 				console.log("INVITE:", response?.data);
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: response?.data } );
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: response?.data.link });
 				await reloadEverything(socket.username);
 			} catch (err) {
 				console.error(`Error sending the pong invite match, user: ${socket.username}`);
