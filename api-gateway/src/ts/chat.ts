@@ -2,6 +2,11 @@ export function chat() {
 
 const SOCKET_URL = "http://localhost:3000";
 
+const socket = io(SOCKET_URL, {
+    transports: ["websocket"], 
+    withCredentials: true
+});
+
 // Capture the form and also the input
 
 const username = document.body.dataset.username;
@@ -39,9 +44,6 @@ console.log("Username:", username);
 console.log("Public_id:", public_id);
 //console.log("Avatar:", avatar);
 
-const socket = io(SOCKET_URL, {
-    transports: ["websocket"], 
-});
 
 socket.on("connect", () => {
     console.log("Connected:", socket.id, "as", username);

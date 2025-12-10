@@ -2,6 +2,7 @@ export function direct() {
     const SOCKET_URL = "http://localhost:3000";
     const socket = io(SOCKET_URL, {
         transports: ["websocket"],
+        withCredentials: true
     });
     // Capture the form and also the input
     const username = document.body.dataset.username;

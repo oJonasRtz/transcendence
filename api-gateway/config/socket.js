@@ -1,9 +1,48 @@
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
 export default async function registerServer(io) {
 	const users = new Map();
 	//let official = new Map();
 	const privateUsers = new Map();
+
+	io.use((socket, next) => {
+		const cookie = socket.handshake.headers.cookie;
+
+		if (!cookie)
+			return next(new Error("No cookies sent"));
+
+		const cookies = Object.fromEntries(cookie.split(';').map(c => c.split("=")));
+
+		const token = cookies.jwt;
+
+		if (!token) {
+			console.error("Not found JWT");
+			return next(new Error("You need JWT"));
+		}
+
+		try {
+			const data = jwt.verify(token, process.env.JWT_SECRET);
+
+			socket.user = {
+				user_id: data.user_id,
+				email: data.email,
+				username: data.username
+			}
+
+			socket.user_id = data.user_id;
+			socket.username = data.username;
+
+			console.log("socket.user_id:", socket.user_id);
+			console.log("socket.username:", socket.username);
+			console.log("socket.user:", socket.user);
+			return next();
+
+		} catch (err) {
+			console.error("ERROR NO IO USE:", err);
+			return next(new Error("Invalid JWT"));
+		}
+	});
 
 	let messages = [];
 	let notifications = [];
