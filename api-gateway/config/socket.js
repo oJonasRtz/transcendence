@@ -128,20 +128,19 @@ export default async function registerServer(io) {
 			socket.public_id = public_id;
 			const exist = Array.from(users.values()).some(u => u.name === socket.username);
 			if (exist) return ;
-			users.set(socket.id, { name, public_id });
+			users.set(socket.id, { name: socket.username, public_id });
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, msg: `system: ${socket.username} joined to the chat` } );
 				await reloadEverything(socket.username);
 			} catch (err) { 
-				console.error(`Error updating status of the user ${name}`);
+				console.error(`Error updating status of the user ${socket.username}`);
 			}
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
                         const blacklist = response?.data ?? {};
 
-                        const sender = users.get(socket.id); // who are you, sender?
-                        const senderName = sender.name;
+                        const senderName = socket.username;
 
-                        if (!sender || !senderName) return ;
+                        if (!senderName) return ;
 
                         const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
 
@@ -175,10 +174,9 @@ export default async function registerServer(io) {
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
                         const blacklist = response?.data ?? {};
 
-                        const sender = users.get(socket.id); // who are you, sender?
-                        const senderName = sender.name;
+                        const senderName = socket.username;
 
-                        if (!sender || !senderName) return ;
+                        if (!senderName) return ;
 
                         const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
 
@@ -200,6 +198,7 @@ export default async function registerServer(io) {
 					await reloadEverything(socket.username);
 					socket.emit("updateMessages", messages);
 				}
+				console.log("INVITE:", response?.data);
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: response?.data } );
 				await reloadEverything(socket.username);
 			} catch (err) {
@@ -209,10 +208,9 @@ export default async function registerServer(io) {
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
                         const blacklist = response?.data ?? {};
 
-			const sender = users.get(socket.id); // who are you, sender?
-                        const senderName = sender.name;
+                        const senderName = socket.username;
 
-                        if (!sender || !senderName) return ;
+                        if (!senderName) return ;
 
                         const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
 
@@ -238,16 +236,15 @@ export default async function registerServer(io) {
 				console.error("Invalid input or message above to the allowed length");
 				return ;
 			}
-			const sender = users.get(socket.id); // who are you, sender?
-			const senderName = sender.name;
+			const senderName = socket.username;
 
-			if (!sender || !senderName) return ;
+			if (!senderName) return ;
 
 			const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
 
 			try {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: input } );
-				await reloadEverything(socket.name); // reload everything using the database
+				await reloadEverything(socket.username); // reload everything using the database
 			} catch (err) {
 				console.error(`Error trying to send the message of user ${socket.username}`);
 			}
