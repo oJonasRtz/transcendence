@@ -29,7 +29,7 @@ const chatControllers = {
 
 	getAllPrivateMessages: async function getAllPrivateMessages(req, reply) {
 		try {
-			if (!req.body || !req.body.username || !req.body.public_id)
+			if (!req.body || !req.body.user_id || !req.body.public_id)
 				return reply.code(400).send("You need to inform user_id and public_id here");
 			const response = await axios.post("http://sqlite-db:3002/getAllPrivateMessages", req.body);
 			return reply.code(200).send(response?.data ?? []);
@@ -41,7 +41,7 @@ const chatControllers = {
 
 	storePrivateMessage: async function storePrivateMessage(req, reply) {
 		try {
-			if (!req.body || !req.body.username || !req.body.msg || !req.body.public_id)
+			if (!req.body || !req.body.user_id || !req.body.msg || !req.body.public_id)
 				return reply.code(400).send("You need to inform username and public_id here");
 			await axios.post("http://sqlite-db:3002/storePrivateMessage", req.body);
 			return reply.code(201).send("Success");

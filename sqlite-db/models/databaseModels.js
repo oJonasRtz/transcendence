@@ -251,7 +251,8 @@ const databaseModels = {
 	},
 
 	storeMessage: async function storeMessage(fastify, data) {
-		await fastify.db.run("INSERT INTO messages (content, sender_id, isSystem) VALUES (?, ?, ?)", [ data.msg, data.user_id, data.isSystem ]);
+		console.log("data no storeMessage:", data);
+		await fastify.db.run("INSERT INTO messages (content, sender_id, isLink, avatar, isSystem) VALUES (?, ?, ?, ?, ?)", [ data.msg, data.user_id, data.isLink, data.avatar, data.isSystem ]);
 		return (true);
 	},
 
@@ -334,13 +335,13 @@ const databaseModels = {
 	},
 
 	getPrivateMessages: async function getAllPrivateMessages(fastify, data) {
-		const getter = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ data.username ]);
-		const sender_id = getter.user_id;
+		const sender_id = data.user_id;
 		const getTwo = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
 		const receiver_id = getTwo.user_id;
 
 		console.log("sender_id:", sender_id);
 		console.log("receiver_id:", receiver_id);
+		console.log("data getPrivateMessages:", data);
 
 		if (!sender_id || !receiver_id)
 			return ([]);
@@ -350,12 +351,13 @@ const databaseModels = {
 	},
 
 	storePrivateMessage: async function storePrivateMessage(fastify, data) {
-		const getter = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ data.username ]);
-		const sender_id = getter.user_id;
+		const sender_id = data.user_id;
 		const getTwo = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
 		const receiver_id = getTwo.user_id;
 
-		await fastify.db.run(`INSERT INTO privateMessages (sender_id, content, receiver_id) VALUES (?,?,?)`, [ sender_id, data.msg, receiver_id ]);
+		console.log("data no storePrivateMessage:", data);
+
+		await fastify.db.run(`INSERT INTO privateMessages (sender_id, content, avatar, isLink, receiver_id) VALUES (?,?,?,?,?)`, [ sender_id, data.msg, data.avatar, data.isLink, receiver_id ]);
 		return (true);
 	}
 }

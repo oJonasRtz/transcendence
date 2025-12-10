@@ -56,6 +56,8 @@ export default async function initDatabase() {
                         content TEXT NOT NULL,
                         sender_id TEXT NOT NULL,
 			isSystem BOOLEAN DEFAULT false,
+			isLink BOOLEAN DEFAULT false,
+			avatar TEXT NOT NULL,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                         );
 	`);
@@ -66,6 +68,8 @@ export default async function initDatabase() {
 			sender_id TEXT NOT NULL,
 			receiver_id TEXT NULL DEFAULT NULL,
 			isSystem BOOLEAN DEFAULT false,
+			avatar TEXT NOT NULL,
+			isLink BOOLEAN DEFAULT false,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 			);
 		`);

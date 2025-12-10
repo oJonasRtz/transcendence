@@ -624,7 +624,7 @@ const databaseControllers = {
 
 	getAllPrivateMessages: async function getAllPrivateMessages(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.username || !req.body.public_id)
+			if (!req.body || !req.body.user_id || !req.body.public_id)
 				return reply.code(400).send("You need to inform user_id and public_id here");
 			const privateMessages = await databaseModels.getPrivateMessages(fastify, req.body);
 			return reply.code(200).send(privateMessages ?? []);
@@ -636,7 +636,7 @@ const databaseControllers = {
 
 	storePrivateMessage: async function storePrivateMessage(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.username || !req.body.public_id)
+			if (!req.body || !req.body.user_id || !req.body.public_id)
 				return reply.code(400).send("You need to inform user_id and public_id here");
 			await databaseModels.storePrivateMessage(fastify, req.body);
 			return reply.code(201).send("Created");

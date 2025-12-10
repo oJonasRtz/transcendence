@@ -31,15 +31,12 @@ export default async function registerServer(io) {
 			}
 
 			socket.user_id = data.user_id;
+			socket.email = data.email;
 			socket.username = data.username;
 
-			console.log("socket.user_id:", socket.user_id);
-			console.log("socket.username:", socket.username);
-			console.log("socket.user:", socket.user);
 			return next();
 
 		} catch (err) {
-			console.error("ERROR NO IO USE:", err);
 			return next(new Error("Invalid JWT"));
 		}
 	});
@@ -47,9 +44,9 @@ export default async function registerServer(io) {
 	let messages = [];
 	let notifications = [];
 
-	async function sendPrivateMessageServer(msg, name, public_id) {
+	async function sendPrivateMessageServer(msg, user_id, name, public_id) {
 		try {
-                                const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { username: name, public_id: public_id });
+                                const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: user_id, public_id: public_id });
                                 const dataPrivateMessages = response?.data || [];
 
                                 let privateMessages = [];
@@ -121,7 +118,7 @@ export default async function registerServer(io) {
 			io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
 			let msg = null;
-			await sendPrivateMessageServer(msg, socket.username, target_id);
+			await sendPrivateMessageServer(msg, socket.user_id, socket.username, target_id);
 		});
 
 		socket.on("join", async ({ public_id }) => {
@@ -130,13 +127,14 @@ export default async function registerServer(io) {
 			if (exist) return ;
 			users.set(socket.id, { name: socket.username, public_id });
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, msg: `system: ${socket.username} joined to the chat` } );
+				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png" , isLink: false, msg: `system: ${socket.username} joined to the chat` } );
 				await reloadEverything(socket.username);
 			} catch (err) { 
-				console.error(`Error updating status of the user ${socket.username}`);
+				console.error(`Error updating status of the user ${socket.username}:`, err);
 			}
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
-                        const blacklist = response?.data ?? {};
+                        const blacklist = response?.data ?? [];
 
                         const senderName = socket.username;
 
@@ -166,19 +164,20 @@ export default async function registerServer(io) {
 				data = { name: "Anonymous" };
 			users.delete(socket.id);
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${data.name}`, isSystem: true, msg: `system: ${data.name} left the chat` } );
+				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${data.name}`, isSystem: true, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: `system: ${data.name} left the chat` });
 				await reloadEverything(data.name);
 			} catch (err) {
-				console.error(`Error updating status of the user ${data.name}`);
+				console.error(`Error updating status of the user ${data.name}:`, err);
 			}
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
-                        const blacklist = response?.data ?? {};
+                        const blacklist = response?.data ?? [];
 
                         const senderName = socket.username;
 
                         if (!senderName) return ;
 
-                        const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+                        const blockUserTargets = blacklist.filter(target => target.target_username === senderName).map(user => user.owner_username);
 
                         for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {
@@ -199,20 +198,21 @@ export default async function registerServer(io) {
 					socket.emit("updateMessages", messages);
 				}
 				console.log("INVITE:", response?.data);
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: response?.data.link });
+				 const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? '/app/public/images/default_avatar.png', isLink: false, msg: response?.data.link });
 				await reloadEverything(socket.username);
 			} catch (err) {
-				console.error(`Error sending the pong invite match, user: ${socket.username}`);
+				console.error(`Error sending the pong invite match, user: ${socket.username}:`, err);
 			}
 
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
-                        const blacklist = response?.data ?? {};
+                        const blacklist = response?.data ?? [];
 
                         const senderName = socket.username;
 
                         if (!senderName) return ;
 
-                        const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+                        const blockUserTargets = blacklist.filter(target => target.target_username === senderName).map(user => user.owner_username);
 
 			for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {
@@ -243,10 +243,11 @@ export default async function registerServer(io) {
 			const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
 
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: input } );
+				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: input } );
 				await reloadEverything(socket.username); // reload everything using the database
 			} catch (err) {
-				console.error(`Error trying to send the message of user ${socket.username}`);
+				console.error(`Error trying to send the message of user ${socket.username}:`, err);
 			}
 
 			for (const [socketId, user] of users.entries()) {
@@ -262,8 +263,9 @@ export default async function registerServer(io) {
 
 		socket.on("sendPrivateMessage", async (msg, public_id) => {
 			try {
-				await axios.post("http://chat-service:3005/storePrivateMessage", { username: `${socket.username}`, msg: msg, public_id: public_id });
-				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { username: `${socket.username}`, public_id: public_id });
+				const ress = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+				await axios.post("http://chat-service:3005/storePrivateMessage", { user_id: socket.user_id, avatar: ress?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: msg, public_id: public_id });
+				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
 				const dataPrivateMessages = response?.data || [];
 
 				let privateMessages = [];
