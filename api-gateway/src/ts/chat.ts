@@ -88,14 +88,53 @@ socket.on("updateMessages", (msgs: any[]) => {
 
 	const messagesDiv = document.getElementById("messages");
 
+	if (!messagesDiv) return ;
+
 	messagesDiv.innerHTML = ""; // extremely IMPORTANT!!! You need to clean everything before to add more
 
 	msgs.forEach(msg => {
-		const p = document.createElement("p");
-		p.textContent = msg;
-		p.style.fontWeight = "bold";
-		p.style.padding = "4px 0";
-		messagesDiv.appendChild(p);
+		const div = document.createElement("div");
+		div.style.display = "flex";
+		div.style.alignItems = "flex-start";
+		div.style.gap = "12px";
+		div.style.padding = "8px 4px";
+
+		const img = document.createElement("img");
+		img.src = msg.avatar || "/app/public/images/default_avatar.png";
+		img.width = 60;
+		img.height = 60;
+		img.style.borderRadius = "50%";
+		img.style.objectFit = "cover";
+
+		const textBox = document.createElement("div");
+
+		const username = document.createElement("strong");
+		username.textContent = msg.username || "Anonymous";
+		username.style.display = "block";
+
+		let contentEl: HTMLElement;
+
+		if (msg.isLink) {
+			const a = document.createElement("a");
+			a.href = msg.content;
+			a.textContent = "Pong Invitation";
+			a.target = "_blank"; // Open the link in another page
+			a.rel = "noopener noreferrer"; // protection to use _blank to avoid the page opened obtain access to our website and avoid the another page to know where the user come from
+			a.style.color = "#4da3ff"; // vibrant blue
+			contentEl = a;
+		} else {
+			const span = document.createElement("span");
+			span.textContent = msg.content;
+			contentEl = span;
+		}
+
+		textBox.appendChild(username);
+		textBox.appendChild(contentEl);
+
+		div.appendChild(img);
+		div.appendChild(textBox);
+
+		messagesDiv.appendChild(div);
 	});
 
 	console.log("MESSAGES:", msgs);

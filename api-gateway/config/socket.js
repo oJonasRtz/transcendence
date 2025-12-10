@@ -16,6 +16,8 @@ export default async function registerServer(io) {
 
 		const token = cookies.jwt;
 
+		console.log("o cookie:", cookie);
+		console.log("os cookies:", cookies);
 		if (!token) {
 			console.error("Not found JWT");
 			return next(new Error("You need JWT"));
@@ -73,20 +75,15 @@ export default async function registerServer(io) {
                 try {
 			if (!owner) return ;
                         const responseMessages = await axios.post("http://chat-service:3005/getAllMessages", { username: owner });
-			let tmp = responseMessages?.data ?? [];
-			let input;
-			messages.length = 0; // erase the list
-			tmp.forEach(msg => {
-				if (!msg.isSystem)
-					input = `${msg.username}: ${msg.content}`;
-				else
-					input = `${msg.content}`;
+			let data = Array.isArray(responseMessages?.data) ? responseMessages?.data : [];
 
-				messages.push(input);
-			});
+			messages.length = 0; // erase the list
+
+			messages.push(...data);
+
                         console.log("got all messages");
                 } catch (err) {
-                        console.error(err);
+                        console.error("Error in reloadEverything:", err);
                 }
         };
 
@@ -199,7 +196,7 @@ export default async function registerServer(io) {
 				}
 				console.log("INVITE:", response?.data);
 				 const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? '/app/public/images/default_avatar.png', isLink: false, msg: response?.data.link });
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? '/app/public/images/default_avatar.png', isLink: true, msg: response?.data.link });
 				await reloadEverything(socket.username);
 			} catch (err) {
 				console.error(`Error sending the pong invite match, user: ${socket.username}:`, err);
