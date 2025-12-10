@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export default async function registerServer(io) {
 	const users = new Map();
-	let official = new Map();
+	//let official = new Map();
 	const privateUsers = new Map();
 
 	let messages = [];
@@ -69,7 +69,7 @@ export default async function registerServer(io) {
 			let public_id = owner_id;
 			privateUsers.set(socket.id, { name, public_id });
 
-			official.clear();
+			let official = new Map();
 
 			official.set(socket.id, { name, public_id });
 
@@ -79,14 +79,15 @@ export default async function registerServer(io) {
 				if (user.public_id === target_id) {
 					console.log("ACHEI");
 					official.set(socketId, user);
+					io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
 					break ;
 				}
 			}
 
+			io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
+
 			console.log("privateUsers:", Array.from(privateUsers.values()));
 			console.log("official:", Array.from(official.values()));
-
-			io.emit("updatePrivateUsers", Array.from(official.values()));
 
 			let msg = null;
 			await sendPrivateMessageServer(msg, socket.name, target_id);
@@ -134,8 +135,6 @@ export default async function registerServer(io) {
 			const exist = privateUsers.get(socket.id);
 			if (exist) {
 				privateUsers.delete(socket.id);
-				official.delete(socket.id);
-				io.emit("updatePrivateUsers", Array.from(official.values()));
 				return ;
 			}
 			if (!data)
@@ -254,15 +253,25 @@ export default async function registerServer(io) {
 				const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: public_id });
 				const target_name = res?.data.username;
 
-				console.log("target_id do sender:", public_id);
-				console.log("owner_name:", socket.name);
-				console.log("target_name:", target_name);
-
 				for (const [socketId, user] of privateUsers.entries()) {
                                 	if (user.name === `${socket.name}` || user.name === target_name) {
                                         	io.to(socketId).emit("updateDirectMessages", privateMessages);
                                 	}
                         	}
+
+				let official = new Map();
+
+                        	official.set(socket.id, { name: `${socket.name}`, public_id: `${socket.public_id}` });
+
+                        	for (const [ socketId, user ] of privateUsers.entries()) {
+                                	if (user.public_id === public_id) {
+                                        	official.set(socketId, user);
+						io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
+                                        	break ;
+                               		 }
+                        	}
+				io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
+
 			} catch (err) {
 				console.error("Unfortunately we cannot send the private Message:", err);
 			}
