@@ -12,12 +12,10 @@ export default async function registerServer(io) {
 		if (!cookie)
 			return next(new Error("No cookies sent"));
 
-		const cookies = Object.fromEntries(cookie.split(';').map(c => c.split("=")));
+		const cookies = Object.fromEntries(cookie.split(';').map(c => c.trim().split("=")));
 
 		const token = cookies.jwt;
 
-		console.log("o cookie:", cookie);
-		console.log("os cookies:", cookies);
 		if (!token) {
 			console.error("Not found JWT");
 			return next(new Error("You need JWT"));
@@ -49,14 +47,14 @@ export default async function registerServer(io) {
 	async function sendPrivateMessageServer(msg, user_id, name, public_id) {
 		try {
                                 const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: user_id, public_id: public_id });
-                                const dataPrivateMessages = response?.data || [];
 
                                 let privateMessages = [];
 
-                                dataPrivateMessages.forEach(msg => {
-                                        let input = `${msg.sender_username}: ${msg.content}`;
-                                        privateMessages.push(input);
-                                });
+				let data = Array.isArray(response?.data) ? response?.data : [];
+
+				console.log("data:", response?.data);
+                                privateMessages.push(...data);
+				console.log("privateMessages async function:", privateMessages);
 
                                 const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: public_id });
                                 const target_name = res?.data.username;
@@ -115,7 +113,11 @@ export default async function registerServer(io) {
 			io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
 			let msg = null;
-			await sendPrivateMessageServer(msg, socket.user_id, socket.username, target_id);
+			try {
+				await sendPrivateMessageServer(msg, socket.user_id, socket.username, target_id);
+			} catch (err) {
+				console.error("Error sending private message:", err);
+			}
 		});
 
 		socket.on("join", async ({ public_id }) => {
@@ -263,14 +265,14 @@ export default async function registerServer(io) {
 				const ress = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storePrivateMessage", { user_id: socket.user_id, avatar: ress?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: msg, public_id: public_id });
 				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
-				const dataPrivateMessages = response?.data || [];
 
 				let privateMessages = [];
+	
+				console.log("data:", response?.data);
+				let data = Array.isArray(response?.data) ? response?.data : [];
+                                privateMessages.push(...data);
 
-				dataPrivateMessages.forEach(msg => {
-                                       	let input = `${msg.sender_username}: ${msg.content}`; 
-                                	privateMessages.push(input);
-                        	});
+				console.log("privateMessages sendPrivate:", privateMessages);
 
 				const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: public_id });
 				const target_name = res?.data.username;
