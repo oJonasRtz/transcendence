@@ -5,7 +5,6 @@ export function direct() {
         withCredentials: true
     });
     // Capture the form and also the input
-    const username = document.body.dataset.username;
     const owner_id = document.body.dataset.owner_id;
     const target_id = document.body.dataset.target_id;
     const form = document.getElementById("sendForm");
@@ -30,8 +29,7 @@ export function direct() {
     }
     //const avatar = document.body.dataset.avatar;
     socket.on("connect", () => {
-        console.log("Private Connected:", socket.id, "as", username);
-        socket.emit("joinPrivate", { username, owner_id, target_id });
+        socket.emit("joinPrivate", { owner_id, target_id });
     });
     socket.on("updatePrivateUsers", (users) => {
         const usersDiv = document.getElementById("users");

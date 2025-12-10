@@ -9,7 +9,6 @@ const socket = io(SOCKET_URL, {
 
 // Capture the form and also the input
 
-const username = document.body.dataset.username;
 const public_id = document.body.dataset.public_id;
 
 const form = document.getElementById("sendForm") as HTMLFormElement;
@@ -40,14 +39,12 @@ if (form instanceof HTMLFormElement && input instanceof HTMLInputElement) {
 
 //const avatar = document.body.dataset.avatar;
 
-console.log("Username:", username);
 console.log("Public_id:", public_id);
 //console.log("Avatar:", avatar);
 
 
 socket.on("connect", () => {
-    console.log("Connected:", socket.id, "as", username);
-    socket.emit("join", { username, public_id });
+    socket.emit("join", { public_id });
 });
 
 /*socket.on("serverMessage", (msg: string) => {

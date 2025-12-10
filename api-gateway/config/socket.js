@@ -99,24 +99,19 @@ export default async function registerServer(io) {
 		socket.currentChannel = null; // the first channel is not a channel :D
 		// connection
 
-		socket.on("joinPrivate", async ({ username, owner_id, target_id }) => {
-			let name = username?.trim();
-			socket.name = name;
+		socket.on("joinPrivate", async ({ owner_id, target_id }) => {
 			socket.public_id = owner_id;
-			const exist = Array.from(privateUsers.values()).some(u => u.name === name);
+			const exist = Array.from(privateUsers.values()).some(u => u.name === socket.username);
 			if (exist) return ;
 			let public_id = owner_id;
-			privateUsers.set(socket.id, { name, public_id });
+			privateUsers.set(socket.id, { name: socket.username, public_id });
 
 			let official = new Map();
 
-			official.set(socket.id, { name, public_id });
-
-			console.log("target_id:", target_id);
+			official.set(socket.id, { name: socket.username, public_id });
 
 			for (const [ socketId, user ] of privateUsers.entries()) {
 				if (user.public_id === target_id) {
-					console.log("ACHEI");
 					official.set(socketId, user);
 					io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
 					break ;
@@ -125,23 +120,18 @@ export default async function registerServer(io) {
 
 			io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
-			console.log("privateUsers:", Array.from(privateUsers.values()));
-			console.log("official:", Array.from(official.values()));
-
 			let msg = null;
-			await sendPrivateMessageServer(msg, socket.name, target_id);
+			await sendPrivateMessageServer(msg, socket.username, target_id);
 		});
 
-		socket.on("join", async ({ username, public_id, avatar }) => {
-			let name = username?.trim() || "Anonymous";
-			socket.name = name; // use the socket.name name
+		socket.on("join", async ({ public_id }) => {
 			socket.public_id = public_id;
-			const exist = Array.from(users.values()).some(u => u.name === name);
+			const exist = Array.from(users.values()).some(u => u.name === socket.username);
 			if (exist) return ;
 			users.set(socket.id, { name, public_id });
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${name}`, isSystem: true, msg: `system: ${name} joined to the chat` } );
-				await reloadEverything(socket.name);
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, msg: `system: ${socket.username} joined to the chat` } );
+				await reloadEverything(socket.username);
 			} catch (err) { 
 				console.error(`Error updating status of the user ${name}`);
 			}
@@ -156,12 +146,9 @@ export default async function registerServer(io) {
                         const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
 
                         for (const [socketId, user] of users.entries()) {
-                                console.log(`${socket.name} is starting filter ${user.name}`);
                                 if (blockUserTargets.includes(user.name)) {
-                                        console.log("Blocked:", user.name);
                                         continue ;
                                 }
-                                console.log(`${socket.name} is sending messages to ${user.name}`);
                                 io.to(socketId).emit("updateMessages", messages);
                         }
 			io.emit("updateUsers", Array.from(users.values()));
@@ -207,16 +194,16 @@ export default async function registerServer(io) {
 
 		socket.on("sendInvite", async () => {
 			try {
-				const response = await axios.post("http://localhost:3004/invite", { userName: socket.name, public_id: socket.public_id });
+				const response = await axios.post("http://localhost:3004/invite", { userName: socket.username, public_id: socket.public_id });
 				if (!response?.data) {
 					messages.push(`system: You need to wait time to send another link`);
-					await reloadEverything(socket.name);
+					await reloadEverything(socket.username);
 					socket.emit("updateMessages", messages);
 				}
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: response?.data } );
-				await reloadEverything(socket.name);
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: response?.data } );
+				await reloadEverything(socket.username);
 			} catch (err) {
-				console.error(`Error sending the pong invite match, user: ${socket.name}`);
+				console.error(`Error sending the pong invite match, user: ${socket.username}`);
 			}
 
 			const response = await axios.get("http://users-service:3003/getAllBlacklist");
@@ -259,10 +246,10 @@ export default async function registerServer(io) {
 			const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
 
 			try {
-				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.name}`, isSystem: false, msg: input } );
+				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, msg: input } );
 				await reloadEverything(socket.name); // reload everything using the database
 			} catch (err) {
-				console.error(`Error trying to send the message of user ${socket.name}`);
+				console.error(`Error trying to send the message of user ${socket.username}`);
 			}
 
 			for (const [socketId, user] of users.entries()) {
@@ -278,8 +265,8 @@ export default async function registerServer(io) {
 
 		socket.on("sendPrivateMessage", async (msg, public_id) => {
 			try {
-				await axios.post("http://chat-service:3005/storePrivateMessage", { username: `${socket.name}`, msg: msg, public_id: public_id });
-				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { username: `${socket.name}`, public_id: public_id });
+				await axios.post("http://chat-service:3005/storePrivateMessage", { username: `${socket.username}`, msg: msg, public_id: public_id });
+				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { username: `${socket.username}`, public_id: public_id });
 				const dataPrivateMessages = response?.data || [];
 
 				let privateMessages = [];
@@ -293,14 +280,14 @@ export default async function registerServer(io) {
 				const target_name = res?.data.username;
 
 				for (const [socketId, user] of privateUsers.entries()) {
-                                	if (user.name === `${socket.name}` || user.name === target_name) {
+                                	if (user.name === `${socket.username}` || user.name === target_name) {
                                         	io.to(socketId).emit("updateDirectMessages", privateMessages);
                                 	}
                         	}
 
 				let official = new Map();
 
-                        	official.set(socket.id, { name: `${socket.name}`, public_id: `${socket.public_id}` });
+                        	official.set(socket.id, { name: `${socket.username}`, public_id: `${socket.public_id}` });
 
                         	for (const [ socketId, user ] of privateUsers.entries()) {
                                 	if (user.public_id === public_id) {
