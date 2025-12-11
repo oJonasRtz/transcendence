@@ -22,7 +22,7 @@ if (invite instanceof HTMLFormElement) {
 	invite.addEventListener("submit", (e) => {
 		e.preventDefault();
 
-		socket.emit("sendInvite");
+		socket.emit("sendPrivateInvite", target_id);
 	});
 }
 

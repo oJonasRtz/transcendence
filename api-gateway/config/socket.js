@@ -188,6 +188,50 @@ export default async function registerServer(io) {
                         io.emit("updateUsers", Array.from(users.values()));
 		});
 
+		socket.on("sendPrivateInvite", async (target_id) => {
+			try {
+				const invitation = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: target_id });
+
+				 const userAvatar = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+
+				console.log("INVITE:", invitation);
+
+				await axios.post("http://chat-service:3005/storePrivateMessage", { user_id: socket.user_id, avatar: userAvatar?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: true, msg: invitation?.data.link, public_id: target_id });
+				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: target_id });
+
+                                let privateMessages = [];
+
+                                let data = Array.isArray(response?.data) ? response?.data : [];
+
+                                privateMessages.push(...data);
+
+                                const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: target_id });
+                                const target_name = res?.data.username;
+
+                                for (const [socketId, user] of privateUsers.entries()) {
+                                        if (user.name === `${socket.username}` || user.name === target_name) {
+                                                io.to(socketId).emit("updateDirectMessages", privateMessages);
+                                        }
+                                }
+
+                                let official = new Map();
+
+                                official.set(socket.id, { name: `${socket.username}`, public_id: `${socket.public_id}` });
+
+                                for (const [ socketId, user ] of privateUsers.entries()) {
+                                        if (user.public_id === target_id) {
+                                                official.set(socketId, user);
+                                                io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
+                                                break ;
+                                         }
+                                }
+                                io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
+
+			} catch (err) {
+				console.error("sendPrivateInvite ERROR:", err);
+			}	
+		});
+
 		socket.on("sendInvite", async () => {
 			try {
 				const response = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: socket.public_id });
