@@ -355,15 +355,6 @@ const databaseModels = {
 			(privateMessages.sender_id = ? AND privateMessages.receiver_id = ?) 
 			OR 
 			(privateMessages.sender_id = ? AND privateMessages.receiver_id = ?)
-		)
-		AND NOT EXISTS ( 
-			SELECT 1 
-			FROM blacklist 
-			WHERE (
-				(blacklist.owner_id = privateMessages.sender_id AND blacklist.target_id = privateMessages.receiver_id) 
-			OR 
-				(blacklist.owner_id = privateMessages.receiver_id AND blacklist.target_id = privateMessages.sender_id )
-			 )
 		)`, [ sender_id, receiver_id, receiver_id, sender_id ]);
 		return (privateMessages ?? []);
 	},

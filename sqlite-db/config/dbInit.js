@@ -68,6 +68,7 @@ export default async function initDatabase() {
 			sender_id TEXT NOT NULL,
 			receiver_id TEXT NULL DEFAULT NULL,
 			isSystem BOOLEAN DEFAULT false,
+			isBlocked BOOLEAN DEFAULT false,
 			avatar TEXT NOT NULL,
 			isLink BOOLEAN DEFAULT false,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
