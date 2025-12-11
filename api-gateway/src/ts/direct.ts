@@ -80,7 +80,10 @@ socket.on("updateDirectMessages", (msgs: any[]) => {
                 div.style.padding = "8px 4px";
 
                 const img = document.createElement("img");
-                img.src = msg.avatar || "/app/public/images/default_avatar.png";
+		if (msg.isSystem)
+			img.src = "/app/public/images/system.png";
+		else
+                	img.src = msg.avatar || "/public/images/default_avatar.png";
                 img.width = 60;
                 img.height = 60;
                 img.style.borderRadius = "50%";
@@ -89,7 +92,10 @@ socket.on("updateDirectMessages", (msgs: any[]) => {
                 const textBox = document.createElement("div");
 
                 const username = document.createElement("strong");
-                username.textContent = msg.sender_username || "Anonymous";
+		if (msg.isSystem)
+			username.textContent = "SYSTEM"
+		else
+                	username.textContent = msg.sender_username || "Anonymous";
                 username.style.display = "block";
 
                 let contentEl: HTMLElement;

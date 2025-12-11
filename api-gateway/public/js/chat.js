@@ -76,14 +76,20 @@ export function chat() {
             div.style.gap = "12px";
             div.style.padding = "8px 4px";
             const img = document.createElement("img");
-            img.src = msg.avatar || "/app/public/images/default_avatar.png";
+            if (msg.isSystem)
+                img.src = "/public/images/system.png";
+            else
+                img.src = msg.avatar || "/app/public/images/default_avatar.png";
             img.width = 60;
             img.height = 60;
             img.style.borderRadius = "50%";
             img.style.objectFit = "cover";
             const textBox = document.createElement("div");
             const username = document.createElement("strong");
-            username.textContent = msg.username || "Anonymous";
+            if (msg.isSystem)
+                username.textContent = "SYSTEM";
+            else
+                username.textContent = msg.username || "Anonymous";
             username.style.display = "block";
             let contentEl;
             if (msg.isLink) {
