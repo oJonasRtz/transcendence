@@ -373,10 +373,23 @@ const databaseModels = {
 		const getTwo = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
 		const receiver_id = getTwo.user_id;
 
+		const isBlock = await fastify.db.get(`
+				SELECT 1
+				FROM blacklist
+				WHERE (
+					(blacklist.owner_id = ? AND blacklist.target_id = ?)
+				OR
+					(blacklist.owner_id = ? AND blacklist.target_id = ?)
+				)
+			`, [ sender_id, receiver_id, receiver_id, sender_id ]);
+
 		console.log("data no storePrivateMessage:", data);
 
-		await fastify.db.run(`INSERT INTO privateMessages (sender_id, content, avatar, isLink, receiver_id) VALUES (?,?,?,?,?)`, [ sender_id, data.msg, data.avatar, data.isLink, receiver_id ]);
-		return (true);
+		if (!isBlock) {
+			await fastify.db.run(`INSERT INTO privateMessages (sender_id, content, avatar, isLink, receiver_id) VALUES (?,?,?,?,?)`, [ sender_id, data.msg, data.avatar, data.isLink, receiver_id ]);
+			return (true);
+		}
+		return (false);
 	}
 }
 
