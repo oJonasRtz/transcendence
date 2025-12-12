@@ -122,6 +122,8 @@ const privateControllers = {
 
 			const data = myData?.data;
 
+			console.log("data:", data);
+
 			return reply.view("home", { username, success, data, avatar, error } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
@@ -202,10 +204,10 @@ const privateControllers = {
 			
 			// validator hook, do your job
 
-			const token = req.cookies.jwt;
-			const decoded = jwt.verify(token, process.env.JWT_SECRET);
+			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
 
-			await axios.post("http://users-service:3003/validateUserEmail", { email: decoded.email });
+			console.log("email:", req.user.email);
+			console.log("user_id:", req.user.user_id);
 
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
@@ -479,7 +481,7 @@ const privateControllers = {
 		} catch (err) {
 			if (err?.response.status === 400) {
 				req.session.error = ["You cannot change to the same password you have now"];
-				return reply.redirect("/home");
+				return reply.redirect("/changePassword");
 			}
 			console.error("setAuthPassword Api-gateway error:", err);
 			req.session.error = ["Error trying to change your password"];
@@ -524,8 +526,8 @@ const privateControllers = {
 
                 } catch (err) {
                         console.error("API-GATEWAY setAuthEmail error:", err);
-                        req.session.error = ["Error trying to change your nickname"];
-                        return reply.redirect("/changeUsername");
+                        req.session.error = ["Error trying to change your email"];
+                        return reply.redirect("/changeEmail");
                 }
 	},
 

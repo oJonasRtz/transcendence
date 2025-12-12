@@ -80,8 +80,8 @@ const databaseModels = {
 		await fastify.db.run("INSERT INTO users (user_id, public_id) VALUES (?, ?)", [ user_id, nanoId ]);
 	},
 
-	activateEmail: async function validateUserEmail(fastify, email) {
-		await fastify.db.run("UPDATE users SET isEmailConfirmed = true");
+	activateEmail: async function validateUserEmail(fastify, data) {
+		await fastify.db.run("UPDATE users SET isEmailConfirmed = true WHERE user_id = ?", [ data.user_id ]);
 	},
 
 	get2FAEnable: async function get2FAEnable(fastify, email) {

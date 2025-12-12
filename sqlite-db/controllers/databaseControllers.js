@@ -122,7 +122,7 @@ const databaseControllers = {
 		try {
 			if (!req.body || !req.body.email)
 				return reply.code(400).send("You need to inform an email here");
-			await databaseModels.activateEmail(fastify, req.body.email);
+			await databaseModels.activateEmail(fastify, req.body);
 
 			return reply.code(200).send("Success");
 		} catch (err) {

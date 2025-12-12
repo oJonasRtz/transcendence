@@ -73,6 +73,11 @@
 				<% } else { %>
 					<p><strong>Description:</strong> You do not have a description </p>
 				<% } %>
+				<% if (data.isEmailConfirmed) { %>
+					<p><strong>IsEmailConfirmed: <span style="color: green">YES</span></strong></p>
+				<% } else { %>
+					<p><strong>IsEmailConfirmed: <span style="color: red">NO</span></strong></p>
+				<% } %>
 				<p><strong>Title:</strong> <%= data.title %> </p>
 				<p><strong>Ranking:</strong> <%= data.rank %>° </p>
 				<p><strong>Experience Points:</strong> <%= data.experience_points %> </p>
