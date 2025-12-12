@@ -61,7 +61,7 @@ app.get("/boom", (req, reply) => {
 	throw new Error("Big Error");
 });
 
-//errorHandler(app);
+errorHandler(app);
 notFoundHandler(app);
 
 const isProduction = process.env.NODE_ENV === 'production';
