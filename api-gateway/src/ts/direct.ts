@@ -81,7 +81,7 @@ socket.on("updateDirectMessages", (msgs: any[]) => {
 
                 const img = document.createElement("img");
 		if (msg.isSystem)
-			img.src = "/app/public/images/system.png";
+			img.src = "/public/images/system.png";
 		else
                 	img.src = msg.avatar || "/public/images/default_avatar.png";
                 img.width = 60;
@@ -110,7 +110,12 @@ socket.on("updateDirectMessages", (msgs: any[]) => {
                         contentEl = a;
                 } else {
                         const span = document.createElement("span");
-                        span.textContent = msg.content;
+			if (msg.isSystem && !msg.content && msg.isLimit !== true)
+				span.textContent = "You must need to wait to send another invitation";
+			else if (msg.isSystem && !msg.content && msg.isLimit === true)
+				span.textContent = "You must input until 200 characters";
+			else
+                        	span.textContent = msg.content;
                         contentEl = span;
                 }
 

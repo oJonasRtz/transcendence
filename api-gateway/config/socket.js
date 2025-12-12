@@ -9,10 +9,14 @@ export default async function registerServer(io) {
 	io.use((socket, next) => {
 		const cookie = socket.handshake.headers.cookie;
 
+		console.log("cookie:", cookie);
+
 		if (!cookie)
 			return next(new Error("No cookies sent"));
 
 		const cookies = Object.fromEntries(cookie.split(';').map(c => c.trim().split("=")));
+
+		console.log("cookies:", cookies);
 
 		const token = cookies.jwt;
 
@@ -52,9 +56,7 @@ export default async function registerServer(io) {
 
 				let data = Array.isArray(response?.data) ? response?.data : [];
 
-				console.log("data:", response?.data);
                                 privateMessages.push(...data);
-				console.log("privateMessages async function:", privateMessages);
 
                                 const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: public_id });
                                 const target_name = res?.data.username;
@@ -189,22 +191,25 @@ export default async function registerServer(io) {
 		});
 
 		socket.on("sendPrivateInvite", async (target_id) => {
+			let invitation = null;
+
+                        let privateMessages = [];
 			try {
-				const invitation = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: target_id });
+				invitation = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: target_id });
 
 				 const userAvatar = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 
 				console.log("INVITE:", invitation);
 
 				await axios.post("http://chat-service:3005/storePrivateMessage", { user_id: socket.user_id, avatar: userAvatar?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: true, msg: invitation?.data.link, public_id: target_id });
+
 				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: target_id });
 
-                                let privateMessages = [];
 
                                 let data = Array.isArray(response?.data) ? response?.data : [];
 
                                 privateMessages.push(...data);
-
+				
                                 const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: target_id });
                                 const target_name = res?.data.username;
 
@@ -228,28 +233,56 @@ export default async function registerServer(io) {
                                 io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
 			} catch (err) {
+				let res = null;
+				let target_name = null;
+				try {
+                                	res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: target_id });
+                                	target_name = res?.data.username;
+				} catch (err) { return ; }
+
+				let response = null;
+				try {
+					response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: target_id });
+				} catch (err) {}
+
+				let data = Array.isArray(response?.data) ? response?.data : [];
+
+				if (data)
+                                	privateMessages.push(...data);
+
+				if (!invitation?.data.link) {
+					privateMessages.push({isSystem: true, isLink: false, content: `system: You need to wait time to send another link`, username: "SYSTEM", avatar: '/public/images/system.png'});
+					for (const [socketId, user] of privateUsers.entries()) {
+                                        if (user.name === `${socket.username}` || user.name === target_name) {
+                                                io.to(socketId).emit("updateDirectMessages", privateMessages);
+                                        }
+                                }
+					return ;
+				}
 				console.error("sendPrivateInvite ERROR:", err);
 			}	
 		});
 
 		socket.on("sendInvite", async () => {
+			let response = null;
 			try {
-				const response = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: socket.public_id });
-				if (!response?.data) {
-					messages.push(`system: You need to wait time to send another link`);
-					await reloadEverything(socket.username);
+				response = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: socket.public_id });
 					socket.emit("updateMessages", messages);
-				}
+				
 				console.log("INVITE:", response?.data);
 				 const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? '/app/public/images/default_avatar.png', isLink: true, msg: response?.data.link });
 				await reloadEverything(socket.username);
 			} catch (err) {
+				if (!response?.data.link)
+					await reloadEverything(socket.username);
+					messages.push({isSystem: true, isLink: false, content: `system: You need to wait time to send another link`, username: "Anonymous", avatar: '/public/images/system.png'});
+					io.emit("updateMessages", messages);
 				console.error(`Error sending the pong invite match, user: ${socket.username}:`, err);
 			}
 
-			const response = await axios.get("http://users-service:3003/getAllBlacklist");
-                        const blacklist = response?.data ?? [];
+			const resp = await axios.get("http://users-service:3003/getAllBlacklist");
+                        const blacklist = resp?.data ?? [];
 
                         const senderName = socket.username;
 
@@ -268,28 +301,34 @@ export default async function registerServer(io) {
 		
 		// Specif events only happens on socket
 		socket.on("sendMessage", async (msg) => {
-			const response = await axios.get("http://users-service:3003/getAllBlacklist");
-			const blacklist = response?.data ?? {};
-
-			let input = msg?.trim();
-			if (!input || input.length > 200) {
-				messages.push("system: You cannot type a message above 200 characters");
-				socket.emit("updateMessages", messages);
-				io.emit("updateUsers", Array.from(users.values()));
-				console.error("Invalid input or message above to the allowed length");
-				return ;
-			}
-			const senderName = socket.username;
-
-			if (!senderName) return ;
-
-			const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
-
+			let blockUserTargets = null;
 			try {
+				const response = await axios.get("http://users-service:3003/getAllBlacklist");
+				const blacklist = response?.data ?? {};
+
+				let input = msg?.trim();
+				if (!input || input.length > 200)
+					throw new Error("LENGTH_TOO_HIGH");
+
+				const senderName = socket.username;
+
+				if (!senderName) return ;
+
+				blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username); // obtain all the names of users' blocked
+
 				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: input } );
 				await reloadEverything(socket.username); // reload everything using the database
 			} catch (err) {
+				if (err.message === "LENGTH_TOO_HIGH") {
+					try {
+						await reloadEverything(`${socket.username}`);
+					} catch (err) {}
+					messages.push({isSystem: true, isLink: false, isLimit: true, msg: "system: You cannot type a message above 200 characters", username: "SYSTEM", avatar: '/public/images/system.png'});
+                                	socket.emit("updateMessages", messages);
+                                	io.emit("updateUsers", Array.from(users.values()));
+                                	console.error("Invalid input or message above to the allowed length");
+				}
 				console.error(`Error trying to send the message of user ${socket.username}:`, err);
 			}
 
@@ -305,12 +344,13 @@ export default async function registerServer(io) {
 		});
 
 		socket.on("sendPrivateMessage", async (msg, public_id) => {
+			let privateMessages = [];
 			try {
+				if(msg && msg.length > 200)
+					throw new Error("TOO_HIGH_LENGTH");
 				const ress = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storePrivateMessage", { user_id: socket.user_id, avatar: ress?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: msg, public_id: public_id });
 				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
-
-				let privateMessages = [];
 	
 				console.log("data:", response?.data);
 				let data = Array.isArray(response?.data) ? response?.data : [];
@@ -341,6 +381,16 @@ export default async function registerServer(io) {
 				io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
 			} catch (err) {
+				if (err.message === "TOO_HIGH_LENGTH") {
+					try {
+						const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
+						let data = Array.isArray(response?.data) ? response?.data : [];
+                                		privateMessages.push(...data);
+					} catch (err) {}
+					privateMessages.push({isSystem: true, isLink: false, content: "system: You cannot type a message above 200 characters", username: "SYSTEM", avatar: '/public/images/system.png'});
+                                	socket.emit("updateDirectMessages", privateMessages);
+                                	console.error("Invalid input or message above to the allowed length");
+				}
 				console.error("Unfortunately we cannot send the private Message:", err);
 			}
 		});

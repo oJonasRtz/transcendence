@@ -101,6 +101,11 @@ const publicControllers = {
 	
 	checkLogin: async function tryLoginTheUser(req, reply) {
 		try {
+			if (!req.body.captchaInput) {
+				req.session.error = ["You forgot to fill captcha code"];
+				return reply.redirect("/login");
+			}
+
 			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
 
 			const token = response?.data?.token;

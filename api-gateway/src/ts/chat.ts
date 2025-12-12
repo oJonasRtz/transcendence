@@ -130,7 +130,12 @@ socket.on("updateMessages", (msgs: any[]) => {
 			contentEl = a;
 		} else {
 			const span = document.createElement("span");
-			span.textContent = msg.content;
+			if (msg.isSystem && !msg.content && msg.isLimit !== true)
+				span.textContent = `system: wait to send another invitation`;
+			else if (msg.isSystem && !msg.content && msg.isLimit === true)
+				span.textContent = `system: You cannot send a message above 200 characters`;
+			else
+				span.textContent = msg.content;
 			contentEl = span;
 		}
 
