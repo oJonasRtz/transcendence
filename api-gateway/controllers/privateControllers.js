@@ -11,12 +11,11 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
-import matchClient from '../utils/MatchClient.class.js'
+import matchClient from '../utils/MatchClient.class.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const DEFAULT_AVATAR_PATH = "/app/public/images/default_avatar.png";
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 let inQueue = false;
 
@@ -99,8 +98,9 @@ const privateControllers = {
 
 			if (avatar === '/public/images/default.jpg') {
 				try {
-					await fs.access(DEFAULT_AVATAR_PATH);
+					await fs.access(`/app/public/uploads/avatar_${req.user.user_id}.png`);
 				} catch (err) {
+					 await mkdir("/app/public/uploads", { recursive: true });
 					 await sharp(BASE_IMAGE_PATH)
                 			.resize(350, 350)
                 			.composite([{
@@ -112,9 +112,9 @@ const privateControllers = {
                     			blend: "dest-in"
                 		}])
                 		.png()
-                		.toFile(DEFAULT_AVATAR_PATH);
+                		.toFile(`/app/public/uploads/avatar_${req.user.user_id}.png`);
 				}			
-				avatar = "/public/images/default_avatar.png";
+				avatar = `/public/uploads/avatar_${req.user.user_id}.png`;
 				await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatar });
 			}
 
