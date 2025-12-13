@@ -22,4 +22,19 @@ fastify.get('/users', async (request, reply) => {
     return { users };
 });
 
+fastify.get('/query', async (request, reply) => {
+  const data = fastify.db.prepare(`
+    SELECT invoices.amount, customers.name
+      FROM invoices
+      JOIN customers ON invoices.customer_id = customers.id
+      WHERE invoices.amount = 666;`).all();
+    return { data };
+});
+
+fastify.get('/revenue', async (request, reply) => {
+  const data = fastify.db.prepare(`
+    "SELECT * FROM revenue;"`).all();
+  return { data };
+});
+
 await fastify.listen({ port: 3002, host: '0.0.0.0' });
