@@ -1,7 +1,7 @@
 export class Client {
 	#info = {
-		id,
-		name,
+		id: null,
+		name: null,
 	};
 	#ws;
 	#email;
@@ -13,6 +13,13 @@ export class Client {
 		this.#email = email;
 		this.#info.id = id;
 		this.#info.name = name;
+
+		this.#listeners();
+	}
+
+	#listeners() {
+		if (!this.#ws)
+			return;
 
 		this.#ws.on('open', () => {
 			this.#flushPending();

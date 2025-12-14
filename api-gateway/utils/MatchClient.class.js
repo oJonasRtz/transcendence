@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 
-class MatchClient {
+export class MatchClient {
 	#ws = null;
 	#messages = [];
 	constructor(url) {
@@ -21,4 +21,4 @@ class MatchClient {
 	}
 }
 
-export default new MatchClient('ws://match-service:3004');
+// export default new MatchClient('ws://match-service:3004');

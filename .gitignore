@@ -9,3 +9,4 @@ blacklist.txt
 *.cert
 *.key
 *.ip
+a/

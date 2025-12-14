@@ -11,13 +11,14 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
-import matchClient from '../utils/MatchClient.class.js';
+import { MatchClient } from '../utils/MatchClient.class.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 let inQueue = false;
+const lobby = new MatchClient('ws://new-match-service:3020');
 
 const privateControllers = {
 
