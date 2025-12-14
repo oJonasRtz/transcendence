@@ -14,6 +14,11 @@ app.register(formbody);
 
 const db = await initDatabase();
 
+app.addHook('onClose', (instance, done) => {
+	db.close();
+	done();
+});
+
 // Now, our database is accessible in all part of this container
 
 app.decorate('db', db);
