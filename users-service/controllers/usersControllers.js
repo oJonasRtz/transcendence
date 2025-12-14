@@ -99,6 +99,18 @@ const usersControllers = {
 		}
 	},
 
+	getRank: async function getRank(req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const rank = await axios.post("http://sqlite-db:3002/getRank", req.body);
+			return reply.code(200).send(rank?.data ?? {});
+		} catch (err) {
+			console.error("Users-Service getRank", err?.response?.data || err.message);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	getUserStatus: async function getUserStatus(req, reply) {
 		try {
 			if (!req.body || !req.body.email)

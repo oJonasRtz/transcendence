@@ -9,5 +9,5 @@ RUN apt-get update -y && apt-get upgrade -y && \
     apt-get install -y net-tools iputils-ping libnss3-tools openssl
 RUN npm install
 COPY . .
-EXPOSE 3004
+EXPOSE 3004 3010
 CMD ["node", "server.js"]

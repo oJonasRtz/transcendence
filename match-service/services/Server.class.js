@@ -4,21 +4,23 @@ import formbody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
 import { Client } from './Client.class.js';
 import { lobby } from '../app.js';
+import { Queue } from './Queue.class.js';
 
 export class Server {
 	#invites = new Map();
 	#usersInvited = new Map();
+	#matchMaking = null;
 	#app = fastify();
-	#queue = new Map(); // <-- key[email] = Client
-	#services = {
-		ENQUEUE: this.#enqueue.bind(this),
-		DEQUEUE: this.#dequeue.bind(this),
-	}
+	// #queue = new Map(); // <-- key[email] = Client
+	// #services = {
+	// 	ENQUEUE: this.#enqueue.bind(this),
+	// 	DEQUEUE: this.#dequeue.bind(this),
+	// }
 	#routes = [
 		{ method: 'POST', url: '/invite', handler: this.#sendInvite.bind(this) },
 		{ method: 'POST', url: '/accept-invite', handler: this.#acceptInvite.bind(this) },
 	];
-	#intervalMatchMaking = null;
+	// #intervalMatchMaking = null;
 
 	constructor() {
 		this.#app.register(cookie, {
@@ -27,31 +29,32 @@ export class Server {
 		});
 
 		this.#app.register(formbody);
-		this.#app.register(fastifyWebsocket);
+		// this.#app.register(fastifyWebsocket);
 
-		this.#app.get('/', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
-			connection.socket.on('message', (message) => {
-				try {
-					const data = JSON.parse(message.toString());
-					const type = data.type;
+		// this.#app.get('/', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
+		// 	connection.socket.on('message', (message) => {
+		// 		try {
+		// 			const data = JSON.parse(message.toString());
+		// 			const type = data.type;
 
-					if (!type || !data.email || !data.user_id || !this.#services[type])
-						throw new Error('INVALID_FORMAT');
+		// 			if (!type || !data.email || !data.user_id || !this.#services[type])
+		// 				throw new Error('INVALID_FORMAT');
 
-					this.#services[type]({ ws: connection.socket, email: data.email, id: data.user_id });
-				} catch (error) {
-					connection.socket.send(JSON.stringify({ 
-						type: 'ERROR',
-						message: error.message
-					}));
-					return;
-				}
-			});
-		});
+		// 			this.#services[type]({ ws: connection.socket, email: data.email, id: data.user_id });
+		// 		} catch (error) {
+		// 			connection.socket.send(JSON.stringify({ 
+		// 				type: 'ERROR',
+		// 				message: error.message
+		// 			}));
+		// 			return;
+		// 		}
+		// 	});
+		// });
 		
 		this.#routes_def();
-		this.#matchMaking();
+		// this.#matchMaking();
 		this.#checkInviteValidity();
+		this.#matchMaking = new Queue();
 	}
 
 	#checkInviteValidity() {
@@ -149,54 +152,54 @@ export class Server {
 			this.#app.route(route);
 	}
 
-	#matchMaking() {
-		if (this.#intervalMatchMaking)
-			return;
+	// #matchMaking() {
+	// 	if (this.#intervalMatchMaking)
+	// 		return;
 
-		const TIMER = 5000; // 5 seconds
+	// 	const TIMER = 5000; // 5 seconds
 
-		this.#intervalMatchMaking = setInterval(() => {
-			const queueSize = this.#queue.size;
-			if (queueSize < 2)
-				return;
+	// 	this.#intervalMatchMaking = setInterval(() => {
+	// 		const queueSize = this.#queue.size;
+	// 		if (queueSize < 2)
+	// 			return;
 
-			const queue = Array.from(this.#queue.values());
-			for (let i = 0; i < Math.floor(queueSize / 2); i++) {
-				const clientA = queue[i * 2];
-				const clientB = queue[i * 2 + 1];
+	// 		const queue = Array.from(this.#queue.values());
+	// 		for (let i = 0; i < Math.floor(queueSize / 2); i++) {
+	// 			const clientA = queue[i * 2];
+	// 			const clientB = queue[i * 2 + 1];
 
-				//Match not found, continue
-				if (!clientA.checkRank(clientB.rank)) continue;
+	// 			//Match not found, continue
+	// 			if (!clientA.checkRank(clientB.rank)) continue;
 
-				//Match found
-				// const matchId = lobby.newMatch([clientA, clientB]);
-				const matchId = 42;
-				clientA.matchFound(matchId);
-				clientB.matchFound(matchId);
-				this.#queue.delete(clientA.email);
-				this.#queue.delete(clientB.email);
-			}
-		}, TIMER);
-	}
+	// 			//Match found
+	// 			// const matchId = lobby.newMatch([clientA, clientB]);
+	// 			const matchId = 42;
+	// 			clientA.matchFound(matchId);
+	// 			clientB.matchFound(matchId);
+	// 			this.#queue.delete(clientA.email);
+	// 			this.#queue.delete(clientB.email);
+	// 		}
+	// 	}, TIMER);
+	// }
 
-	#enqueue({ws, email, id}) {
-		if (this.#queue.has(email))
-			this.#queue.get(email).destroy();
+	// #enqueue({ws, email, id}) {
+	// 	if (this.#queue.has(email))
+	// 		this.#queue.get(email).destroy();
 
-		const client = new Client({ws, email, id});
-		this.#queue.set(email, client);
+	// 	const client = new Client({ws, email, id});
+	// 	this.#queue.set(email, client);
 
-		console.log(`Client ${email} enqueued for matchmaking.`);
-	}
+	// 	console.log(`Client ${email} enqueued for matchmaking.`);
+	// }
 
-	#dequeue({email}) {
-		if (!this.#queue.has(email))
-			return;
+	// #dequeue({email}) {
+	// 	if (!this.#queue.has(email))
+	// 		return;
 
-		this.#queue.get(email).destroy();
-		this.#queue.delete(email);
-		console.log(`Client ${email} dequeued from matchmaking.`);
-	}
+	// 	this.#queue.get(email).destroy();
+	// 	this.#queue.delete(email);
+	// 	console.log(`Client ${email} dequeued from matchmaking.`);
+	// }
 
 	calculateRankPoints(score1, score2, winner = true) {
 		const min = 15;
