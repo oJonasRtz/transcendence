@@ -1,5 +1,7 @@
 **AUTH-SERVICE: that service handles with the authentication part of this project**
 
+> CONTROLLERS 
+
 **tryLoginTheUser:** check if the user can login correctly.
 
 **createUserToken:** if the user logged up correctly that route will be called to create a token to identify the user.
@@ -39,3 +41,11 @@
 **hello:** Test connection with the service
 
 **helloDb:** Test connection with database
+
+> ROUTES
+
+**authRoutes.js**: all the routes can be find here
+
+> MODELS
+
+**authModels.js**: all models can be find here
