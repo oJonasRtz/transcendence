@@ -36,4 +36,15 @@ fastify.get('/revenue', async (request, reply) => {
   return { data };
 });
 
+fastify.get('/invoices', async (request, reply) => {
+  const data = fastify.db.prepare(`
+    SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
+      FROM invoices
+      JOIN customers ON invoices.customer_id = customers.id
+      ORDER BY invoices.date DESC
+      LIMIT 5`).all();
+    return data;
+
+})
+
 await fastify.listen({ port: 3002, host: '0.0.0.0' });
