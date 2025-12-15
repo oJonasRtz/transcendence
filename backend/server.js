@@ -32,8 +32,7 @@ fastify.get('/query', async (request, reply) => {
 });
 
 fastify.get('/revenue', async (request, reply) => {
-  const data = fastify.db.prepare(`
-    "SELECT * FROM revenue;"`).all();
+  const data = fastify.db.prepare('SELECT * FROM revenue;').all();
   return { data };
 });
 
