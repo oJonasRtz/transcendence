@@ -35,10 +35,7 @@ export async function fetchLatestInvoices() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    console.log('API Response:', data); // Add this line
-    console.log('Type of data:', typeof data); // And this
-    console.log('Is array:', Array.isArray(data)); // And this
-
+    
     const latestInvoices = data.map((invoice: LatestInvoiceRaw) => ({
       ...invoice,
       amount: formatCurrency(invoice.amount),

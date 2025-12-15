@@ -47,4 +47,27 @@ fastify.get('/invoices', async (request, reply) => {
 
 })
 
+fastify.get('/card', async (request, reply) => {
+  try {
+    const invoiceCount = fastify.db.prepare('SELECT COUNT(*) as count FROM invoices;').get();
+    const customerCount = fastify.db.prepare('SELECT COUNT(*) as count FROM customers;').get();
+    const invoiceStatus = fastify.db.prepare(`
+      SELECT 
+        SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) as paid,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+      FROM invoices;`).get();
+
+    const numberOfInvoices = invoiceCount.count || 0;
+    const numberOfCustomers = customerCount.count || 0;
+    const totalPaidInvoices = invoiceStatus.paid || 0;
+    const totalPendingInvoices = invoiceStatus.pending || 0;
+
+    return { numberOfInvoices, numberOfCustomers, totalPaidInvoices, totalPendingInvoices };
+
+  } catch (error) {
+    console.error('Error fetching card data:', error);
+    throw new Error('Failed to fetch card data');
+  }
+});
+
 await fastify.listen({ port: 3002, host: '0.0.0.0' });
