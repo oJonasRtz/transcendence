@@ -1,5 +1,18 @@
 import { Lobby } from "./Lobby.class";
 
+
+/*
+
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	!!																	!!
+	!!							AVISO									!!
+	!!																	!!
+	!!	ESSA CLASSE POSSIVELMENTE SERA DESCARTADA NO FUTURO.			!!
+	!!	ELA VAI SER MANTIDA POR REFERENCIA A IMPLEMENTAÇÕES FUTURAS.	!!
+	!!																	!!
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+*/
 export class Queue {
 	#room = new Map() //  <queue_id, Lobby>
 
