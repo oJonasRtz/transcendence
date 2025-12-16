@@ -15,11 +15,17 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 export async function fetchRevenue() {
   try {
     const endpoint = `${process.env.API_URL}/revenue`;
+    console.log('Fetching revenue data...');
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     const response = await fetch(endpoint);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const result = await response.json();
+
+    console.log('Data fetched completed after 3 seconds.');
+
     return result.data || [];
   } catch (error) {
     console.error('Database Error:', error);
@@ -30,16 +36,22 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   try {
     const endpoint = `${process.env.API_URL}/invoices`;
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+    
     const response = await fetch(endpoint);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
     
+    
     const latestInvoices = data.map((invoice: LatestInvoiceRaw) => ({
       ...invoice,
       amount: formatCurrency(invoice.amount),
     }));
+    
+    console.log('Data fetched completed after 6 seconds.');
+    
     return latestInvoices;
   } catch (error) {
     console.error('Database Error:', error);
