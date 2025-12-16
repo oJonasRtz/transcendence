@@ -9,14 +9,10 @@ export default async function registerServer(io) {
 	io.use((socket, next) => {
 		const cookie = socket.handshake.headers.cookie;
 
-		console.log("cookie:", cookie);
-
 		if (!cookie)
 			return next(new Error("No cookies sent"));
 
 		const cookies = Object.fromEntries(cookie.split(';').map(c => c.trim().split("=")));
-
-		console.log("cookies:", cookies);
 
 		const token = cookies.jwt;
 
@@ -48,6 +44,16 @@ export default async function registerServer(io) {
 	let messages = [];
 	let notifications = [];
 
+	async function getTournamentAdvise() {
+		try {
+			const response = await axios.get("http://match-service:3004/tournaments");
+			if (response?.data.tournament) {
+				const match = `${response?.data.name} at ${response?.data.date}. Keep you posted about everything.`;
+				await axios.post("http://chat-service:3005/storeMessage", { name: `SYSTEM`, isSystem: true, avatar: "/app/public/images/default_avatar.png" , isLink: false, msg: match });
+			}
+		} catch (err) {}
+	};
+
 	async function sendPrivateMessageServer(msg, user_id, name, public_id) {
 		try {
                                 const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: user_id, public_id: public_id });
@@ -74,6 +80,7 @@ export default async function registerServer(io) {
 	async function reloadEverything (owner) {
                 try {
 			if (!owner) return ;
+			await getTournamentAdvise();
                         const responseMessages = await axios.post("http://chat-service:3005/getAllMessages", { username: owner });
 			let data = Array.isArray(responseMessages?.data) ? responseMessages?.data : [];
 

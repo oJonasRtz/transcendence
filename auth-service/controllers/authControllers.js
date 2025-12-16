@@ -97,6 +97,7 @@ const authControllers = {
 				error.push("User already exists");
 				return reply.code(409).send({ success, error });
 			}
+			await axios.post("http://sqlite-db:3002/deleteUserAccount", { user_id: req.body.user_id });
 			error.push(`An error happening: ${err.message}`);
 			return reply.code(500).send({ success, error });
 		}

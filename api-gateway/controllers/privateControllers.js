@@ -123,8 +123,6 @@ const privateControllers = {
 
 			const data = myData?.data;
 
-			console.log("data:", data);
-
 			return reply.view("home", { username, success, data, avatar, error } );
 		} catch (err) {
 			console.error("getHomePage API-GATEWAY ERROR:", err);
