@@ -141,14 +141,16 @@ export default async function registerServer(io) {
 
                         if (!senderName) return ;
 
-                        const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+                        /*const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
 
                         for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {
                                         continue ;
                                 }
                                 io.to(socketId).emit("updateMessages", messages);
-                        }
+                        }*/
+
+			io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
 		});
 
@@ -178,7 +180,7 @@ export default async function registerServer(io) {
 
                         if (!senderName) return ;
 
-                        const blockUserTargets = blacklist.filter(target => target.target_username === senderName).map(user => user.owner_username);
+                        /*const blockUserTargets = blacklist.filter(target => target.target_username === senderName).map(user => user.owner_username);
 
                         for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {
@@ -186,7 +188,8 @@ export default async function registerServer(io) {
                                         continue ;
                                 }
                                 io.to(socketId).emit("updateMessages", messages);
-                        }
+                        }*/
+			io.emit("updateMessages", messages);
                         io.emit("updateUsers", Array.from(users.values()));
 		});
 
@@ -288,14 +291,15 @@ export default async function registerServer(io) {
 
                         if (!senderName) return ;
 
-                        const blockUserTargets = blacklist.filter(target => target.target_username === senderName).map(user => user.owner_username);
+                        /*const blockUserTargets = blacklist.filter(target => target.target_username === senderName).map(user => user.owner_username);
 
 			for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {
                                         continue ;
                                 }
                                 io.to(socketId).emit("updateMessages", messages);
-                        }
+                        }*/
+			io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
 		});
 		
@@ -332,14 +336,14 @@ export default async function registerServer(io) {
 				console.error(`Error trying to send the message of user ${socket.username}:`, err);
 			}
 
-			for (const [socketId, user] of users.entries()) {
+			/*for (const [socketId, user] of users.entries()) {
 				if (blockUserTargets.includes(user.name)) {
 					continue ;
 				}
                                 io.to(socketId).emit("updateMessages", messages);
-			}
+			}*/
 
-			//io.emit("updateMessages", messages);
+			io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
 		});
 

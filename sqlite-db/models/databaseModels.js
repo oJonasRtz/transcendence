@@ -258,8 +258,11 @@ const databaseModels = {
 
 	getAllMessages: async function getAllMessages(fastify, owner) {
 		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ owner ]);
-		const object = await fastify.db.all("SELECT messages.*, auth.username FROM messages JOIN auth ON auth.user_id = messages.sender_id WHERE NOT EXISTS ( SELECT 1 FROM blacklist WHERE (blacklist.owner_id = ? AND blacklist.target_id = messages.sender_id) OR (blacklist.target_id = ? AND blacklist.owner_id = messages.sender_id))", [ user_id, user_id ]);
+		const object = await fastify.db.all("SELECT messages.*, auth.username FROM messages JOIN auth ON auth.user_id = messages.sender_id", [ user_id, user_id ]);
 		return (object ?? null);
+		/*
+		 *WHERE NOT EXISTS ( SELECT 1 FROM blacklist WHERE (blacklist.owner_id = ? AND blacklist.target_id = messages.sender_id) OR (blacklist.target_id = ? AND blacklist.owner_id = messages.sender_id))"
+		 * */
 	},
 
 	blockTheUser: async function blockTheUser(fastify, data) {
