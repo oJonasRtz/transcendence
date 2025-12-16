@@ -1,64 +1,64 @@
 # MatchMaking
 
-Planing of how it gonna works
-	-> Client
-		-> FSM(Finite State Machine)
-			- every state will trigger a behavior
-			- states [IDLE, IN_QUEUE, IN_GAME]
-			-> IDLE
-				- Only connected to the system
-				- Can create invites
-				- Can change to IN_QUEUE state via ENQUEUE
-			-> IN_QUEUE
-				- join the MatchMaking system
-				- Await to find a match
-				- Chan change to IDLE state via DEQUEUE
-			-> IN_GAME
-				- A Match has been found
-				- Client is in a Lobby now
-				- Can't change to any other state
-	-> MatchMaking
-		- Queues[RANKED, TOURNAMENT]
-		-> RANKED
-			- Will match 2 Clients in IN_QUEUE state
-		-> TOURNAMENT
-			- will match 4 Clients in IN_QUEUE state
-		-> once all Clients are found for a match
-			- Move then for a Lobby
-			- All Clients change to IN_GAME state
-	-> Lobby
-		- Create a match on the game-server
-		- Manages the matches while their running
-		- Update the database at the end
-			- Points
-			- history
-			- Disconnect all players
-		-> RANKED
-			- GAMES: 1
-			-> POINTS: bases on score diff in the game
-				- 11x0: Max points
-					- Winner: +30 pts
-					- Loser: -25pts
-				-> Ranges
-					Win: 25 - 30 pts
-					lose: 20 - 25 pts
-		-> TOURNAMENT
-			- Will build the brackets
-			- GAMES: 2 (every player will play 2 games)
-			-> Brackets
-				- Round 1 - opening
-					Match 1: P1 x P2
-					Match 2: P3 x P4
-				- Round 2 - Final
-					- Winners Final: winner M1 x winner M2
-					- Losers Final: loser M1 x loser M2
-			-> Points
-				-> pontuatin by position
-					- 1st: +50 pts
-					- 2nd: +25 pts
-					- 3rd: -20 pts
-					- 4th: -40 pts
-		-> Server
-			- Place where all clients are connected by default
-			- Manages the messages
-			- Call the routes
+Planning of how it is going to work:
+- Client
+  - FSM (Finite State Machine)
+    - Every state will trigger a behavior
+    - States: IDLE, IN_QUEUE, IN_GAME
+    - IDLE:
+      - Only connected to the system
+      - Can create invites
+      - Can change to IN_QUEUE state via ENQUEUE
+    - IN_QUEUE:
+      - Join the MatchMaking system
+      - Await to find a match
+      - Can change to IDLE state via DEQUEUE
+    - IN_GAME:
+      - A match has been found
+      - Client is in a Lobby now
+      - Can't change to any other state
+- MatchMaking
+  - Queues: RANKED, TOURNAMENT
+  - RANKED:
+    - Will match 2 Clients in IN_QUEUE state
+  - TOURNAMENT:
+    - Will match 4 Clients in IN_QUEUE state
+  - Once all Clients are found for a match:
+    - Move them to a Lobby
+    - All Clients change to IN_GAME state
+- Lobby
+  - Create a match on the game-server
+  - Manages the matches while they're running
+  - Update the database at the end:
+    - Points
+    - History
+    - Disconnect all players
+  - RANKED:
+    - GAMES: 1
+    - POINTS: Based on score difference in the game
+      - 11x0: Max points
+        - Winner: +30 pts
+        - Loser: -25 pts
+      - Ranges:
+        - Win: 25–30 pts
+        - Lose: 20–25 pts
+  - TOURNAMENT:
+    - Builds the brackets
+    - GAMES: 2 (every player will play 2 games)
+    - Brackets:
+      - Round 1 - Opening:
+        - Match 1: P1 vs. P2
+        - Match 2: P3 vs. P4
+      - Round 2 - Final:
+        - Winners’ Final: Winner of Match 1 vs. Winner of Match 2
+        - Losers’ Final: Loser of Match 1 vs. Loser of Match 2
+    - Points:
+      - Points by position:
+        - 1st: +50 pts
+        - 2nd: +25 pts
+        - 3rd: -20 pts
+        - 4th: -40 pts
+- Server:
+  - Place where all clients are connected by default
+  - Manages the messages
+  - Calls the routes
