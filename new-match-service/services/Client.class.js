@@ -8,11 +8,13 @@ export class Client {
 	#ws = null;
 	#sendBuffer = [];
 	#state = 'IDLE';
+	//Finite State Machine methods
 	#FSM = {
 		IDLE: this.#idle.bind(this),
 		IN_QUEUE: this.#in_queue.bind(this),
 		IN_GAME: this.#in_game.bind(this),
 	}
+	//Allowed state transitions
 	#transitions = {
 		IDLE: ['IN_QUEUE'],
 		IN_QUEUE: ['IN_GAME', 'IDLE'],
