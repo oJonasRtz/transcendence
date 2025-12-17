@@ -3,6 +3,9 @@ up: tsl get-ip build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 
+# Main 
+all: down up
+
 #get ip
 get-ip:
 	@echo "Getting server IP address"
