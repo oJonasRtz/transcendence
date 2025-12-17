@@ -47,13 +47,13 @@ groups:
     rules:
       # Container restart
       - alert: ContainerRestarted
-        expr: rate(container_last_seen[5m]) > 0.1
+        expr: changes(container_start_time_seconds{name=~".+"}[1h]) > 0
         for: 1m
         labels:
           severity: info
         annotations:
           summary: "Container {{ $labels.name }} restarted"
-          description: "Container {{ $labels.name }} has been restarting frequently."
+          description: "Container {{ $labels.name }} has restarted within the last hour."
 
       # High container memory
       - alert: ContainerHighMemory
@@ -70,7 +70,7 @@ groups:
     rules:
       # Critical container down
       - alert: CriticalContainerDown
-        expr: container_last_seen{name=~"nginx|api-gateway|auth-service|sqlite-db"} == 0
+        expr: absent(container_last_seen{name=~"nginx|api-gateway|auth-service|sqlite-db"})
         for: 1m
         labels:
           severity: critical
