@@ -52,7 +52,7 @@ export async function validatorHook(req, reply) {
 		},
 		{
 			condition: req.body.captchaInput && req.session.captcha !== req.body.captchaInput,
-			message: "Invalid captcha code, try again"
+			message: "Invalid code"
 		},
 		{
 			condition: req.body.email && !emailRegex.test(req.body.email),

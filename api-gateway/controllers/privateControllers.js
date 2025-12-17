@@ -139,14 +139,17 @@ const privateControllers = {
 
 		req.user.isOnline = false;
 
-		await axios.post("http://users-service:3003/setIsOnline", req.user);
+		try {
+			await axios.post("http://users-service:3003/setIsOnline", req.user);
 
-		await req.session.destroy();
+			await req.session.destroy();
 
-		reply.clearCookie("jwt");
-		reply.clearCookie("session");
+			reply.clearCookie("jwt");
+			reply.clearCookie("session");
 
-		await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+			await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+		} catch (err) { console.error("API-GATEWAY logout ERROR:", err?.response.data || err.message };
+
 		return reply.redirect("/login");
 	},
 
