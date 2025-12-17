@@ -31,6 +31,6 @@
     "app/lib/placeholder-data.ts",
     "scripts/seed.js",
     ".next/dev/types/**/*.ts"
-  ],
+, "tools/migrate.ts", "tools/migrate.js"  ],
   "exclude": ["node_modules"]
 }
