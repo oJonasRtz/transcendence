@@ -80,7 +80,7 @@ app.register(session, {
 	cookieName: "session",
 	cookie: {
 		httpOnly: true,
-		sameSite: 'lax',
+		sameSite: 'strict',
 		path: '/',
 		secure: isProduction
 	},

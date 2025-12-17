@@ -124,7 +124,7 @@ const publicControllers = {
                                	httpOnly: true,
                                	secure: isProduction,
                                	path: "/",
-                               	sameSite: "lax",
+                               	sameSite: "strict",
                                	maxAge: 60 * 60 * 1000 // 1h
                         });
 
