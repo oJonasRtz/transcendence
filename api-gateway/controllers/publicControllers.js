@@ -90,7 +90,7 @@ const publicControllers = {
 			return reply.redirect("/login");
 		} catch (err) {
 			if (err?.response.status === 409) {
-				req.session.error = ["Permission denied for that register"];
+				req.session.error = ["Registration failed. Try again"];
 				return reply.redirect("/register");
 			}
 			error = [`${err.message}`];

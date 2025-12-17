@@ -148,7 +148,7 @@ const privateControllers = {
 			reply.clearCookie("session");
 
 			await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
-		} catch (err) { console.error("API-GATEWAY logout ERROR:", err?.response.data || err.message };
+		} catch (err) { console.error("API-GATEWAY logout ERROR:", err?.response.data || err.message) };
 
 		return reply.redirect("/login");
 	},
