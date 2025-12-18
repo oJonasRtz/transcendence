@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "./prisma/generated"
+  output   = "./generated"
 }
 
 datasource db {
@@ -18,13 +18,64 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @default(now()) @updatedAt
 
+  // Friendships
   sentFriendships     Friendship[] @relation("User")
   receivedFriendships Friendship[] @relation("Friend")
 
+  // Game relations
   gameStats        GameStats?
   matchesAsPlayer1 Match[]           @relation("Player1")
   matchesAsPlayer2 Match[]           @relation("Player2")
   achievements     UserAchievement[]
+
+  // Chat relations
+  sentMessages     Message[]                 @relation("Sender")
+  receivedMessages Message[]                 @relation("Receiver")
+  conversations    ConversationParticipant[]
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  userId         Int
+  joinedAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@index([conversationId])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  receiverId     Int
+  content        String   @db.Text
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@index([isRead])
 }
 
 model GameStats {
