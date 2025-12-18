@@ -522,23 +522,24 @@
           "mappings": [
             {
               "options": {
-                "0": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "Down"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "1": {
+                "from": 0,
+                "to": 59,
+                "result": {
                   "color": "green",
-                  "index": 0,
                   "text": "Running"
                 }
               },
-              "type": "value"
+              "type": "range"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "red",
+                  "text": "Stopped"
+                }
+              },
+              "type": "special"
             }
           ],
           "thresholds": {
@@ -579,7 +580,7 @@
             "type": "prometheus",
             "uid": "prometheus-transcendence"
           },
-          "expr": "container_last_seen{name=~\".+\"} > 0",
+          "expr": "(time() - container_last_seen{name=~\".+\"}) < 60",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -742,7 +743,7 @@
             "type": "prometheus",
             "uid": "prometheus-transcendence"
           },
-          "expr": "changes(container_last_seen{name=~\".+\"}[1h])",
+          "expr": "changes(container_start_time_seconds{name=~\".+\"}[1h])",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
