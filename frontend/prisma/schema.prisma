@@ -12,7 +12,7 @@ model User {
   username     String    @unique
   email        String    @unique
   passwordHash String
-  avatar       String    @default("public/images/default_avatar.png")
+  avatar       String    @default("/images/default_avatar.png")
   isOnline     Boolean   @default(false)
   lastSeen     DateTime?
   createdAt    DateTime  @default(now())
