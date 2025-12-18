@@ -376,7 +376,23 @@ const databaseModels = {
 			return (true);
 		}
 		return (false);
-	}
+	},
+
+	set2FAOnOff: async function set2FAOnOff(fastify, data) {
+                try {
+                        const stat = await fastify.db.get("SELECT twoFactorEnable FROM auth WHERE user_id = ?", [ data.user_id ]);
+                        if (stat?.twoFactorEnable) {
+                                await fastify.db.run("UPDATE auth SET twoFactorEnable = false, twoFactorSecret = null WHERE user_id = ?", [ data.user_id ]);
+                                return ("2FA_DISABLED");
+                        } else {
+                                await fastify.db.run("UPDATE auth SET twoFactorEnable = true, twoFactorSecret = null WHERE user_id = ?", [ data.user_id ]);
+                                return ("2FA_ENABLED");
+                        }
+                } catch (err) {
+                        console.error("SQLITE-DB MODELS set2FAOnOff ERROR:", err.message);
+                        return ("An error happened");
+                }
+        }
 }
 
 export default databaseModels;

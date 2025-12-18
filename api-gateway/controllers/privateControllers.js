@@ -806,6 +806,22 @@ const privateControllers = {
                         req.session.error = ["Error opening the chat"];
                         return reply.redirect("/home");
                 }
+        },
+
+	set2FAOnOff: async function set2FAOnOff(req, reply) {
+                try {
+                        const result = await axios.post("http://auth-service:3001/set2FAOnOff", { user_id: req.user.user_id });
+                        if (result?.data.message === "2FA_ENABLED") {
+                                req.session.success = ["2FA enabled successfully"];
+                        } else if (result?.data.message === "2FA_DISABLED") {
+                                req.session.success = ["2FA disabled successfully"];
+                        }
+                        return reply.redirect("/home");
+                } catch (err) {
+                        console.error("API-GATEWAY set2FAOnOff");
+                        req.session.error = ["Error setting the new status of 2FA"];
+                        return reply.redirect("/home");
+                }
         }
 };
 
