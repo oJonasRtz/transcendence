@@ -1,6 +1,6 @@
 export function chat() {
 
-const SOCKET_URL = "https://localhost:3000";
+const SOCKET_URL = "https://localhost";
 
 const socket = io(SOCKET_URL, {
     transports: ["websocket"], 
