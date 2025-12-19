@@ -12,4 +12,4 @@ blacklist.txt
 
 # Grafana secure password
 monitoring/.grafana-password.txt
-.env
+a/

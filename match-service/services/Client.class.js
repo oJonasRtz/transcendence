@@ -8,17 +8,31 @@ export class Client {
 		name: null,
 		id: null,
 	};
-	constructor({ws, email, id}) {
+	#matchId = null;
+
+	constructor({ws, email, id, name}) {
 		this.#ws = ws;
 		this.#userInfo.email = email;
 		this.#userInfo.id = id;
+		this.#userInfo.name = name;
 		db.setInQueue(email, true);
 
-		const userData = db.getUserInformation(email);
-		try {
-			this.#userInfo.rank = userData.rank;
-			this.#userInfo.name = userData.name;
-		} catch (error) {}
+		
+	}
+
+	get info() {
+		return {
+			name: this.#userInfo.name,
+			id: this.#userInfo.id,
+		};
+	}
+
+	get id() {
+		return this.#userInfo.id;
+	}
+
+	get match() {
+		return this.#matchId;
 	}
 
 	get rank() {
@@ -42,6 +56,7 @@ export class Client {
 	}
 
 	matchFound(matchId) {
+		this.#matchId = matchId;
 		db.setInQueue(this.#userInfo.email, false);
 		db.setMatchId(this.#userInfo.email, matchId);
 		this.#send({ type: 'SUCCESS', matchId: matchId });

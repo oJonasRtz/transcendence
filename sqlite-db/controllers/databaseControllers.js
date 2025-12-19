@@ -644,7 +644,19 @@ const databaseControllers = {
 			console.error("SQLITE-DB storePrivateMessage ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
-	}
+	},
+
+	set2FAOnOff: async function set2FAOnOff(fastify, req, reply) {
+                try {
+                        if (!req.body || !req.body.user_id)
+                                return reply.code(400).send("You need to inform user_id here");
+                        const message = await databaseModels.set2FAOnOff(fastify, req.body);
+                        return reply.code(200).send({ message: message });
+                } catch (err) {
+                        console.error("SQLITE-DB set2FAOnOff ERROR:", err.message);
+                        return reply.code(500).send("An error happened");
+                }
+        }
 };
 
 export default databaseControllers;

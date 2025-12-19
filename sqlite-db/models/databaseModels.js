@@ -92,7 +92,6 @@ const databaseModels = {
 	},
 
 	set2FASecret: async function set2FASecret(fastify, email, secret) {
-		console.log("email do set:", email, "secret do set:", secret);
 		await fastify.db.run("UPDATE auth SET twoFactorSecret = ? WHERE email = ?", [ secret, email ]);
 	},
 
@@ -251,15 +250,17 @@ const databaseModels = {
 	},
 
 	storeMessage: async function storeMessage(fastify, data) {
-		console.log("data no storeMessage:", data);
 		await fastify.db.run("INSERT INTO messages (content, sender_id, isLink, avatar, isSystem) VALUES (?, ?, ?, ?, ?)", [ data.msg, data.user_id, data.isLink, data.avatar, data.isSystem ]);
 		return (true);
 	},
 
 	getAllMessages: async function getAllMessages(fastify, owner) {
 		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE username = ?", [ owner ]);
-		const object = await fastify.db.all("SELECT messages.*, auth.username FROM messages JOIN auth ON auth.user_id = messages.sender_id WHERE NOT EXISTS ( SELECT 1 FROM blacklist WHERE (blacklist.owner_id = ? AND blacklist.target_id = messages.sender_id) OR (blacklist.target_id = ? AND blacklist.owner_id = messages.sender_id))", [ user_id, user_id ]);
+		const object = await fastify.db.all("SELECT messages.*, auth.username FROM messages JOIN auth ON auth.user_id = messages.sender_id", [ user_id, user_id ]);
 		return (object ?? null);
+		/*
+		 *WHERE NOT EXISTS ( SELECT 1 FROM blacklist WHERE (blacklist.owner_id = ? AND blacklist.target_id = messages.sender_id) OR (blacklist.target_id = ? AND blacklist.owner_id = messages.sender_id))"
+		 * */
 	},
 
 	blockTheUser: async function blockTheUser(fastify, data) {
@@ -339,10 +340,6 @@ const databaseModels = {
 		const getTwo = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
 		const receiver_id = getTwo.user_id;
 
-		console.log("sender_id:", sender_id);
-		console.log("receiver_id:", receiver_id);
-		console.log("data getPrivateMessages:", data);
-
 		if (!sender_id || !receiver_id)
 			return ([]);
 
@@ -374,14 +371,28 @@ const databaseModels = {
 				)
 			`, [ sender_id, receiver_id, receiver_id, sender_id ]);
 
-		console.log("data no storePrivateMessage:", data);
-
 		if (!isBlock) {
 			await fastify.db.run(`INSERT INTO privateMessages (sender_id, content, avatar, isLink, receiver_id) VALUES (?,?,?,?,?)`, [ sender_id, data.msg, data.avatar, data.isLink, receiver_id ]);
 			return (true);
 		}
 		return (false);
-	}
+	},
+
+	set2FAOnOff: async function set2FAOnOff(fastify, data) {
+                try {
+                        const stat = await fastify.db.get("SELECT twoFactorEnable FROM auth WHERE user_id = ?", [ data.user_id ]);
+                        if (stat?.twoFactorEnable) {
+                                await fastify.db.run("UPDATE auth SET twoFactorEnable = false, twoFactorSecret = null WHERE user_id = ?", [ data.user_id ]);
+                                return ("2FA_DISABLED");
+                        } else {
+                                await fastify.db.run("UPDATE auth SET twoFactorEnable = true, twoFactorSecret = null WHERE user_id = ?", [ data.user_id ]);
+                                return ("2FA_ENABLED");
+                        }
+                } catch (err) {
+                        console.error("SQLITE-DB MODELS set2FAOnOff ERROR:", err.message);
+                        return ("An error happened");
+                }
+        }
 }
 
 export default databaseModels;

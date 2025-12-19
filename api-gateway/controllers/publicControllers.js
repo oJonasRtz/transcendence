@@ -89,6 +89,10 @@ const publicControllers = {
 
 			return reply.redirect("/login");
 		} catch (err) {
+			if (err?.response.status === 409) {
+				req.session.error = ["Registration failed. Try again"];
+				return reply.redirect("/register");
+			}
 			error = [`${err.message}`];
 			req.session.success = success;
 			req.session.error = error;
@@ -120,7 +124,7 @@ const publicControllers = {
                                	httpOnly: true,
                                	secure: isProduction,
                                	path: "/",
-                               	sameSite: "lax",
+                               	sameSite: "strict",
                                	maxAge: 60 * 60 * 1000 // 1h
                         });
 

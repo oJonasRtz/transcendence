@@ -11,14 +11,14 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from '../utils/apiCheckImages.js';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
-import matchClient from '../utils/MatchClient.class.js'
+import { MatchClient } from '../utils/MatchClient.class.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const DEFAULT_AVATAR_PATH = "/app/public/images/default_avatar.png";
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 let inQueue = false;
+const lobby = new MatchClient('ws://new-match-service:3020');
 
 const privateControllers = {
 
@@ -99,8 +99,9 @@ const privateControllers = {
 
 			if (avatar === '/public/images/default.jpg') {
 				try {
-					await fs.access(DEFAULT_AVATAR_PATH);
+					await fs.access(`/app/public/uploads/avatar_${req.user.user_id}.png`);
 				} catch (err) {
+					 await mkdir("/app/public/uploads", { recursive: true });
 					 await sharp(BASE_IMAGE_PATH)
                 			.resize(350, 350)
                 			.composite([{
@@ -112,17 +113,15 @@ const privateControllers = {
                     			blend: "dest-in"
                 		}])
                 		.png()
-                		.toFile(DEFAULT_AVATAR_PATH);
+                		.toFile(`/app/public/uploads/avatar_${req.user.user_id}.png`);
 				}			
-				avatar = "/public/images/default_avatar.png";
+				avatar = `/public/uploads/avatar_${req.user.user_id}.png`;
 				await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatar });
 			}
 
 			const myData = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
 
 			const data = myData?.data;
-
-			console.log("data:", data);
 
 			return reply.view("home", { username, success, data, avatar, error } );
 		} catch (err) {
@@ -140,14 +139,17 @@ const privateControllers = {
 
 		req.user.isOnline = false;
 
-		await axios.post("http://users-service:3003/setIsOnline", req.user);
+		try {
+			await axios.post("http://users-service:3003/setIsOnline", req.user);
 
-		await req.session.destroy();
+			await req.session.destroy();
 
-		reply.clearCookie("jwt");
-		reply.clearCookie("session");
+			reply.clearCookie("jwt");
+			reply.clearCookie("session");
 
-		await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+			await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+		} catch (err) { console.error("API-GATEWAY logout ERROR:", err?.response.data || err.message) };
+
 		return reply.redirect("/login");
 	},
 
@@ -518,7 +520,7 @@ const privateControllers = {
                                 httpOnly: true,
                                 secure: isProduction,
                                 path: "/",
-                                sameSite: "lax",
+                                sameSite: "strict",
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
@@ -563,7 +565,7 @@ const privateControllers = {
                                 httpOnly: true,
                                 secure: isProduction,
                                 path: "/",
-                                sameSite: "lax",
+                                sameSite: "strict",
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
@@ -612,7 +614,7 @@ const privateControllers = {
                                 httpOnly: true,
                                 secure: isProduction,
                                 path: "/",
-                                sameSite: "lax",
+                                sameSite: "strict",
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
@@ -802,6 +804,22 @@ const privateControllers = {
                 } catch (err) {
                         console.error("API-GATEWAY chatAllUsers:", err);
                         req.session.error = ["Error opening the chat"];
+                        return reply.redirect("/home");
+                }
+        },
+
+	set2FAOnOff: async function set2FAOnOff(req, reply) {
+                try {
+                        const result = await axios.post("http://auth-service:3001/set2FAOnOff", { user_id: req.user.user_id });
+                        if (result?.data.message === "2FA_ENABLED") {
+                                req.session.success = ["2FA enabled successfully"];
+                        } else if (result?.data.message === "2FA_DISABLED") {
+                                req.session.success = ["2FA disabled successfully"];
+                        }
+                        return reply.redirect("/home");
+                } catch (err) {
+                        console.error("API-GATEWAY set2FAOnOff");
+                        req.session.error = ["Error setting the new status of 2FA"];
                         return reply.redirect("/home");
                 }
         }
