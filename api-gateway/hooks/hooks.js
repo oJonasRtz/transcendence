@@ -39,6 +39,10 @@ export async function validatorHook(req, reply) {
 
 	const check = [
 		{
+			condition: req.body.password !== undefined && req.body.password !== null && typeof req.body.password !== "string",
+			message: "Password must be a string"
+		},
+		{
 			condition: req.body.password && !passwordRegex.test(req.body.password),
 			message: "Password must have numbers, letters, special characters"
 		},
@@ -51,20 +55,40 @@ export async function validatorHook(req, reply) {
 			message: "Password Mismatch"
 		},
 		{
+			condition: req.body.captchaInput !== undefined && req.body.captchaInput !== null && typeof req.body.captchaInput !== "string",
+			message: "The code must be a string"
+		},
+		{
 			condition: req.body.captchaInput && req.session.captcha !== req.body.captchaInput,
 			message: "Invalid code"
+		},
+		{
+			condition: req.body.email !== undefined && req.body.email !== null && typeof req.body.email !== "string",
+			message: "Email must be a string"
 		},
 		{
 			condition: req.body.email && !emailRegex.test(req.body.email),
 			message: "Invalid e-mail"
 		},
 		{
+			condition: req.body.username !== undefined && req.body.username !== null && typeof req.body.username !== "string",
+			message: "Username must be a string"
+		},
+		{
 			condition: req.body.username && (!usernameRegex.test(req.body.username) || req.body.username.length < 3 || req.body.username.length > 20),
 			message: "Invalid username"
 		},
 		{
+			condition: req.body.nickname !== undefined && req.body.nickname !== null && typeof req.body.nickname !== "string",
+			message: "Nickname must be a string"
+		},
+		{
 			condition: req.body.nickname && (!usernameRegex.test(req.body.nickname) || req.body.nickname.length < 3 || req.body.nickname.length > 20),
 			message: "Invalid nickname"
+		},
+		{
+			condition: (req.body.description !== undefined && req.body.description !== null && typeof req.body.description !== "string"),
+			message: "Invalid description"
 		},
 		{
 			condition: req.body.description && req.body.description.length > 100,
