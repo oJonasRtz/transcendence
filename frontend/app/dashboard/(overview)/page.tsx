@@ -7,6 +7,7 @@ import Leaderboard from '@/app/ui/dashboard/leaderboard';
 import FriendsList from '@/app/ui/dashboard/friends-list';
 import RecentMessages from '@/app/ui/dashboard/recent-messages';
 import ActivityFeed from '@/app/ui/dashboard/activity-feed';
+import UserProfileHeader from '@/app/ui/dashboard/user-profile-header';
 import {
   StatsCardsSkeleton,
   RecentMatchesSkeleton,
@@ -20,23 +21,12 @@ import { getUserById } from '@/app/lib/data';
 export default async function DashboardPage() {
   // TODO: Get userId from auth session
   const userId = 1;
-  const user = await getUserById(userId);
 
   return (
     <main className="p-4 md:p-6 lg:p-8">
+
       <div className="grid place-items-center mb-6">
-      <div className="flex items-center gap-4">
-        <img
-          src={user?.avatar || 'images/default_avatar.png'}
-          alt="User Avatar"
-          className="h-40 w-40 rounded-full"
-        />
-      </div>
-      </div>
-      <div className="mt-4 mb-8">
-        <h2 className={`${lusitana.className} text-2xl font-bold text-center py-4 lg:text-left lg:py-0 drop-shadow-md`}>
-          Welcome back, {user?.username}!
-        </h2>
+        <UserProfileHeader userId={userId} />
       </div>
 
       {/* Stats Cards */}
