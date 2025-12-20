@@ -396,7 +396,8 @@ const databaseModels = {
 
 	setTargetId: async function setTargetId(fastify, data) {
 		try {
-			await fastify.db.run("UPDATE users SET target_id = ? WHERE user_id = ?", [ data.public_id, data.user_id ]);
+			const user_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+			await fastify.db.run("UPDATE users SET target_id = ? WHERE user_id = ?", [ user_id.user_id, data.user_id ]);
 			return (true);
 		} catch (err) {
 			console.error("MODELS setTargetId ERROR:", err?.response?.data || err.message);
@@ -406,7 +407,7 @@ const databaseModels = {
 
 	getTargetId: async function getTargetId(fastify, data) {
 		try {
-			const response = await fastify.db.get("SELECT target_id, user_id FROM users WHERE public_id = ?", [ data.public_id ]);
+			const response = await fastify.db.get("SELECT target_id FROM users WHERE public_id = ?", [ data.public_id ]);
 			return (response ?? null);
 		} catch (err) {
 			console.error("MODELS getTargetId ERROR:", err?.response?.data || err.message);

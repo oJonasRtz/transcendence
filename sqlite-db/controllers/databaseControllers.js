@@ -674,8 +674,8 @@ const databaseControllers = {
 		try {
 			if (!req.body || !req.body.public_id)
 				return reply.code(400).send("You need to inform public_id here");
-			await databaseModels.getTargetId(fastify, req.body);
-			return reply.code(201).send({ message: "Success" });
+			const target = await databaseModels.getTargetId(fastify, req.body);
+			return reply.code(201).send(target ?? null);
 		} catch (err) {
 			console.error("SQLITE-DB getTargetId ERROR:", err.message);
 			return reply.code(500).send("An error happened");
