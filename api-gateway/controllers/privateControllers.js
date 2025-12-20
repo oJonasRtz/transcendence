@@ -208,9 +208,6 @@ const privateControllers = {
 
 			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
 
-			console.log("email:", req.user.email);
-			console.log("user_id:", req.user.user_id);
-
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
 		} catch (err) {
@@ -799,10 +796,13 @@ const privateControllers = {
 				return reply.redirect("/home");
 			}
 
+			await axios.post("http://chat-service:3005/setTargetId", { user_id: req.user.user_id, public_id: req.query.public_id });
+			const res = await axios.post("http://chat-service:3005/getTargetId", { public_id: req.query.public_id });
+			console.log("target:", res?.data);
 			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
                         return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, target_id: req.query.public_id } );
                 } catch (err) {
-                        console.error("API-GATEWAY chatAllUsers:", err);
+                        console.error("API-GATEWAY chatAllUsers ERROR:", err);
                         req.session.error = ["Error opening the chat"];
                         return reply.redirect("/home");
                 }

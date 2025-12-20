@@ -56,7 +56,9 @@ const routes = [
 	{ method: 'GET', url: '/getAllBlacklist', handler: databaseControllers.getAllBlacklist },
 	{ method: 'POST', url: '/getAllPrivateMessages', handler: databaseControllers.getAllPrivateMessages },
 	{ method: 'POST', url: '/storePrivateMessage', handler: databaseControllers.storePrivateMessage },
-	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff }
+	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff },
+	{ method: 'POST', url: '/setTargetId', handler: databaseControllers.setTargetId },
+	{ method: 'POST', url: '/getTargetId', handler: databaseControllers.getTargetId }
 ];
 
 export default async function databaseRoutes(fastify, options) {

@@ -656,7 +656,31 @@ const databaseControllers = {
                         console.error("SQLITE-DB set2FAOnOff ERROR:", err.message);
                         return reply.code(500).send("An error happened");
                 }
-        }
+        },
+
+	setTargetId: async function setTargetId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id / public_id here");
+			const message = await databaseModels.setTargetId(fastify, req.body);
+			return reply.code(201).send({ message: "Success" });
+		} catch (err) {
+			console.error("SQLITE-DB setTargetId ERROR:", err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getTargetId: async function getTargetId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.public_id)
+				return reply.code(400).send("You need to inform public_id here");
+			await databaseModels.getTargetId(fastify, req.body);
+			return reply.code(201).send({ message: "Success" });
+		} catch (err) {
+			console.error("SQLITE-DB getTargetId ERROR:", err.message);
+			return reply.code(500).send("An error happened");
+		}
+	}
 };
 
 export default databaseControllers;
