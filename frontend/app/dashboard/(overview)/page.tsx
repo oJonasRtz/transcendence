@@ -15,16 +15,29 @@ import {
   RecentMessagesSkeleton,
   ActivityFeedSkeleton,
 } from '@/app/ui/dashboard/skeletons';
+import { getUserById } from '@/app/lib/data';
 
 export default async function DashboardPage() {
   // TODO: Get userId from auth session
   const userId = 1;
+  const user = await getUserById(userId);
 
   return (
     <main className="p-4 md:p-6 lg:p-8">
-      <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
-        Dashboard
-      </h1>
+      <div className="grid place-items-center mb-6">
+      <div className="flex items-center gap-4">
+        <img
+          src={user?.avatar || 'images/default_avatar.png'}
+          alt="User Avatar"
+          className="h-40 w-40 rounded-full"
+        />
+      </div>
+      </div>
+      <div className="mt-4 mb-8">
+        <h2 className={`${lusitana.className} text-2xl font-bold text-center py-4 lg:text-left lg:py-0 drop-shadow-md`}>
+          Welcome back, {user?.username}!
+        </h2>
+      </div>
 
       {/* Stats Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
