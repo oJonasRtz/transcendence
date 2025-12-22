@@ -95,7 +95,7 @@ services:
       - pong-dist:/usr/share/nginx/html
 
   match-service:
-    build: ./match-service
+    build: ./new-match-service
     image: match-service:1.0.0
     container_name: match-service
     ports:

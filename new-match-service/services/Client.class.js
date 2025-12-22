@@ -10,9 +10,9 @@ export class Client {
 	#state = 'IDLE';
 	//Finite State Machine methods
 	#FSM = {
-		IDLE: this.#idle.bind(this),
-		IN_QUEUE: this.#in_queue.bind(this),
-		IN_GAME: this.#in_game.bind(this),
+		IDLE: (payload) => this.#idle(payload),
+		IN_QUEUE: async (payload) => await this.#in_queue(payload),
+		IN_GAME: async (payload) => await this.#in_game(payload),
 	}
 	//Allowed state transitions
 	#transitions = {
@@ -22,9 +22,12 @@ export class Client {
 	}
 	//External actions that can be performed on the client
 	#actions = {
-		ENQUEUE: () => this.#changeState('IN_QUEUE', {}),
-		DEQUEUE: () => this.#changeState('IDLE', {}),
-		INVITE: () => this.#changeState('IDLE', {create_invite: true}),
+		ENQUEUE: async () => await this.#changeState('IN_QUEUE', {}),
+		DEQUEUE: async () => {
+			//matchmaking.dequeue({client: this, type: this.#game_type});
+			await this.#changeState('IDLE', {});
+		},
+		INVITE: async () => await this.#changeState('IDLE', {create_invite: true}),
 		EXIT: () => this.#disconnect(),
 	}
 	#disconnections = {
@@ -40,9 +43,8 @@ export class Client {
 		lobby: null,
 	}
 
-	constructor ({ws, email, id, name, game_type}) {
-		if (![ws, email, id, name, game_type].every(Boolean)
-				|| !this.#valid_game_types.includes(game_type))
+	constructor ({ws, email, id, name}) {
+		if (![ws, email, id, name].every(Boolean))
 			throw new Error('INVALID_FORMAT');
 
 		this.#game_type = game_type;
@@ -57,6 +59,14 @@ export class Client {
 		this.#idle({});
 	}
 
+	get name() {
+		return this.#info.name;
+	}
+
+	get id() {
+		return this.#info.id;
+	}
+
 	#idle({create_invite}) {
 
 		if (create_invite) {
@@ -67,7 +77,7 @@ export class Client {
 	async #in_queue({}) {
 
 		//match found
-		// const matchPayload = await matchmaking.joinQueue({
+		// const matchPayload = await matchmaking.enqueue({
 		// 	client: this,
 		// 	type: this.#game_type
 		//	rank: this.#info.rank
@@ -100,27 +110,27 @@ export class Client {
 		// this.#changeState('IDLE', {});
 	}
 
-	handleActions(data) {
+	async handleActions(data) {
 		try {
 			const {to} = data;
 
 			if (!to || !(to in this.#actions))
 				throw new Error('INVALID_ACTION');
 
-			return this.#actions[to](data);
+			return await this.#actions[to](data);
 		} catch (error) {
 			console.error('Client.handleMessage: Error handling message:', error.message);
 			throw new Error(error.message);
 		}
 	}
 
-	#changeState(to, payload = {}) {
+	async #changeState(to, payload = {}) {
 		const allowed = this.#transitions[this.#state];
 		if (!allowed.includes(to))
 			throw new Error('INVALID_STATE_TRANSITION');
 
 		this.#state = to;
-		this.#FSM[this.#state](payload);
+		await this.#FSM[this.#state](payload);
 	}
 
 	#listeners() {
@@ -129,6 +139,10 @@ export class Client {
 
 		this.#ws.on('open', () => {
 			this.#flushPending();
+		});
+
+		this.#ws.on('error', (error) => {
+			console.error(`Client ${this.#info.email} WebSocket error:`, error.message);
 		});
 
 		this.#ws.on('close', () => {
