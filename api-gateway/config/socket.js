@@ -279,7 +279,6 @@ export default async function registerServer(io) {
 				response = await axios.post("http://match-service:3004/invite", { userName: `${socket.username}`, public_id: socket.public_id });
 					socket.emit("updateMessages", messages);
 				
-				console.log("INVITE:", response?.data);
 				 const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? '/app/public/images/default_avatar.png', isLink: true, msg: response?.data.link });
 				await reloadEverything(socket.username);
@@ -363,19 +362,24 @@ export default async function registerServer(io) {
 				await axios.post("http://chat-service:3005/storePrivateMessage", { user_id: socket.user_id, avatar: ress?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: msg, public_id: public_id });
 				const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
 	
-				console.log("data:", response?.data);
 				let data = Array.isArray(response?.data) ? response?.data : [];
-                                privateMessages.push(...data);
 
-				console.log("privateMessages sendPrivate:", privateMessages);
+				await axios.post("http://chat-service:3005/setTargetId", { user_id: socket.user_id, public_id: public_id });
+
+				let allowed = true;
+				const test = await axios.post("http://chat-service:3005/getTargetId", { public_id: public_id });
+				if (test?.data.target_id !== socket.user_id)
+					allowed = false;
+                                privateMessages.push(...data);
 
 				const res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: public_id });
 				const target_name = res?.data.username;
 
 				for (const [socketId, user] of privateUsers.entries()) {
-                                	if (user.name === `${socket.username}` || user.name === target_name) {
+                                	if (user.name === `${socket.username}`) 
                                         	io.to(socketId).emit("updateDirectMessages", privateMessages);
-                                	}
+					else if (user.name === target_name && allowed)
+						io.to(socketId).emit("updateDirectMessages", privateMessages);
                         	}
 
 				let official = new Map();
@@ -385,7 +389,8 @@ export default async function registerServer(io) {
                         	for (const [ socketId, user ] of privateUsers.entries()) {
                                 	if (user.public_id === public_id) {
                                         	official.set(socketId, user);
-						io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
+						if (allowed)
+							io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
                                         	break ;
                                		 }
                         	}

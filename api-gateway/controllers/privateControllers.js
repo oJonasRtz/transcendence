@@ -208,9 +208,6 @@ const privateControllers = {
 
 			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
 
-			console.log("email:", req.user.email);
-			console.log("user_id:", req.user.user_id);
-
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
 		} catch (err) {
@@ -802,7 +799,7 @@ const privateControllers = {
 			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
                         return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, target_id: req.query.public_id } );
                 } catch (err) {
-                        console.error("API-GATEWAY chatAllUsers:", err);
+                        console.error("API-GATEWAY chatAllUsers ERROR:", err);
                         req.session.error = ["Error opening the chat"];
                         return reply.redirect("/home");
                 }

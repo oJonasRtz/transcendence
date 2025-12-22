@@ -1,6 +1,6 @@
 export function direct() {
 
-const SOCKET_URL = "https://localhost";
+const SOCKET_URL = window.location.origin;
 
 const socket = io(SOCKET_URL, {
     transports: ["websocket"], 
