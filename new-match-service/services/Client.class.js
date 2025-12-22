@@ -22,9 +22,10 @@ export class Client {
 	}
 	//External actions that can be performed on the client
 	#actions = {
-		ENQUEUE: async () => await this.#changeState('IN_QUEUE', {}),
+		ENQUEUE: async ({game_type}) => await this.#changeState('IN_QUEUE', {game_type}),
 		DEQUEUE: async () => {
 			//matchmaking.dequeue({client: this, type: this.#game_type});
+			//this.#game_type = null;
 			await this.#changeState('IDLE', {});
 		},
 		INVITE: async () => await this.#changeState('IDLE', {create_invite: true}),
@@ -47,7 +48,7 @@ export class Client {
 		if (![ws, email, id, name].every(Boolean))
 			throw new Error('INVALID_FORMAT');
 
-		this.#game_type = game_type;
+		// this.#game_type = game_type;
 		this.#ws = ws;
 		this.#info.id = id;
 		this.#info.name = name;
@@ -63,19 +64,27 @@ export class Client {
 		return this.#info.name;
 	}
 
+	get actions() {
+		return Object.keys(this.#actions);
+	}
+
 	get id() {
 		return this.#info.id;
 	}
 
 	#idle({create_invite}) {
-
-		if (create_invite) {
-			// Logic to create an invite can be added here
-		}
+		console.log("Client entered IDLE state");
+		// if (create_invite) {
+		// 	// Logic to create an invite can be added here
+		// }
 	}
 
-	async #in_queue({}) {
+	async #in_queue({game_type}) {
+		console.log("Client entered IN_QUEUE state");
+		// if (!game_type || !this.#valid_game_types.includes(game_type))
+		// 	throw new Error('INVALID_FORMAT');
 
+		// this.#game_type = game_type;
 		//match found
 		// const matchPayload = await matchmaking.enqueue({
 		// 	client: this,
@@ -85,6 +94,7 @@ export class Client {
 		// this.#changeState('IN_GAME', matchPayload);
 	}
 	async #in_game({match_id, lobby}) {
+		console.log("Client entered IN_GAME state");
 		// if (!match_id || !lobby)
 		// 	throw new Error('INVALID_FORMAT');
 
@@ -112,15 +122,14 @@ export class Client {
 
 	async handleActions(data) {
 		try {
-			const {to} = data;
+			const {type} = data;
 
-			if (!to || !(to in this.#actions))
+			if (!type || !(type in this.#actions))
 				throw new Error('INVALID_ACTION');
 
-			return await this.#actions[to](data);
+			return await this.#actions[type](data);
 		} catch (error) {
 			console.error('Client.handleMessage: Error handling message:', error.message);
-			throw new Error(error.message);
 		}
 	}
 

@@ -14,6 +14,10 @@ export class Server {
 	#clients = new Map(); // <id, Client>
 	#handlers = {
 		'CONNECT': ({email, id, name}, ws) => this.#addClient({email, id, name}, ws),
+		"ENQUEUE": (data, client) => client.handleActions(data),
+		'DEQUEUE': (data, client) => client.handleActions(data),
+		'INVITE': (data, client) => client.handleActions(data),
+		'EXIT': (data, client) => client.handleActions(data),
 	}
 
 	constructor() {
@@ -61,19 +65,19 @@ export class Server {
 	// 	//   }
 	// }
 
+	//Client need to send id every request
 	#handleMessages({data, ws}) {
 		try {
 			const {type} = data;
 
-			console.log('Server.#handleMessages: Handling message of type:', type);
-			if (!type || !(type in this.#handlers))
+			if (!type || (!(type in this.#handlers)))
 				throw new Error('INVALID_FORMAT');
 
-			console.log("passei aqui");
 			if (type === 'CONNECT') {
 				this.#handlers[type](data, ws);
 				return;
 			}
+			
 			const client = this.#clients.get(data.id);
 			if (!client)
 				throw new Error('NOT_CONNECTED');
@@ -83,7 +87,8 @@ export class Server {
 			console.error('Server.#handleMessages: Error handling message:', error.message);
 			const message = {
 				type: 'ERROR',
-				reason: error.message
+				reason: error.message,
+				code: 400,
 			}
 			ws.send(JSON.stringify(message));
 		}
@@ -97,6 +102,10 @@ export class Server {
 		console.log("criando novo client");
 		const c = new Client({ws, email, id, name});
 		this.#clients.set(id, c);
+		c.send({
+			type: 'CONNECTED',
+			code: 200,
+		});
 	}
 
 	listen(port = 3020) {
