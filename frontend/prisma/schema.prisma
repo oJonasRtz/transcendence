@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  avatar       String    @default("/images/default_avatar.png")
+  isOnline     Boolean   @default(false)
+  lastSeen     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  // Friendships
+  sentFriendships     Friendship[] @relation("User")
+  receivedFriendships Friendship[] @relation("Friend")
+
+  // Game relations
+  gameStats        GameStats?
+  matchesAsPlayer1 Match[]           @relation("Player1")
+  matchesAsPlayer2 Match[]           @relation("Player2")
+  matchesWon       Match[]           @relation("Winner")
+  achievements     UserAchievement[]
+
+  // Chat relations
+  sentMessages     Message[]                 @relation("Sender")
+  receivedMessages Message[]                 @relation("Receiver")
+  conversations    ConversationParticipant[]
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  userId         Int
+  joinedAt       DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@index([conversationId])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  receiverId     Int
+  content        String   @db.Text
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+model GameStats {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  wins      Int      @default(0)
+  losses    Int      @default(0)
+  draws     Int      @default(0)
+  ranking   Int      @default(0)
+  level     Int      @default(0)
+  xp        Int      @default(0)
+  winStreak Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ranking])
+  @@index([level])
+}
+model Match {
+  id        Int         @id @default(autoincrement())
+  player1Id Int
+  player2Id Int
+  winnerId  Int?
+  result    MatchResult
+  score     String?
+  duration  Int?
+  playedAt  DateTime    @default(now())
+
+  player1 User @relation("Player1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2 User @relation("Player2", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner  User? @relation("Winner", fields: [winnerId], references: [id], onDelete: Cascade)
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([playedAt])
+  @@index([winnerId])
+}
+
+model Achievement {
+  id          Int                 @id @default(autoincrement())
+  name        String              @unique
+  description String
+  icon        String?
+  category    AchievementCategory
+  requirement Int
+  xpReward    Int
+  createdAt   DateTime            @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  achievementId Int
+  unlockedAt    DateTime? @default(now())
+  progress      Int       @default(0)
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([unlockedAt])
+}
+
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  friendId  Int
+  status    Status   @default(pending)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  user   User @relation("User", fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation("Friend", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+  @@index([status])
+}
+
+enum Status {
+  pending
+  accepted
+  rejected
+  blocked
+}
+
+enum MatchResult {
+  player1Win
+  player2Win
+  draw
+}
+
+enum AchievementCategory {
+  wins
+  matches
+  streak
+  ranking
+  special
+}
