@@ -12,6 +12,7 @@ services:
       - api-gateway
     networks:
       - "transcendence"
+
   api-gateway:
     build: ./api-gateway
     image: api-gateway:1.0.0
@@ -28,6 +29,7 @@ services:
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
       - flappy-bird-dist:/app/public/flappy-bird
       - pong-dist:/app/public/pong
+
   auth-service:
     build: ./auth-service
     image: auth-service:1.0.0
@@ -37,6 +39,7 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
+
   users-service:
     build: ./users-service
     image: users-service:1.0.0
@@ -48,6 +51,7 @@ services:
       - "db_connection"
     volumes:
       - users-service:/app/assets
+
   sqlite-db:
     build: ./sqlite-db
     image: sqlite-db:1.0.0
@@ -58,6 +62,7 @@ services:
     volumes:
       - sqlite-db:/app/database
       - ./shared/ssl:/app/ssl:ro
+
   chat-service:
     build: ./chat-service
     image: chat-service:1.0.0
@@ -65,6 +70,7 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
+
   game-server:
     build: ./game-server
     image: game-server:1.0.0
@@ -74,6 +80,7 @@ services:
       - "transcendence"
     volumes:
       - ./shared/game-stats.json:/app/game-stats.json
+
   game-pong:
     build: ./game-pong
     image: game-pong:1.0.0
@@ -86,8 +93,9 @@ services:
       - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
       - pong-dist:/usr/share/nginx/html
+
   match-service:
-    build: ./match-service
+    build: ./new-match-service
     image: match-service:1.0.0
     container_name: match-service
     ports:
@@ -102,6 +110,7 @@ services:
       - ./match-service/.env
     volumes:
       - ./shared/ip/server.ip:/app/shared/server.ip:ro
+
   game-flappy-bird:
     build: ./game-flappy-bird
     image: game-flappy-bird:1.0.0
@@ -110,12 +119,133 @@ services:
       - "game"
     volumes:
       - flappy-bird-dist:/usr/share/nginx/html
+
+  # MONITORING STACK
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--storage.tsdb.wal-compression'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - "transcendence"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    env_file:
+    - ./monitoring/.grafana-password.txt
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=localhost
+      - GF_SERVER_ROOT_URL=https://localhost/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_COOKIE_SAMESITE=strict
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_SERVER_ENABLE_GZIP=true
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_BASIC_ENABLED=true
+      - GF_AUTH_DISABLE_LOGIN_FORM=false
+      - GF_USERS_AUTO_ASSIGN_ORG_ROLE=Viewer
+      - GF_SERVER_ENFORCE_DOMAIN=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - "transcendence"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - "transcendence"
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
+    networks:
+      - "transcendence"
+    restart: unless-stopped
+
+  blackbox-exporter:          
+    image: prom/blackbox-exporter:latest
+    container_name: blackbox-exporter
+    ports:
+      - "9115:9115"
+    volumes:
+      - ./monitoring/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    networks:
+      - "transcendence"
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - "transcendence"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   sqlite-db:
   users-service:
   api-gateway:
   flappy-bird-dist:
   pong-dist:
+  prometheus-data:
+  grafana-data:
+
 networks:
   game:
     driver: bridge
@@ -133,8 +263,3 @@ networks:
 
   db_connection:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.30.0.0/16
-          gateway: 172.30.0.1
-

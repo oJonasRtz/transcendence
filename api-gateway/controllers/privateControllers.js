@@ -139,14 +139,17 @@ const privateControllers = {
 
 		req.user.isOnline = false;
 
-		await axios.post("http://users-service:3003/setIsOnline", req.user);
+		try {
+			await axios.post("http://users-service:3003/setIsOnline", req.user);
 
-		await req.session.destroy();
+			await req.session.destroy();
 
-		reply.clearCookie("jwt");
-		reply.clearCookie("session");
+			reply.clearCookie("jwt");
+			reply.clearCookie("session");
 
-		await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+			await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+		} catch (err) { console.error("API-GATEWAY logout ERROR:", err?.response.data || err.message) };
+
 		return reply.redirect("/login");
 	},
 
@@ -204,9 +207,6 @@ const privateControllers = {
 			// validator hook, do your job
 
 			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
-
-			console.log("email:", req.user.email);
-			console.log("user_id:", req.user.user_id);
 
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
@@ -517,7 +517,7 @@ const privateControllers = {
                                 httpOnly: true,
                                 secure: isProduction,
                                 path: "/",
-                                sameSite: "lax",
+                                sameSite: "strict",
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
@@ -562,7 +562,7 @@ const privateControllers = {
                                 httpOnly: true,
                                 secure: isProduction,
                                 path: "/",
-                                sameSite: "lax",
+                                sameSite: "strict",
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
@@ -611,7 +611,7 @@ const privateControllers = {
                                 httpOnly: true,
                                 secure: isProduction,
                                 path: "/",
-                                sameSite: "lax",
+                                sameSite: "strict",
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
@@ -799,8 +799,24 @@ const privateControllers = {
 			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
                         return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, target_id: req.query.public_id } );
                 } catch (err) {
-                        console.error("API-GATEWAY chatAllUsers:", err);
+                        console.error("API-GATEWAY chatAllUsers ERROR:", err);
                         req.session.error = ["Error opening the chat"];
+                        return reply.redirect("/home");
+                }
+        },
+
+	set2FAOnOff: async function set2FAOnOff(req, reply) {
+                try {
+                        const result = await axios.post("http://auth-service:3001/set2FAOnOff", { user_id: req.user.user_id });
+                        if (result?.data.message === "2FA_ENABLED") {
+                                req.session.success = ["2FA enabled successfully"];
+                        } else if (result?.data.message === "2FA_DISABLED") {
+                                req.session.success = ["2FA disabled successfully"];
+                        }
+                        return reply.redirect("/home");
+                } catch (err) {
+                        console.error("API-GATEWAY set2FAOnOff");
+                        req.session.error = ["Error setting the new status of 2FA"];
                         return reply.redirect("/home");
                 }
         }

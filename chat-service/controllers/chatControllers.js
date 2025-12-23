@@ -49,6 +49,30 @@ const chatControllers = {
 			console.error("CHAT-SERVICE storePrivateMessage ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	setTargetId: async function setTargetId(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id and public_id here");
+			await axios.post("http://sqlite-db:3002/setTargetId", req.body);
+			return reply.code(201).send("Success");
+		} catch (err) {
+			console.error("CHAT-SERVICE setTargetId ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getTargetId: async function getTargetId(req, reply) {
+		try {
+			if (!req.body || !req.body.public_id)
+				return reply.code(400).send("You need to inform public_id here");
+			const response = await axios.post("http://sqlite-db:3002/getTargetId", { public_id: req.body.public_id });
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("CHAT-SERVICE getTargetId ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
 	}
 }
 

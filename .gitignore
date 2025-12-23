@@ -9,4 +9,7 @@ blacklist.txt
 *.cert
 *.key
 *.ip
+
+# Grafana secure password
+monitoring/.grafana-password.txt
 a/

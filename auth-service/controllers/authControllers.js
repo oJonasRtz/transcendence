@@ -325,6 +325,21 @@ const authControllers = {
 		}
 	},
 
+	set2FAOnOff: async function set2FAOnOff(req, reply) {
+                try {
+                        if (!req.body || !req.body.user_id)
+                                return reply.code(400).send("You need to inform user_id here");
+                        const response = await axios.post("http://sqlite-db:3002/set2FAOnOff", req.body);
+                        if (response?.data.message === "2FA_ENABLED")
+                                return reply.code(200).send({ message: "2FA_ENABLED" });
+                        else 
+                                return reply.code(200).send({ message: "2FA_DISABLED" });
+                } catch (err) {
+                        console.error("AUTH-SERVICE set2FAOnOff ERROR:", err.message);
+                        return reply.code(500).send("An error happened");
+                }
+        },
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");
