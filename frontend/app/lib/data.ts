@@ -717,6 +717,86 @@ export async function getUserRankPosition(userId: number) {
 // MATCH QUERIES
 // ============================================
 
+const ITEMS_PER_PAGE = 6;
+
+export async function fetchFilteredMatches(
+  query: string,
+  currentPage: number,
+) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const matches = await prisma.match.findMany({
+      where: {
+        OR: [
+          {
+            player1: {
+              username: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            player2: {
+              username: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            winner: {
+              username: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            score: {
+              contains: query,
+            },
+          },
+        ],
+      },
+      include: {
+        player1: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
+        player2: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
+        winner: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
+      orderBy: {
+        playedAt: 'desc',
+      },
+      take: ITEMS_PER_PAGE,
+      skip: offset,
+    });
+
+    return matches;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch matches.');
+  }
+}
+
+
 /**
  * Create a match
  */

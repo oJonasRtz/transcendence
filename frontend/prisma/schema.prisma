@@ -26,6 +26,7 @@ model User {
   gameStats        GameStats?
   matchesAsPlayer1 Match[]           @relation("Player1")
   matchesAsPlayer2 Match[]           @relation("Player2")
+  matchesWon       Match[]           @relation("Winner")
   achievements     UserAchievement[]
 
   // Chat relations
@@ -96,7 +97,6 @@ model GameStats {
   @@index([ranking])
   @@index([level])
 }
-
 model Match {
   id        Int         @id @default(autoincrement())
   player1Id Int
@@ -109,10 +109,12 @@ model Match {
 
   player1 User @relation("Player1", fields: [player1Id], references: [id], onDelete: Cascade)
   player2 User @relation("Player2", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner  User? @relation("Winner", fields: [winnerId], references: [id], onDelete: Cascade)
 
   @@index([player1Id])
   @@index([player2Id])
   @@index([playedAt])
+  @@index([winnerId])
 }
 
 model Achievement {
