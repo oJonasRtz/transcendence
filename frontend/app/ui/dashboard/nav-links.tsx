@@ -14,8 +14,8 @@ import clsx from 'clsx';
 const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
   {
-    name: 'New Match',
-    href: '/dashboard/new-match',
+    name: 'Matches',
+    href: '/dashboard/matches',
     icon: TrophyIcon,
   },
   { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon },

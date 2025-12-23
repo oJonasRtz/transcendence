@@ -796,6 +796,52 @@ export async function fetchFilteredMatches(
   }
 }
 
+export async function fetchMatchesPages(query: string) {
+  try {
+    const totalCount = await prisma.match.count({
+      where: {
+        OR: [
+          {
+            player1: {
+              username: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            player2: {
+              username: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            winner: {
+              username: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            score: {
+              contains: query,
+            },
+          },
+        ],
+      },
+    });
+
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+    return totalPages;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of matches.');
+  }
+}
+
 
 /**
  * Create a match
