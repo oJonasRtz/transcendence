@@ -9,8 +9,6 @@ const socket = io(SOCKET_URL, {
 
 // Capture the form and also the input
 
-const public_id = document.body.dataset.public_id;
-
 const form = document.getElementById("sendForm") as HTMLFormElement;
 const input = document.getElementById("message") as HTMLInputElement;
 const invite = document.getElementById("sendInvite") as HTMLFormElement;
@@ -39,12 +37,11 @@ if (form instanceof HTMLFormElement && input instanceof HTMLInputElement) {
 
 //const avatar = document.body.dataset.avatar;
 
-console.log("Public_id:", public_id);
 //console.log("Avatar:", avatar);
 
 
 socket.on("connect", () => {
-    socket.emit("join", { public_id });
+    socket.emit("join");
 });
 
 /*socket.on("serverMessage", (msg: string) => {

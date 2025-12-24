@@ -9,7 +9,6 @@ const socket = io(SOCKET_URL, {
 
 // Capture the form and also the input
 
-const owner_id = document.body.dataset.owner_id;
 const target_id = document.body.dataset.target_id;
 
 const form = document.getElementById("sendForm") as HTMLFormElement;
@@ -41,7 +40,7 @@ if (form instanceof HTMLFormElement && input instanceof HTMLInputElement) {
 //const avatar = document.body.dataset.avatar;
 
 socket.on("connect", () => {
-    socket.emit("joinPrivate", { owner_id, target_id });
+    socket.emit("joinPrivate", { target_id });
 });
 
 socket.on("updatePrivateUsers", (users: chatUser[]) => {

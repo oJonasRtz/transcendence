@@ -413,6 +413,16 @@ const databaseModels = {
 			console.error("MODELS getTargetId ERROR:", err?.response?.data || err.message);
 			return (null);
 		}
+	},
+
+	getPublicId: async function getPublicId(fastify, data) {
+		try {
+			const res = await fastify.db.get("SELECT public_id FROM users WHERE user_id = ?", [ data.user_id ]);
+			return (res ?? null);
+		} catch (err) {
+			console.error("MODELS getPublicId ERROR:", err?.response?.data || err.message);
+			return (null);
+		}
 	}
 }
 

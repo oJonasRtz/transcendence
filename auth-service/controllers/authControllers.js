@@ -28,8 +28,11 @@ const authControllers = {
 
 			const { username, user_id } = await authModels.getUserData(email);
 
-			console.log("user_id: auth-service", user_id);
-			const payload = { username, user_id, email };
+			const res = await axios.post("http://users-service:3003/getPublicId", { user_id: user_id });
+			const public_id = res?.data.public_id;
+			if (!public_id)
+				throw new Error("The user does not exist");
+			const payload = { username, user_id, email, public_id };
 
 			const token = jwt.sign(payload, process.env.JWT_SECRET || "purpleVoid", {
 				expiresIn: process.env.JWT_EXPIRES_IN || "1h"
@@ -37,7 +40,6 @@ const authControllers = {
 
 			return reply.code(200).send({ success, error, token });
 		} catch (err) {
-			console.error("tryLoginTheUser Auth:", err);
 			if (err.response && err.response.status === 401) {
 				error.push("Email/Password Incorrect");
 				return reply.code(401).send({ success, error });
@@ -56,7 +58,11 @@ const authControllers = {
 			if (!req.body || !req.body.email || !req.body.user_id || !req.body.username)
 				return reply.code(400).send("Bad request, you need to inform email, user_id and username");
 			const { username, email, user_id } = req.body;
-			const payload = { username, email, user_id };
+			const response = await axios.post("http://users-service:3003/getPublicId", { user_id: user_id });
+			const public_id = response?.data.public_id;
+			if (!public_id)
+				throw new Error("NO_PUBLIC_ID");
+			const payload = { username, email, user_id, public_id };
 			const token = jwt.sign(payload, process.env.JWT_SECRET || "purpleVoid", {
 				expiresIn: process.env.JWT_EXPIRESIN || "1h"
 			});

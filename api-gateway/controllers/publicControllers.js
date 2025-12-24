@@ -130,7 +130,6 @@ const publicControllers = {
 
 			return reply.redirect("/home");
 		} catch (err) {
-			console.log("\x1b[94mEstamos no err da checkLogin\x1b[0m");
 			if (err?.response?.status === 404) {
 				req.session.error = ["Invalid credentials"];
 				return reply.redirect("/login");

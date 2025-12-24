@@ -26,7 +26,8 @@ const routes = [
 	{ method: 'POST', url: '/getAllPendencies', handler: usersControllers.getAllPendencies },
 	{ method: 'POST', url: '/setAcceptFriend', handler: usersControllers.setAcceptFriend },
 	{ method: 'POST', url: '/deleteAFriend', handler: usersControllers.deleteAFriend },
-	{ method: 'GET', url: '/getAllBlacklist', handler: usersControllers.getAllBlacklist }
+	{ method: 'GET', url: '/getAllBlacklist', handler: usersControllers.getAllBlacklist },
+	{ method: 'POST', url: '/getPublicId', handler: usersControllers.getPublicId }
 ];
 
 export default async function usersRoutes(fastify, options) {

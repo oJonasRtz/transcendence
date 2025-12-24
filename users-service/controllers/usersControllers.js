@@ -313,6 +313,18 @@ const usersControllers = {
 			console.error("USERS-SERVICE getAllBlacklist ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getPublicId: async function getPublicId(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id here");
+			const response = await axios.post("http://sqlite-db:3002/getPublicId", req.body);
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getPublicId ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
 	}
 }
 

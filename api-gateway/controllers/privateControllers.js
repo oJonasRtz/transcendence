@@ -114,7 +114,7 @@ const privateControllers = {
                 		}])
                 		.png()
                 		.toFile(`/app/public/uploads/avatar_${req.user.user_id}.png`);
-				}			
+				}
 				avatar = `/public/uploads/avatar_${req.user.user_id}.png`;
 				await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatar });
 			}
@@ -797,7 +797,7 @@ const privateControllers = {
 			}
 
 			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
-                        return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, target_id: req.query.public_id } );
+                        return reply.view("chatDirectUsers", { target_id: req.query.public_id } );
                 } catch (err) {
                         console.error("API-GATEWAY chatAllUsers ERROR:", err);
                         req.session.error = ["Error opening the chat"];

@@ -5,7 +5,6 @@ export function chat() {
         withCredentials: true
     });
     // Capture the form and also the input
-    const public_id = document.body.dataset.public_id;
     const form = document.getElementById("sendForm");
     const input = document.getElementById("message");
     const invite = document.getElementById("sendInvite");
@@ -27,10 +26,9 @@ export function chat() {
         });
     }
     //const avatar = document.body.dataset.avatar;
-    console.log("Public_id:", public_id);
     //console.log("Avatar:", avatar);
     socket.on("connect", () => {
-        socket.emit("join", { public_id });
+        socket.emit("join");
     });
     /*socket.on("serverMessage", (msg: string) => {
         const messagesDiv = document.getElementById("messages");

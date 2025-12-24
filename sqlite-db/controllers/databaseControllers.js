@@ -680,6 +680,18 @@ const databaseControllers = {
 			console.error("SQLITE-DB getTargetId ERROR:", err.message);
 			return reply.code(500).send("An error happened");
 		}
+	},
+
+	getPublicId: async function getPublicId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id here");
+			const public_id = await databaseModels.getPublicId(fastify, req.body);
+			return reply.code(201).send(public_id ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getPublicId ERROR:", err.message);
+			return reply.code(500).send("An error happened");
+		}
 	}
 };
 

@@ -27,12 +27,14 @@ export default async function registerServer(io) {
 			socket.user = {
 				user_id: data.user_id,
 				email: data.email,
-				username: data.username
+				username: data.username,
+				public_id: data.public_id
 			}
 
 			socket.user_id = data.user_id;
 			socket.email = data.email;
 			socket.username = data.username;
+			socket.public_id = data.public_id;
 
 			return next();
 
@@ -100,16 +102,14 @@ export default async function registerServer(io) {
 		socket.currentChannel = null; // the first channel is not a channel :D
 		// connection
 
-		socket.on("joinPrivate", async ({ owner_id, target_id }) => {
-			socket.public_id = owner_id;
+		socket.on("joinPrivate", async ({ target_id }) => {
 			const exist = Array.from(privateUsers.values()).some(u => u.name === socket.username);
 			if (exist) return ;
-			let public_id = owner_id;
-			privateUsers.set(socket.id, { name: socket.username, public_id });
+			privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id });
 
 			let official = new Map();
 
-			official.set(socket.id, { name: socket.username, public_id });
+			official.set(socket.id, { name: socket.username, public_id: socket.public_id });
 
 			for (const [ socketId, user ] of privateUsers.entries()) {
 				if (user.public_id === target_id) {
@@ -129,11 +129,10 @@ export default async function registerServer(io) {
 			}
 		});
 
-		socket.on("join", async ({ public_id }) => {
-			socket.public_id = public_id;
+		socket.on("join", async () => {
 			const exist = Array.from(users.values()).some(u => u.name === socket.username);
 			if (exist) return ;
-			users.set(socket.id, { name: socket.username, public_id });
+			users.set(socket.id, { name: socket.username, public_id: socket.public_id });
 			try {
 				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png" , isLink: false, msg: `system: ${socket.username} joined to the chat` } );
