@@ -1,6 +1,6 @@
 import Form from '@/app/ui/matches/create-form';
 import Breadcrumbs from '@/app/ui/matches/breadcrumbs';
-import { getOnlineUsers, fetchOnlineUsers } from '@/app/lib/data';
+import { getOnlineUsers } from '@/app/lib/data';
  
 export default async function Page() {
   const users = await getOnlineUsers();
