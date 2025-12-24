@@ -1,6 +1,8 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import sharp from 'sharp';
 import sendMail from '../utils/sendMail.js';
+import { mkdir } from 'node:fs/promises';
 import { randomUUID } from 'crypto';
 
 const publicControllers = {
@@ -87,9 +89,25 @@ const publicControllers = {
 			req.session.success = success;
 			req.session.error = error;
 
+                        await mkdir("/app/public/uploads", { recursive: true });
+                        await sharp("/app/public/images/default.jpg")
+                        .resize(350, 350)
+                        .composite([{
+                        input: Buffer.from(
+                        `<svg width="350" height="350">
+                         <circle cx="175" cy="175" r="175" fill="white"/>
+                         </svg>`
+                         ),
+                         blend: "dest-in"
+                       }])
+                         .png()
+                         .toFile(`/app/public/uploads/avatar_${req.body.user_id}.png`); 
+                         let avatar = `/public/uploads/avatar_${req.body.user_id}.png`;
+                         await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.body.user_id, avatar: avatar }); 
+
 			return reply.redirect("/login");
 		} catch (err) {
-			if (err?.response.status === 409) {
+			if (err?.response?.status === 409) {
 				req.session.error = ["Registration failed. Try again"];
 				return reply.redirect("/register");
 			}
