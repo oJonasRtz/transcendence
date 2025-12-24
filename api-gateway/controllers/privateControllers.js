@@ -97,7 +97,7 @@ const privateControllers = {
 			const response = await axios.post("http://users-service:3003/getUserAvatar", { user_id: req.user.user_id, email: req.user.email });
 			let avatar = response?.data.avatar;
 
-			if (avatar === '/public/images/default.jpg') {
+			/*if (avatar === '/public/images/default.jpg') {
 				try {
 					await fs.access(`/app/public/uploads/avatar_${req.user.user_id}.png`);
 				} catch (err) {
@@ -117,7 +117,7 @@ const privateControllers = {
 				}
 				avatar = `/public/uploads/avatar_${req.user.user_id}.png`;
 				await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatar });
-			}
+			}*/
 
 			const myData = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
 
