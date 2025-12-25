@@ -1,5 +1,105 @@
 # MatchMaking
 
+# How to use
+    - Connection
+      - Its a websocket communication
+      - how to connect:
+        const socket = new WebSocket('ws://address:port');
+
+        socket.onopen = () => {
+          socket.send(JSON.stringfy({
+            type: "CONNECT",
+            id: string,
+            email: string,
+            name: string,
+          }))
+        }
+        - All messages sent gotta be JSONs so use JSON.stringfy() before send anything to convertion, websockets only send strings
+        - after send CONNECT you will recieve a confirmation via (socket.onmessage)
+
+
+    - Messages
+      - Every message needs identification so (type & id) is needed in every message {
+        type: what this request wants the system to do
+        id: who's ordering that action (user_id)
+      } 
+      - NOTE: every error will return this format:
+      {
+        type: 'ERROR',
+        reason: string,
+        code: 400,
+      }
+
+
+      - types:
+      - CONNECT
+        - Register client on match-service
+        - body: {
+          type: "CONNECT",
+          id: number | string,
+          email: string,
+          name: string,
+        }
+        - return: 
+          SUCCESS: {
+            type: 'CONNECTED',
+            code: 200
+          }
+
+      - ENQUEUE 
+        - body: {
+          type: "ENQUEUE",
+          id: number| string,
+          game_type: "RANKED" | "TOURNAMENT"
+        }
+        - return:
+          SUCCESS:{
+            type: 'STATE_CHANGE',
+            state: 'IN_QUEUE'
+          }
+          FAIL: {
+            type: 'ERROR',
+            reason: 'MATCHMAKING_FAILED',
+            code: 400,
+          }
+
+        - on fail the client state will return to idle state
+
+      - DEQUEUE
+        - body: {
+          type: "DEQUEUE",
+          id: number | string
+        }
+        - just return to idle state
+        - return: {
+          type: 'STATE_CHANGE',
+          state: 'IDLE',
+        }
+
+
+      - EXIT
+        - body: {
+          type: "EXIT",
+          id: number | string
+        }
+        - disconnects user to match-service
+        - NOTE: Depending on Client state its instance will not be destroyed.
+          On IN_GAME state it'll be preserver for reconnections, otherwise it'll be destroyed
+        - return: no return (void)
+    - Routes
+      - /invite
+      - /match/invite:token
+      - /get_tournaments
+      - /create_tournament
+    - Errors
+
+    - Flow
+      - Connect via Websocket
+      - Sign up sending type: CONNECT
+      - 
+
+# Planing
+
 Planning of how it is going to work:
 - Client
   - FSM (Finite State Machine)

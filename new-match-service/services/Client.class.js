@@ -1,3 +1,6 @@
+import {server, matchmaking} from '../app.js';
+import { Party } from './Party.class.js';
+
 export class Client {
 	#info = {
 		id: null,
@@ -16,7 +19,7 @@ export class Client {
 	}
 	//Allowed state transitions
 	#transitions = {
-		IDLE: ['IN_QUEUE'],
+		IDLE: ['IN_QUEUE', 'IDLE'],
 		IN_QUEUE: ['IN_GAME', 'IDLE'],
 		IN_GAME: ['IDLE'],
 	}
@@ -26,9 +29,10 @@ export class Client {
 		DEQUEUE: async () => {
 			//matchmaking.dequeue({client: this, type: this.#game_type});
 			//this.#game_type = null;
+			this.#game.party.dequeue();
 			await this.#changeState('IDLE', {});
 		},
-		INVITE: async () => await this.#changeState('IDLE', {create_invite: true}),
+		INVITE: async () => this.#invite(),
 		EXIT: () => this.#disconnect(),
 	}
 	#disconnections = {
@@ -38,7 +42,12 @@ export class Client {
 	}
 	#valid_game_types = ['RANKED', 'TOURNAMENT'];
 	#game_type = null;
+	promisses = {
+		resolve: null,
+		reject: null,
+	};
 	#game = {
+		party: null,
 		match_id: null,
 		lobby_id: null,
 		lobby: null,
@@ -68,33 +77,83 @@ export class Client {
 		return Object.keys(this.#actions);
 	}
 
+	get party() {
+		return this.#game.party;
+	}
+
+	setParty(party) {
+		this.#game.party = party;
+	}
+
 	get id() {
 		return this.#info.id;
 	}
 
-	#idle({create_invite}) {
+	get rank() {
+		return this.#info.rank;
+	}
+
+	//Just check permission to invite
+	#invite() {
+		if (this.#state !== 'IDLE')
+			throw new Error('PERMISSION_DENIED');
+
+		return true;
+	}
+
+	#idle({}) {
 		console.log("Client entered IDLE state");
-		// if (create_invite) {
-		// 	// Logic to create an invite can be added here
-		// }
+		this.send({
+			type: 'STATE_CHANGE',
+			state: 'IDLE',
+		});
+	}
+
+	waitGame() {
+		return new Promise((resolve, reject) => {
+			this.promisses.resolve = resolve;
+			this.promisses.reject = reject;
+		})
 	}
 
 	async #in_queue({game_type}) {
-		console.log("Client entered IN_QUEUE state");
-		// if (!game_type || !this.#valid_game_types.includes(game_type))
-		// 	throw new Error('INVALID_FORMAT');
+		if (!game_type || !this.#valid_game_types.includes(game_type))
+			throw new Error('INVALID_FORMAT');
 
-		// this.#game_type = game_type;
-		//match found
-		// const matchPayload = await matchmaking.enqueue({
-		// 	client: this,
-		// 	type: this.#game_type
-		//	rank: this.#info.rank
-		// })
-		// this.#changeState('IN_GAME', matchPayload);
+		console.log("Client entered IN_QUEUE state");
+		this.send({
+			type: 'STATE_CHANGE',
+			state: 'IN_QUEUE',
+		});
+
+		try {
+
+			this.#game_type = game_type;
+			const party = this.#game.party
+				|| server.createSoloParty({id: this.#info.id, game_type});
+
+			party.enqueue(this);
+
+			this.#game.party = party;
+			const payload = await this.waitGame();
+
+			await this.#changeState('IN_GAME', payload);
+		} catch (error) {
+			console.error('Client.#in_queue: Error during matchmaking enqueue:', error.message);
+			this.#changeState('IDLE', {});
+			this.send({
+				type: 'ERROR',
+				reason: 'MATCHMAKING_FAILED',
+				code: 400,
+			});
+		}
 	}
 	async #in_game({match_id, lobby}) {
 		console.log("Client entered IN_GAME state");
+		this.send({
+			type: 'STATE_CHANGE',
+			state: 'IN_GAME',
+		});
 		// if (!match_id || !lobby)
 		// 	throw new Error('INVALID_FORMAT');
 
@@ -151,10 +210,13 @@ export class Client {
 		});
 
 		this.#ws.on('error', (error) => {
+			this.#disconnect();
 			console.error(`Client ${this.#info.email} WebSocket error:`, error.message);
 		});
 
 		this.#ws.on('close', () => {
+			this.#disconnect();
+
 			console.log(`Client ${this.#info.email} disconnected.`);
 		});
 	}
@@ -196,13 +258,15 @@ export class Client {
 	}
 
 	#disconnect() {
-		if (!this.#ws || this.#ws.readyState !== this.#ws.OPEN)
+		if (!this.#ws)
 			return;
 		
 		const res = this.#disconnections[this.#state]();
 		this.#ws.close();
 		this.#ws = null;
-		return res;
+
+		if (res === "REMOVE")
+			server.removeClient(this.#info.id);
 	}
 
 	#inIdleDisconnect() {
@@ -213,6 +277,7 @@ export class Client {
 	#inQueueDisconnect() {
 		// matchmaking.dequeue({client: this, type: this.#game_type});
 		this.#sendBuffer = [];
+		this.#changeState('IDLE', {});
 		return ("REMOVE");
 	}
 

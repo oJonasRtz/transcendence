@@ -1,9 +1,11 @@
+import { Client } from "./Client.class";
 import { Lobby } from "./Lobby.class";
+import { Party } from "./Party.class";
 
 export class MatchMaking {
 	#queue = {
-		RANKED: new Set(),
-		TOURNAMENT: new Set()
+		RANKED: [], // <party>
+		TOURNAMENT: [], // <party>
 	}
 	#maxPlayers = {
 		RANKED: 2,
@@ -14,56 +16,60 @@ export class MatchMaking {
 		this.#tryMatch();
 	}
 
-	async enqueue({client, type}) {
-		if (!['RANKED', 'TOURNAMENT'].includes(type))
-			throw new Error('INVALID_GAME_TYPE');
+	async enqueue({party}) {
+		if (!(party instanceof Party))
+			throw new Error('INVALID_PARAM');
 
 		return new Promise((resolve) => {
-			client.__matchResolve = resolve;
-			this.#queue[type].add(client);
+			party.attachResolve(resolve);
+			this.#queue[party.game_type].push(party);
 		})
 	}
-	dequeue({client, type}) {
-		if (!['RANKED', 'TOURNAMENT'].includes(type))
-			throw new Error('INVALID_GAME_TYPE');
+	dequeue({party}) {
+		if (!(party instanceof Party))
+			throw new Error('INVALID_PARAM');
 
-		this.#queue[type].delete(client);
-
+		this.#queue[party.game_type] = this.#queue[party.game_type].filter(e => e !== party);
 	}
 	#tryMatch(){
 		setInterval(async () => {
 			for (const type of ['RANKED', 'TOURNAMENT']) {
 				const queue = this.#queue[type];
-				if (queue.size < 2) continue;
+				const max = this.#maxPlayers[type];
 
-				//Temp check
-				const it = queue.values();
-				const p1 = it.next().value;
-				const p2 = it.next().value;
+				let collected = [];
+				let cnt = 0;
 
-				queue.delete(p1);
-				queue.delete(p2);
+				//Match loop - temp implementation: first come first served
+				for (const entry of queue) {
+					if (cnt + entry.size > max)
+						continue;
+					
+					collected.push(entry);
+					cnt += entry.size;
 
+					if (cnt === max)
+						break;
+				}
+
+				if (cnt !== max)
+					continue;
+
+				this.#queue[type] = this.#queue[type].filter(e => !collected.includes(e));
+
+				const players = collected.flatMap(e => [...e.clients]);
 				const lobby_id = crypto.randomUUID();
-				// const match_id = await connection.newMatch({
-				// 	players: {
-				// 		1: {name: p1.name, id: p1.id},
-				// 		2: {name: p2.name, id: p2.id}},
-				//	}
-				// 	maxPlayers: this.#maxPlayers[type],
-				// 	'PONG'
-				// });
-				// const lobby = new Lobby({type, clients: [p1, p2], id: lobby_id, match_id});
+				const payload = {
+					lobby_id,
+					players,
+				};
 
-				// const payload = {
-				// 	match_id,
-				// 	lobby,
-				// };
-				p1.__matchResolve(payload);
-				p2.__matchResolve(payload);
-
-				delete p1.__matchResolve;
-				delete p2.__matchResolve;
+				for (const entry of collected) {
+					entry.resolveAll(payload);
+					for (const p of entry.clients) {
+						p.__matchResolve = null;
+					}
+				}
 			}
 		}, 200);
 	}
