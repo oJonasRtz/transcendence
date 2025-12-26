@@ -79,42 +79,66 @@ const publicControllers = {
 		let error = [];
 		try {
 			req.body.user_id = randomUUID();
-			if (!req.body.username || !req.body.nickname || req.body.username.toLowerCase() === "system" || req.body.nickname.toLowerCase() === "system")
+			if (!req.body.username || !req.body.nickname || req.body.username.toLowerCase() === "system" || req.body.nickname.toLowerCase() === "system") {
 				throw new Error("Fill everything or Forbidden Username/Nickname");
+			}
+
 			const response = await axios.post("http://auth-service:3001/checkRegister", req.body);
 
 			success = response.data.success || [];
 			error = response.data.error || [];
 
+			// If auth-service returned errors, handle them
+			if (error.length > 0) {
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success, error });
+				}
+				req.session.success = success;
+				req.session.error = error;
+				return reply.redirect("/register");
+			}
+
+			await mkdir("/app/public/uploads", { recursive: true });
+			await sharp("/app/public/images/default.jpg")
+			.resize(350, 350)
+			.composite([{
+			input: Buffer.from(
+			`<svg width="350" height="350">
+			 <circle cx="175" cy="175" r="175" fill="white"/>
+			 </svg>`
+			 ),
+			 blend: "dest-in"
+		       }])
+			 .png()
+			 .toFile(`/app/public/uploads/avatar_${req.body.user_id}.png`);
+			 let avatar = `/public/uploads/avatar_${req.body.user_id}.png`;
+			 await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.body.user_id, avatar: avatar });
+
+			// For API requests, return JSON success
+			if (req.isApiRequest) {
+				return reply.code(200).send({ success, error: [] });
+			}
+
 			req.session.success = success;
 			req.session.error = error;
-
-                        await mkdir("/app/public/uploads", { recursive: true });
-                        await sharp("/app/public/images/default.jpg")
-                        .resize(350, 350)
-                        .composite([{
-                        input: Buffer.from(
-                        `<svg width="350" height="350">
-                         <circle cx="175" cy="175" r="175" fill="white"/>
-                         </svg>`
-                         ),
-                         blend: "dest-in"
-                       }])
-                         .png()
-                         .toFile(`/app/public/uploads/avatar_${req.body.user_id}.png`); 
-                         let avatar = `/public/uploads/avatar_${req.body.user_id}.png`;
-                         await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.body.user_id, avatar: avatar }); 
-
 			return reply.redirect("/login");
 		} catch (err) {
 			if (err?.response?.status === 409) {
-				req.session.error = ["Registration failed. Try again"];
+				error = ["Registration failed. Try again"];
+				if (req.isApiRequest) {
+					return reply.code(409).send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/register");
 			}
 			error = [`${err.message}`];
+
+			if (req.isApiRequest) {
+				return reply.code(400).send({ success: [], error });
+			}
+
 			req.session.success = success;
 			req.session.error = error;
-
 			return reply.redirect("/register");
 		}
 	},
@@ -124,6 +148,9 @@ const publicControllers = {
 	checkLogin: async function tryLoginTheUser(req, reply) {
 		try {
 			if (!req.body.captchaInput) {
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error: ["You forgot to fill captcha code"] });
+				}
 				req.session.error = ["You forgot to fill captcha code"];
 				return reply.redirect("/login");
 			}
@@ -132,6 +159,9 @@ const publicControllers = {
 
 			const token = response?.data?.token;
 			if (!token) {
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error: ["Invalid credentials"] });
+				}
 				req.session.error = ["Invalid credentials"];
 				return reply.redirect("/login");
 			};
@@ -146,13 +176,24 @@ const publicControllers = {
                                	maxAge: 60 * 60 * 1000 // 1h
                         });
 
+			// For API requests, return JSON with token
+			if (req.isApiRequest) {
+				return reply.code(200).send({ success: ["Login successful"], error: [], token });
+			}
+
 			return reply.redirect("/home");
 		} catch (err) {
+			const errorMessage = ["Invalid credentials"];
+
+			if (req.isApiRequest) {
+				return reply.code(400).send({ success: [], error: errorMessage });
+			}
+
 			if (err?.response?.status === 404) {
-				req.session.error = ["Invalid credentials"];
+				req.session.error = errorMessage;
 				return reply.redirect("/login");
 			}
-			req.session.error = ["Invalid credentials"];
+			req.session.error = errorMessage;
 			console.error("Error trying login:", err);
 			return reply.redirect("/login");
 		}
@@ -282,6 +323,21 @@ const publicControllers = {
 			}
 			req.session.error = ["An error happened when we are trying to change your password as requested D="];
 			return reply.redirect("/changePassword");
+		}
+	},
+
+	// Get CAPTCHA for Next.js frontend (stateless, no sessions)
+	getCaptcha: async function getCaptcha(req, reply) {
+		try {
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
+			const { code, data } = response.data;
+
+			// Return both code and image data for client-side validation
+			// Note: This is different from EJS frontend which uses sessions
+			return reply.code(200).send({ code, data });
+		} catch (err) {
+			console.error("Error fetching CAPTCHA:", err.message);
+			return reply.code(500).send({ error: "Failed to generate CAPTCHA" });
 		}
 	},
 

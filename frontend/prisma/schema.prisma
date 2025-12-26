@@ -1,10 +1,11 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "./generated"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -85,7 +86,7 @@ model GameStats {
   wins      Int      @default(0)
   losses    Int      @default(0)
   draws     Int      @default(0)
-  ranking   Int      @default(0)
+  ranking   Int      @default(1000)
   level     Int      @default(0)
   xp        Int      @default(0)
   winStreak Int      @default(0)

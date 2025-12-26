@@ -4,6 +4,7 @@ import privateRoutes from './routes/privateRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { authHook, validatorHook, require2faHook } from './hooks/hooks.js';
+import { detectApiRequest } from './hooks/apiMiddleware.js';
 import path from 'path';
 import formBody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
@@ -98,6 +99,10 @@ app.register(fastifyView, {
 });
 
 // You can add prefix: /api to prefix every route prefix: '/api'
+
+// Register API detection middleware FIRST (before validatorHook)
+// This sets req.isApiRequest flag for subsequent hooks to check
+app.addHook('preHandler', detectApiRequest);
 
 app.addHook('preHandler', validatorHook);
 

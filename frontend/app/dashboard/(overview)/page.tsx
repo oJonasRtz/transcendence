@@ -1,6 +1,5 @@
 // app/dashboard/page.tsx
 import { Suspense } from 'react';
-import { lusitana } from '@/app/ui/fonts';
 import StatsCards from '@/app/ui/dashboard/stats-cards';
 import RecentMatches from '@/app/ui/dashboard/recent-matches';
 import Leaderboard from '@/app/ui/dashboard/leaderboard';
@@ -16,11 +15,28 @@ import {
   RecentMessagesSkeleton,
   ActivityFeedSkeleton,
 } from '@/app/ui/dashboard/skeletons';
-import { getUserById } from '@/app/lib/data';
+import { getUserByEmail } from '@/app/lib/data';
+import { getUser } from '@/app/lib/auth';
+import { redirect } from 'next/navigation';
 
 export default async function DashboardPage() {
-  // TODO: Get userId from auth session
-  const userId = 1;
+  // Get authenticated user from JWT
+  const authUser = await getUser();
+
+  if (!authUser) {
+    redirect('/login');
+  }
+
+  // Get the Prisma user ID by matching email
+  // The JWT contains backend user_id (UUID), but Prisma uses auto-increment id
+  const prismaUser = await getUserByEmail(authUser.email);
+
+  if (!prismaUser) {
+    // User exists in auth DB but not in Prisma DB - data inconsistency
+    redirect('/login?error=profile_not_found');
+  }
+
+  const userId = prismaUser.id;
 
   return (
     <main className="p-4 md:p-6 lg:p-8">

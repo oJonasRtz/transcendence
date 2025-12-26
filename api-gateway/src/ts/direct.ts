@@ -1,9 +1,19 @@
+// Type definitions for Socket.io client (loaded via CDN in browser)
+declare const io: any;
+
+interface chatUser {
+  name: string;
+  public_id: string;
+  avatar?: string;
+  socketId?: string;
+}
+
 export function direct() {
 
 const SOCKET_URL = window.location.origin;
 
 const socket = io(SOCKET_URL, {
-    transports: ["websocket"], 
+    transports: ["websocket"],
     withCredentials: true
 });
 

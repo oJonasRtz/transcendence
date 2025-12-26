@@ -116,6 +116,16 @@ export async function validatorHook(req, reply) {
 
 	if (!error.length) return ;
 
+	// Check if this is an API request (from Next.js)
+	// If so, return JSON instead of redirecting
+	if (req.isApiRequest) {
+		return reply.code(400).send({
+			success: [],
+			error: error
+		});
+	}
+
+	// Traditional EJS flow: store in session and redirect
 	req.session.success = success;
 	req.session.error = error;
 
