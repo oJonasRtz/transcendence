@@ -79,6 +79,7 @@ export default function PongWars() {
     ];
 
     function drawSpace() {
+      if (!ctx || !canvas) return;
       const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
       g.addColorStop(0, '#020617');
       g.addColorStop(1, COLORS.SPACE);
@@ -96,6 +97,7 @@ export default function PongWars() {
     }
 
     function drawSquares() {
+      if (!ctx) return;
       for (let i = 0; i < numSquaresX; i++) {
         for (let j = 0; j < numSquaresY; j++) {
           ctx.fillStyle = squares[i][j];
@@ -110,6 +112,7 @@ export default function PongWars() {
     }
 
     function drawShip(ball: Ball) {
+      if (!ctx) return;
       const angle = Math.atan2(ball.dy, ball.dx);
 
       ctx.save();
@@ -131,6 +134,7 @@ export default function PongWars() {
     }
 
     function drawTrail(ball: Ball) {
+      if (!ctx) return;
       ball.trail.push({ x: ball.x, y: ball.y, life: 1 });
 
       ball.trail.forEach((t) => (t.life -= 0.06));

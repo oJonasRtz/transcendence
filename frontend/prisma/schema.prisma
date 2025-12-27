@@ -11,9 +11,10 @@ datasource db {
 
 model User {
   id           Int       @id @default(autoincrement())
+  publicId     String    @unique // SQLite UUID - used for backend API calls and ID mapping
   username     String    @unique
   email        String    @unique
-  passwordHash String
+  passwordHash String    @default("") /// @ignore - Passwords managed by auth-service backend only
   avatar       String    @default("/images/default_avatar.png")
   isOnline     Boolean   @default(false)
   lastSeen     DateTime?
@@ -35,6 +36,10 @@ model User {
   sentMessages     Message[]                 @relation("Sender")
   receivedMessages Message[]                 @relation("Receiver")
   conversations    ConversationParticipant[]
+
+  @@index([username])
+  @@index([publicId])
+  @@index([isOnline])
 }
 
 model Conversation {

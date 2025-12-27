@@ -58,9 +58,12 @@ export async function validatorHook(req, reply) {
 			condition: req.body.captchaInput !== undefined && req.body.captchaInput !== null && typeof req.body.captchaInput !== "string",
 			message: "The code must be a string"
 		},
-		// CAPTCHA validation - handled differently for EJS vs Next.js
-		// EJS: Validates against req.session.captcha
-		// Next.js: CAPTCHA already validated in Server Action before sending request
+		// CAPTCHA validation for both EJS and Next.js
+		// EJS: Validates against req.session.captcha (session-based)
+		// Next.js: Server Action validates CAPTCHA in frontend before sending request
+		// Note: Next.js Server Actions run on server, so CAPTCHA is already validated server-side
+		// We trust Server Actions because they cannot be bypassed by client
+		// For EJS, we must validate here since it's client-submitted
 		{
 			condition: req.body.captchaInput && !req.isApiRequest && req.session.captcha !== req.body.captchaInput,
 			message: "Invalid code"

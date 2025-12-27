@@ -1,3 +1,5 @@
-export default function Page() {
-  return <p>Settings Page</p>
+import { redirect } from 'next/navigation';
+
+export default function SettingsPage() {
+  redirect('/dashboard/settings/email');
 }

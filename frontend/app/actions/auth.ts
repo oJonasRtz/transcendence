@@ -87,18 +87,22 @@ export async function login(formData: FormData) {
       // Clear CAPTCHA cookie after successful login
       cookieStore.delete('captcha_code');
 
-      // Sync user to Prisma if not already there (for existing users)
+      // Sync user to Prisma using hybrid sync strategy
       try {
         const { getUser } = await import('@/app/lib/auth');
-        const { createUserInPrisma } = await import('@/app/lib/data');
+        const { getUserProfile } = await import('@/app/lib/backend-api');
+        const { syncUserToPrisma } = await import('@/app/lib/sync');
+
         const authUser = await getUser();
 
-        if (authUser) {
-          await createUserInPrisma({
-            username: authUser.username,
-            email: authUser.email,
-            passwordHash: 'managed_by_backend',
-          });
+        if (authUser && authUser.public_id) {
+          // Fetch full user profile from backend SQLite
+          const backendUser = await getUserProfile(authUser.public_id);
+
+          if (backendUser) {
+            // Sync to Prisma PostgreSQL
+            await syncUserToPrisma(backendUser);
+          }
         }
       } catch (prismaError) {
         // Log but don't fail login if Prisma sync fails
@@ -193,18 +197,8 @@ export async function signup(formData: FormData) {
     }
 
     // Registration successful!
-    // Sync user to Prisma PostgreSQL database
-    try {
-      const { createUserInPrisma } = await import('@/app/lib/data');
-      await createUserInPrisma({
-        username,
-        email,
-        passwordHash: '', // Backend handles password hashing, we don't need to store it again
-      });
-    } catch (prismaError) {
-      // Log but don't fail registration if Prisma sync fails
-      console.error('Failed to sync user to Prisma:', prismaError);
-    }
+    // Note: User sync will happen automatically on login below
+    // No need to sync immediately after registration since auto-login follows
 
     // Auto-login without requiring CAPTCHA again (user just verified with CAPTCHA)
     const loginResponse = await fetch(`${API_GATEWAY_URL}/checkLogin`, {

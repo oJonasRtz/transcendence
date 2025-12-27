@@ -32,3 +32,47 @@ export const signupSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
+
+// Profile update schemas
+export const changeUsernameSchema = z.object({
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters')
+    .regex(usernameRegex, 'Username can only contain letters, numbers, dots, dashes and underscores'),
+});
+
+export const changeEmailSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z
+    .string()
+    .min(8, 'Password must contain eight or more characters')
+    .regex(passwordRegex, 'Password must have uppercase, lowercase, numbers, and special characters'),
+  confirmPassword: z.string().min(1, 'Please confirm your password'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+export const changeNicknameSchema = z.object({
+  nickname: z.string()
+    .min(3, 'Nickname must be at least 3 characters')
+    .max(20, 'Nickname must be at most 20 characters')
+    .regex(usernameRegex, 'Nickname can only contain letters, numbers, dots, dashes and underscores'),
+});
+
+export const changeDescriptionSchema = z.object({
+  description: z.string()
+    .max(500, 'Description must be at most 500 characters')
+    .optional()
+    .or(z.literal('')),
+});
+
+export type ChangeUsernameInput = z.infer<typeof changeUsernameSchema>;
+export type ChangeEmailInput = z.infer<typeof changeEmailSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ChangeNicknameInput = z.infer<typeof changeNicknameSchema>;
+export type ChangeDescriptionInput = z.infer<typeof changeDescriptionSchema>;
