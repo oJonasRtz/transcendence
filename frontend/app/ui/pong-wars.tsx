@@ -173,6 +173,7 @@ export default function PongWars() {
     }
 
     function checkBoundaryCollision(ball: Ball) {
+      if (!canvas) return;
       if (ball.x < 12 || ball.x > canvas.width - 12) {
         ball.dx = -ball.dx;
         ball.dy += (Math.random() - 0.5) * 1.5;
@@ -197,6 +198,7 @@ export default function PongWars() {
     }
 
     function draw() {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawSpace();
       drawSquares();

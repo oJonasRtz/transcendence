@@ -27,8 +27,7 @@ export default function NewPong() {
     resize();
 
     const draw = () => {
-      ctx.fillStyle = '#0f172a'; // Match Slate-900
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       ctx.strokeStyle = '#334155';
       ctx.setLineDash([5, 15]);
