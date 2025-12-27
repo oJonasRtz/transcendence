@@ -9,16 +9,21 @@ import { User as PrismaUser } from '../../prisma/generated';
 
 /**
  * SQLite User type (from backend)
+ * 
+ * Note: email field is optional because some backend endpoints (like /seeProfile)
+ * don't include it. When syncing, we get the email from the JWT token instead.
+ * 
+ * Note: SQLite stores booleans as integers (0/1), so we need to convert them.
  */
 export interface SQLiteUser {
   user_id: string; // UUID
   username: string;
   nickname: string;
-  email: string;
+  email?: string; // Optional - not always returned by backend
   avatar: string;
-  isOnline: boolean;
-  inQueue: boolean;
-  inGame: boolean;
+  isOnline: number | boolean; // SQLite returns 0/1 as integer
+  inQueue: number | boolean;
+  inGame: number | boolean;
   rank: number;
   public_id: string; // UUID
   title: string;
@@ -51,15 +56,38 @@ export interface SQLiteFriend {
  * NOTE: This does NOT include the Prisma `id` field (autoincrement Int).
  * Prisma will generate that on insert. We use username as the unique identifier
  * for syncing since it's unique in both systems.
+ * 
+ * WARNING: email field must be set on the sqliteUser parameter before calling this.
+ * The backend doesn't always return email, so callers must provide it from JWT token.
  */
 export function transformSQLiteUserToPrisma(sqliteUser: SQLiteUser): Omit<PrismaUser, 'id' | 'createdAt' | 'updatedAt'> {
+  if (!sqliteUser.email) {
+    throw new Error('Email is required for transforming SQLite user to Prisma. Backend data missing email field.');
+  }
+  
+  // Convert SQLite integers to proper types
+  // SQLite stores booleans as 0/1 integers
+  const isOnline = Boolean(sqliteUser.isOnline);
+  
+  // Transform avatar URL: backend stores at /public/uploads/, we need to point to backend server
+  // Backend avatar: /public/uploads/avatar_xxx.png
+  // Transform to: http://localhost:3000/public/uploads/avatar_xxx.png
+  let avatar = sqliteUser.avatar;
+  if (avatar && avatar.startsWith('/public/')) {
+    const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+    avatar = `${BACKEND_URL}${avatar}`;
+  } else if (!avatar) {
+    avatar = '/images/default_avatar.png';
+  }
+  
   return {
+    publicId: sqliteUser.public_id,
     username: sqliteUser.username,
     email: sqliteUser.email,
     passwordHash: '', // Not synced from backend for security
-    avatar: sqliteUser.avatar || '/images/default_avatar.png',
-    isOnline: sqliteUser.isOnline,
-    lastSeen: sqliteUser.isOnline ? new Date() : null,
+    avatar: avatar,
+    isOnline: isOnline,
+    lastSeen: isOnline ? new Date() : null,
   };
 }
 

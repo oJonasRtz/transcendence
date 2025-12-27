@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const settingsTabs = [
+  { name: 'Username', href: '/dashboard/settings/username', icon: IdentificationIcon },
   { name: 'Email', href: '/dashboard/settings/email', icon: EnvelopeIcon },
   { name: 'Password', href: '/dashboard/settings/password', icon: KeyIcon },
   { name: 'Nickname', href: '/dashboard/settings/nickname', icon: IdentificationIcon },

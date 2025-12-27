@@ -649,12 +649,30 @@ const privateControllers = {
 
 	seeProfile: async function seeProfile(req, reply) {
 		try {
+			console.log('[seeProfile] Request received');
+			console.log('[seeProfile] req.isApiRequest:', req.isApiRequest);
+			console.log('[seeProfile] Accept header:', req.headers['accept']);
+			
 			const { user } = req.query;
 			const response = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: user });
 			const data = response?.data;
+			
+			// Return JSON for API requests (Next.js frontend)
+			if (req.isApiRequest) {
+				console.log('[seeProfile] Returning JSON response');
+				return reply.send(data);
+			}
+			
+			console.log('[seeProfile] Returning HTML view');
+			// Return HTML view for traditional requests
 			return reply.view("publicProfile", { data } );
 		} catch (err) {
 			console.error("API-GATEWAY seeProfile Error:", err);
+			
+			if (req.isApiRequest) {
+				return reply.code(500).send({ error: "Error fetching user profile" });
+			}
+			
 			req.session.error = ["Error trying to see the profile of the target user"];
 			return reply.redirect("/home");
 		}

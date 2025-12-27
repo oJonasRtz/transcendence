@@ -101,12 +101,17 @@ export async function login(formData: FormData) {
 
           if (backendUser) {
             // Sync to Prisma PostgreSQL
-            await syncUserToPrisma(backendUser);
+            // Pass email from JWT token since backend doesn't return it
+            await syncUserToPrisma(backendUser, authUser.email);
+            console.log('[Auth] User synced to Prisma successfully:', authUser.email);
+          } else {
+            console.error('[Auth] Backend user not found for public_id:', authUser.public_id);
           }
         }
       } catch (prismaError) {
         // Log but don't fail login if Prisma sync fails
-        console.error('Failed to sync user to Prisma:', prismaError);
+        console.error('[Auth] Failed to sync user to Prisma:', prismaError);
+        // Continue anyway - dashboard will handle this
       }
     }
 

@@ -29,11 +29,48 @@ export default async function DashboardPage() {
 
   // Get the Prisma user ID by matching email
   // The JWT contains backend user_id (UUID), but Prisma uses auto-increment id
-  const prismaUser = await getUserByEmail(authUser.email);
+  let prismaUser = await getUserByEmail(authUser.email);
 
   if (!prismaUser) {
-    // User exists in auth DB but not in Prisma DB - data inconsistency
-    redirect('/login?error=profile_not_found');
+    // User exists in auth DB but not in Prisma DB - attempt sync
+    console.log('[Dashboard] User not found in Prisma, attempting sync:', authUser.email);
+    
+    try {
+      const { getUserProfile } = await import('@/app/lib/backend-api');
+      const { syncUserToPrisma } = await import('@/app/lib/sync');
+      
+      if (authUser.public_id) {
+        const backendUser = await getUserProfile(authUser.public_id);
+        
+        if (backendUser) {
+          // Pass email from JWT token since backend doesn't return it
+          await syncUserToPrisma(backendUser, authUser.email);
+          console.log('[Dashboard] User synced on-demand:', authUser.email);
+          
+          // Try to fetch again after sync
+          prismaUser = await getUserByEmail(authUser.email);
+        }
+      }
+    } catch (syncError) {
+      console.error('[Dashboard] On-demand sync failed:', syncError);
+    }
+    
+    // If still no user after sync attempt, show error message instead of redirect loop
+    if (!prismaUser) {
+      return (
+        <main className="p-4 md:p-6 lg:p-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <h2 className="text-xl font-semibold text-red-800 mb-2">Profile Sync Error</h2>
+            <p className="text-red-600 mb-4">
+              Unable to sync your profile. Please try logging out and logging back in.
+            </p>
+            <p className="text-sm text-red-500">
+              Email: {authUser.email} | ID: {authUser.public_id}
+            </p>
+          </div>
+        </main>
+      );
+    }
   }
 
   const userId = prismaUser.id;

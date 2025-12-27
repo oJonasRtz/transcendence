@@ -141,9 +141,20 @@ export async function validatorHook(req, reply) {
 }
 
 export async function authHook(req, reply) {
+	console.log('[authHook] Request URL:', req.url);
+	console.log('[authHook] Cookies:', req.cookies);
+	console.log('[authHook] Cookie header:', req.headers.cookie);
+	
 	const token = req.cookies?.jwt;
 	// Check if the user has a token
 	if (!token) {
+		console.log('[authHook] No JWT token found, redirecting to /login');
+		
+		// For API requests, return JSON instead of redirect
+		if (req.isApiRequest) {
+			return reply.code(401).send({ error: 'Not authenticated' });
+		}
+		
 		return reply.redirect("/login");
 	}
 

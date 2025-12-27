@@ -7,11 +7,15 @@ import { prisma } from './prisma';
 /**
  * Create user in Prisma database (for syncing with backend)
  * Uses upsert to avoid duplicate key errors if user already exists
+ * 
+ * Note: Prefer using syncUserToPrisma from lib/sync.ts for full user sync.
+ * This is a legacy function kept for backward compatibility.
  */
 export async function createUserInPrisma(data: {
   username: string;
   email: string;
   passwordHash: string;
+  publicId?: string;
 }) {
   return await prisma.user.upsert({
     where: { email: data.email },
@@ -19,6 +23,7 @@ export async function createUserInPrisma(data: {
       username: data.username,
     },
     create: {
+      publicId: data.publicId || `legacy-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       username: data.username,
       email: data.email,
       passwordHash: data.passwordHash || 'managed_by_backend',

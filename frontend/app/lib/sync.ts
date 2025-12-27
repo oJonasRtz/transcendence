@@ -37,12 +37,25 @@ import {
  *
  * Uses publicId (SQLite UUID) as the unique identifier for robust ID mapping.
  * Creates user if doesn't exist, updates if exists.
+ * 
+ * @param sqliteUser - User data from backend (may not include email)
+ * @param email - Optional email override (from JWT token or login form)
  */
-export async function syncUserToPrisma(sqliteUser: SQLiteUser): Promise<void> {
+export async function syncUserToPrisma(sqliteUser: SQLiteUser, email?: string): Promise<void> {
   try {
-    const prismaData = transformSQLiteUserToPrisma(sqliteUser);
+    // Use provided email or fall back to sqliteUser.email (which might be undefined)
+    const userEmail = email || sqliteUser.email;
+    
+    if (!userEmail) {
+      throw new Error('Email is required for syncing user to Prisma. SQLite data does not include email.');
+    }
 
-    await prisma.user.upsert({
+    const prismaData = transformSQLiteUserToPrisma({
+      ...sqliteUser,
+      email: userEmail, // Ensure email is set
+    });
+
+    const result = await prisma.user.upsert({
       where: { publicId: sqliteUser.public_id },
       update: {
         username: prismaData.username,
@@ -62,9 +75,10 @@ export async function syncUserToPrisma(sqliteUser: SQLiteUser): Promise<void> {
       },
     });
 
-    console.log(`Synced user to Prisma: ${sqliteUser.username} (${sqliteUser.public_id})`);
+    console.log(`[Sync] User synced: ${sqliteUser.username} -> Prisma ID: ${result.id}`);
   } catch (error) {
-    console.error('Error syncing user to Prisma:', error);
+    console.error('[Sync] Error syncing user to Prisma:', error);
+    console.error('SQLite user data:', JSON.stringify(sqliteUser, null, 2));
     throw error;
   }
 }

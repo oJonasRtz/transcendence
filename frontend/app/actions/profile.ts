@@ -7,11 +7,73 @@ import {
   changePasswordSchema,
   changeNicknameSchema,
   changeDescriptionSchema,
+  changeUsernameSchema,
 } from '@/app/lib/validations';
 import { getUser } from '@/app/lib/auth';
-import { createUserInPrisma } from '@/app/lib/data';
 
 const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
+
+export async function changeUsername(_state: { error?: string; success?: string } | undefined, formData: FormData) {
+  try {
+    const username = formData.get('username') as string;
+
+    // Validate input
+    const validation = changeUsernameSchema.safeParse({ username });
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
+      return { error: errors.username?.[0] || 'Invalid username' };
+    }
+
+    // Get JWT cookie
+    const cookieStore = await cookies();
+    const token = cookieStore.get('jwt');
+
+    if (!token) {
+      redirect('/login');
+    }
+
+    // Call backend API
+    const response = await fetch(`${API_GATEWAY_URL}/setAuthUsername`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `jwt=${token.value}`,
+      },
+      body: JSON.stringify({ username }),
+      credentials: 'include',
+    });
+
+    const data = await response.json();
+
+    // Check for errors
+    if (data?.error && data.error.length > 0) {
+      return { error: data.error[0] };
+    }
+
+    // Sync to Prisma - fetch fresh data from backend and sync
+    try {
+      const authUser = await getUser();
+      if (authUser && authUser.public_id) {
+        const { getUserProfile } = await import('@/app/lib/backend-api');
+        const { syncUserToPrisma } = await import('@/app/lib/sync');
+        
+        const backendUser = await getUserProfile(authUser.public_id);
+        if (backendUser) {
+          // Sync with updated username
+          await syncUserToPrisma(backendUser, authUser.email);
+          console.log('[changeUsername] User re-synced to Prisma after username change');
+        }
+      }
+    } catch (prismaError) {
+      console.error('Failed to sync username to Prisma:', prismaError);
+    }
+
+    return { success: 'Username updated successfully!' };
+  } catch (error) {
+    console.error('Change username error:', error);
+    return { error: 'An unexpected error occurred. Please try again.' };
+  }
+}
 
 export async function changeEmail(_state: { error?: string; success?: string } | undefined, formData: FormData) {
   try {
@@ -50,15 +112,19 @@ export async function changeEmail(_state: { error?: string; success?: string } |
       return { error: data.error[0] };
     }
 
-    // Sync to Prisma
+    // Sync to Prisma - fetch fresh data from backend and sync
     try {
       const authUser = await getUser();
-      if (authUser) {
-        await createUserInPrisma({
-          username: authUser.username,
-          email,
-          passwordHash: 'managed_by_backend',
-        });
+      if (authUser && authUser.public_id) {
+        const { getUserProfile } = await import('@/app/lib/backend-api');
+        const { syncUserToPrisma } = await import('@/app/lib/sync');
+        
+        const backendUser = await getUserProfile(authUser.public_id);
+        if (backendUser) {
+          // Sync with updated email
+          await syncUserToPrisma(backendUser, email);
+          console.log('[changeEmail] User re-synced to Prisma after email change');
+        }
       }
     } catch (prismaError) {
       console.error('Failed to sync email to Prisma:', prismaError);

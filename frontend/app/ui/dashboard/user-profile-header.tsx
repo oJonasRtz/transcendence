@@ -8,7 +8,7 @@ export default async function UserProfileHeader({ userId }: { userId: number }) 
     <>
       <div className="flex items-center gap-4">
         <img
-          src={user?.avatar || 'images/default_avatar.png'}
+          src={user?.avatar || '/images/default_avatar.png'}
           alt="User Avatar"
           className="h-40 w-40 rounded-full"
         />
