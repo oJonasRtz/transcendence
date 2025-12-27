@@ -2,7 +2,7 @@ import AcmeLogo from '@/app/ui/pong-logo';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import Starfield from '@/app/ui/starfield';
-import NewPong from '@/app/ui/new-pong'; // ✅ Renamed Import
+import NewPong from '@/app/ui/new-pong'; 
 import { ButtonGlimmer } from '@/app/ui/button-glimmer';
 
 export default function Page() {

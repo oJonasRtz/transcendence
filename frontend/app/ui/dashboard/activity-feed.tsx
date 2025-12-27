@@ -10,19 +10,21 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
   const activities = await getActivityFeed(userId, 10);
 
   return (
-    <div className="rounded-lg bg-white shadow">
-      <div className="border-b p-6">
-        <h2 className="text-xl font-semibold">Recent Activity</h2>
+    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
+      <div className="border-b border-white/10 p-6">
+        <h2 className="text-xl font-black tracking-tight text-white uppercase">
+          <span className="text-yellow-400">//</span> Recent Activity
+        </h2>
       </div>
 
-      <div className="divide-y">
+      <div className="divide-y divide-white/5">
         {activities.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
-            <p>No recent activity</p>
+          <div className="p-6 text-center">
+            <p className="text-slate-500 font-mono text-sm">// NO RECENT ACTIVITY</p>
           </div>
         ) : (
           activities.map((activity, index) => (
-            <div key={index} className="p-4">
+            <div key={index} className="p-4 hover:bg-white/5 transition-all duration-300">
               {activity.type === 'match' && (
                 <ActivityItem
                   icon={BoltIcon}
@@ -30,7 +32,7 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
                   text={
                     <>
                       Played against{' '}
-                      <span className="font-semibold">
+                      <span className="font-semibold text-blue-400">
                         {activity.data.player1Id === userId
                           ? activity.data.player2.username
                           : activity.data.player1.username}
@@ -48,7 +50,7 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
                   text={
                     <>
                       Unlocked{' '}
-                      <span className="font-semibold">
+                      <span className="font-semibold text-yellow-400">
                         {activity.data.achievement.name}
                       </span>
                     </>
@@ -64,7 +66,7 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
                   text={
                     <>
                       New friend:{' '}
-                      <span className="font-semibold">
+                      <span className="font-semibold text-green-400">
                         {activity.data.userId === userId
                           ? activity.data.friend.username
                           : activity.data.user.username}
@@ -94,19 +96,19 @@ function ActivityItem({
   date: Date;
 }) {
   const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
-    green: 'bg-green-100 text-green-600',
+    blue: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    yellow: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
+    green: 'bg-green-500/10 text-green-400 border-green-500/30',
   };
 
   return (
     <div className="flex items-center space-x-3">
-      <div className={`rounded-full p-2 ${colorClasses[iconColor]}`}>
+      <div className={`rounded-lg p-2 border ${colorClasses[iconColor]}`}>
         <Icon className="h-5 w-5" />
       </div>
       <div className="flex-1">
-        <p className="text-sm">{text}</p>
-        <p className="text-xs text-gray-500">
+        <p className="text-sm text-slate-300">{text}</p>
+        <p className="text-xs font-mono text-slate-500">
           {new Date(date).toLocaleString()}
         </p>
       </div>

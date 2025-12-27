@@ -12,22 +12,24 @@ export default async function RecentMessages({ userId }: { userId: number }) {
   const recentConversations = conversations.slice(0, 5);
 
   return (
-    <div className="rounded-lg bg-white shadow">
-      <div className="border-b p-6">
+    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
+      <div className="border-b border-white/10 p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Messages</h2>
+          <h2 className="text-xl font-black tracking-tight text-white uppercase">
+            <span className="text-purple-400">//</span> Messages
+          </h2>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white">
+            <span className="rounded-lg bg-red-500/20 border border-red-500/50 px-3 py-1 text-xs font-black text-red-400 animate-pulse">
               {unreadCount}
             </span>
           )}
         </div>
       </div>
 
-      <div className="max-h-96 divide-y overflow-y-auto">
+      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
         {recentConversations.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
-            <p>No messages yet</p>
+          <div className="p-6 text-center">
+            <p className="text-slate-500 font-mono text-sm">// NO MESSAGES YET</p>
           </div>
         ) : (
           recentConversations.map((conv) =>
@@ -35,7 +37,7 @@ export default async function RecentMessages({ userId }: { userId: number }) {
               <Link
                 key={conv.id}
                 href={`/messages/${conv.id}`}
-                className="block p-4 hover:bg-gray-50"
+                className="block p-4 hover:bg-white/5 transition-all duration-300 group"
               >
                 <div className="flex items-start space-x-3">
                   <div className="relative flex-shrink-0">
@@ -44,22 +46,22 @@ export default async function RecentMessages({ userId }: { userId: number }) {
                       alt={conv.otherUser.username}
                       width={48}
                       height={48}
-                      className="rounded-full"
+                      className="rounded-full border-2 border-white/10 group-hover:border-purple-400/50 transition-colors"
                     />
                     {conv.otherUser.isOnline && (
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{conv.otherUser.username}</p>
+                    <p className="font-semibold text-white">{conv.otherUser.username}</p>
                     {conv.lastMessage && (
                       <>
-                        <p className="truncate text-sm text-gray-500">
+                        <p className="truncate text-sm text-slate-400 font-mono">
                           {conv.lastMessage.content.substring(0, 50)}
                           {conv.lastMessage.content.length > 50 ? '...' : ''}
                         </p>
-                        <p className="mt-1 text-xs text-gray-400">
+                        <p className="mt-1 text-xs text-slate-500 font-mono">
                           {new Date(
                             conv.lastMessage.createdAt
                           ).toLocaleDateString()}
@@ -74,12 +76,13 @@ export default async function RecentMessages({ userId }: { userId: number }) {
         )}
       </div>
 
-      <div className="border-t p-4">
+      <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
           href="/messages"
-          className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+          className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
-          View all messages →
+          View all messages 
+          <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
     </div>

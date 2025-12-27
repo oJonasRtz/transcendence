@@ -9,22 +9,26 @@ export default async function FriendsList({ userId }: { userId: number }) {
   const onlineFriends = allFriends.filter((friend) => friend.isOnline);
 
   return (
-    <div className="rounded-lg bg-white shadow">
-      <div className="border-b p-6">
-        <h2 className="text-xl font-semibold">Online Friends</h2>
-        <p className="mt-1 text-sm text-gray-500">{onlineFriends.length} online</p>
+    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
+      <div className="border-b border-white/10 p-6">
+        <h2 className="text-xl font-black tracking-tight text-white uppercase">
+          <span className="text-green-400">//</span> Online Friends
+        </h2>
+        <p className="mt-2 text-sm font-mono text-slate-400">
+          <span className="text-green-400">{onlineFriends.length}</span> active
+        </p>
       </div>
 
-      <div className="max-h-96 divide-y overflow-y-auto">
+      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
         {onlineFriends.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
-            <p>No friends online</p>
+          <div className="p-6 text-center">
+            <p className="text-slate-500 font-mono text-sm">// NO FRIENDS ONLINE</p>
           </div>
         ) : (
           onlineFriends.map((friend) => (
             <div
               key={friend.id}
-              className="flex cursor-pointer items-center space-x-3 p-4 hover:bg-gray-50"
+              className="flex cursor-pointer items-center space-x-3 p-4 hover:bg-white/5 transition-all duration-300 group"
             >
               <div className="relative">
                 <Image
@@ -32,17 +36,17 @@ export default async function FriendsList({ userId }: { userId: number }) {
                   alt={friend.username}
                   width={40}
                   height={40}
-                  className="rounded-full"
+                  className="rounded-full border-2 border-white/10 group-hover:border-green-400/50 transition-colors"
                 />
-                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500"></span>
+                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
               </div>
 
               <div className="flex-1">
-                <p className="font-semibold">{friend.username}</p>
-                <p className="text-xs text-green-600">Online</p>
+                <p className="font-semibold text-white">{friend.username}</p>
+                <p className="text-xs font-mono text-green-400 uppercase">Online</p>
               </div>
 
-              <button className="text-blue-600 hover:text-blue-800">
+              <button className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300">
                 <ChatBubbleLeftIcon className="h-5 w-5" />
               </button>
             </div>
@@ -50,12 +54,13 @@ export default async function FriendsList({ userId }: { userId: number }) {
         )}
       </div>
 
-      <div className="border-t p-4">
+      <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
           href="/friends"
-          className="text-sm font-semibold text-blue-600 hover:text-blue-800"
+          className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
-          View all friends →
+          View all friends 
+          <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
     </div>
