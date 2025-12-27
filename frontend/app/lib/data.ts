@@ -1,17 +1,45 @@
 import { PrismaClient } from '../../prisma/generated';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
+// Create PostgreSQL connection pool with proper configuration
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
 
+// Create Prisma adapter with the pool instance
+const adapter = new PrismaPg(pool);
+
+// Initialize Prisma Client with the adapter
 const prisma = new PrismaClient({
-  adapter,
+  adapter: adapter as any, // Type assertion needed for custom adapters
 });
 
 // ============================================
 // USER QUERIES
 // ============================================
+
+/**
+ * Create user in Prisma database (for syncing with backend)
+ * Uses upsert to avoid duplicate key errors if user already exists
+ */
+export async function createUserInPrisma(data: {
+  username: string;
+  email: string;
+  passwordHash: string;
+}) {
+  return await prisma.user.upsert({
+    where: { email: data.email },
+    update: {
+      username: data.username,
+    },
+    create: {
+      username: data.username,
+      email: data.email,
+      passwordHash: data.passwordHash || 'managed_by_backend',
+    },
+  });
+}
 
 /**
  * Get user by ID with all relations

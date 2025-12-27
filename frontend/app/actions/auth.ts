@@ -86,6 +86,24 @@ export async function login(formData: FormData) {
 
       // Clear CAPTCHA cookie after successful login
       cookieStore.delete('captcha_code');
+
+      // Sync user to Prisma if not already there (for existing users)
+      try {
+        const { getUser } = await import('@/app/lib/auth');
+        const { createUserInPrisma } = await import('@/app/lib/data');
+        const authUser = await getUser();
+
+        if (authUser) {
+          await createUserInPrisma({
+            username: authUser.username,
+            email: authUser.email,
+            passwordHash: 'managed_by_backend',
+          });
+        }
+      } catch (prismaError) {
+        // Log but don't fail login if Prisma sync fails
+        console.error('Failed to sync user to Prisma:', prismaError);
+      }
     }
 
     // Successful login
@@ -175,6 +193,19 @@ export async function signup(formData: FormData) {
     }
 
     // Registration successful!
+    // Sync user to Prisma PostgreSQL database
+    try {
+      const { createUserInPrisma } = await import('@/app/lib/data');
+      await createUserInPrisma({
+        username,
+        email,
+        passwordHash: '', // Backend handles password hashing, we don't need to store it again
+      });
+    } catch (prismaError) {
+      // Log but don't fail registration if Prisma sync fails
+      console.error('Failed to sync user to Prisma:', prismaError);
+    }
+
     // Auto-login without requiring CAPTCHA again (user just verified with CAPTCHA)
     const loginResponse = await fetch(`${API_GATEWAY_URL}/checkLogin`, {
       method: 'POST',
