@@ -47,16 +47,24 @@ export default function SettingsForm({
   const [state, formAction] = useActionState(action, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Auto-clear success message after 3 seconds and refresh
+  // Show success message and refresh data
   useEffect(() => {
     if (state?.success) {
       setShowSuccess(true);
-      // Force a hard refresh to fetch new data
-      router.refresh();
-      const timer = setTimeout(() => {
+
+      // Delay router.refresh() slightly to ensure state is visible
+      const refreshTimer = setTimeout(() => {
+        router.refresh();
+      }, 100);
+
+      const hideTimer = setTimeout(() => {
         setShowSuccess(false);
-      }, 3000);
-      return () => clearTimeout(timer);
+      }, 5000);
+
+      return () => {
+        clearTimeout(refreshTimer);
+        clearTimeout(hideTimer);
+      };
     }
   }, [state?.success, router]);
 

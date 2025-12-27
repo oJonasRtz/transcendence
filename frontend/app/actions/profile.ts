@@ -223,6 +223,7 @@ export async function changePassword(_state: { error?: string; success?: string 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         Cookie: `jwt=${token.value}`,
       },
       body: JSON.stringify({
@@ -232,6 +233,13 @@ export async function changePassword(_state: { error?: string; success?: string 
       }),
       credentials: 'include',
     });
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[changePassword] Expected JSON but got:', text.substring(0, 200));
+      return { error: 'Server returned HTML instead of JSON. Please check api-gateway logs.' };
+    }
 
     const data = await response.json();
 
@@ -343,11 +351,19 @@ export async function changeDescription(_state: { error?: string; success?: stri
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         Cookie: `jwt=${token.value}`,
       },
       body: JSON.stringify({ description }),
       credentials: 'include',
     });
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[changeDescription] Expected JSON but got:', text.substring(0, 200));
+      return { error: 'Server returned HTML instead of JSON. Please check api-gateway logs.' };
+    }
 
     const data = await response.json();
 
