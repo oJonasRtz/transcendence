@@ -1,12 +1,16 @@
-import axios from 'axios'; 
+import axios from 'axios';
+
+const LANGS_TO_TEST = ["pt", "en", "es", "fr", "it", "de"];
 
 export async function checkNameSecurity(name) {
+     if (typeof name !== "string" || !name || !name.trim())
+	 return ({ nsfw: false, data: null, error: "EMPTY_USERNAME" });
+     for (const langCode of LANGS_TO_TEST) {
 	try {
-		if (!name || !name.trim() || typeof name !== "string")
-			return ({ nsfw: false, data: null, error: "EMPTY_USERNAME" });
+		console.log("langCode testing:", langCode);
 		const params = new URLSearchParams({
 			text: name,
-			lang: "en",
+			lang: langCode,
 			mode: "ml",
 			api_user: process.env.SIGHTENGINE_USER,
 			api_secret: process.env.SIGHTENGINE_SECRET
@@ -29,9 +33,12 @@ export async function checkNameSecurity(name) {
 
 		//console.log("Result CheckNameSecurity:", result);
 
-		return ({ nsfw, data: response.data });
+		if (nsfw)
+			return ({ nsfw, data: response.data });
 	} catch (err) {
 		console.error("Error da checkNameSecurity:", err);
 		return ({ nsfw: false, data: null, error: err.message });
 	}
+    }
+    return { nsfw: false, data: null };
 }
