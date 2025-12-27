@@ -18,7 +18,7 @@ import { User as PrismaUser } from '../../prisma/generated';
 export interface SQLiteUser {
   user_id: string; // UUID
   username: string;
-  nickname: string;
+  nickname?: string | null; // Optional - user may not have set a nickname yet
   email?: string; // Optional - not always returned by backend
   avatar: string;
   isOnline: number | boolean; // SQLite returns 0/1 as integer
