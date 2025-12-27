@@ -58,8 +58,11 @@ export async function validatorHook(req, reply) {
 			condition: req.body.captchaInput !== undefined && req.body.captchaInput !== null && typeof req.body.captchaInput !== "string",
 			message: "The code must be a string"
 		},
+		// CAPTCHA validation - handled differently for EJS vs Next.js
+		// EJS: Validates against req.session.captcha
+		// Next.js: CAPTCHA already validated in Server Action before sending request
 		{
-			condition: req.body.captchaInput && req.session.captcha !== req.body.captchaInput,
+			condition: req.body.captchaInput && !req.isApiRequest && req.session.captcha !== req.body.captchaInput,
 			message: "Invalid code"
 		},
 		{

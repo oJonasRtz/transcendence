@@ -80,7 +80,7 @@ export default function LoginForm() {
               name="password"
               placeholder="••••••••••••"
               required
-              minLength={6}
+              minLength={8}
               disabled={isPending}
             />
             <KeyIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />

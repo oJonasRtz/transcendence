@@ -124,7 +124,7 @@ const publicControllers = {
 			return reply.redirect("/login");
 		} catch (err) {
 			if (err?.response?.status === 409) {
-				error = ["Registration failed. Try again"];
+				error = ["Username or email already exists"];
 				if (req.isApiRequest) {
 					return reply.code(409).send({ success: [], error });
 				}

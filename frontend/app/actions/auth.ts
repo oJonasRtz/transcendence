@@ -150,6 +150,7 @@ export async function signup(formData: FormData) {
         password,
         confirmPassword: password, // Required by auth-service
         nickname: nickname || username, // Use username if nickname is empty
+        captchaInput: storedCaptcha.value, // Send validated CAPTCHA to backend
       }),
       credentials: 'include',
       redirect: 'manual', // Don't follow redirects
@@ -173,14 +174,44 @@ export async function signup(formData: FormData) {
       return { error: data.error[0] };
     }
 
-    // Clear CAPTCHA cookie after successful registration
+    // Registration successful!
+    // Auto-login without requiring CAPTCHA again (user just verified with CAPTCHA)
+    const loginResponse = await fetch(`${API_GATEWAY_URL}/checkLogin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        captchaInput: storedCaptcha.value, // Reuse the CAPTCHA from registration (already validated)
+      }),
+      credentials: 'include',
+    });
+
+    const loginData = await loginResponse.json();
+
+    if (loginData?.token) {
+      const cookieStore = await cookies();
+
+      // Clear CAPTCHA cookie
+      cookieStore.delete('captcha_code');
+
+      // Set JWT cookie
+      cookieStore.set('jwt', loginData.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 60 * 60 * 1000,
+      });
+      redirect('/dashboard');
+    }
+
+    // If auto-login fails, redirect to login page
     const cookieStore = await cookies();
     cookieStore.delete('captcha_code');
-
-    // After successful registration, log the user in
-    // Registration doesn't return a token, so we need to login
-    // Note: login() will generate a new CAPTCHA requirement
-    return await login(formData);
+    redirect('/login?registered=true');
   } catch (error) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
       throw error; // Re-throw redirect errors
