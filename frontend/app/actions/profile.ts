@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import {
   changeEmailSchema,
   changePasswordSchema,
@@ -32,16 +33,24 @@ export async function changeUsername(_state: { error?: string; success?: string 
       redirect('/login');
     }
 
-    // Call backend API
+    // Call backend API with credentials: 'include' to receive new JWT cookie
     const response = await fetch(`${API_GATEWAY_URL}/setAuthUsername`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         Cookie: `jwt=${token.value}`,
       },
       body: JSON.stringify({ username }),
       credentials: 'include',
     });
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[changeUsername] Expected JSON but got:', text.substring(0, 200));
+      return { error: 'Server returned HTML instead of JSON. Please check api-gateway logs.' };
+    }
 
     const data = await response.json();
 
@@ -50,23 +59,41 @@ export async function changeUsername(_state: { error?: string; success?: string 
       return { error: data.error[0] };
     }
 
-    // Sync to Prisma - fetch fresh data from backend and sync
+    // Extract new JWT from Set-Cookie header and update Next.js cookie
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+      const jwtMatch = setCookieHeader.match(/jwt=([^;]+)/);
+      if (jwtMatch) {
+        const newJwtToken = jwtMatch[1];
+        cookieStore.set('jwt', newJwtToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          sameSite: 'strict',
+          maxAge: 60 * 60, // 1 hour
+        });
+      }
+    }
+
+    // Sync to Prisma - fetch fresh data from backend and sync with new username
     try {
       const authUser = await getUser();
       if (authUser && authUser.public_id) {
         const { getUserProfile } = await import('@/app/lib/backend-api');
         const { syncUserToPrisma } = await import('@/app/lib/sync');
-        
+
         const backendUser = await getUserProfile(authUser.public_id);
         if (backendUser) {
-          // Sync with updated username
           await syncUserToPrisma(backendUser, authUser.email);
-          console.log('[changeUsername] User re-synced to Prisma after username change');
         }
       }
     } catch (prismaError) {
       console.error('Failed to sync username to Prisma:', prismaError);
     }
+
+    // Revalidate all relevant paths to show updated username
+    revalidatePath('/dashboard/settings/username');
+    revalidatePath('/dashboard');
 
     return { success: 'Username updated successfully!' };
   } catch (error) {
@@ -94,16 +121,24 @@ export async function changeEmail(_state: { error?: string; success?: string } |
       redirect('/login');
     }
 
-    // Call backend API
+    // Call backend API with credentials: 'include' to receive new JWT cookie
     const response = await fetch(`${API_GATEWAY_URL}/setAuthEmail`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         Cookie: `jwt=${token.value}`,
       },
       body: JSON.stringify({ email }),
       credentials: 'include',
     });
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[changeEmail] Expected JSON but got:', text.substring(0, 200));
+      return { error: 'Server returned HTML instead of JSON. Please check api-gateway logs.' };
+    }
 
     const data = await response.json();
 
@@ -112,23 +147,41 @@ export async function changeEmail(_state: { error?: string; success?: string } |
       return { error: data.error[0] };
     }
 
-    // Sync to Prisma - fetch fresh data from backend and sync
+    // Extract new JWT from Set-Cookie header and update Next.js cookie
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+      const jwtMatch = setCookieHeader.match(/jwt=([^;]+)/);
+      if (jwtMatch) {
+        const newJwtToken = jwtMatch[1];
+        cookieStore.set('jwt', newJwtToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          sameSite: 'strict',
+          maxAge: 60 * 60, // 1 hour
+        });
+      }
+    }
+
+    // Sync to Prisma - fetch fresh data from backend and sync with new email
     try {
       const authUser = await getUser();
       if (authUser && authUser.public_id) {
         const { getUserProfile } = await import('@/app/lib/backend-api');
         const { syncUserToPrisma } = await import('@/app/lib/sync');
-        
+
         const backendUser = await getUserProfile(authUser.public_id);
         if (backendUser) {
-          // Sync with updated email
           await syncUserToPrisma(backendUser, email);
-          console.log('[changeEmail] User re-synced to Prisma after email change');
         }
       }
     } catch (prismaError) {
       console.error('Failed to sync email to Prisma:', prismaError);
     }
+
+    // Revalidate all relevant paths to show updated email
+    revalidatePath('/dashboard/settings/email');
+    revalidatePath('/dashboard');
 
     return { success: 'Email updated successfully!' };
   } catch (error) {
@@ -213,16 +266,24 @@ export async function changeNickname(_state: { error?: string; success?: string 
       redirect('/login');
     }
 
-    // Call backend API
+    // Call backend API with credentials: 'include' to receive new JWT cookie
     const response = await fetch(`${API_GATEWAY_URL}/setAuthNickname`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         Cookie: `jwt=${token.value}`,
       },
       body: JSON.stringify({ nickname }),
       credentials: 'include',
     });
+
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[changeNickname] Expected JSON but got:', text.substring(0, 200));
+      return { error: 'Server returned HTML instead of JSON. Please check api-gateway logs.' };
+    }
 
     const data = await response.json();
 
@@ -230,6 +291,26 @@ export async function changeNickname(_state: { error?: string; success?: string 
     if (data?.error && data.error.length > 0) {
       return { error: data.error[0] };
     }
+
+    // Extract new JWT from Set-Cookie header and update Next.js cookie
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+      const jwtMatch = setCookieHeader.match(/jwt=([^;]+)/);
+      if (jwtMatch) {
+        const newJwtToken = jwtMatch[1];
+        cookieStore.set('jwt', newJwtToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          sameSite: 'strict',
+          maxAge: 60 * 60, // 1 hour
+        });
+      }
+    }
+
+    // Revalidate all relevant paths to show updated nickname
+    revalidatePath('/dashboard/settings/nickname');
+    revalidatePath('/dashboard');
 
     return { success: 'Nickname updated successfully!' };
   } catch (error) {

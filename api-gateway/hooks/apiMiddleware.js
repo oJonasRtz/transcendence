@@ -28,21 +28,6 @@ export async function detectApiRequest(req, reply) {
 
 	// Store flag in request for hooks and controllers to check
 	req.isApiRequest = isApiRequest;
-	
-	// Debug logging only for seeProfile
-	if (req.url.includes('seeProfile')) {
-		console.log('[detectApiRequest] URL:', req.url);
-		console.log('[detectApiRequest] Accept:', acceptHeader);
-		console.log('[detectApiRequest] Content-Type:', contentType);
-		console.log('[detectApiRequest] isApiRequest:', isApiRequest);
-		console.log('[detectApiRequest] Headers:', JSON.stringify({
-			accept: req.headers['accept'],
-			'content-type': req.headers['content-type'],
-			cookie: req.headers['cookie'] ? 'present' : 'missing',
-			origin: req.headers['origin'],
-			referer: req.headers['referer']
-		}, null, 2));
-	}
 
 	return; // Continue to next handler
 }

@@ -231,13 +231,13 @@ const databaseModels = {
 
 	getAllUsersInformation: async function getAllUsersInformation(fastify) {
 		// We are using JOIN here to combine using a common element here the user_id from auth and also from users table
-		const users = await fastify.db.all("SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id");
+		const users = await fastify.db.all("SELECT users.*, auth.username, auth.nickname FROM users JOIN auth ON auth.user_id = users.user_id");
 		return (users ?? null);
 	},
 
 	getDataByPublicId: async function getAllUsersInformation(fastify, body) {
 		const user_id = await fastify.db.get("SELECT user_id FROM users WHERE public_id = ?", [ body.public_id ]);
-		const data = await fastify.db.get("SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?", [ user_id.user_id ]);
+		const data = await fastify.db.get("SELECT users.*, auth.username, auth.nickname FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?", [ user_id.user_id ]);
 		return (data ?? null);
 	},
 

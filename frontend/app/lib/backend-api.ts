@@ -21,7 +21,7 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 interface BackendUser {
   user_id: string;
   username: string;
-  nickname: string;
+  nickname?: string | null; // Optional - user may not have set a nickname yet
   email?: string; // Optional - not always returned
   avatar: string;
   isOnline: number | boolean; // SQLite returns 0/1
@@ -64,7 +64,6 @@ interface BackendResponse<T> {
 async function getAuthToken(): Promise<string | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get('jwt');
-  console.log('[getAuthToken] Token found:', token ? `Yes (${token.value.substring(0, 20)}...)` : 'No');
   return token?.value || null;
 }
 
@@ -107,14 +106,11 @@ export async function getUserProfile(publicId: string): Promise<BackendUser | nu
   try {
     const token = await getAuthToken();
     if (!token) {
-      console.error('[getUserProfile] No auth token available');
       return null;
     }
 
-    console.log('[getUserProfile] Fetching user profile for public_id:', publicId);
-    const url = `${BACKEND_URL}/seeProfile?user=${publicId}`;
-    console.log('[getUserProfile] Backend URL:', url);
-    console.log('[getUserProfile] Token:', token.substring(0, 20) + '...');
+    // Add timestamp to prevent Next.js request deduplication
+    const url = `${BACKEND_URL}/seeProfile?user=${publicId}&_t=${Date.now()}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -124,35 +120,21 @@ export async function getUserProfile(publicId: string): Promise<BackendUser | nu
         'Cookie': `jwt=${token}`,
       },
       cache: 'no-store',
-    });
-
-    console.log('[getUserProfile] Response status:', response.status, response.statusText);
-    console.log('[getUserProfile] Response headers:', {
-      'content-type': response.headers.get('content-type'),
-      'content-length': response.headers.get('content-length')
+      next: { revalidate: 0 }, // Force no caching
     });
 
     if (!response.ok) {
-      const text = await response.text();
-      console.error('[getUserProfile] Backend error response (first 500 chars):', text.substring(0, 500));
       return null;
     }
 
-    // Check what we actually got
     const contentType = response.headers.get('content-type');
     const responseText = await response.text();
-    
-    console.log('[getUserProfile] Response content-type:', contentType);
-    console.log('[getUserProfile] Response text (first 200 chars):', responseText.substring(0, 200));
-    
+
     // Try to parse as JSON
     if (contentType && contentType.includes('application/json')) {
       const data = JSON.parse(responseText);
-      console.log('[getUserProfile] User profile fetched:', data.username || 'unknown');
       return data as BackendUser;
     } else {
-      console.error('[getUserProfile] Expected JSON but got:', contentType);
-      console.error('[getUserProfile] Response was HTML, not JSON');
       return null;
     }
   } catch (error) {

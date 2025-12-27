@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import SettingsForm from '@/app/ui/dashboard/settings-form';
 import { changeNickname } from '@/app/actions/profile';
 import { getUser } from '@/app/lib/auth';
+import { getUserProfile } from '@/app/lib/backend-api';
 import { redirect} from 'next/navigation';
 import LoadingSkeleton from '@/app/ui/dashboard/loading-skeleton';
 
@@ -11,6 +12,10 @@ async function NicknameFormContent() {
   if (!user) {
     redirect('/login');
   }
+
+  // Fetch nickname from backend (not in JWT)
+  const backendUser = await getUserProfile(user.public_id);
+  const currentNickname = backendUser?.nickname || user.username;
 
   return (
     <SettingsForm
@@ -24,7 +29,7 @@ async function NicknameFormContent() {
           Current Nickname
         </label>
         <div className="px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-slate-400">
-          {user.username}
+          {currentNickname}
         </div>
       </div>
 

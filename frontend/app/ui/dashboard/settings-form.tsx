@@ -1,7 +1,8 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useEffect, useState, useActionState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SettingsFormProps {
   title: string;
@@ -42,19 +43,22 @@ export default function SettingsForm({
   children,
   submitText = 'Update',
 }: SettingsFormProps) {
-  const [state, formAction] = useFormState(action, undefined);
+  const router = useRouter();
+  const [state, formAction] = useActionState(action, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Auto-clear success message after 3 seconds
+  // Auto-clear success message after 3 seconds and refresh
   useEffect(() => {
     if (state?.success) {
       setShowSuccess(true);
+      // Force a hard refresh to fetch new data
+      router.refresh();
       const timer = setTimeout(() => {
         setShowSuccess(false);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [state?.success]);
+  }, [state?.success, router]);
 
   return (
     <div className="space-y-6">

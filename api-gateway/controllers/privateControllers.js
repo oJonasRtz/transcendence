@@ -490,8 +490,12 @@ const privateControllers = {
 
 	setAuthEmail: async function setAuthEmail(req, reply) {
 		try {
-			if (!req.body || !req.body.email) { 
-				req.session.error = ["You need to fill everything"];
+			if (!req.body || !req.body.email) {
+				const error = ["You need to fill everything"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/changeEmail");
 			}
 
@@ -500,14 +504,18 @@ const privateControllers = {
 
                         await axios.post("http://auth-service:3001/setAuthEmail", req.body);
 
-                        req.session.success = ["Email changed successfully"];
+                        const success = ["Email changed successfully"];
 
                         const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
 
                         const token = response?.data.token;
 
                         if (!token) {
-                                req.session.error = ["Error recreating the jwt"];
+				const error = ["Error recreating the jwt"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+                                req.session.error = error;
                                 return reply.redirect("/home");
                         }
 
@@ -521,11 +529,20 @@ const privateControllers = {
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
+			if (req.isApiRequest) {
+				return reply.send({ success, error: [] });
+			}
+
+			req.session.success = success;
                         return reply.redirect("/home");
 
                 } catch (err) {
                         console.error("API-GATEWAY setAuthEmail error:", err);
-                        req.session.error = ["Error trying to change your email"];
+			const error = ["Error trying to change your email"];
+			if (req.isApiRequest) {
+				return reply.send({ success: [], error });
+			}
+                        req.session.error = error;
                         return reply.redirect("/changeEmail");
                 }
 	},
@@ -533,7 +550,11 @@ const privateControllers = {
 	setAuthNickname: async function setAuthNickname(req, reply) {
 		try {
 			if (!req.body || !req.body.nickname) {
-				req.session.error = ["You need to fill everything"];
+				const error = ["You need to fill everything"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/changeNickname");
 			}
 			req.body.user_id = req.user.user_id;
@@ -545,14 +566,18 @@ const privateControllers = {
 
                         await axios.post("http://auth-service:3001/setAuthNickname", req.body);
 
-                        req.session.success = ["Nickname changed successfully"];
+                        const success = ["Nickname changed successfully"];
 
                         const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
 
                         const token = response?.data.token;
 
                         if (!token) {
-                                req.session.error = ["Error recreating the jwt"];
+				const error = ["Error recreating the jwt"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+                                req.session.error = error;
                                 return reply.redirect("/home");
                         }
 
@@ -566,15 +591,28 @@ const privateControllers = {
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
+			if (req.isApiRequest) {
+				return reply.send({ success, error: [] });
+			}
+
+			req.session.success = success;
                         return reply.redirect("/home");
 
 		} catch (err) {
 			if (err.message === "You cannot use that nickname") {
-				req.session.error = ["Forbidden nickname"];
+				const error = ["Forbidden nickname"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/changeNickname");
 			}
 			console.error("API-GATEWAY setAuthNickname error:", err);
-			req.session.error = ["Error trying to change your nickname"];
+			const error = ["Error trying to change your nickname"];
+			if (req.isApiRequest) {
+				return reply.send({ success: [], error });
+			}
+			req.session.error = error;
 			return reply.redirect("/home");
 		}
 	},
@@ -582,7 +620,11 @@ const privateControllers = {
 	setAuthUsername: async function setAuthUsername(req, reply) {
 		try {
 			if (!req.body || !req.body.username) {
-				req.session.error = ["You need to fill everything"];
+				const error = ["You need to fill everything"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/changeUsername");
 			}
 
@@ -594,14 +636,18 @@ const privateControllers = {
 
 			await axios.post("http://auth-service:3001/setAuthUsername", req.body);
 
-			req.session.success = ["Username changed successfully"];
+			const success = ["Username changed successfully"];
 
 			const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
 
 			const token = response?.data.token;
 
 			if (!token) {
-				req.session.error = ["Error recreating the jwt"];
+				const error = ["Error recreating the jwt"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
@@ -615,14 +661,27 @@ const privateControllers = {
                                 maxAge: 60 * 60 * 1000 // 1h
                         });
 
+			if (req.isApiRequest) {
+				return reply.send({ success, error: [] });
+			}
+
+			req.session.success = success;
 			return reply.redirect("/home");
 		} catch (err) {
 			if (err.message === "You cannot use that username") {
-				req.session.error = ["Forbidden username"];
+				const error = ["Forbidden username"];
+				if (req.isApiRequest) {
+					return reply.send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/changeUsername");
 			}
 			console.error("Api-Gateway setAuthUsername:", err);
-			req.session.error = ["Error during setting your new username"];
+			const error = ["Error during setting your new username"];
+			if (req.isApiRequest) {
+				return reply.send({ success: [], error });
+			}
+			req.session.error = error;
 			return reply.redirect("/changeUsername");
 		}
 	},
@@ -649,30 +708,24 @@ const privateControllers = {
 
 	seeProfile: async function seeProfile(req, reply) {
 		try {
-			console.log('[seeProfile] Request received');
-			console.log('[seeProfile] req.isApiRequest:', req.isApiRequest);
-			console.log('[seeProfile] Accept header:', req.headers['accept']);
-			
 			const { user } = req.query;
 			const response = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: user });
 			const data = response?.data;
-			
+
 			// Return JSON for API requests (Next.js frontend)
 			if (req.isApiRequest) {
-				console.log('[seeProfile] Returning JSON response');
 				return reply.send(data);
 			}
-			
-			console.log('[seeProfile] Returning HTML view');
+
 			// Return HTML view for traditional requests
 			return reply.view("publicProfile", { data } );
 		} catch (err) {
 			console.error("API-GATEWAY seeProfile Error:", err);
-			
+
 			if (req.isApiRequest) {
 				return reply.code(500).send({ error: "Error fetching user profile" });
 			}
-			
+
 			req.session.error = ["Error trying to see the profile of the target user"];
 			return reply.redirect("/home");
 		}
