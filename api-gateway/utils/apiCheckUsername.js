@@ -7,7 +7,6 @@ export async function checkNameSecurity(name) {
 	 return ({ nsfw: false, data: null, error: "EMPTY_USERNAME" });
      for (const langCode of LANGS_TO_TEST) {
 	try {
-		console.log("langCode testing:", langCode);
 		const params = new URLSearchParams({
 			text: name,
 			lang: langCode,
