@@ -58,12 +58,8 @@ export async function validatorHook(req, reply) {
 			condition: req.body.captchaInput !== undefined && req.body.captchaInput !== null && typeof req.body.captchaInput !== "string",
 			message: "The code must be a string"
 		},
-		// CAPTCHA validation for both EJS and Next.js
-		// EJS: Validates against req.session.captcha (session-based)
-		// Next.js: Server Action validates CAPTCHA in frontend before sending request
-		// Note: Next.js Server Actions run on server, so CAPTCHA is already validated server-side
-		// We trust Server Actions because they cannot be bypassed by client
-		// For EJS, we must validate here since it's client-submitted
+		// CAPTCHA validation for EJS requests only (session-based)
+		// API requests validate in the controller using global store (keyed by user_id)
 		{
 			condition: req.body.captchaInput && !req.isApiRequest && req.session.captcha !== req.body.captchaInput,
 			message: "Invalid code"
@@ -141,15 +137,10 @@ export async function validatorHook(req, reply) {
 }
 
 export async function authHook(req, reply) {
-	console.log('[authHook] Request URL:', req.url);
-	console.log('[authHook] Cookies:', req.cookies);
-	console.log('[authHook] Cookie header:', req.headers.cookie);
-	
 	const token = req.cookies?.jwt;
+	
 	// Check if the user has a token
 	if (!token) {
-		console.log('[authHook] No JWT token found, redirecting to /login');
-		
 		// For API requests, return JSON instead of redirect
 		if (req.isApiRequest) {
 			return reply.code(401).send({ error: 'Not authenticated' });
@@ -178,9 +169,18 @@ export async function authHook(req, reply) {
                 	reply.clearCookie("session");
 
                 	await axios.post("http://auth-service:3001/set2FAValidate", { email: data.email, signal: false });
-                	return reply.redirect("/login");
+                	
+			// For API requests, return JSON instead of redirect
+			if (req.isApiRequest) {
+				return reply.code(401).send({ success: [], error: ['Session expired. Please log in again.'] });
+			}
+			return reply.redirect("/login");
 
 		} else if (err.name === "JsonWebTokenError") {
+			// For API requests, return JSON instead of redirect
+			if (req.isApiRequest) {
+				return reply.code(401).send({ success: [], error: ['Invalid token. Please log in again.'] });
+			}
 			return reply.redirect("/login");
 		}
 		return reply.code(500).send("Authentication internal error");
@@ -192,15 +192,36 @@ export async function require2faHook(req, reply) {
 	const token = req.cookies?.jwt;
 	let decoded = null;
 	try {
-		if (req.url === "/check2FAQrCode" || req.url === "/validate2FAQrCode")
+		// Skip 2FA check for these endpoints
+		const skip2FAEndpoints = [
+			"/check2FAQrCode", 
+			"/validate2FAQrCode",
+			"/getVerificationStatus",  // Status check doesn't require 2FA
+			"/set2FAOnOff",            // Enable/disable 2FA doesn't require 2FA validation
+			"/get2FAQrCode"            // Getting QR code doesn't require 2FA validation
+		];
+		if (skip2FAEndpoints.includes(req.url))
 			return ;
-		if (!token)
+		if (!token) {
+			// For API requests, return JSON instead of redirect
+			if (req.isApiRequest) {
+				return reply.code(401).send({ success: [], error: ['Not authenticated'] });
+			}
 			return reply.redirect("/login");
+		}
 		decoded = jwt.verify(token, process.env.JWT_SECRET) ?? {};
 		const twoFactorEnable = await axios.post("http://auth-service:3001/get2FAEnable", { email: req.user.email });
 		if (twoFactorEnable?.data.twoFactorEnable) {
 			const twoFactorValidate = await axios.post("http://auth-service:3001/get2FAValidate", { email: req.user.email });
 			if (!twoFactorValidate?.data.twoFactorValidate) {
+				// For API requests, return JSON indicating 2FA required
+				if (req.isApiRequest) {
+					return reply.code(403).send({ 
+						success: [], 
+						error: ['2FA verification required'],
+						requires2FA: true 
+					});
+				}
 				const qrCodeDataURL = await axios.post("http://auth-service:3001/get2FAQrCode", { email: req.user.email });
 				req.session.qrCodeDataURL = qrCodeDataURL?.data.qrCodeDataURL;
 				return reply.redirect("/check2FAQrCode");
@@ -213,6 +234,10 @@ export async function require2faHook(req, reply) {
 			if (err.name === "TokenExpiredError") {
 				// The user must do 2FA again
 				await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: false });
+			}
+			// For API requests, return JSON instead of redirect
+			if (req.isApiRequest) {
+				return reply.code(401).send({ success: [], error: ['Session expired. Please log in again.'] });
 			}
 			return reply.redirect("/login");
 		}

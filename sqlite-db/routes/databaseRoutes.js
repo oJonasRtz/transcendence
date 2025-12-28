@@ -15,6 +15,7 @@ const routes = [
 	{ method: 'POST', url: '/newPassword', handler: databaseControllers.newPassword },
 	{ method: 'POST', url: '/createNewUser', handler: databaseControllers.createNewUser },
 	{ method: 'POST', url: '/validateUserEmail', handler: databaseControllers.validateUserEmail },
+	{ method: 'POST', url: '/resetEmailVerification', handler: databaseControllers.resetEmailVerification },
 	{ method: 'POST', url: '/getQueue', handler: databaseControllers.getQueue },
 	{ method: 'POST', url: '/setInQueue', handler: databaseControllers.setInQueue },
 	{ method: 'POST', url: '/get2FAEnable', handler: databaseControllers.get2FAEnable },
@@ -57,6 +58,7 @@ const routes = [
 	{ method: 'POST', url: '/getAllPrivateMessages', handler: databaseControllers.getAllPrivateMessages },
 	{ method: 'POST', url: '/storePrivateMessage', handler: databaseControllers.storePrivateMessage },
 	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff },
+	{ method: 'POST', url: '/disable2FA', handler: databaseControllers.disable2FA },
 	{ method: 'POST', url: '/setTargetId', handler: databaseControllers.setTargetId },
 	{ method: 'POST', url: '/getTargetId', handler: databaseControllers.getTargetId },
 	{ method: 'POST', url: '/getPublicId', handler: databaseControllers.getPublicId }

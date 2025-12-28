@@ -4,6 +4,7 @@ import usersControllers from '../controllers/usersControllers.js';
 const routes = [
 	{ method: 'POST', url: '/createNewUser', handler: usersControllers.createNewUser },
 	{ method: 'POST', url: '/validateUserEmail', handler: usersControllers.validateUserEmail },
+	{ method: 'POST', url: '/resetEmailVerification', handler: usersControllers.resetEmailVerification },
 	{ method: 'POST', url: '/getIsOnline', handler: usersControllers.getIsOnline },
 	{ method: 'POST', url: '/getQueue', handler: usersControllers.getQueue },
 	{ method: 'POST', url: '/setIsOnline', handler: usersControllers.setIsOnline },

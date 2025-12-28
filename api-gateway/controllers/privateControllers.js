@@ -188,6 +188,18 @@ const privateControllers = {
 			req.session.captcha = code;
 			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
 
+			// For API requests, also store in a server-side map keyed by user_id
+			// This allows verification across different sessions (Next.js API calls)
+			if (req.isApiRequest) {
+				if (!global.emailVerificationCodes) {
+					global.emailVerificationCodes = new Map();
+				}
+				global.emailVerificationCodes.set(req.user.user_id, {
+					code,
+					expires: Date.now() + 5 * 60 * 1000
+				});
+			}
+
 			const receiver = email;
 			const subject = "Confirm your e-mail, Transcendence Pong";
 			const webPage = `
@@ -198,15 +210,30 @@ const privateControllers = {
 
 			await sendMail(receiver, subject, webPage);
 
+			// API Request: Return JSON response
+			if (req.isApiRequest) {
+				return reply.send({ 
+					success: ['Verification code sent to your email'], 
+					error: [] 
+				});
+			}
+
 			return reply.redirect("/confirmUserEmailCode");
 		} catch (err) {
 			delete req.session.captcha;
 			delete req.session.captchaExpires;
 
-			if (err.response.status === 401)
-				req.session.error = ["Invalid code"];
-			else
-				req.session.error = ["Unexpected error happened"];
+			const errorMsg = err.response?.status === 401 
+				? "Invalid code" 
+				: "Unexpected error happened";
+			const error = [errorMsg];
+
+			// API Request: Return JSON error
+			if (req.isApiRequest) {
+				return reply.code(500).send({ success: [], error });
+			}
+
+			req.session.error = error;
 			return reply.redirect("/confirmUserEmailCode");
 		}
 	},
@@ -220,19 +247,68 @@ const privateControllers = {
 	validateUserEmailCode: async function validateUserEmailCode(req, reply) {
 		try {
 			if (!req.body || !req.body.captchaInput) {
-				req.session.error = ["You need to follow step by step"];
+				const error = ["You need to follow step by step"];
+				
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				
+				req.session.error = error;
 				return reply.redirect("/confirmUserEmailCode");
 			}
 			
-			// validator hook, do your job
+			// For API requests, validate against global store
+			if (req.isApiRequest) {
+				const stored = global.emailVerificationCodes?.get(req.user.user_id);
+				
+				if (!stored) {
+					return reply.code(400).send({ 
+						success: [], 
+						error: ["Please request a verification code first"] 
+					});
+				}
+				
+				if (Date.now() > stored.expires) {
+					global.emailVerificationCodes.delete(req.user.user_id);
+					return reply.code(400).send({ 
+						success: [], 
+						error: ["Verification code has expired. Please request a new one."] 
+					});
+				}
+				
+				if (stored.code !== req.body.captchaInput) {
+					return reply.code(400).send({ 
+						success: [], 
+						error: ["Invalid verification code"] 
+					});
+				}
+				
+				// Code is valid, clean up and proceed
+				global.emailVerificationCodes.delete(req.user.user_id);
+			}
+			// For EJS requests, the validatorHook handles session-based validation
 
 			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
 
-			req.session.success = ["Your e-mail is validated now =D"];
+			const success = ["Your e-mail is validated now =D"];
+			
+			// API Request: Return JSON response
+			if (req.isApiRequest) {
+				return reply.send({ success, error: [] });
+			}
+
+			req.session.success = success;
 			return reply.redirect("/home");
 		} catch (err) {
 			console.error("VALIDATE USER EMAIL CODE API-GATEWAY:", err);
-			req.session.error = ["An error happened trying to validating your code"];
+			const error = ["An error happened trying to validating your code"];
+			
+			// API Request: Return JSON error
+			if (req.isApiRequest) {
+				return reply.code(500).send({ success: [], error });
+			}
+
+			req.session.error = error;
 			return reply.redirect("/confirmUserEmailCode");
 		}
 	},
@@ -243,23 +319,54 @@ const privateControllers = {
 			const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 			const res = await axios.post("http://auth-service:3001/get2FAEnable", { email: decoded.email });
 			if (!res.data.twoFactorEnable) {
-				req.session.error = ["You do not have 2FA activated at the moment"];
+				const error = ["You do not have 2FA activated at the moment"];
+				
+				// API Request: Return JSON error
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 			const response = await axios.post("http://auth-service:3001/get2FAQrCode", { email: decoded.email });
 			if (response.data.qrCodeDataURL == null && response.data.image == null) {
+				const error = ["Error generating the qrCode"];
+				
+				// API Request: Return JSON error
+				if (req.isApiRequest) {
+					return reply.code(500).send({ success: [], error });
+				}
+				
 				return reply.code(500).send("Error generating the qrCode");
 			}
 
 			const qrCodeDataURL = response.data.qrCodeDataURL;
 			const image = response.data.image;
 
+			// API Request: Return QR code directly
+			if (req.isApiRequest) {
+				return reply.send({ 
+					success: ['QR code generated successfully'], 
+					error: [],
+					qrCodeDataURL,
+					image
+				});
+			}
+
 			req.session.qrCodeDataURL = qrCodeDataURL;
 			req.session.image = image;
 			return reply.redirect("/check2FAQrCode");
 		} catch (err) {
 			console.error("get2FAQrCode");
-			req.session.error = ["Error getting get2FAQrCode"];
+			const error = ["Error getting get2FAQrCode"];
+			
+			// API Request: Return JSON error
+			if (req.isApiRequest) {
+				return reply.code(500).send({ success: [], error });
+			}
+			
+			req.session.error = error;
 			return reply.redirect("/home");
 		}
 	},
@@ -286,20 +393,34 @@ const privateControllers = {
 
 	validate2FAQrCode: async function validate2FAQrCode(req, reply) {
 		try {
-			if (!req.session.canValidate) {
+			if (!req.session.canValidate && !req.isApiRequest) {
 				req.session.error = ["You need to follow step by step"];
 				delete req.session.canValidate;
 				return reply.redirect("/home");
 			}
 			if (!req.body || !req.body.code) {
-				req.session.error = ["You need to follow step by step"];
+				const error = ["You need to provide a code"];
+				
+				// API Request: Return JSON error
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				
+				req.session.error = error;
 				return reply.redirect("/check2FAQrCode");
 			}
 			const token = req.cookies.jwt;
 			const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 			const response = await axios.post("http://auth-service:3001/get2FASecret", { email: decoded.email });
 			if (!response.data.twoFactorSecret) {
-				req.session.error = ["You cannot have 2FA activate"];
+				const error = ["You cannot have 2FA activate"];
+				
+				// API Request: Return JSON error
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
@@ -313,15 +434,37 @@ const privateControllers = {
                 });
 
 			if (!verified) {
-				req.session.error = ["The code is incorrect. Try again"];
+				const error = ["The code is incorrect. Try again"];
+				
+				// API Request: Return JSON error
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				
+				req.session.error = error;
 				return reply.redirect("/check2FAQrCode");
 			}
-			req.session.success = ["2FA passed successfully"];
+			
+			const success = ["2FA passed successfully"];
 			await axios.post("http://auth-service:3001/set2FAValidate", { email: decoded.email, signal: true });
+			
+			// API Request: Return JSON response
+			if (req.isApiRequest) {
+				return reply.send({ success, error: [] });
+			}
+			
+			req.session.success = success;
 			return reply.redirect("/home");
 		} catch (err) {
 			console.error("Validate2FAQrCode Api-Gateway", err);
-			req.session.error = ["An error happened trying to validate your 2FA Code"];
+			const error = ["An error happened trying to validate your 2FA Code"];
+			
+			// API Request: Return JSON error
+			if (req.isApiRequest) {
+				return reply.code(500).send({ success: [], error });
+			}
+			
+			req.session.error = error;
 			return reply.redirect("/home");
 		}
 	},
@@ -593,7 +736,29 @@ const privateControllers = {
 
                         await axios.post("http://auth-service:3001/setAuthEmail", req.body);
 
-                        const success = ["Email changed successfully"];
+			// Reset email verification when email changes
+			try {
+				await axios.post("http://users-service:3003/resetEmailVerification", { 
+					user_id: req.user.user_id 
+				});
+			} catch (resetErr) {
+				console.error("Error resetting email verification:", resetErr?.response?.data || resetErr.message);
+			}
+
+			// Disable 2FA when email changes (for security)
+			try {
+				await axios.post("http://auth-service:3001/disable2FA", { 
+					user_id: req.user.user_id 
+				});
+			} catch (disable2FAErr) {
+				console.error("Error disabling 2FA:", disable2FAErr?.response?.data || disable2FAErr.message);
+			}
+
+                        const success = [
+				"Email changed successfully",
+				"Email verification has been reset",
+				"Two-Factor Authentication has been disabled for security"
+			];
 
                         const response = await axios.post("http://auth-service:3001/createNewToken", req.body);
 
@@ -968,18 +1133,71 @@ const privateControllers = {
 	set2FAOnOff: async function set2FAOnOff(req, reply) {
                 try {
                         const result = await axios.post("http://auth-service:3001/set2FAOnOff", { user_id: req.user.user_id });
+                        const success = [];
+                        let enabled = false;
+                        
                         if (result?.data.message === "2FA_ENABLED") {
-                                req.session.success = ["2FA enabled successfully"];
+                                success.push("2FA enabled successfully");
+                                enabled = true;
                         } else if (result?.data.message === "2FA_DISABLED") {
-                                req.session.success = ["2FA disabled successfully"];
+                                success.push("2FA disabled successfully");
+                                enabled = false;
                         }
+                        
+                        // API Request: Return JSON response
+                        if (req.isApiRequest) {
+                                return reply.send({ 
+                                        success, 
+                                        error: [],
+                                        enabled,
+                                        message: result?.data.message
+                                });
+                        }
+                        
+                        req.session.success = success;
                         return reply.redirect("/home");
                 } catch (err) {
                         console.error("API-GATEWAY set2FAOnOff");
-                        req.session.error = ["Error setting the new status of 2FA"];
+                        const error = ["Error setting the new status of 2FA"];
+                        
+                        // API Request: Return JSON error
+                        if (req.isApiRequest) {
+                                return reply.code(500).send({ success: [], error });
+                        }
+                        
+                        req.session.error = error;
                         return reply.redirect("/home");
                 }
-        }
+        },
+
+	getVerificationStatus: async function getVerificationStatus(req, reply) {
+		try {
+			// Get user's email verification status
+			const userInfoResponse = await axios.post("http://users-service:3003/getUserInformation", { 
+				user_id: req.user.user_id 
+			});
+			
+			// Get user's 2FA status
+			const twoFactorResponse = await axios.post("http://auth-service:3001/get2FAEnable", { 
+				email: req.user.email 
+			});
+			
+			return reply.send({
+				success: ['Status retrieved successfully'],
+				error: [],
+				isEmailVerified: userInfoResponse?.data?.isEmailConfirmed || false,
+				has2FA: twoFactorResponse?.data?.twoFactorEnable || false,
+			});
+		} catch (err) {
+			console.error("API-GATEWAY getVerificationStatus ERROR:", err);
+			return reply.code(500).send({
+				success: [],
+				error: ['Error retrieving verification status'],
+				isEmailVerified: false,
+				has2FA: false,
+			});
+		}
+	}
 };
 
 export default privateControllers;

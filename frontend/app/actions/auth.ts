@@ -69,7 +69,26 @@ export async function login(formData: FormData) {
       return { error: data.error[0] };
     }
 
-    // Check for successful login with token
+    // Check if 2FA is required
+    if (data?.requires2FA && data?.tempToken) {
+      // Store the temp token in a cookie for the 2FA verification page
+      const cookieStore = await cookies();
+      cookieStore.set('pending_2fa_token', data.tempToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 5 * 60, // 5 minutes to complete 2FA
+      });
+      
+      // Clear CAPTCHA cookie
+      cookieStore.delete('captcha_code');
+      
+      // Return indicator that 2FA is needed
+      return { requires2FA: true };
+    }
+
+    // Check for successful login with token (no 2FA required)
     const token = data?.token;
 
     if (token) {
@@ -113,16 +132,16 @@ export async function login(formData: FormData) {
         console.error('[Auth] Failed to sync user to Prisma:', prismaError);
         // Continue anyway - dashboard will handle this
       }
+      
+      // Return success to indicate redirect should happen
+      return { success: true };
     }
 
-    // Successful login
-    redirect('/dashboard');
+    // No token received
+    return { error: 'Invalid credentials' };
   } catch (error) {
-    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-      throw error; // Re-throw redirect errors
-    }
     // SECURITY: Don't log error details that might contain sensitive data
-    console.error('Login error occurred');
+    console.error('Login error occurred:', error);
     return { error: 'An unexpected error occurred. Please try again.' };
   }
 }
@@ -253,31 +272,32 @@ export async function signup(formData: FormData) {
 }
 
 export async function logout() {
+  const cookieStore = await cookies();
+  
   try {
-    const cookieStore = await cookies();
     const token = cookieStore.get('jwt');
 
     if (token) {
-      // Call backend logout endpoint
+      // Call backend logout endpoint - use redirect: 'manual' to prevent following redirects
       await fetch(`${API_GATEWAY_URL}/logout`, {
         method: 'GET',
         headers: {
           Cookie: `jwt=${token.value}`,
         },
         credentials: 'include',
+        redirect: 'manual', // Don't follow redirects from backend
       });
     }
-
-    // Clear the cookie
-    cookieStore.delete('jwt');
-
-    redirect('/login');
   } catch (error) {
-    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-      throw error; // Re-throw redirect errors
-    }
-    // SECURITY: Don't log error details
-    console.error('Logout error occurred');
-    return { error: 'Logout failed. Please try again.' };
+    // Log but continue with logout - clearing cookies is more important
+    console.error('Backend logout call failed:', error);
   }
+
+  // Clear cookies regardless of backend response
+  cookieStore.delete('jwt');
+  cookieStore.delete('pending_2fa_token');
+  cookieStore.delete('session');
+  
+  // redirect() must be called outside try-catch in Next.js 15
+  redirect('/login');
 }

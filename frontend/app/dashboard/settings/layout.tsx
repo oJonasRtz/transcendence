@@ -7,7 +7,9 @@ import {
   KeyIcon,
   IdentificationIcon,
   DocumentTextIcon,
-  PhotoIcon
+  PhotoIcon,
+  ShieldCheckIcon,
+  CheckBadgeIcon
 } from '@heroicons/react/24/outline';
 
 const settingsTabs = [
@@ -16,7 +18,9 @@ const settingsTabs = [
   { name: 'Email', href: '/dashboard/settings/email', icon: EnvelopeIcon },
   { name: 'Password', href: '/dashboard/settings/password', icon: KeyIcon },
   { name: 'Nickname', href: '/dashboard/settings/nickname', icon: IdentificationIcon },
-  { name: 'Description', href: '/dashboard/settings/description', icon: DocumentTextIcon },
+  { name: 'Description', href: '/dashboard/git ssettings/description', icon: DocumentTextIcon },
+  { name: 'Email Verification', href: '/dashboard/settings/email-verification', icon: CheckBadgeIcon },
+  { name: 'Two-Factor Auth', href: '/dashboard/settings/two-factor-auth', icon: ShieldCheckIcon },
 ];
 
 export default function SettingsLayout({

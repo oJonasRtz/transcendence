@@ -346,6 +346,21 @@ const authControllers = {
                 }
         },
 
+	disable2FA: async function disable2FA(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id) {
+				return reply.code(400).send("USER_ID_REQUIRED");
+			}
+			
+			await axios.post("http://sqlite-db:3002/disable2FA", req.body);
+			
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("AUTH-SERVICE disable2FA ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	// TESTS
 	hello: function testAuthServiceConnection(req, reply) {
 		return reply.send("The auth-service is working perfectly");

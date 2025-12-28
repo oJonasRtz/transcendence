@@ -9,6 +9,7 @@ const routes = [
 	{ method: 'GET', url: '/register', handler: publicControllers.register },
 	{ method: 'POST', url: '/checkRegister', handler: publicControllers.checkRegister },
 	{ method: 'POST', url: '/checkLogin', handler: publicControllers.checkLogin },
+	{ method: 'POST', url: '/verifyLogin2FA', handler: publicControllers.verifyLogin2FA },
 	{ method: 'GET', url: '/getCaptcha', handler: publicControllers.getCaptcha },
 	{ method: 'GET', url: '/hello', handler: publicControllers.hello },
 	{ method: 'GET', url: '/forgotPassword', handler: publicControllers.forgotPasswordPage },

@@ -131,6 +131,24 @@ const databaseControllers = {
 		}
 	},
 
+	resetEmailVerification: async function resetEmailVerification(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id) {
+				return reply.code(400).send("USER_ID_REQUIRED");
+			}
+			
+			await fastify.db.run(
+				"UPDATE users SET isEmailConfirmed = false WHERE user_id = ?",
+				[req.body.user_id]
+			);
+			
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error(`resetEmailVerification Sqlite-db: ${err?.response?.data || err.message}`);
+			return reply.code(500).send("Error resetting email verification");
+		}
+	},
+
 	get2FAEnable: async function get2FAEnable(fastify, req, reply) {
 		try { 
 			if (!req.body || !req.body.email)
@@ -657,6 +675,35 @@ const databaseControllers = {
                         return reply.code(500).send("An error happened");
                 }
         },
+
+	disable2FA: async function disable2FA(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id) {
+				return reply.code(400).send("USER_ID_REQUIRED");
+			}
+			
+			// Get email from user_id
+			const user = await fastify.db.get(
+				"SELECT email FROM auth WHERE user_id = (SELECT user_id FROM users WHERE user_id = ?)",
+				[req.body.user_id]
+			);
+			
+			if (!user || !user.email) {
+				return reply.code(404).send("User not found");
+			}
+			
+			// Disable 2FA
+			await fastify.db.run(
+				"UPDATE auth SET twoFactorEnable = false, twoFactorValidate = false, twoFactorSecret = NULL WHERE email = ?",
+				[user.email]
+			);
+			
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("SQLITE-DB disable2FA ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("Error disabling 2FA");
+		}
+	},
 
 	setTargetId: async function setTargetId(fastify, req, reply) {
 		try {

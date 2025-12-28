@@ -29,6 +29,21 @@ const usersControllers = {
                 }
         },
 
+	resetEmailVerification: async function resetEmailVerification(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id) {
+				return reply.code(400).send("USER_ID_REQUIRED");
+			}
+			
+			await axios.post("http://sqlite-db:3002/resetEmailVerification", req.body);
+			
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("resetEmailVerification USERS", err?.response?.data || err.message);
+			return reply.code(500).send("Internal Server Error");
+		}
+	},
+
 	getIsOnline: async function getIsOnline(req, reply) {
 		try {
 			if (!req.body || !req.body.email)

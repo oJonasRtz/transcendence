@@ -166,6 +166,44 @@ const publicControllers = {
 				return reply.redirect("/login");
 			};
 
+			// Check if user has 2FA enabled
+			const twoFactorCheck = await axios.post("http://auth-service:3001/get2FAEnable", { email: req.body.email });
+			
+			if (twoFactorCheck?.data?.twoFactorEnable) {
+				// User has 2FA enabled - don't give full access yet
+				// Store temporary token in session and require 2FA verification
+				const decoded = jwt.verify(token, process.env.JWT_SECRET || "purpleVoid");
+				
+				// For API requests, return response indicating 2FA is required
+				if (req.isApiRequest) {
+					// Create a temporary token that only allows 2FA verification
+					const tempToken = jwt.sign(
+						{ 
+							user_id: decoded.user_id, 
+							email: decoded.email,
+							username: decoded.username,
+							public_id: decoded.public_id,
+							pending2FA: true 
+						}, 
+						process.env.JWT_SECRET || "purpleVoid", 
+						{ expiresIn: '5m' } // Short expiry for 2FA step
+					);
+					
+					return reply.code(200).send({ 
+						success: ["Credentials verified"], 
+						error: [],
+						requires2FA: true,
+						tempToken: tempToken
+					});
+				}
+				
+				// For EJS requests, store in session and redirect to 2FA page
+				req.session.pendingLoginToken = token;
+				req.session.pendingEmail = req.body.email;
+				return reply.redirect("/check2FAQrCode");
+			}
+
+			// No 2FA - proceed with normal login
 			const isProduction = process.env.NODE_ENV === "production";
 
 			reply.setCookie("jwt", token, {
@@ -196,6 +234,107 @@ const publicControllers = {
 			req.session.error = errorMessage;
 			console.error("Error trying login:", err);
 			return reply.redirect("/login");
+		}
+	},
+
+	// Verify 2FA code during login
+	verifyLogin2FA: async function verifyLogin2FA(req, reply) {
+		try {
+			const { tempToken, code } = req.body;
+			
+			if (!tempToken || !code) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Missing token or verification code"] 
+				});
+			}
+			
+			// Verify the temp token
+			let decoded;
+			try {
+				decoded = jwt.verify(tempToken, process.env.JWT_SECRET || "purpleVoid");
+			} catch (err) {
+				return reply.code(401).send({ 
+					success: [], 
+					error: ["Session expired. Please login again."] 
+				});
+			}
+			
+			// Check that this is a pending 2FA token
+			if (!decoded.pending2FA) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Invalid token type"] 
+				});
+			}
+			
+			// Get the user's 2FA secret
+			const secretResponse = await axios.post("http://auth-service:3001/get2FASecret", { 
+				email: decoded.email 
+			});
+			
+			if (!secretResponse?.data?.twoFactorSecret) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["2FA not properly configured"] 
+				});
+			}
+			
+			// Verify the TOTP code
+			const speakeasy = (await import('speakeasy')).default;
+			const verified = speakeasy.totp.verify({
+				secret: secretResponse.data.twoFactorSecret,
+				encoding: 'base32',
+				token: code,
+				window: 2 // Allow 2 time steps for clock drift
+			});
+			
+			if (!verified) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Invalid verification code"] 
+				});
+			}
+			
+			// 2FA verified! Create the full access token
+			const fullToken = jwt.sign(
+				{ 
+					user_id: decoded.user_id, 
+					email: decoded.email,
+					username: decoded.username,
+					public_id: decoded.public_id
+				}, 
+				process.env.JWT_SECRET || "purpleVoid", 
+				{ expiresIn: process.env.JWT_EXPIRES_IN || "1h" }
+			);
+			
+			// Mark 2FA as validated for this session
+			await axios.post("http://auth-service:3001/set2FAValidate", { 
+				email: decoded.email, 
+				signal: true 
+			});
+			
+			const isProduction = process.env.NODE_ENV === "production";
+			
+			reply.setCookie("jwt", fullToken, {
+				httpOnly: true,
+				secure: isProduction,
+				path: "/",
+				sameSite: "strict",
+				maxAge: 60 * 60 * 1000 // 1h
+			});
+			
+			return reply.code(200).send({ 
+				success: ["Login successful"], 
+				error: [],
+				token: fullToken
+			});
+		} catch (err) {
+			console.error("Error verifying 2FA login:", err);
+			return reply.code(500).send({ 
+				success: [], 
+				error: ["An error occurred. Please try again."] 
+			});
 		}
 	},
 

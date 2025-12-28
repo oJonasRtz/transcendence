@@ -2,6 +2,7 @@ import Link from 'next/link';
 import NavLinks from '@/app/ui/dashboard/nav-links';
 import AcmeLogo from '@/app/ui/pong-logo';
 import LogoutButton from '@/app/ui/dashboard/logout-button';
+import EmailVerificationStatus from '@/app/ui/dashboard/email-verification-status';
 
 export default function SideNav() {
   return (
@@ -17,6 +18,7 @@ export default function SideNav() {
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <NavLinks />
         <div className="hidden h-auto w-full grow rounded-lg bg-gradient-to-br from-slate-900/50 to-black/50 border border-white/5 md:block backdrop-blur-sm"></div>
+        <EmailVerificationStatus />
         <LogoutButton />
       </div>
     </div>

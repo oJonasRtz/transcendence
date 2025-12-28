@@ -9,16 +9,31 @@ import { ButtonGlimmer } from './button-glimmer';
 import { login } from '@/app/actions/auth';
 import Captcha from './captcha';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const [error, setError] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
     setError('');
 
     const result = await login(formData);
+
+    if (result?.requires2FA) {
+      // Redirect to 2FA verification page
+      router.push('/login/2fa');
+      return;
+    }
+
+    if (result?.success) {
+      // Successful login - redirect to dashboard
+      router.push('/dashboard');
+      router.refresh();
+      return;
+    }
 
     if (result?.error) {
       setError(result.error);

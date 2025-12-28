@@ -25,6 +25,7 @@ const routes = [
 	{ method: 'POST', url: '/setAuthPassword', handler: authControllers.setAuthPassword },
 	{ method: 'POST', url: '/deleteUserAccount', handler: authControllers.deleteUserAccount },
 	{ method: 'POST', url: '/set2FAOnOff', handler: authControllers.set2FAOnOff },
+	{ method: 'POST', url: '/disable2FA', handler: authControllers.disable2FA },
 ];
 
 export default async function authRoutes(fastify, options) {
