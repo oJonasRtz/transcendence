@@ -17,7 +17,7 @@ const usersControllers = {
 
 	validateUserEmail: async function validateUserEmail(req, reply) {
                 try {
-			if (!req.body || !req.body.email || !req.body.user_id) 
+			if (!req.body || !req.body.email || !req.body.user_id || req.body.stats === undefined) 
 				return reply.code(400).send("YOU_NEED_TO_FILL_ALL");
 			
                         await axios.post("http://sqlite-db:3002/validateUserEmail", req.body);

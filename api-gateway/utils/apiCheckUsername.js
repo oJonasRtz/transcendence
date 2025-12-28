@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const LANGS_TO_TEST = ["pt", "en", "es", "fr", "it"];
+const LANGS_TO_TEST = ["pt", "en", "es", "fr", "it", "ru", "tr"];
 
 export async function checkNameSecurity(name) {
      if (typeof name !== "string" || !name || !name.trim())

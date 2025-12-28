@@ -81,7 +81,7 @@ const databaseModels = {
 	},
 
 	activateEmail: async function validateUserEmail(fastify, data) {
-		await fastify.db.run("UPDATE users SET isEmailConfirmed = true WHERE user_id = ?", [ data.user_id ]);
+		await fastify.db.run("UPDATE users SET isEmailConfirmed = ? WHERE user_id = ?", [ data.stats, data.user_id ]);
 	},
 
 	get2FAEnable: async function get2FAEnable(fastify, email) {

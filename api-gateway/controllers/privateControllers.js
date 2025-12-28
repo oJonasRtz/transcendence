@@ -206,7 +206,7 @@ const privateControllers = {
 			
 			// validator hook, do your job
 
-			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
+			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id, stats: true });
 
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
@@ -499,6 +499,8 @@ const privateControllers = {
                         req.body.username = req.user.username;
 
                         await axios.post("http://auth-service:3001/setAuthEmail", req.body);
+
+			await axios.post("http://users-service:3003/validateUserEmail", { email: req.body.email, user_id: req.user.user_id, stats: false });
 
                         req.session.success = ["Email changed successfully"];
 

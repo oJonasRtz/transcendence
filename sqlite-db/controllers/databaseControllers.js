@@ -120,8 +120,8 @@ const databaseControllers = {
 
 	validateUserEmail: async function validateUserEmail(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email)
-				return reply.code(400).send("You need to inform an email here");
+			if (!req.body || !req.body.email || req.body.stats === undefined)
+				return reply.code(400).send("You need to inform an email and put a valid status here");
 			await databaseModels.activateEmail(fastify, req.body);
 
 			return reply.code(200).send("Success");
