@@ -3,6 +3,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
+import AcmeLogo from '@/app/ui/pong-logo';
+import Starfield from '@/app/ui/starfield';
+import { ButtonGlimmer } from '@/app/ui/button-glimmer';
+import Link from 'next/link';
 
 export default function TwoFactorAuthPage() {
   const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -113,74 +117,148 @@ export default function TwoFactorAuthPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="relative mx-auto flex w-full max-w-md flex-col space-y-2.5 p-4">
-        <div className="flex h-auto w-full items-end rounded-lg bg-blue-500 p-6">
-          <div className="w-full text-white">
-            <div className="flex items-center gap-3">
-              <ShieldCheckIcon className="h-10 w-10" />
-              <span className="text-2xl font-bold">Two-Factor Authentication</span>
+    <main className="relative flex min-h-screen flex-col overflow-hidden font-sans">
+      <Starfield />
+
+      <header className="relative z-20 w-full border-b border-white/10 bg-black/60 backdrop-blur-md px-6 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center justify-center bg-black p-2 rounded-md border border-white/20">
+              <div className="w-20 text-white md:w-24">
+                <AcmeLogo />
+              </div>
+            </div>
+            <div className="hidden h-8 w-[1px] bg-white/20 md:block" />
+            <div className="hidden md:flex flex-col">
+              <h1 className="text-lg font-bold leading-none text-white">Two-Factor Authentication</h1>
+              <p className="text-[10px] uppercase tracking-widest text-blue-400 mt-1 font-bold">
+                Security Verification Required
+              </p>
             </div>
           </div>
-        </div>
-        
-        <div className="rounded-lg bg-white px-6 py-8 shadow-md">
-          <div className="text-center mb-6">
-            <p className="text-gray-600">
-              Enter the 6-digit code from your authenticator app
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-4 p-3 rounded bg-red-50 border border-red-200 text-red-600 text-sm text-center">
-              {error}
-            </div>
-          )}
-
-          <div className="flex justify-center gap-2 mb-6" onPaste={handlePaste}>
-            {code.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => { inputRefs.current[index] = el; }}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-colors"
-                disabled={isVerifying}
-                autoComplete="off"
-              />
-            ))}
-          </div>
-
-          <button
-            onClick={() => handleSubmit()}
-            disabled={isVerifying || code.some(d => d === '')}
-            className="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isVerifying ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Verifying...
-              </span>
-            ) : (
-              'Verify'
-            )}
-          </button>
-
+          
           <button
             onClick={handleCancel}
-            className="w-full mt-3 py-2 px-4 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+            className="text-xs uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
           >
-            Cancel and return to login
+            ← Return to Login
           </button>
         </div>
-      </div>
+      </header>
+
+      <section className="relative z-10 flex flex-1 items-center justify-center px-6">
+        <div className="w-full max-w-md">
+          {/* Space-themed glass card container */}
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur-xl">
+            {/* Ambient glow effect */}
+            <div className="absolute -top-24 -right-24 h-48 w-48 bg-blue-500/20 blur-3xl rounded-full" />
+            <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-indigo-500/20 blur-3xl rounded-full" />
+
+            {/* Content */}
+            <div className="relative space-y-6">
+              {/* Header */}
+              <div className="space-y-2 border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <ShieldCheckIcon className="h-8 w-8 text-blue-400" />
+                  <div>
+                    <h2 className="text-xl font-black tracking-tight text-white">
+                      SECURITY SCAN
+                    </h2>
+                    <p className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                      // Two-Factor Authentication
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="text-center space-y-2">
+                <p className="text-sm text-slate-300">
+                  Enter the 6-digit verification code
+                </p>
+                <p className="text-xs text-slate-500">
+                  From your authenticator app
+                </p>
+              </div>
+
+              {/* Error Display */}
+              {error && (
+                <div className="p-3 rounded-lg border border-red-500/20 bg-red-500/10 backdrop-blur-md">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />
+                    <p className="text-xs font-bold uppercase tracking-wider text-red-300">
+                      ACCESS DENIED
+                    </p>
+                  </div>
+                  <p className="text-sm text-red-200 mt-1">{error}</p>
+                </div>
+              )}
+
+              {/* Code Input */}
+              <div className="space-y-4">
+                <div className="flex justify-center gap-2" onPaste={handlePaste}>
+                  {code.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => { inputRefs.current[index] = el; }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleInputChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className="w-12 h-14 text-center text-2xl font-bold bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                      disabled={isVerifying}
+                      autoComplete="off"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <ButtonGlimmer
+                onClick={() => handleSubmit()}
+                disabled={isVerifying || code.some(d => d === '')}
+                className="w-full h-12 text-sm font-bold uppercase tracking-wider shadow-lg shadow-blue-500/20"
+              >
+                {isVerifying ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    VERIFYING ACCESS...
+                  </span>
+                ) : (
+                  'AUTHENTICATE →'
+                )}
+              </ButtonGlimmer>
+
+              {/* Alternative Actions */}
+              <div className="pt-4 border-t border-white/10">
+                <button
+                  onClick={handleCancel}
+                  className="w-full py-2 px-4 text-slate-400 hover:text-white font-medium text-sm uppercase tracking-wider transition-colors"
+                >
+                  Cancel Authentication
+                </button>
+              </div>
+
+              {/* Footer Stats */}
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+                    <span className="font-mono text-slate-500">Security Active</span>
+                  </div>
+                  <span className="font-mono text-slate-600">v2.0.42</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="relative z-20 p-8 text-center text-[10px] uppercase tracking-tighter text-slate-500">
+        © 2025 42 PONG • Secure Authentication Portal
+      </footer>
     </main>
   );
 }
