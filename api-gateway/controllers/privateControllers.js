@@ -288,7 +288,11 @@ const privateControllers = {
 			}
 			// For EJS requests, the validatorHook handles session-based validation
 
-			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
+			await axios.post("http://users-service:3003/validateUserEmail", {
+				email: req.user.email,
+				user_id: req.user.user_id,
+				stats: true,
+			});
 
 			const success = ["Your e-mail is validated now =D"];
 			

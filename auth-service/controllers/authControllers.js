@@ -111,10 +111,10 @@ const authControllers = {
 
 	getCaptcha: async function getCaptchaImageCode(req, reply) {
 		const captcha = svgCaptcha.create({
-			size: 6,
-			noise: 4,
+			size: 8,
+			noise: 5,
 			color: true,
-			background: "#f4f4f4"
+			background: "#0f172a"
 		});
 
 		const svgBase64 = Buffer.from(captcha.data).toString('base64');
