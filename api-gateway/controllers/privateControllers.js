@@ -18,7 +18,7 @@ const __dirname = dirname(__filename);
 
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 let inQueue = false;
-const lobby = new MatchClient('ws://new-match-service:3020');
+const matchClient = new MatchClient('ws://new-match-service:3020');
 
 const privateControllers = {
 
@@ -38,7 +38,12 @@ const privateControllers = {
 	},
 
 	joinQueue: async function joinQueue(req, reply) {
-		if (inQueue) return;
+		if (inQueue) {
+			if (req.isApiRequest) {
+				return reply.send({ success: [], error: ["Already in queue"] });
+			}
+			return reply.send("Already in queue");
+		}
 
 		const payload = {
 			type: "ENQUEUE",
@@ -46,22 +51,37 @@ const privateControllers = {
 			user_id: req.user.user_id,
 		};
 
-		matchClient.sendMessage(payload);
+		matchClient.send(payload);
 		inQueue = true;
 		console.log(`User ${req.user.email} joined the queue`);
+
+		if (req.isApiRequest) {
+			return reply.send({ success: ["Joined queue successfully"], error: [] });
+		}
+		return reply.send("Joined queue");
 	},
 
 	leaveQueue: async function leaveQueue(req, reply) {
-		if (!inQueue) return;
-	
+		if (!inQueue) {
+			if (req.isApiRequest) {
+				return reply.send({ success: [], error: ["Not in queue"] });
+			}
+			return reply.send("Not in queue");
+		}
+
 		const payload = {
 			type: "DEQUEUE",
 			email: req.user.email,
 			user_id: req.user.user_id,
 		};
-		matchClient.sendMessage(payload);
+		matchClient.send(payload);
 		inQueue = false;
 		console.log(`User ${req.user.email} left the queue`);
+
+		if (req.isApiRequest) {
+			return reply.send({ success: ["Left queue successfully"], error: [] });
+		}
+		return reply.send("Left queue");
 	},
 
 	helloDb: async function testPrivateRoute(req, reply) {

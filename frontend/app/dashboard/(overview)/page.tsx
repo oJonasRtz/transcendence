@@ -18,6 +18,7 @@ import {
 import { getUserByEmail } from '@/app/lib/data';
 import { getUser } from '@/app/lib/auth';
 import { redirect } from 'next/navigation';
+import PlayButton from '@/app/ui/dashboard/play-button';
 
 export default async function DashboardPage() {
   // Get authenticated user from JWT
@@ -80,6 +81,11 @@ export default async function DashboardPage() {
 
       <div className="grid place-items-center mb-6">
         <UserProfileHeader userId={userId} />
+      </div>
+
+      {/* Play Button */}
+      <div className="flex justify-center mb-8">
+        <PlayButton />
       </div>
 
       {/* Stats Cards */}
