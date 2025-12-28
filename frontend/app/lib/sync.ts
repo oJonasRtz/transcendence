@@ -142,7 +142,6 @@ async function createUserIdMapping(
   for (const sqliteUser of sqliteUsers) {
     const prismaId = publicIdToIdMap.get(sqliteUser.public_id);
     if (prismaId) {
-      // Map both user_id and public_id to the same Prisma id for flexibility
       mapping.set(sqliteUser.user_id, prismaId);
       mapping.set(sqliteUser.public_id, prismaId);
     }
