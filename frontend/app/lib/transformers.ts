@@ -75,7 +75,9 @@ export function transformSQLiteUserToPrisma(sqliteUser: SQLiteUser): Omit<Prisma
   let avatar = sqliteUser.avatar;
   if (avatar && avatar.startsWith('/public/')) {
     const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
-    avatar = `${BACKEND_URL}${avatar}`;
+    // Add cache-busting timestamp to force browser to reload updated images
+    const timestamp = Date.now();
+    avatar = `${BACKEND_URL}${avatar}?t=${timestamp}`;
   } else if (!avatar) {
     avatar = '/images/default_avatar.png';
   }
