@@ -378,3 +378,91 @@ export async function changeDescription(_state: { error?: string; success?: stri
     return { error: 'An unexpected error occurred. Please try again.' };
   }
 }
+
+export async function changeAvatar(_state: { error?: string; success?: string } | undefined, formData: FormData) {
+  try {
+    const avatarFile = formData.get('avatar') as File;
+
+    // Validate file exists
+    if (!avatarFile || avatarFile.size === 0) {
+      return { error: 'Please select an image file' };
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowedTypes.includes(avatarFile.type)) {
+      return { error: 'Invalid file type. Please upload PNG, JPG, JPEG, or WEBP' };
+    }
+
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (avatarFile.size > maxSize) {
+      return { error: 'File size too large. Maximum size is 5MB' };
+    }
+
+    // Get JWT cookie
+    const cookieStore = await cookies();
+    const token = cookieStore.get('jwt');
+
+    if (!token) {
+      redirect('/login');
+    }
+
+    // Create FormData for multipart upload
+    const uploadFormData = new FormData();
+    uploadFormData.append('avatar', avatarFile);
+
+    // Call backend API with multipart/form-data
+    // Add Accept: application/json and X-Requested-With headers to trigger isApiRequest
+    const response = await fetch(`${API_GATEWAY_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        Cookie: `jwt=${token.value}`,
+      },
+      body: uploadFormData,
+      credentials: 'include',
+    });
+
+    // Parse JSON response
+    const contentType = response.headers.get('content-type');
+    if (!contentType?.includes('application/json')) {
+      const text = await response.text();
+      console.error('[changeAvatar] Expected JSON but got:', text.substring(0, 200));
+      return { error: 'Server returned unexpected response format.' };
+    }
+
+    const data = await response.json();
+
+    // Check for errors
+    if (data?.error && data.error.length > 0) {
+      return { error: data.error[0] };
+    }
+
+    // Sync to Prisma - fetch fresh data from backend
+    try {
+      const authUser = await getUser();
+      if (authUser && authUser.public_id) {
+        const { getUserProfile } = await import('@/app/lib/backend-api');
+        const { syncUserToPrisma } = await import('@/app/lib/sync');
+
+        const backendUser = await getUserProfile(authUser.public_id);
+        if (backendUser) {
+          await syncUserToPrisma(backendUser, authUser.email);
+        }
+      }
+    } catch (prismaError) {
+      console.error('Failed to sync avatar to Prisma:', prismaError);
+    }
+
+    // Revalidate paths
+    revalidatePath('/dashboard/settings/avatar');
+    revalidatePath('/dashboard');
+
+    return { success: 'Avatar updated successfully!' };
+  } catch (error) {
+    console.error('Change avatar error:', error);
+    return { error: 'An unexpected error occurred. Please try again.' };
+  }
+}

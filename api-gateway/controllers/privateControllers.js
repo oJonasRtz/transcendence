@@ -331,7 +331,11 @@ const privateControllers = {
 			const file = await req.file();
 
 			if (!file) {
-				req.session.error = ["You need to send an image"];
+				const error = ["You need to send an image"];
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
@@ -345,7 +349,11 @@ const privateControllers = {
 			const ext = path.extname(file.filename);
 
 			if (!allowed_extensions.includes(ext)) {
-				req.session.error = ["Forbidden extension detected"];
+				const error = ["Forbidden extension detected"];
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
@@ -359,7 +367,11 @@ const privateControllers = {
 
 			if (!type || !type.mime.startsWith("image/")) {
 				await unlink(filePath);
-				req.session.error = ["The file is not a valid image"];
+				const error = ["The file is not a valid image"];
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
@@ -369,13 +381,22 @@ const privateControllers = {
 			// Innapropriate image
 			if (response.nsfw) {
 				await unlink(filePath); // destroy the innapropriate file
-				req.session.error = ["Innapropriate image detected! Be careful choosing images!"];
+				const error = ["Innapropriate image detected! Be careful choosing images!"];
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
 			// Corrupted image
 			if (response.isError) {
-				req.session.error = ["Invalid image"];
+				await unlink(filePath);
+				const error = ["Invalid image"];
+				if (req.isApiRequest) {
+					return reply.code(400).send({ success: [], error });
+				}
+				req.session.error = error;
 				return reply.redirect("/home");
 			}
 
@@ -395,20 +416,32 @@ const privateControllers = {
                         .toFile(avatarFile);
 
 			// erase the last temporary file
-		
+
 			await unlink(filePath);
 
 			const avatarDb = `/public/uploads/avatar_${user_id}.png`;
 			await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatarDb });
 
-			req.session.success = ["Upload successfully"];
+			const success = ["Upload successfully"];
+
+			if (req.isApiRequest) {
+				return reply.send({ success, error: [] });
+			}
+
+			req.session.success = success;
 			return reply.redirect("/home");
 		} catch (err) {
-	
+
 			try { await unlink(`/app/public/uploads/avatar_${req.user.user_id}.tmp`) } catch {};
 
 			console.error("API-GATEWAY upload error:", err);
-			req.session.error = ["Error in the upload process"];
+			const error = ["Error in the upload process"];
+
+			if (req.isApiRequest) {
+				return reply.code(500).send({ success: [], error });
+			}
+
+			req.session.error = error;
 			return reply.redirect("/home");
 		}
 	},

@@ -20,11 +20,13 @@ export async function detectApiRequest(req, reply) {
 	// 1. Accept header includes application/json
 	// 2. Content-Type is application/json
 	// 3. Request is from Next.js frontend (checks origin and referer)
+	// 4. X-Requested-With header is set (AJAX/fetch requests)
 	const isApiRequest =
 		acceptHeader.includes('application/json') ||
 		contentType.includes('application/json') ||
 		req.headers['origin']?.includes(nextjsHost) ||
-		req.headers['referer']?.includes(nextjsHost);
+		req.headers['referer']?.includes(nextjsHost) ||
+		req.headers['x-requested-with'] === 'XMLHttpRequest';
 
 	// Store flag in request for hooks and controllers to check
 	req.isApiRequest = isApiRequest;
