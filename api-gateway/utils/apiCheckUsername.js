@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const LANGS_TO_TEST = ["pt", "en", "es", "fr", "it", "de"];
+const LANGS_TO_TEST = ["pt", "en", "es", "fr", "it"];
 
 export async function checkNameSecurity(name) {
      if (typeof name !== "string" || !name || !name.trim())
@@ -32,8 +32,10 @@ export async function checkNameSecurity(name) {
 
 		//console.log("Result CheckNameSecurity:", result);
 
-		if (nsfw)
+		if (nsfw) {
+			//console.log("result:", response.data);
 			return ({ nsfw, data: response.data });
+		}
 	} catch (err) {
 		console.error("Error da checkNameSecurity:", err);
 		return ({ nsfw: false, data: null, error: err.message });
