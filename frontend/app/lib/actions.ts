@@ -2,6 +2,8 @@
 
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 export async function createMatch(formData: FormData) {
   const rawFormData = {
@@ -29,4 +31,10 @@ export async function authenticate(
     }
     throw error;
   }
+}
+
+export async function logout() {
+  const cookieStore = await cookies();
+  cookieStore.delete('jwt');
+  redirect('/login');
 }

@@ -268,6 +268,46 @@ const publicControllers = {
 		}
 	},
 
+	// API endpoint for login (returns JSON)
+	apiCheckLogin: async function apiCheckLogin(req, reply) {
+		try {
+			if (!req.body.captchaInput) {
+				return reply.code(400).send({ error: ["You forgot to fill captcha code"] });
+			}
+
+			const response = await axios.post("http://auth-service:3001/checkLogin", req.body);
+
+			const token = response?.data?.token;
+			if (!token) {
+				return reply.code(401).send({ error: ["Invalid credentials"] });
+			}
+
+			return reply.send({ token });
+		} catch (err) {
+			console.error("API login error:", err.message);
+			if (err?.response?.status === 404) {
+				return reply.code(404).send({ error: ["User not found"] });
+			}
+			return reply.code(401).send({ error: ["Invalid credentials"] });
+		}
+	},
+
+	// API endpoint for captcha (returns JSON)
+	getCaptcha: async function getCaptcha(req, reply) {
+		try {
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
+			const { code, data } = response.data;
+
+			req.session.captcha = code;
+			req.session.captchaExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+			return reply.send({ code, data });
+		} catch (err) {
+			console.error("Error fetching captcha:", err.message);
+			return reply.code(500).send({ error: "Failed to fetch captcha" });
+		}
+	},
+
 	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {
