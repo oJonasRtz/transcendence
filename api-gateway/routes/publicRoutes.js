@@ -20,7 +20,7 @@ const routes = [
 	{ method: 'GET', url: '/validateEmailCode', handler: publicControllers.validateEmailCode },
 	{ method: 'GET', url: '/checkEmailCode', handler: publicControllers.checkEmailCode },
 	{ method: 'POST', url: '/checkEmailCode', handler: publicControllers.checkEmailCode },
-	{ method: 'GET', url: '/changePassword', handler: publicControllers.changePassword },
+	{ method: 'GET', url: '/newPasswordPage', handler: publicControllers.newPasswordPage },
 	{ method: 'POST', url: '/newPassword', handler: publicControllers.newPassword },
 	// TESTING BAD ROUTES
 	{ method: 'GET', url: '/checkDb', handler: publicControllers.checkDb },
