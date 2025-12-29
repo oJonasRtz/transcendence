@@ -1,5 +1,5 @@
-import { Client } from "./Client.class";
-import matchMaking from '../app.js';
+import { Client } from "./Client.class.js";
+import { matchMaking } from '../app.js';
 
 export class Party {
 	#leader = null;
@@ -13,6 +13,7 @@ export class Party {
 		RANKED: 2,
 		TOURNAMENT: 4
 	};
+	resolve = null;
 
 	constructor({token, game_type}) {
 		if (!token || !game_type || !['RANKED', 'TOURNAMENT'].includes(game_type))
@@ -68,18 +69,18 @@ export class Party {
 		if (!matchFound) {
 			this.#clients.forEach(c => {
 				if (c?.promisses?.reject) {
-					c?.promisses?.reject(new Error('PARTY_DEQUEUED'));
-					c?.promisses?.resolve = null;
-					c?.promisses?.reject = null;
+					c.promisses.reject(new Error('PARTY_DEQUEUED'));
+					c.promisses.resolve = null;
+					c.promisses.reject = null;
 				}
 			})
 		}
 		else {
 			this.#clients.forEach(c => {
 				if (c?.promisses?.resolve) {
-					c?.promisses?.resolve(payload);
-					c?.promisses?.resolve = null;
-					c?.promisses?.reject = null;
+					c.promisses.resolve(payload);
+					c.promisses.resolve = null;
+					c.promisses.reject = null;
 				}
 			})
 		}
@@ -105,6 +106,8 @@ export class Party {
 		this.#broadcast({
 			type: "PARTY_UPDATED",
 		});
+
+		console.log("Clients in party: ", [...this.#clients].map(c => c.name));
 	}
 
 	removeClient(client) {
@@ -142,9 +145,10 @@ export class Party {
 	
 		this.#registerClientWait();
 		this.#state = 'IN_QUEUE';
+		this.resolve = (payload) => this.#onMatchFound(payload);
+
 		matchMaking.enqueue({
-			party: this,
-			resolve: (payload) => this.#onMatchFound(payload),
+			party: this
 		});
 	}
 

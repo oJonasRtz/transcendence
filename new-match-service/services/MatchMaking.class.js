@@ -1,6 +1,6 @@
-import { Client } from "./Client.class";
-import { Lobby } from "./Lobby.class";
-import { Party } from "./Party.class";
+import { Lobby } from "./Lobby.class.js";
+import { Party } from "./Party.class.js";
+import crypto from 'crypto';
 
 export class MatchMaking {
 	#queue = {
@@ -20,10 +20,7 @@ export class MatchMaking {
 		if (!(party instanceof Party))
 			throw new Error('INVALID_PARAM');
 
-		return new Promise((resolve) => {
-			party.attachResolve(resolve);
-			this.#queue[party.game_type].push(party);
-		})
+		this.#queue[party.game_type].push(party);
 	}
 	dequeue({party}) {
 		if (!(party instanceof Party))
@@ -40,35 +37,33 @@ export class MatchMaking {
 				let collected = [];
 				let cnt = 0;
 
-				//Match loop - temp implementation: first come first served
-				for (const entry of queue) {
-					if (cnt + entry.size > max)
-						continue;
-					
-					collected.push(entry);
-					cnt += entry.size;
+				//match
+				for (const party of queue) {
+					if (cnt + party.size > max) continue;
 
-					if (cnt === max)
-						break;
+					collected.push(party);
+					cnt += party.size;
+
+					if (cnt === max) break;
 				}
 
-				if (cnt !== max)
-					continue;
+				if (cnt !== max) continue;
 
-				this.#queue[type] = this.#queue[type].filter(e => !collected.includes(e));
+				this.#queue[type] = this.#queue[type].filter(party => !collected.includes(party));
 
-				const players = collected.flatMap(e => [...e.clients]);
-				const lobby_id = crypto.randomUUID();
-				const payload = {
-					lobby_id,
-					players,
-				};
 
-				for (const entry of collected) {
-					entry.resolveAll(payload);
-					for (const p of entry.clients) {
-						p.__matchResolve = null;
-					}
+				//create lobby
+				try {
+					const players = collected.flatMap(p => [...p.clients]);
+					const id = crypto.randomBytes(16).toString('hex');
+					const lobby = new Lobby({type, clients: players, id});
+
+					for (const party of collected) {
+						if (party.resolve)
+							party.resolve({lobby});
+				}
+				} catch (error) {
+					console.error('MatchMaking:#tryMatch: Error creating lobby:', error.message);
 				}
 			}
 		}, 200);

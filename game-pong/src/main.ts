@@ -5,11 +5,11 @@ import type { StartType } from "./types";
 const temp = {
   1: {
     name: "Raltz",
-    playerId: 4002,
+    playerId: "1",
   },
   2: {
     name: "Kirlia",
-    playerId: 8922,
+    playerId: "2",
   },
 };
 
@@ -33,7 +33,7 @@ async function startPong(data: StartType): Promise<void> {
   await waitGameStart();
   const game = new Game();
 
-  game.start();
+  await game.start();
 }
 
 //Puxar as infos via url futuramente, essa é so pra teste

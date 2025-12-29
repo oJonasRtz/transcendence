@@ -1,5 +1,4 @@
-import {server, matchmaking} from '../app.js';
-import { Party } from './Party.class.js';
+import {server} from '../app.js';
 
 export class Client {
 	#info = {
@@ -67,6 +66,10 @@ export class Client {
 
 		this.#listeners();
 		this.#idle({});
+	}
+
+	get isConnected() {
+		return this.#ws !== null;
 	}
 
 	get name() {
@@ -148,42 +151,39 @@ export class Client {
 			});
 		}
 	}
-	async #in_game({match_id, lobby}) {
+	async #in_game({lobby}) {
 		console.log("Client entered IN_GAME state");
 		this.send({
 			type: 'STATE_CHANGE',
 			state: 'IN_GAME',
 		});
-		// if (!match_id || !lobby)
-		// 	throw new Error('INVALID_FORMAT');
+		if (!lobby)
+			throw new Error('INVALID_FORMAT');
 
-		// this.#game.match_id = match_id;
-		// this.#game.lobby = lobby;
-		// this.#game.lobby_id = lobby.id;
+		this.#game.lobby = lobby;
+		this.#game.lobby_id = lobby.id;
 
-		// this.send({
-		// 	type: 'MATCH_FOUND',
-		// 	match_id,
-		// });
 
-		// await lobby.waitEnd();
+		console.log(this.#info.name + " a partida comecou e to esperando terminar");		
+		await lobby.waitEnd();
+		console.log(this.#info.name + " a partida terminou");
 		
-		// this.#game.match_id = null;
-		// this.#game.lobby = null;
-		// this.#game.lobby_id = null;
+		this.#game.match_id = null;
+		this.#game.lobby = null;
+		this.#game.lobby_id = null;
 
-		// this.send({
-		// 	type: 'MATCH_ENDED',
-		// });
+		this.send({
+			type: 'MATCH_ENDED',
+		});
 
-		// this.#changeState('IDLE', {});
+		this.#changeState('IDLE', {});
 	}
 
 	async handleActions(data) {
 		try {
-			const {type} = data;
+			const {type, id} = data;
 
-			if (!type || !(type in this.#actions))
+			if (!type || !(type in this.#actions) || !id || id !== this.#info.id)
 				throw new Error('INVALID_ACTION');
 
 			return await this.#actions[type](data);
@@ -214,10 +214,11 @@ export class Client {
 			console.error(`Client ${this.#info.email} WebSocket error:`, error.message);
 		});
 
-		this.#ws.on('close', () => {
+		this.#ws.on('close', (code, reason) => {
 			this.#disconnect();
 
-			console.log(`Client ${this.#info.email} disconnected.`);
+			const r = reason?.toString() || 'No reason provided';
+			console.log(`Client ${this.#info.email} disconnected. Reason: ${r} (Code: ${code})`);
 		});
 	}
 
@@ -251,7 +252,7 @@ export class Client {
 	send(data) {
 		if (!data)
 			return;
-		if (this.#ws.readyState !== this.#ws.OPEN)
+		if (!this.#ws || this.#ws.readyState !== this.#ws.OPEN)
 			return this.#sendBuffer.push(data);
 
 		this.#ws.send(JSON.stringify(data));

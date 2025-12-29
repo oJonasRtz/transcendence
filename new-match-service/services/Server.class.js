@@ -17,6 +17,7 @@ export class Server {
 		// { method: 'POST', url: '/create_tournament', handler: this.#setTournament.bind(this) },
 	];
 
+	#wsToClient = new Map() // <ws, Client>
 	#clients = new Map(); // <id, Client>
 	#invitesValidityTime = (1000 * 60) * 5 // 5 minutes
 	#invites = new Map(); // <token, group: {owner(client), createdAt, members: Set(), size: members.lenght + 1, game_type}>
@@ -52,6 +53,13 @@ export class Server {
 					} catch (error) {
 						console.error('Server: Error parsing message:', error.message);
 					}
+				});
+
+				socket.on('close', () => {
+					const client = this.#wsToClient.get(socket);
+					if (!client) return;
+
+					this.#wsToClient.delete(socket);
 				});
 			});
 		});
@@ -136,7 +144,8 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const link = 'https://localhost/join_party/' + token;
+			const ip = process.env.PUBLIC_IP || 'localhost';
+			const link = `https://${ip}/match/join_party/` + token;
 
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			this.#invitesOwners.add(client);
@@ -293,7 +302,13 @@ export class Server {
 			if (![email, id, name].every(Boolean))
 				throw new Error('INVALID_FORMAT');
 
+			if (this.#wsToClient.has(ws))
+				throw new Error('ALREADY_CONNECTED');
+
 			let c = this.#clients.get(id);
+			if (c && c.isConnected())
+				throw new Error('ALREADY_CONNECTED');
+
 			if (c) {
 				c.reconnect(ws);
 				console.log(`Server.#addClient: Client reconnected: ${name} (${id})`);
@@ -303,6 +318,9 @@ export class Server {
 				this.#clients.set(id, c);
 				console.log(`Server.#addClient: New client connected: ${name} (${id})`);
 			}
+
+			this.#wsToClient.set(ws, c);
+
 			c.send({
 				type: 'CONNECTED',
 				code: 200,

@@ -1,0 +1,33 @@
+- Connect to service
+	wscat -c ws://localhost:3010
+
+- User 1
+	- Message
+		{"type":"CONNECT","id":"1","email":"user1@example.com","name":"Raltz"}
+	- Response expected
+		{"type":"STATE_CHANGE","state":"IDLE"}
+		{"type":"CONNECTED","code":200}
+
+	- message
+		{"type":"ENQUEUE","id":"1","game_type":"RANKED"}
+	- Response expected
+		{"type":"STATE_CHANGE","state":"IN_QUEUE"}
+		{"type":"PARTY_UPDATED"}
+
+- User 2
+	- Message
+		{"type":"CONNECT","id":"2","email":"user2@example.com","name":"Kirlia"}
+	- Response expected
+		{"type":"STATE_CHANGE","state":"IDLE"}
+		{"type":"CONNECTED","code":200}
+
+	- message
+		{"type":"ENQUEUE","id":"2","game_type":"RANKED"}
+- Response expecte
+		{"type":"STATE_CHANGE","state":"IDLE"}
+		{"type":"CONNECTED","code":200}
+
+- When both is in queue
+	- Response expected(both)
+		{"type":"MATCH_FOUND","match_id":"<id_do_lobby>"}
+		{"type":"STATE_CHANGE","state":"IN_GAME"}

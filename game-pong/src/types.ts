@@ -1,7 +1,7 @@
 export type StartType = {
   name: string;
   matchId: number;
-  playerId: number;
+  playerId: number | string;
 };
 
 export type InputType = {
