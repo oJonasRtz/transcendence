@@ -24,9 +24,9 @@ export class Connection {
   };
 
   private getWdUrl(): string {
-    // const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    // return `${protocol}://${window.location.host}/pong-server/`;
-    return 'ws://localhost:8443';
+    const host = window.location.host.split(":")[0];
+
+    return `wss://${host}/pong-ws/`;
   }
   
 
