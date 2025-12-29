@@ -31,6 +31,10 @@ export class Party {
 		this.#createdByInvite = Boolean(value);
 	}
 
+	get state() {
+		return this.#state;
+	}
+	
 	get token() {
 		return this.#token;
 	}

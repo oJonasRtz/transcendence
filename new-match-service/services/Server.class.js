@@ -92,7 +92,7 @@ export class Server {
 
 	#getParty(req, reply) {
 		try {
-			const {id} = req.body;
+			const {id} = req.query;
 
 			if (!id)
 				throw new Error('INVALID_FORMAT');
@@ -210,8 +210,25 @@ export class Server {
 		}
 	}
 
+	/**
+	 * Checks if an invite is still valid.
+	 *
+	 * An invite becomes invalid if:
+	 * - The party has entered the IN_QUEUE state
+	 * - The validity time has expired
+	 *
+	 * If the invite is no longer valid, it is removed from
+	 * the internal maps and the owner is notified.
+	 *
+	 * @param {Object} param0 - The invite object containing owner and createdAt
+	 * @param {Client} param0.owner - The client who created the invite
+	 * @param {number} param0.createdAt - Timestamp when the invite was created
+	 * @param {string} token - The unique token of the invite
+	 * @returns {boolean} - True if the invite was invalidated, false otherwise
+	 */
 	#checkInvite({owner, createdAt}, token) {
-		if (Date.now() - createdAt <= this.#invitesValidityTime)
+		if ((owner && owner.party.state === 'IDLE')
+			|| Date.now() - createdAt <= this.#invitesValidityTime)
 			return false;
 
 		this.#invites.delete(token);
@@ -228,7 +245,6 @@ export class Server {
 			if (this.#invites.size === 0 && this.#invitesOwners.size === 0)
 				return;
 
-			const now = Date.now();
 			this.#invites.forEach(({owner, createdAt}, token) => {
 				this.#checkInvite({owner, createdAt}, token);
 			});
