@@ -1,9 +1,19 @@
+// Type definitions for Socket.io client (loaded via CDN in browser)
+declare const io: any;
+
+interface chatUser {
+  name: string;
+  public_id: string;
+  avatar?: string;
+  socketId?: string;
+}
+
 export function chat() {
 
 const SOCKET_URL = window.location.origin;
 
 const socket = io(SOCKET_URL, {
-    transports: ["websocket"], 
+    transports: ["websocket"],
     withCredentials: true
 });
 
@@ -79,6 +89,7 @@ socket.on("updateUsers", (users: chatUser[]) => {
 		a.style.fontWeight = "bold";
 		a.style.padding = "4px 0";
 		usersDiv.style.display = "flex";
+		usersDiv.style.alignItem = "center";
 		usersDiv.appendChild(img);
 		usersDiv.appendChild(a);
 		usersDiv.appendChild(document.createElement("br"));
@@ -107,7 +118,7 @@ socket.on("updateMessages", (msgs: any[]) => {
 		if (msg.isSystem)
 			img.src = "/public/images/system.png";
 		else
-			img.src = msg.avatar || "/public/images/default_avatar.png";
+			img.src = msg.avatar || "/app/public/images/default_avatar.png";
 		img.width = 60;
 		img.height = 60;
 		img.style.borderRadius = "50%";
@@ -153,64 +164,6 @@ socket.on("updateMessages", (msgs: any[]) => {
 	});
 
 	console.log("MESSAGES:", msgs);
-});
-
-socket.on("updateNotifications", (notes: any[]) => {
-	const notificationsDiv = document.getElementById("notifications");
-
-        if (!notificationsDiv) return ;
-
-        notificationsDiv.innerHTML = ""; // extremely IMPORTANT!!! You need to clean everything before to add more
-
-        notes.forEach(note => {
-                const div = document.createElement("div");
-                div.style.display = "flex";
-                div.style.alignItems = "flex-start";
-                div.style.gap = "12px";
-                div.style.padding = "8px 4px";
-
-                const img = document.createElement("img");
-                img.src = "/public/images/system.png";
-                img.width = 60;
-                img.height = 60;
-                img.style.borderRadius = "50%";
-                img.style.objectFit = "cover";
-
-                const textBox = document.createElement("div");
-
-                const username = document.createElement("strong");
-                username.textContent = "SYSTEM"
-                username.style.display = "block";
-
-                let contentEl: HTMLElement;
-
-                if (note.isLink) {
-                        const a = document.createElement("a");
-                        a.href = note.content;
-                        a.textContent = "Pong Invitation";
-                        a.target = "_blank"; // Open the link in another page
-                        a.rel = "noopener noreferrer"; // protection to use _blank to avoid the page opened obtain access to our website and avoid the another page to know where the user come from
-                        a.style.color = "#4da3ff"; // vibrant blue
-                        contentEl = a;
-                } else {
-                        const span = document.createElement("span");
-                        if (note.isSystem && !note.content && note.isLimit !== true)
-                                span.textContent = `system: wait to send another invitation`;
-                        else if (note.isSystem && !note.content && note.isLimit === true)
-                                span.textContent = `system: You cannot send a message above 200 characters`;
-                        else
-                                span.textContent = note.content;
-                        contentEl = span;
-                }
-
-                textBox.appendChild(username);
-                textBox.appendChild(contentEl);
-
-                div.appendChild(img);
-                div.appendChild(textBox);
-
-                notificationsDiv.appendChild(div);
-        });
 });
 
 socket.on("updateChannels", (channels: any[]) => {

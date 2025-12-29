@@ -111,8 +111,8 @@ const authControllers = {
 
 	getCaptcha: async function getCaptchaImageCode(req, reply) {
 		const captcha = svgCaptcha.create({
-			size: 8,
-			noise: 5,
+			size: 6,
+			noise: 3,
 			color: true,
 			background: "#0f172a"
 		});
