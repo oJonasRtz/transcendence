@@ -102,6 +102,7 @@ export default async function registerServer(io) {
 		// connection
 
 		socket.on("joinPrivate", async ({ target_id }) => {
+			notifications.length = 0;
 			const exist = Array.from(privateUsers.values()).some(u => u.name === socket.username);
 			if (exist) return ;
 			privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
@@ -119,6 +120,7 @@ export default async function registerServer(io) {
 				}
 			}
 
+			socket.emit("updateNotifications", notifications);
 			io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
 			let msg = null;
@@ -134,6 +136,7 @@ export default async function registerServer(io) {
 			if (exist) return ;
 			users.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
 			try {
+				notifications.length = 0;
 				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png" , isLink: false, msg: `system: ${socket.username} joined to the chat` } );
 				await reloadEverything(socket.username);
@@ -156,6 +159,7 @@ export default async function registerServer(io) {
                                 io.to(socketId).emit("updateMessages", messages);
                         }*/
 
+			io.emit("updateNotifications", notifications);
 			io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
 		});
@@ -163,6 +167,7 @@ export default async function registerServer(io) {
 		//disconnection
 
 		socket.on("disconnect", async () => {
+			notifications.length = 0;
 			let data = users.get(socket.id);
 			const exist = privateUsers.get(socket.id);
 			if (exist) {
@@ -195,6 +200,7 @@ export default async function registerServer(io) {
                                 }
                                 io.to(socketId).emit("updateMessages", messages);
                         }*/
+			io.emit("updateNotifications", notifications);
 			io.emit("updateMessages", messages);
                         io.emit("updateUsers", Array.from(users.values()));
 		});
@@ -244,28 +250,30 @@ export default async function registerServer(io) {
 			} catch (err) {
 				let res = null;
 				let target_name = null;
-				try {
+				/*try {
                                 	res = await axios.post("http://users-service:3003/getDataByPublicId", { public_id: target_id });
                                 	target_name = res?.data.username;
-				} catch (err) { return ; }
+				} catch (err) { return ; }*/
 
-				let response = null;
-				try {
+				//let response = null;
+				/*try {
 					response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: target_id });
 				} catch (err) {}
 
 				let data = Array.isArray(response?.data) ? response?.data : [];
 
 				if (data)
-                                	privateMessages.push(...data);
+                                	privateMessages.push(...data);*/
 
 				if (!invitation?.data.link) {
-					privateMessages.push({isSystem: true, isLink: false, content: `system: You need to wait time to send another link`, username: "SYSTEM", avatar: '/public/images/system.png'});
-					for (const [socketId, user] of privateUsers.entries()) {
+					notifications.length = 0;
+					notifications.push({isSystem: true, isLink: false, content: `system: You need to wait time to send another link`, username: "SYSTEM", avatar: '/public/images/system.png'});
+					/*for (const [socketId, user] of privateUsers.entries()) {
                                         if (user.name === `${socket.username}` || user.name === target_name) {
                                                 io.to(socketId).emit("updateDirectMessages", privateMessages);
                                         }
-                                }
+                                }*/
+					socket.emit("updateNotifications", notifications);
 					return ;
 				}
 				console.error("sendPrivateInvite ERROR:", err);
@@ -284,8 +292,9 @@ export default async function registerServer(io) {
 			} catch (err) {
 				if (!response?.data.link)
 					await reloadEverything(socket.username);
-					messages.push({isSystem: true, isLink: false, content: `system: You need to wait time to send another link`, username: "Anonymous", avatar: '/public/images/system.png'});
-					io.emit("updateMessages", messages);
+					notifications.length = 0;
+					notifications.push({isSystem: true, isLink: false, content: `system: You need to wait time to send another link`, username: "Anonymous", avatar: '/public/images/system.png'});
+					socket.emit("updateNotifications", notifications);
 				console.error(`Error sending the pong invite match, user: ${socket.username}:`, err);
 			}
 
@@ -310,6 +319,7 @@ export default async function registerServer(io) {
 		
 		// Specif events only happens on socket
 		socket.on("sendMessage", async (msg) => {
+			let flag = true;
 			let blockUserTargets = null;
 			try {
 				const response = await axios.get("http://users-service:3003/getAllBlacklist");
@@ -329,12 +339,14 @@ export default async function registerServer(io) {
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: false, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png", isLink: false, msg: input } );
 				await reloadEverything(socket.username); // reload everything using the database
 			} catch (err) {
+				notifications.length = 0;
 				if (err.message === "LENGTH_TOO_HIGH") {
+					flag = false;
 					try {
 						await reloadEverything(`${socket.username}`);
 					} catch (err) {}
-					messages.push({isSystem: true, isLink: false, isLimit: true, msg: "system: You cannot type a message above 200 characters", username: "SYSTEM", avatar: '/public/images/system.png'});
-                                	socket.emit("updateMessages", messages);
+					notifications.push({isSystem: true, isLink: false, isLimit: true, msg: "system: You cannot type a message above 200 characters", username: "SYSTEM", avatar: '/public/images/system.png'});
+                                	socket.emit("updateNotifications", notifications);
                                 	io.emit("updateUsers", Array.from(users.values()));
                                 	console.error("Invalid input or message above to the allowed length");
 				}
@@ -348,12 +360,17 @@ export default async function registerServer(io) {
                                 io.to(socketId).emit("updateMessages", messages);
 			}*/
 
+			if (flag)
+				notifications.length = 0;
+			
+			socket.emit("updateNotifications", notifications);
 			io.emit("updateMessages", messages);
 			io.emit("updateUsers", Array.from(users.values()));
 		});
 
 		socket.on("sendPrivateMessage", async (msg, public_id) => {
 			let privateMessages = [];
+			notifications.length = 0;
 			try {
 				if(msg && msg.length > 200)
 					throw new Error("TOO_HIGH_LENGTH");
@@ -393,17 +410,19 @@ export default async function registerServer(io) {
                                         	break ;
                                		 }
                         	}
+				socket.emit("updateNotifications", notifications);
 				io.to(socket.id).emit("updatePrivateUsers", Array.from(official.values()));
 
 			} catch (err) {
 				if (err.message === "TOO_HIGH_LENGTH") {
-					try {
+					notifications.length = 0;
+					/*try {
 						const response = await axios.post("http://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
 						let data = Array.isArray(response?.data) ? response?.data : [];
                                 		privateMessages.push(...data);
-					} catch (err) {}
-					privateMessages.push({isSystem: true, isLink: false, content: "system: You cannot type a message above 200 characters", username: "SYSTEM", avatar: '/public/images/system.png'});
-                                	socket.emit("updateDirectMessages", privateMessages);
+					} catch (err) {}*/
+					notifications.push({isSystem: true, isLink: false, content: "system: You cannot type a message above 200 characters", username: "SYSTEM", avatar: '/public/images/system.png'});
+                                	socket.emit("updateNotifications", notifications);
                                 	console.error("Invalid input or message above to the allowed length");
 				}
 				console.error("Unfortunately we cannot send the private Message:", err);
