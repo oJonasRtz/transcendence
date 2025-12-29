@@ -3,6 +3,7 @@ import { Paddle } from './actors/paddle';
 import { gameState, stats } from '../globals';
 import { Ball } from './actors/ball';
 import { ScoreBoard } from './ScoreBoard.class';
+import { hideDisconnectScreen, showDisconnectScreen } from '../main';
 
 export class Game {
 	private engine: ex.Engine;
@@ -40,6 +41,12 @@ export class Game {
 
 			if (gameEnd)
 				this.end();
+
+			const players = gameState.getPlayers();
+			if (!players[1].connected || !players[2].connected)
+				showDisconnectScreen();
+			else
+				hideDisconnectScreen();
 
 			this.ballReset();
 		});
