@@ -244,18 +244,19 @@ const publicControllers = {
 		// validator hook validates the captchaInput
 
 		req.session.permission = true;
-		return reply.redirect("/changePassword");
+		return reply.redirect("/newPasswordPage");
 	},
 
-	changePassword: async function validateEmailCode(req, reply) {
+	newPasswordPage: async function validateEmailCode(req, reply) {
 		if (!req.session.email || !req.session.permission) {
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/login");
 		}
-		const error = req.session.error || [];
+		const error = req.session.error ?? [];
+		const success = req.session.success ?? [];
 		delete req.session.error;
 
-		return reply.view("changePassword", { error });
+		return reply.view("newPasswordPage", { success, error });
 	},
 
 	newPassword: async function newPassword(req, reply) {
@@ -281,7 +282,7 @@ const publicControllers = {
 				return reply.redirect("/login");
 			}
 			req.session.error = ["An error happened when we are trying to change your password as requested D="];
-			return reply.redirect("/changePassword");
+			return reply.redirect("/newPasswordPage");
 		}
 	},
 
