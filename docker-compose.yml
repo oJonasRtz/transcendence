@@ -7,25 +7,11 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./shared/ssl:/etc/nginx/ssl:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - api-gateway
-      - frontend
     networks:
       - "transcendence"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/etc/nginx/ssl/server.cert
-
-  frontend:
-    build: ./frontend
-    image: frontend:1.0.0
-    container_name: frontend
-    networks:
-      - "transcendence"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-    volumes:
-      - ./shared/ssl:/app/ssl:ro
 
   api-gateway:
     build: ./api-gateway
@@ -38,13 +24,11 @@ services:
     networks:
       - "transcendence"
       - "game"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     volumes:
       - api-gateway:/app/public
+      - ./shared/ip/server.ip:/app/shared/server.ip:ro
       - flappy-bird-dist:/app/public/flappy-bird
       - pong-dist:/app/public/pong
-      - ./shared/ssl:/app/ssl:ro
 
   auth-service:
     build: ./auth-service
@@ -55,10 +39,6 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-    volumes:
-      - ./shared/ssl:/app/ssl:ro
 
   users-service:
     build: ./users-service
@@ -69,10 +49,7 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     volumes:
-      - ./shared/ssl:/app/ssl:ro
       - users-service:/app/assets
 
   sqlite-db:
@@ -82,8 +59,6 @@ services:
     restart: always
     networks:
       - "db_connection"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     volumes:
       - sqlite-db:/app/database
       - ./shared/ssl:/app/ssl:ro
@@ -95,22 +70,17 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-    volumes:
-      - ./shared/ssl:/app/ssl:ro
 
   game-server:
     build: ./game-server
     image: game-server:1.0.0
     container_name: game-server
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     networks:
       - "game"
       - "transcendence"
+    ports:
+      - "8443:8443"
     volumes:
-      - ./shared/ssl:/app/ssl
       - ./shared/game-stats.json:/app/game-stats.json
 
   game-pong:
@@ -121,7 +91,10 @@ services:
       - game-server
     networks:
       - "game"
+    ports:
+      - "5173:5173"
     volumes:
+      - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
       - pong-dist:/usr/share/nginx/html
 
@@ -134,12 +107,8 @@ services:
     networks:
       - "game"
       - "transcendence"
-    volumes:
-      - ./shared/ssl:/app/ssl:ro
     env_file:
       - ./new-match-service/.env
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
 
   game-flappy-bird:
     build: ./game-flappy-bird
@@ -293,4 +262,3 @@ networks:
 
   db_connection:
     driver: bridge
-

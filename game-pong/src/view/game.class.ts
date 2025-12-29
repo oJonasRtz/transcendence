@@ -3,7 +3,6 @@ import { Paddle } from './actors/paddle';
 import { gameState, stats } from '../globals';
 import { Ball } from './actors/ball';
 import { ScoreBoard } from './ScoreBoard.class';
-import { hideDisconnectScreen, showDisconnectScreen } from '../main';
 
 export class Game {
 	private engine: ex.Engine;
@@ -42,12 +41,6 @@ export class Game {
 			if (gameEnd)
 				this.end();
 
-			const players = gameState.getPlayers();
-			if (!players[1].connected || !players[2].connected)
-				showDisconnectScreen();
-			else
-				hideDisconnectScreen();
-
 			this.ballReset();
 		});
 	}
@@ -59,7 +52,7 @@ export class Game {
 			if (this.ball) {
 				this.engine.remove(this.ball);
 				this.ball = null;
-				// console.log("Ball removed from the game");
+				console.log("Ball removed from the game");
 			}
 			return;
 		}
@@ -67,7 +60,7 @@ export class Game {
 		if (!this.ball) {
 			this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
 			this.addToGame([this.ball]);
-			// console.log("Ball added to the game");
+			console.log("Ball added to the game");
 		}
 	}
 	private addPaddles() {

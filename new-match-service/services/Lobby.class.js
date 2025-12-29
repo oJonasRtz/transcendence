@@ -1,19 +1,12 @@
 import { Client } from "./Client.class.js";
 import { Connection } from "./Connection.class.js";
 import { EventEmitter } from "events";
-import { data, gameServer } from "../app.js";
-
-const MINPTS = 15;
-const MAXGAINPTS = 25;
-const MAXLOSSPTS = 20;
-
-const __MIN_RANK_POSSIBLE__ = -30;
-const __MAX_RANK_POSSIBLE__ = Number.MAX_SAFE_INTEGER - 200;
+import { gameServer } from "../app.js";
 
 export class Lobby extends EventEmitter {
 	#clients = [];
 	#ids = {
-		match_id: new Set(),
+		match_id: [],
 		Lobby_id: null,
 	};
 	#valid_types = ['RANKED', 'TOURNAMENT'];
@@ -36,19 +29,19 @@ export class Lobby extends EventEmitter {
 		this.type = type;
 		this.#clients = clients;
 		this.#ids.Lobby_id = id;
-
 		try{
 			this.#manageMatch();
 		}catch(error){
 			console.error('Lobby: Error managing match:', error.message);
 		}
 	}
+
 	async #newMatch({players}) {
 		if (!gameServer)
 			throw new Error('NO_GAME_SERVER_AVAILABLE');
 
-		const match_id = await gameServer.newMatch(players, 2, 'PONG', this);
-		this.#ids.match_id.add(match_id);
+		const match_id = await gameServer.newMatch(players, 2, 'PONG');
+		this.#ids.match_id.push(match_id);
 		return match_id;
 	}
 
@@ -78,7 +71,7 @@ export class Lobby extends EventEmitter {
 
 	async waitEnd() {
 		if (this.#end_game)
-			return;
+			return Promise.resolve();
 
 		return new Promise((resolve) => {
 			this.once('END_GAME', resolve);
@@ -89,17 +82,13 @@ export class Lobby extends EventEmitter {
 		return this.#clients.length === this.#maxPlayers[this.type];
 	}
 
-	async end_game({setter, match_id, stats}, timeout = false) {
+	end_game({setter, match_id}) {
 		if (!(setter instanceof Connection))
 			throw new Error('PERMISSION_DENIED');
 
 		if (this.#end_game) return;
 
-		if (!timeout && (!stats || !stats.players))
-			throw new Error('INVALID_STATS');
-		
-
-		if (!this.#ids.match_id.has(match_id))
+		if (!this.#ids.match_id.includes(match_id))
 			throw new Error('INVALID_MATCH_ID');
 
 		this.#ids.match_id.delete(match_id);
@@ -107,28 +96,6 @@ export class Lobby extends EventEmitter {
 		switch (this.type) {
 			case 'RANKED':
 				this.#end_game = true;
-				if (timeout) {
-					this.#broadcast({type: 'MATCH_TIMEOUT', match_id});
-					this.emit('END_GAME');
-					return;
-				}
-				const p = stats.players;
-				const winner = Object.values(p).find(player => player.winner).id;
-				const calc = this.#calculateRank({score1: p[1].score, score2: p[2].score});
-				for (const c of this.#clients) {
-					let rank = c.rank;
-					const isWinner = c.id === winner;
-					const pts = isWinner ? calc.gain : calc.loss;
-
-					rank += pts;
-					if (rank > __MAX_RANK_POSSIBLE__)
-						rank = __MAX_RANK_POSSIBLE__;
-					if (rank < __MIN_RANK_POSSIBLE__)
-						rank = __MIN_RANK_POSSIBLE__;
-					c.rank = rank;
-					await data.sendRequest('/setRank', {email: c.email, rank});
-				}
-
 				this.emit('END_GAME');
 				break;
 		}
@@ -138,16 +105,5 @@ export class Lobby extends EventEmitter {
 		this.#clients.forEach(client => {
 			client.send(message);
 		});
-	}
-
-	#calculateRank({score1, score2}) {
-		const scale = Math.max(score1, score2);
-		const diff = Math.abs(score1 - score2);
-		const ratio = Math.min((diff === 1 ? 0 : diff) / scale, 1);
-
-		const gain = Math.round(MINPTS + (MAXGAINPTS - MINPTS) * ratio);
-		const loss = -Math.round(MINPTS + (MAXLOSSPTS - MINPTS) * ratio);
-
-		return {gain, loss};
 	}
 }

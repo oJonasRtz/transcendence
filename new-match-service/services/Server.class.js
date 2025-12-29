@@ -5,22 +5,14 @@ import formbody from "@fastify/formbody";
 import { Client } from "./Client.class.js";
 import crypto from "crypto";
 import { Party } from "./Party.class.js";
-import fs from "fs";
-import { data } from "../app.js";
 
 export class Server {
-	#app = fastify({
-		https: {
-			key: fs.readFileSync('./ssl/server.key'),
-			cert: fs.readFileSync('./ssl/server.cert')
-		}
-	});
+	#app = fastify();
 	#myRoutes = [
 		{ method: 'POST', url: '/invite', handler: this.#invite.bind(this) },
 		{ method: 'POST', url: '/join_party/:token', handler: this.#joinParty.bind(this) },
 		{ method: 'POST', url: '/leave_party', handler: this.#leaveParty.bind(this) },
 		{ method: 'GET', url: '/party', handler: this.#getParty.bind(this) },
-		{ method: 'GET', url: '/getRank', handler: this.#getRank.bind(this) },
 		// { method: 'GET', url: '/get_tournaments', handler: this.#getTournaments.bind(this) },
 		// { method: 'POST', url: '/create_tournament', handler: this.#setTournament.bind(this) },
 	];
@@ -81,38 +73,6 @@ export class Server {
 			this.#app.route(route);
 	}
 
-	async #getRank(req, reply) {
-		try {
-			const {email} = req.query;
-			if (!email || typeof email !== 'string' || email === 'undefined' || email.trim() === '')
-				throw new Error('INVALID_FORMAT');
-
-			const res = await data.sendRequest('getRank', {email});
-			const mmr = res.rank;
-
-			/*
-				mmr
-				0-99: BRONZE
-				100-199: SILVER
-				200-299: GOLD
-				300+: DIAMOND
-
-				pts
-					show 0-99 (bronze/silver/gold)
-					show mmr-300 (diamond)
-
-			*/
-			const ranks = ['BRONZE', 'SILVER', 'GOLD', 'DIAMOND'];
-			const key = mmr < 0 ? 0 : Math.min(Math.floor(mmr / 100), 3);
-			const pts = key < 3 ? mmr % 100 : mmr - 300;
-						
-			return reply.status(200).send({type: 'RANK_INFO', rank: ranks[key], pts, code: 200});
-		} catch (error) {
-			console.error('Server.#getRank: Error getting rank:', error.message);
-			return reply.status(400).send({type: 'ERROR', reason: error.message, code: 400});
-		}
-	}
-
 	createSoloParty({id, game_type}) {
 		if (!id
 			|| !game_type
@@ -132,7 +92,7 @@ export class Server {
 
 	#getParty(req, reply) {
 		try {
-			const {id} = req.query;
+			const {id} = req.body;
 
 			if (!id)
 				throw new Error('INVALID_FORMAT');
@@ -184,8 +144,8 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const address = `https://${req.headers.host}`;
-			const link = `${address}/join_party/` + token;
+			const ip = process.env.PUBLIC_IP || 'localhost';
+			const link = `https://${ip}/match/join_party/` + token;
 
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			this.#invitesOwners.add(client);
@@ -250,31 +210,8 @@ export class Server {
 		}
 	}
 
-	/**
-	 * Checks if an invite is still valid.
-	 *
-	 * An invite becomes invalid if:
-	 * - The party has entered the IN_QUEUE state
-	 * - The validity time has expired
-	 *
-	 * If the invite is no longer valid, it is removed from
-	 * the internal maps and the owner is notified.
-	 *
-	 * @param {Object} param0 - The invite object containing owner and createdAt
-	 * @param {Client} param0.owner - The client who created the invite
-	 * @param {number} param0.createdAt - Timestamp when the invite was created
-	 * @param {string} token - The unique token of the invite
-	 * @returns {boolean} - True if the invite was invalidated, false otherwise
-	 */
 	#checkInvite({owner, createdAt}, token) {
-		if (!owner || !owner.party) {
-			this.#invites.delete(token);
-			this.#invitesOwners.delete(owner);
-			return true;
-		}
-
-		if ((owner && owner.party.state === 'IDLE')
-			|| Date.now() - createdAt <= this.#invitesValidityTime)
+		if (Date.now() - createdAt <= this.#invitesValidityTime)
 			return false;
 
 		this.#invites.delete(token);
@@ -291,6 +228,7 @@ export class Server {
 			if (this.#invites.size === 0 && this.#invitesOwners.size === 0)
 				return;
 
+			const now = Date.now();
 			this.#invites.forEach(({owner, createdAt}, token) => {
 				this.#checkInvite({owner, createdAt}, token);
 			});
@@ -345,11 +283,7 @@ export class Server {
 			
 			const client = this.#clients.get(data.id);
 			if (!client)
-				throw new Error('PERMISION_DENIED');
-
-			const client2 = this.#wsToClient.get(ws);
-			if (client !== client2)
-				throw new Error('PERMISION_DENIED');
+				throw new Error('NOT_CONNECTED');
 
 			this.#handlers[type](data, client);
 		} catch (error) {

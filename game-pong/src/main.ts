@@ -4,12 +4,12 @@ import type { StartType } from "./types";
 
 const temp = {
   1: {
-    name: "aaaa",
-    playerId: "c6cc6382-d8d9-4543-887d-97cb8e396a32",
+    name: "Raltz",
+    playerId: "1",
   },
   2: {
-    name: "bbbb",
-    playerId: "cb4cf326-52b0-4c25-a6db-97f924d9a57b",
+    name: "Kirlia",
+    playerId: "2",
   },
 };
 
@@ -28,75 +28,13 @@ export function waitGameStart(): Promise<void> {
   })
 }
 
-/**
- * Starts the Pong game with the provided player data.
- * @param data - The player data including {matchId, name, playerId}.
- * @param {string} data.name - The name of the player.
- * @param {number} data.matchId - The match identification number.
- * @param {number|string} data.playerId - The player's identification number.
- * @returns Wait a promisse till the game ends.
-*/
 async function startPong(data: StartType): Promise<void> {
-  showDisconnectScreen();
   gameState.setIdentity(data);
   await waitGameStart();
-  hideDisconnectScreen();
-
   const game = new Game();
+
   await game.start();
 }
-
-let disconnectScreen: HTMLDivElement | null = null;
-
-export function showDisconnectScreen() {
-	if (disconnectScreen) return; // já está visível
-
-	disconnectScreen = document.createElement('div');
-	disconnectScreen.id = 'disconnect-screen';
-	disconnectScreen.style.position = 'fixed';
-	disconnectScreen.style.top = '0';
-	disconnectScreen.style.left = '0';
-	disconnectScreen.style.width = '100%';
-	disconnectScreen.style.height = '100%';
-	disconnectScreen.style.background = '#000';
-	disconnectScreen.style.display = 'flex';
-	disconnectScreen.style.alignItems = 'center';
-	disconnectScreen.style.justifyContent = 'center';
-	disconnectScreen.style.gap = '15px';
-	disconnectScreen.style.zIndex = '9999';
-
-	// Cria 3 bolinhas com contorno
-	for (let i = 0; i < 3; i++) {
-		const dot = document.createElement('div');
-		dot.style.width = '20px';
-		dot.style.height = '20px';
-		dot.style.borderRadius = '50%';
-		dot.style.background = 'white';
-		dot.style.border = '2px solid black';
-		dot.style.animation = `bounce 0.6s ${i * 0.2}s infinite ease-in-out`;
-		disconnectScreen.appendChild(dot);
-	}
-
-	document.body.appendChild(disconnectScreen);
-
-	// Adiciona animação via CSS
-	const style = document.createElement('style');
-	style.innerHTML = `
-		@keyframes bounce {
-			0%, 80%, 100% { transform: translateY(0); }
-			40% { transform: translateY(-20px); }
-		}
-	`;
-	document.head.appendChild(style);
-}
-
-export function hideDisconnectScreen() {
-	if (!disconnectScreen) return;
-	disconnectScreen.remove();
-	disconnectScreen = null;
-}
-
-
 
 //Puxar as infos via url futuramente, essa é so pra teste
 (async() => {

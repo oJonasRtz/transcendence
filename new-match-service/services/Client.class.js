@@ -1,4 +1,4 @@
-import {server, data} from '../app.js';
+import {server} from '../app.js';
 
 export class Client {
 	#info = {
@@ -12,7 +12,7 @@ export class Client {
 	#state = 'IDLE';
 	//Finite State Machine methods
 	#FSM = {
-		IDLE: async (payload) => await this.#idle(payload),
+		IDLE: (payload) => this.#idle(payload),
 		IN_QUEUE: async (payload) => await this.#in_queue(payload),
 		IN_GAME: async (payload) => await this.#in_game(payload),
 	}
@@ -26,12 +26,8 @@ export class Client {
 	#actions = {
 		ENQUEUE: async ({game_type}) => await this.#changeState('IN_QUEUE', {game_type}),
 		DEQUEUE: async () => {
-			if (this.promisses.reject) {
-				this.promisses.reject(new Error('DEQUEUED'));
-				this.promisses.resolve = null;
-				this.promisses.reject = null;
-			}
-
+			//matchmaking.dequeue({client: this, type: this.#game_type});
+			//this.#game_type = null;
 			this.#game.party.dequeue();
 			await this.#changeState('IDLE', {});
 		},
@@ -66,21 +62,10 @@ export class Client {
 		this.#info.name = name;
 		this.#info.email = email;
 
+		//get Rank on database using email
+
 		this.#listeners();
 		this.#idle({});
-	}
-
-	async #getRank() {
-		const rank = await data.sendRequest('getRank', { email: this.#info.email });
-		this.#info.rank = rank.rank;
-	}
-
-	get rank() {
-		return this.#info.rank;
-	}
-
-	set rank(value) {
-		this.#info.rank = value;
 	}
 
 	get isConnected() {
@@ -93,10 +78,6 @@ export class Client {
 
 	get actions() {
 		return Object.keys(this.#actions);
-	}
-
-	get email() {
-		return this.#info.email;
 	}
 
 	get party() {
@@ -123,13 +104,8 @@ export class Client {
 		return true;
 	}
 
-	async #idle({}) {
-		if (!this.#info.rank)
-			await this.#getRank();
-
+	#idle({}) {
 		console.log("Client entered IDLE state");
-		console.log(`Client ${this.#info.name} Rank: ` + this.#info.rank);
-		
 		this.send({
 			type: 'STATE_CHANGE',
 			state: 'IDLE',
@@ -166,14 +142,11 @@ export class Client {
 
 			await this.#changeState('IN_GAME', payload);
 		} catch (error) {
-			if (error.message === 'DEQUEUED')
-				return;
-
 			console.error('Client.#in_queue: Error during matchmaking enqueue:', error.message);
 			this.#changeState('IDLE', {});
 			this.send({
 				type: 'ERROR',
-				reason: error.message,
+				reason: 'MATCHMAKING_FAILED',
 				code: 400,
 			});
 		}
@@ -189,7 +162,6 @@ export class Client {
 
 		this.#game.lobby = lobby;
 		this.#game.lobby_id = lobby.id;
-		const actualRank = this.#info.rank;
 
 
 		console.log(this.#info.name + " a partida comecou e to esperando terminar");		
@@ -199,14 +171,9 @@ export class Client {
 		this.#game.match_id = null;
 		this.#game.lobby = null;
 		this.#game.lobby_id = null;
-		this.#game.party = null;
-		
-		const	diff = this.#info.rank - actualRank;
 
 		this.send({
 			type: 'MATCH_ENDED',
-			pts: diff,
-			rank: this.#info.rank,
 		});
 
 		this.#changeState('IDLE', {});

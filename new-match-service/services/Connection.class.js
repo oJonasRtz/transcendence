@@ -32,7 +32,7 @@ export class Connection {
 	}
 	
 	#getUrl() {
-		return `wss://${this.#server.ip}:${this.#server.port}/`;
+		return `ws://${this.#server.ip}:${this.#server.port}/`;
 	}
 
 	connect() {
@@ -48,10 +48,10 @@ export class Connection {
 			});
 		};
 
-		this.#socket.onmessage = async (event) => {
+		this.#socket.onmessage = (event) => {
 			const message = JSON.parse(event.data);
 
-			await this.#handleMessage(message);
+			this.#handleMessage(message);
 		};
 
 		this.#socket.onerror = (error) => {
@@ -65,37 +65,25 @@ export class Connection {
 		};
 	}
 
-	async #endGame(match_id, stats, timeout = false) {
+	#endGame(match_id) {
 		const lobby = this.#matchesRunning.get(match_id);
-
-		console.log("chegamos na endGame");
 		
 		if (!lobby)
 			return;
 
-		console.log(`vamos remover o match ${match_id} do lobby`);
-
-		try {
-			await lobby.end_game({setter: this, stats, match_id}, timeout);
-		} catch (error) {
-			console.error("Connection.#endGame: Error ending game:", error.message);
-		}
-		this.#send({
-			type: this.#types.sends.REMOVEMATCH,
-			matchId: match_id,
-		})
+		lobby.end_game({setter: this, match_id});
 
 		this.#matchesRunning.delete(match_id);
 		console.log(`Connection.#endGame: Match ${match_id} ended and removed from running matches.`);
 	}
 
-	async #handleMessage(message) {
+	#handleMessage(message) {
 		const map = {
 			[this.#types.recieves.CONNECTED]: () => {
 				console.log("Connection.#handleMessage: Connected to lobby server.");
 			},
-			[this.#types.recieves.GAME_END]: async () => {
-				await this.#endGame(message.matchId, message);
+			[this.#types.recieves.GAME_END]: () => {
+				this.#endGame(message.matchId);
 			},
 			[this.#types.recieves.MATCHCREATED]: () => {
 				const next = this.#matchQueue.shift();
@@ -107,9 +95,6 @@ export class Connection {
 			[this.#types.recieves.ERROR]: () => {
 				console.error(`Connection.#handleMessage: Error from server: ${message.error}`);
 			},
-			["TIMEOUT_REMOVE"]: () => {
-				this.#endGame(message.matchId, true);
-			}
 		}
 		try {
 			const type = message.type;
@@ -117,9 +102,6 @@ export class Connection {
 			if (!(type in map)) return;
 
 			console.log(`Reacieved ${type} message from lobby server.`);
-
-			if (type === this.#types.recieves.GAME_END)
-				console.log(`Message: ${JSON.stringify(message)}`);
 
 			map[type]();	
 		} catch (error) {

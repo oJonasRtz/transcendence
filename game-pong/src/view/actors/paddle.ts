@@ -21,6 +21,7 @@ export class Paddle extends ex.Actor {
 			y: y,
 			width: p.size.width,
 			height: p.size.height,
+			// color: ex.Color.White,
 			collisionType: ex.CollisionType.Fixed
 		});
 
