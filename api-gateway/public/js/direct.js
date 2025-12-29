@@ -36,11 +36,18 @@ export function direct() {
             return;
         usersDiv.innerHTML = "";
         users.forEach(user => {
+            const img = document.createElement("img");
             const a = document.createElement("a");
+            img.src = `/public/uploads/${user.avatar}.png`;
+            img.style.width = "60px";
+            img.style.height = "60px";
             a.textContent = `${user.name}`;
             a.href = `/seeProfile?user=${user.public_id}`;
             a.style.fontWeight = "bold";
             a.style.padding = "4px 0";
+            usersDiv.style.display = "flex";
+            usersDiv.style.alignItem = "center";
+            usersDiv.appendChild(img);
             usersDiv.appendChild(a);
             usersDiv.appendChild(document.createElement("br"));
             usersDiv.scrollTop = usersDiv.scrollHeight;

@@ -90,7 +90,6 @@ export default async function registerServer(io) {
 
 			messages.push(...data);
 
-                        console.log("got all messages");
                 } catch (err) {
                         console.error("Error in reloadEverything:", err);
                 }
@@ -105,15 +104,16 @@ export default async function registerServer(io) {
 		socket.on("joinPrivate", async ({ target_id }) => {
 			const exist = Array.from(privateUsers.values()).some(u => u.name === socket.username);
 			if (exist) return ;
-			privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id });
+			privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
 
 			let official = new Map();
 
-			official.set(socket.id, { name: socket.username, public_id: socket.public_id });
+			official.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
 
 			for (const [ socketId, user ] of privateUsers.entries()) {
 				if (user.public_id === target_id) {
-					official.set(socketId, user);
+
+					official.set(socketId, { name: user.name, public_id: user.public_id, avatar: `avatar_${user.user_id}` });
 					io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
 					break ;
 				}
@@ -132,7 +132,7 @@ export default async function registerServer(io) {
 		socket.on("join", async () => {
 			const exist = Array.from(users.values()).some(u => u.name === socket.username);
 			if (exist) return ;
-			users.set(socket.id, { name: socket.username, public_id: socket.public_id });
+			users.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
 			try {
 				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
 				await axios.post("http://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png" , isLink: false, msg: `system: ${socket.username} joined to the chat` } );
@@ -230,11 +230,11 @@ export default async function registerServer(io) {
 
                                 let official = new Map();
 
-                                official.set(socket.id, { name: `${socket.username}`, public_id: `${socket.public_id}` });
+                                official.set(socket.id, { name: `${socket.username}`, public_id: `${socket.public_id}`, avatar: `avatar_${socket.user_id}` });
 
                                 for (const [ socketId, user ] of privateUsers.entries()) {
                                         if (user.public_id === target_id) {
-                                                official.set(socketId, user);
+                                                official.set(socketId, { name: user.name, public_id: user.public_id, avatar: `avatar_${user.user_id}` });
                                                 io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
                                                 break ;
                                          }
@@ -383,11 +383,11 @@ export default async function registerServer(io) {
 
 				let official = new Map();
 
-                        	official.set(socket.id, { name: `${socket.username}`, public_id: `${socket.public_id}` });
+                        	official.set(socket.id, { name: `${socket.username}`, public_id: `${socket.public_id}`, avatar: `avatar_${socket.user_id}` });
 
                         	for (const [ socketId, user ] of privateUsers.entries()) {
                                 	if (user.public_id === public_id) {
-                                        	official.set(socketId, user);
+                                        	official.set(socketId, { name: user.name, public_id: user.public_id,avatar: `avatar_${user.user_id}` });
 						if (allowed)
 							io.to(socketId).emit("updatePrivateUsers", Array.from(official.values()));
                                         	break ;
