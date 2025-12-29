@@ -144,8 +144,8 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const ip = process.env.PUBLIC_IP || 'localhost';
-			const link = `https://${ip}/match/join_party/` + token;
+			const address = `https://${req.headers.host}`;
+			const link = `${address}/match/join_party/` + token;
 
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			this.#invitesOwners.add(client);
