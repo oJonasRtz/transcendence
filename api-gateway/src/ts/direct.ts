@@ -9,7 +9,6 @@ const socket = io(SOCKET_URL, {
 
 // Capture the form and also the input
 
-const owner_id = document.body.dataset.owner_id;
 const target_id = document.body.dataset.target_id;
 
 const form = document.getElementById("sendForm") as HTMLFormElement;
@@ -41,7 +40,7 @@ if (form instanceof HTMLFormElement && input instanceof HTMLInputElement) {
 //const avatar = document.body.dataset.avatar;
 
 socket.on("connect", () => {
-    socket.emit("joinPrivate", { owner_id, target_id });
+    socket.emit("joinPrivate", { target_id });
 });
 
 socket.on("updatePrivateUsers", (users: chatUser[]) => {
@@ -52,15 +51,23 @@ socket.on("updatePrivateUsers", (users: chatUser[]) => {
 	usersDiv.innerHTML = "";
 
 	users.forEach(user => {
-		const a = document.createElement("a");
-		a.textContent = `${user.name}`;
-		a.href = `/seeProfile?user=${user.public_id}`;
-		a.style.fontWeight = "bold";
-		a.style.padding = "4px 0";
-		usersDiv.appendChild(a);
-		usersDiv.appendChild(document.createElement("br"));
-		usersDiv.scrollTop = usersDiv.scrollHeight;
-	})
+                const img = document.createElement("img");
+                const a = document.createElement("a");
+
+                img.src = `/public/uploads/${user.avatar}.png`;
+                img.style.width = "60px";
+                img.style.height = "60px";
+
+                a.textContent = `${user.name}`;
+                a.href = `/seeProfile?user=${user.public_id}`;
+                a.style.fontWeight = "bold";
+                a.style.padding = "4px 0";
+                usersDiv.style.display = "flex";
+                usersDiv.appendChild(img);
+                usersDiv.appendChild(a);
+                usersDiv.appendChild(document.createElement("br"));
+                usersDiv.scrollTop = usersDiv.scrollHeight;
+        })
 	
     console.log("USERS:", users);
 });
@@ -126,6 +133,64 @@ socket.on("updateDirectMessages", (msgs: any[]) => {
                 div.appendChild(textBox);
 
                 messagesDiv.appendChild(div);
+        });
+});
+
+socket.on("updateNotifications", (notes: any[]) => {
+	const notificationsDiv = document.getElementById("notifications");
+
+        if (!notificationsDiv) return ;
+
+        notificationsDiv.innerHTML = ""; // extremely IMPORTANT!!! You need to clean everything before to add more
+
+        notes.forEach(note => {
+                const div = document.createElement("div");
+                div.style.display = "flex";
+                div.style.alignItems = "flex-start";
+                div.style.gap = "12px";
+                div.style.padding = "8px 4px";
+
+                const img = document.createElement("img");
+                img.src = "/public/images/system.png";
+                img.width = 60;
+                img.height = 60;
+                img.style.borderRadius = "50%";
+                img.style.objectFit = "cover";
+
+                const textBox = document.createElement("div");
+
+                const username = document.createElement("strong");
+                username.textContent = "SYSTEM"
+                username.style.display = "block";
+
+                let contentEl: HTMLElement;
+
+                if (note.isLink) {
+                        const a = document.createElement("a");
+                        a.href = note.content;
+                        a.textContent = "Pong Invitation";
+                        a.target = "_blank"; // Open the link in another page
+                        a.rel = "noopener noreferrer"; // protection to use _blank to avoid the page opened obtain access to our website and avoid the another page to know where the user come from
+                        a.style.color = "#4da3ff"; // vibrant blue
+                        contentEl = a;
+                } else {
+                        const span = document.createElement("span");
+                        if (note.isSystem && !note.content && note.isLimit !== true)
+                                span.textContent = `system: wait to send another invitation`;
+                        else if (note.isSystem && !note.content && note.isLimit === true)
+                                span.textContent = `system: You cannot send a message above 200 characters`;
+                        else
+                                span.textContent = note.content;
+                        contentEl = span;
+                }
+
+                textBox.appendChild(username);
+                textBox.appendChild(contentEl);
+
+                div.appendChild(img);
+                div.appendChild(textBox);
+
+                notificationsDiv.appendChild(div);
         });
 });
 

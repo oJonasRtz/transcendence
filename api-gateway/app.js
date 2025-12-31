@@ -56,7 +56,6 @@ app.register(fastifyStatic, {
   decorateReply: false
 });
 
-
 app.get("/boom", (req, reply) => {
 	throw new Error("Big Error");
 });

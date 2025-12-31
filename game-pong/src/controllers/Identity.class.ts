@@ -8,7 +8,7 @@ export class Identity {
 	*/
 	private name: string;
 	private matchId: number;
-	private playerId: number;
+	private playerId: number | string;
 	private id: 1 | 2 | 0;
 
 	constructor() {
@@ -19,7 +19,7 @@ export class Identity {
 	}
 
 	//Alterar fututuramente para consultar o backend
-	public setInfo({name, matchId, playerId}: {name: string; matchId: number; playerId: number;}) {
+	public setInfo({name, matchId, playerId}: {name: string; matchId: number; playerId: number | string;}) {
 		const alreadySet = [
 			this.name.trim() !== "",
 			this.matchId !== 0,
@@ -29,7 +29,7 @@ export class Identity {
 		const invalidData = [
 			name.trim() === "",
 			matchId < 1,
-			playerId < 1,
+			!playerId,
 		].some(Boolean);
 		
 		if (alreadySet || invalidData)

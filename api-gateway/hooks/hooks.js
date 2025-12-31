@@ -17,6 +17,7 @@ const redirect = {
 	'/setAuthNickname': "/changeNickname",
 	'/setAuthEmail': "/changeEmail",
 	'/setAuthPassword': "/changeYourPassword",
+        '/newPassword': "/newPasswordPage",
 	'/setUserDescription': "/changeDescription"
 };
 

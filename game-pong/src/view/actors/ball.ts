@@ -7,10 +7,19 @@ export class Ball extends ex.Actor {
 		super({
 			width: stats?.game?.ball?.size ?? 20,
 			height: stats?.game?.ball?.size ?? 20,
-			color: ex.Color.White,
 			collisionType: ex.CollisionType.Passive,
 			pos: new ex.Vector(x, y),
 		});
+	}
+
+	onInitialize(): void {
+		const color = ex.Color.White;
+		const body = new ex.Circle({
+			radius: this.width / 2,
+			color: color,
+		});
+
+		this.graphics.add(body);
 	}
 
 	onPreUpdate(_engine: ex.Engine, _delta: number): void {

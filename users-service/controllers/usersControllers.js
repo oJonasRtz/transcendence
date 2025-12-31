@@ -17,7 +17,7 @@ const usersControllers = {
 
 	validateUserEmail: async function validateUserEmail(req, reply) {
                 try {
-			if (!req.body || !req.body.email || !req.body.user_id) 
+			if (!req.body || !req.body.email || !req.body.user_id || req.body.stats === undefined) 
 				return reply.code(400).send("YOU_NEED_TO_FILL_ALL");
 			
                         await axios.post("http://sqlite-db:3002/validateUserEmail", req.body);
@@ -311,6 +311,18 @@ const usersControllers = {
 			return reply.code(200).send(blacklist?.data ?? null);
 		} catch (err) {
 			console.error("USERS-SERVICE getAllBlacklist ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getPublicId: async function getPublicId(req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id here");
+			const response = await axios.post("http://sqlite-db:3002/getPublicId", req.body);
+			return reply.code(200).send(response?.data ?? null);
+		} catch (err) {
+			console.error("USERS-SERVICE getPublicId ERROR:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	}

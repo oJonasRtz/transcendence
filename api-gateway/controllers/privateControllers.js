@@ -97,7 +97,7 @@ const privateControllers = {
 			const response = await axios.post("http://users-service:3003/getUserAvatar", { user_id: req.user.user_id, email: req.user.email });
 			let avatar = response?.data.avatar;
 
-			if (avatar === '/public/images/default.jpg') {
+			/*if (avatar === '/public/images/default.jpg') {
 				try {
 					await fs.access(`/app/public/uploads/avatar_${req.user.user_id}.png`);
 				} catch (err) {
@@ -114,10 +114,10 @@ const privateControllers = {
                 		}])
                 		.png()
                 		.toFile(`/app/public/uploads/avatar_${req.user.user_id}.png`);
-				}			
+				}
 				avatar = `/public/uploads/avatar_${req.user.user_id}.png`;
 				await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.user.user_id, avatar: avatar });
-			}
+			}*/
 
 			const myData = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
 
@@ -206,7 +206,7 @@ const privateControllers = {
 			
 			// validator hook, do your job
 
-			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id });
+			await axios.post("http://users-service:3003/validateUserEmail", { email: req.user.email, user_id: req.user.user_id, stats: true });
 
 			req.session.success = ["Your e-mail is validated now =D"];
 			return reply.redirect("/home");
@@ -499,6 +499,8 @@ const privateControllers = {
                         req.body.username = req.user.username;
 
                         await axios.post("http://auth-service:3001/setAuthEmail", req.body);
+
+			await axios.post("http://users-service:3003/validateUserEmail", { email: req.body.email, user_id: req.user.user_id, stats: false });
 
                         req.session.success = ["Email changed successfully"];
 
@@ -797,7 +799,7 @@ const privateControllers = {
 			}
 
 			const response = await axios.post("http://users-service:3003/getUserInformation", { user_id: req.user.user_id });
-                        return reply.view("chatDirectUsers", { owner_id: response?.data.public_id, target_id: req.query.public_id } );
+                        return reply.view("chatDirectUsers", { target_id: req.query.public_id } );
                 } catch (err) {
                         console.error("API-GATEWAY chatAllUsers ERROR:", err);
                         req.session.error = ["Error opening the chat"];

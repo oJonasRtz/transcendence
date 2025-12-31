@@ -23,12 +23,12 @@ export class Connection {
     },
   };
 
-  private getWdUrl():string {
-    const protocol: string = window.location.protocol === 'https' ? 'wss' : 'ws';
+  private getWdUrl(): string {
+    const host = window.location.host.split(":")[0];
 
-    return `${protocol}://${window.location.host}/pong-server/`;
+    return `wss://${host}/pong-ws/`;
   }
-
+  
 
   public connect(): void {
 

@@ -10,7 +10,7 @@ export class Ball {
   #speed = {
     moveSpeed: 5,
     speedIncrement: 1,
-    maxSpeed: 8,
+    maxSpeed: 10,
   };
   #lastBounce = null;
   #DELAY = 100;

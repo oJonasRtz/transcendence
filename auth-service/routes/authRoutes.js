@@ -24,7 +24,7 @@ const routes = [
 	{ method: 'POST', url: '/setAuthEmail', handler: authControllers.setAuthEmail },
 	{ method: 'POST', url: '/setAuthPassword', handler: authControllers.setAuthPassword },
 	{ method: 'POST', url: '/deleteUserAccount', handler: authControllers.deleteUserAccount },
-	{ method: 'POST', url: '/set2FAOnOff', handler: authControllers.set2FAOnOff }
+	{ method: 'POST', url: '/set2FAOnOff', handler: authControllers.set2FAOnOff },
 ];
 
 export default async function authRoutes(fastify, options) {

@@ -1,6 +1,8 @@
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import sharp from 'sharp';
 import sendMail from '../utils/sendMail.js';
+import { mkdir } from 'node:fs/promises';
 import { randomUUID } from 'crypto';
 
 const publicControllers = {
@@ -87,9 +89,25 @@ const publicControllers = {
 			req.session.success = success;
 			req.session.error = error;
 
+                        await mkdir("/app/public/uploads", { recursive: true });
+                        await sharp("/app/public/images/default.jpg")
+                        .resize(350, 350)
+                        .composite([{
+                        input: Buffer.from(
+                        `<svg width="350" height="350">
+                         <circle cx="175" cy="175" r="175" fill="white"/>
+                         </svg>`
+                         ),
+                         blend: "dest-in"
+                       }])
+                         .png()
+                         .toFile(`/app/public/uploads/avatar_${req.body.user_id}.png`); 
+                         let avatar = `/public/uploads/avatar_${req.body.user_id}.png`;
+                         await axios.post("http://users-service:3003/setUserAvatar", { user_id: req.body.user_id, avatar: avatar }); 
+
 			return reply.redirect("/login");
 		} catch (err) {
-			if (err?.response.status === 409) {
+			if (err?.response?.status === 409) {
 				req.session.error = ["Registration failed. Try again"];
 				return reply.redirect("/register");
 			}
@@ -130,7 +148,6 @@ const publicControllers = {
 
 			return reply.redirect("/home");
 		} catch (err) {
-			console.log("\x1b[94mEstamos no err da checkLogin\x1b[0m");
 			if (err?.response?.status === 404) {
 				req.session.error = ["Invalid credentials"];
 				return reply.redirect("/login");
@@ -227,18 +244,19 @@ const publicControllers = {
 		// validator hook validates the captchaInput
 
 		req.session.permission = true;
-		return reply.redirect("/changePassword");
+		return reply.redirect("/newPasswordPage");
 	},
 
-	changePassword: async function validateEmailCode(req, reply) {
+	newPasswordPage: async function validateEmailCode(req, reply) {
 		if (!req.session.email || !req.session.permission) {
 			req.session.error = ["You need to follow step by step"];
 			return reply.redirect("/login");
 		}
-		const error = req.session.error || [];
+		const error = req.session.error ?? [];
+		const success = req.session.success ?? [];
 		delete req.session.error;
 
-		return reply.view("changePassword", { error });
+		return reply.view("newPasswordPage", { success, error });
 	},
 
 	newPassword: async function newPassword(req, reply) {
@@ -264,7 +282,7 @@ const publicControllers = {
 				return reply.redirect("/login");
 			}
 			req.session.error = ["An error happened when we are trying to change your password as requested D="];
-			return reply.redirect("/changePassword");
+			return reply.redirect("/newPasswordPage");
 		}
 	},
 

@@ -2,6 +2,7 @@ import WebSocket from "ws";
 
 export class Connection {
 	#socket = null;
+	#matchesRunning = new Map() // <match_id, Lobby>
 	#matchQueue = [];
 	#login = {
 		id: process.env.LOBBY_ID,
@@ -64,13 +65,25 @@ export class Connection {
 		};
 	}
 
+	#endGame(match_id) {
+		const lobby = this.#matchesRunning.get(match_id);
+		
+		if (!lobby)
+			return;
+
+		lobby.end_game({setter: this, match_id});
+
+		this.#matchesRunning.delete(match_id);
+		console.log(`Connection.#endGame: Match ${match_id} ended and removed from running matches.`);
+	}
+
 	#handleMessage(message) {
 		const map = {
 			[this.#types.recieves.CONNECTED]: () => {
 				console.log("Connection.#handleMessage: Connected to lobby server.");
 			},
 			[this.#types.recieves.GAME_END]: () => {
-				//Chama calculate rank para atualizar o db
+				this.#endGame(message.matchId);
 			},
 			[this.#types.recieves.MATCHCREATED]: () => {
 				const next = this.#matchQueue.shift();
@@ -87,6 +100,8 @@ export class Connection {
 			const type = message.type;
 
 			if (!(type in map)) return;
+
+			console.log(`Reacieved ${type} message from lobby server.`);
 
 			map[type]();	
 		} catch (error) {
@@ -112,9 +127,13 @@ export class Connection {
 			this.#socket.send(JSON.stringify(message));
 	}
 
-	newMatch(players, maxPlayers, game) {
+	newMatch(players, maxPlayers, game, Lobby) {
 		return new Promise((resolve) => {
-			this.#matchQueue.push(resolve);
+			this.#matchQueue.push((matchId) => {
+				this.#matchesRunning.set(matchId, Lobby);
+				console.log("O lobby que acompanha a conexão recebeu o matchId:", matchId);
+				resolve(matchId);
+			});
 
 			this.#send({
 				type: this.#types.sends.NEWMATCH,
@@ -122,8 +141,6 @@ export class Connection {
 				maxPlayers,
 				game,
 			});
-
-
 		});
 	}
 

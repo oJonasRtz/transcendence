@@ -81,7 +81,7 @@ const databaseModels = {
 	},
 
 	activateEmail: async function validateUserEmail(fastify, data) {
-		await fastify.db.run("UPDATE users SET isEmailConfirmed = true WHERE user_id = ?", [ data.user_id ]);
+		await fastify.db.run("UPDATE users SET isEmailConfirmed = ? WHERE user_id = ?", [ data.stats, data.user_id ]);
 	},
 
 	get2FAEnable: async function get2FAEnable(fastify, email) {
@@ -411,6 +411,16 @@ const databaseModels = {
 			return (response ?? null);
 		} catch (err) {
 			console.error("MODELS getTargetId ERROR:", err?.response?.data || err.message);
+			return (null);
+		}
+	},
+
+	getPublicId: async function getPublicId(fastify, data) {
+		try {
+			const res = await fastify.db.get("SELECT public_id FROM users WHERE user_id = ?", [ data.user_id ]);
+			return (res ?? null);
+		} catch (err) {
+			console.error("MODELS getPublicId ERROR:", err?.response?.data || err.message);
 			return (null);
 		}
 	}

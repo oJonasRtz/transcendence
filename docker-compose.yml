@@ -86,6 +86,8 @@ services:
     networks:
       - "game"
       - "transcendence"
+    ports:
+      - "8443:8443"
     volumes:
       - ./shared/game-stats.json:/app/game-stats.json
 
@@ -97,6 +99,8 @@ services:
       - game-server
     networks:
       - "game"
+    ports:
+      - "5173:5173"
     volumes:
       - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
@@ -106,18 +110,13 @@ services:
     build: ./new-match-service
     image: match-service:1.0.0
     container_name: match-service
-    ports:
-      - "3004:3004"
-      - "3010:3010"
     depends_on:
       - game-server
     networks:
       - "game"
       - "transcendence"
     env_file:
-      - ./match-service/.env
-    volumes:
-      - ./shared/ip/server.ip:/app/shared/server.ip:ro
+      - ./new-match-service/.env
 
   game-flappy-bird:
     build: ./game-flappy-bird

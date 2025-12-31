@@ -1,5 +1,12 @@
 import { defineConfig } from "vite";
 
+// export default defineConfig({
+//   base: "/pong/",
+// });
+
 export default defineConfig({
-  base: "/pong/",
+  server: {
+    host: true,
+    port: 5173,
+  }
 });

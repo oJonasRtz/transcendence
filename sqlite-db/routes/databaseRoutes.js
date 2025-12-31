@@ -58,7 +58,8 @@ const routes = [
 	{ method: 'POST', url: '/storePrivateMessage', handler: databaseControllers.storePrivateMessage },
 	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff },
 	{ method: 'POST', url: '/setTargetId', handler: databaseControllers.setTargetId },
-	{ method: 'POST', url: '/getTargetId', handler: databaseControllers.getTargetId }
+	{ method: 'POST', url: '/getTargetId', handler: databaseControllers.getTargetId },
+	{ method: 'POST', url: '/getPublicId', handler: databaseControllers.getPublicId }
 ];
 
 export default async function databaseRoutes(fastify, options) {
