@@ -13,6 +13,18 @@ const prisma = new PrismaClient({
 // USER QUERIES
 // ============================================
 
+export async function fetchUsers() {
+  return await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true
+    },
+      orderBy: { username: 'asc' },
+  })
+}
+
+
+
 /**
  * Get user by ID with all relations
  */
@@ -128,6 +140,7 @@ export async function getOnlineUsers() {
       avatar: true,
       isOnline: true,
     },
+    orderBy: { username: 'asc' },
   });
 }
 

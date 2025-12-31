@@ -65,6 +65,7 @@ server: restart-game-server
 pong: restart-game-pong
 flappy: restart-game-flappy-bird
 match: restart-match-service
+front: restart-frontend
 
 # Restart all the services (RESTART, MAN)
 
