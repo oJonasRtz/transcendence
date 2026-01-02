@@ -26,8 +26,12 @@ export class Client {
 	#actions = {
 		ENQUEUE: async ({game_type}) => await this.#changeState('IN_QUEUE', {game_type}),
 		DEQUEUE: async () => {
-			//matchmaking.dequeue({client: this, type: this.#game_type});
-			//this.#game_type = null;
+			if (this.promisses.reject) {
+				this.promisses.reject(new Error('DEQUEUED'));
+				this.promisses.resolve = null;
+				this.promisses.reject = null;
+			}
+
 			this.#game.party.dequeue();
 			await this.#changeState('IDLE', {});
 		},
@@ -142,11 +146,14 @@ export class Client {
 
 			await this.#changeState('IN_GAME', payload);
 		} catch (error) {
+			if (error.message === 'DEQUEUED')
+				return;
+
 			console.error('Client.#in_queue: Error during matchmaking enqueue:', error.message);
 			this.#changeState('IDLE', {});
 			this.send({
 				type: 'ERROR',
-				reason: 'MATCHMAKING_FAILED',
+				reason: error.message,
 				code: 400,
 			});
 		}
@@ -171,6 +178,7 @@ export class Client {
 		this.#game.match_id = null;
 		this.#game.lobby = null;
 		this.#game.lobby_id = null;
+		this.#game.party = null;
 
 		this.send({
 			type: 'MATCH_ENDED',

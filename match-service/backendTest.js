@@ -41,10 +41,8 @@ function prompt() {
 }
 
 export function connect() {
-	const serverIp = "localhost";
-	socket = new WebSocket(`wss://${serverIp}:8443`, {
-		ca: fs.readFileSync('./rootCA.pem')
-	});
+	const url = "wss://localhost:8443";
+	socket = new WebSocket(url);
 
 	socket.onopen = () => {
 		console.log('Connected to WebSocket server');

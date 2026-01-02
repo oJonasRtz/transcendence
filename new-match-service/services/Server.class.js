@@ -299,7 +299,11 @@ export class Server {
 			
 			const client = this.#clients.get(data.id);
 			if (!client)
-				throw new Error('NOT_CONNECTED');
+				throw new Error('PERMISION_DENIED');
+
+			const client2 = this.#wsToClient.get(ws);
+			if (client !== client2)
+				throw new Error('PERMISION_DENIED');
 
 			this.#handlers[type](data, client);
 		} catch (error) {
