@@ -52,6 +52,14 @@ export class Match {
   get id() {
     return this.#id;
   }
+
+  get allconnected() {
+    return this.#allConnected;
+  }
+
+  get gameEnded() {
+    return this.#gameEnded;
+  }
   // --- Match Timer Methods ---
   #getTime(timestamp, flag = false) {
     const date = new Date(timestamp);
@@ -207,6 +215,9 @@ export class Match {
         this.#broadcast(message);
         this.#lastState = message;
       }
+
+      if (this.#gameEnded && !this.#allConnected)
+        lobby.removeMatch(this.#id);
     }, INTERVALS / FPS);
   }
   #stopPing() {
@@ -223,6 +234,8 @@ export class Match {
 
   // --- Manage Game State ---
   endGame(winner) {
+    if (this.#gameEnded) return;
+
     this.#gameEnded = true;
     this.#stopTimer();
 
@@ -232,7 +245,7 @@ export class Match {
       players: Object.fromEntries(
         Array.from({ length: this.#maxPlayers }, (_, i) => {
           const p = i + 1;
-          const player = this.#players[p];
+          const player = this.#players[p].info;
 
           return [
             p,
@@ -303,15 +316,18 @@ export class Match {
 	return (false);
   }
   #onScore(scorer) {
-      this.#lastScorer = scorer;
-	  this.#ball.stop();
+    if (this.#gameEnded) return;
+  
+    this.#lastScorer = scorer;
+    if (this.#ball)
+      this.#ball.stop();
 	  this.#ball = null;
       Object.values(this.#players).forEach((p) => {
         if (!this.#gameEnded && p.side === scorer && p.score < this.#maxScore) {
           p.score = p.score + 1;
           this.#newBall();
         }
-        if (p.score >= this.#maxScore) this.endGame(p.name);
+        if (p.score >= this.#maxScore) this.endGame(p.info.name);
       });
 
       console.log(`Ball scored for match ${this.#id} side ${scorer}`);

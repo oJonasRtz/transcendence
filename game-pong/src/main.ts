@@ -28,6 +28,14 @@ export function waitGameStart(): Promise<void> {
   })
 }
 
+/**
+ * Starts the Pong game with the provided player data.
+ * @param data - The player data including {matchId, name, playerId}.
+ * @param {string} data.name - The name of the player.
+ * @param {number} data.matchId - The match identification number.
+ * @param {number|string} data.playerId - The player's identification number.
+ * @returns Wait a promisse till the game ends.
+*/
 async function startPong(data: StartType): Promise<void> {
   showDisconnectScreen();
   gameState.setIdentity(data);

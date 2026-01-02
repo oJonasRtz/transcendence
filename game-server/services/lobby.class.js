@@ -100,10 +100,9 @@ export class Lobby {
 	//Fazer tratamento para o force = pedir credenciais
 	removeMatch(index, force = false, timeout = false) {
 		const match = matches[index];
-		const stop = !match
-					|| (!force && Object.values(match.players).every(p => !p.notifyEnd) && !match.gameEnded);
 
-		if (stop) return;
+		if (!match) return;
+		if (!force && !match.gameEnded) return;
 
 		match.destroy();
 

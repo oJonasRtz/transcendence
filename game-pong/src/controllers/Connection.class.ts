@@ -29,7 +29,6 @@ export class Connection {
     return `wss://${host}/pong-ws/`;
   }
   
-
   public connect(): void {
 
     const url: string = this.getWdUrl();

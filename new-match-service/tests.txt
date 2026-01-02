@@ -1,3 +1,4 @@
+
 - Connect to service
 	wscat -n -c wss://localhost/match-ws/
 
@@ -31,7 +32,6 @@
 	- Response expected(both)
 		{"type":"MATCH_FOUND","match_id":"<id_do_lobby>"}
 		{"type":"STATE_CHANGE","state":"IN_GAME"}
-
 
 routes calls
 	- /Invite

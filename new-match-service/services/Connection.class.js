@@ -65,13 +65,22 @@ export class Connection {
 		};
 	}
 
-	#endGame(match_id) {
+	#endGame(match_id, timeout = false) {
 		const lobby = this.#matchesRunning.get(match_id);
+
+		console.log("chegamos na endGame");
 		
 		if (!lobby)
 			return;
 
-		lobby.end_game({setter: this, match_id});
+		console.log(`vamos remover o match ${match_id} do lobby`);
+
+
+		lobby.end_game({setter: this, match_id}, timeout);
+		this.#send({
+			type: this.#types.sends.REMOVEMATCH,
+			matchId: match_id,
+		})
 
 		this.#matchesRunning.delete(match_id);
 		console.log(`Connection.#endGame: Match ${match_id} ended and removed from running matches.`);
@@ -95,6 +104,9 @@ export class Connection {
 			[this.#types.recieves.ERROR]: () => {
 				console.error(`Connection.#handleMessage: Error from server: ${message.error}`);
 			},
+			["TIMEOUT_REMOVE"]: () => {
+				this.#endGame(message.matchId, true);
+			}
 		}
 		try {
 			const type = message.type;
@@ -102,6 +114,9 @@ export class Connection {
 			if (!(type in map)) return;
 
 			console.log(`Reacieved ${type} message from lobby server.`);
+
+			if (type === this.#types.recieves.GAME_END)
+				console.log(`Message: ${JSON.stringify(message)}`);
 
 			map[type]();	
 		} catch (error) {

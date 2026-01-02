@@ -136,14 +136,13 @@ export class Party {
 	}
 
 	enqueue(caller) {
-		if (this.#state === 'IN_QUEUE'
-			|| caller !== this.#leader
-		)
+		if (this.#state === 'IN_QUEUE')
 			return;
 
 		if (!caller
 			|| !(caller instanceof Client)
 			|| !this.#clients.has(caller)
+			|| caller !== this.#leader
 		)
 			throw new Error('INVALID_CALLER');
 	
