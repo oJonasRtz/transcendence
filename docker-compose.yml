@@ -1,3 +1,6 @@
+x-ca-volume: &ca-volume
+  - ./shared/ssl/ca.pem:/etc/ssl/certs/transcendence-ca.pem:ro
+
 services:
   nginx:
     image: nginx:alpine
@@ -34,7 +37,6 @@ services:
       - "game"
     volumes:
       - api-gateway:/app/public
-      - ./shared/ip/server.ip:/app/shared/server.ip:ro
       - flappy-bird-dist:/app/public/flappy-bird
       - pong-dist:/app/public/pong
 
@@ -86,8 +88,6 @@ services:
     networks:
       - "game"
       - "transcendence"
-    ports:
-      - "8443:8443"
     volumes:
       - ./shared/game-stats.json:/app/game-stats.json
 
@@ -99,10 +99,7 @@ services:
       - game-server
     networks:
       - "game"
-    ports:
-      - "5173:5173"
     volumes:
-      - ./shared/ip/server.ip:/app/public/server.ip:ro
       - ./shared/game-stats.json:/app/public/game-stats.json:ro
       - pong-dist:/usr/share/nginx/html
 

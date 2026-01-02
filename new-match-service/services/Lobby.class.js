@@ -6,7 +6,7 @@ import { gameServer } from "../app.js";
 export class Lobby extends EventEmitter {
 	#clients = [];
 	#ids = {
-		match_id: [],
+		match_id: new Set(),
 		Lobby_id: null,
 	};
 	#valid_types = ['RANKED', 'TOURNAMENT'];
@@ -29,19 +29,19 @@ export class Lobby extends EventEmitter {
 		this.type = type;
 		this.#clients = clients;
 		this.#ids.Lobby_id = id;
+
 		try{
 			this.#manageMatch();
 		}catch(error){
 			console.error('Lobby: Error managing match:', error.message);
 		}
 	}
-
 	async #newMatch({players}) {
 		if (!gameServer)
 			throw new Error('NO_GAME_SERVER_AVAILABLE');
 
-		const match_id = await gameServer.newMatch(players, 2, 'PONG');
-		this.#ids.match_id.push(match_id);
+		const match_id = await gameServer.newMatch(players, 2, 'PONG', this);
+		this.#ids.match_id.add(match_id);
 		return match_id;
 	}
 
@@ -71,7 +71,7 @@ export class Lobby extends EventEmitter {
 
 	async waitEnd() {
 		if (this.#end_game)
-			return Promise.resolve();
+			return;
 
 		return new Promise((resolve) => {
 			this.once('END_GAME', resolve);
@@ -82,19 +82,21 @@ export class Lobby extends EventEmitter {
 		return this.#clients.length === this.#maxPlayers[this.type];
 	}
 
-	end_game({setter, match_id}) {
+	end_game({setter, match_id}, timeout = false) {
 		if (!(setter instanceof Connection))
 			throw new Error('PERMISSION_DENIED');
 
 		if (this.#end_game) return;
 
-		if (!this.#ids.match_id.includes(match_id))
+		if (!this.#ids.match_id.has(match_id))
 			throw new Error('INVALID_MATCH_ID');
 
 		this.#ids.match_id.delete(match_id);
 
 		switch (this.type) {
 			case 'RANKED':
+				if (timeout)
+					this.#broadcast({type: 'MATCH_TIMEOUT', match_id});
 				this.#end_game = true;
 				this.emit('END_GAME');
 				break;
