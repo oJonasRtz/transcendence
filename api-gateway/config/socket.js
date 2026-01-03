@@ -102,6 +102,7 @@ export default async function registerServer(io) {
 		// connection
 
 		socket.on("joinPrivate", async ({ target_id }) => {
+			await axios.post("http://chat-service:3005/setTargetId", { user_id: socket.user_id, public_id: target_id });
 			notifications.length = 0;
 			const exist = Array.from(privateUsers.values()).some(u => u.name === socket.username);
 			if (exist) return ;
@@ -380,7 +381,7 @@ export default async function registerServer(io) {
 	
 				let data = Array.isArray(response?.data) ? response?.data : [];
 
-				await axios.post("http://chat-service:3005/setTargetId", { user_id: socket.user_id, public_id: public_id });
+				//await axios.post("http://chat-service:3005/setTargetId", { user_id: socket.user_id, public_id: public_id });
 
 				let allowed = true;
 				const test = await axios.post("http://chat-service:3005/getTargetId", { public_id: public_id });

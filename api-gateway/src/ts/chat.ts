@@ -117,7 +117,7 @@ socket.on("updateMessages", (msgs: any[]) => {
 		if (msg.isSystem)
 			img.src = "/public/images/system.png";
 		else
-			img.src = msg.avatar || "/app/public/images/default_avatar.png";
+			img.src = msg.avatar || "/public/images/default_avatar.png";
 		img.width = 60;
 		img.height = 60;
 		img.style.borderRadius = "50%";
