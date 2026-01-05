@@ -480,6 +480,148 @@ const publicControllers = {
 		}
 	},
 
+	// API version of checkEmail that doesn't use sessions
+	apiCheckEmail: async function apiCheckEmail(req, reply) {
+		try {
+			if (!req.body || !req.body.email) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Email is required"] 
+				});
+			}
+
+			// Check if user exists
+			await axios.post("http://auth-service:3001/checkEmail", req.body);
+
+			// Generate and send code via email
+			const response = await axios.get("http://auth-service:3001/getCaptcha");
+			const { code, data } = response.data;
+
+			const receiver = req.body.email;
+			const subject = "Forgot Password - Transcendence";
+			const webPage = `
+				<h2>Forgot Password - Your Pong Transcendence</h2>
+				<p>Please, you need to inform the code below to change the password of your account</p>
+				<p>The code is <strong>${code}</strong>. Type it in the verification page to validate it</p>
+			`;
+			await sendMail(receiver, subject, webPage);
+
+			// Store code temporarily in global memory (similar to email verification)
+			if (!global.resetCodes) {
+				global.resetCodes = new Map();
+			}
+			global.resetCodes.set(req.body.email, {
+				code: code,
+				expires: Date.now() + 5 * 60 * 1000, // 5 minutes
+			});
+
+			return reply.code(200).send({ 
+				success: ["Verification code sent to your email"], 
+				error: [] 
+			});
+
+		} catch (err) {
+			if (err?.response?.status === 404) {
+				return reply.code(404).send({ 
+					success: [], 
+					error: ["User not found"] 
+				});
+			}
+			return reply.code(500).send({ 
+				success: [], 
+				error: ["An error occurred while sending the verification code"] 
+			});
+		}
+	},
+
+	// API version of checkEmailCode that doesn't use sessions
+	apiCheckEmailCode: async function apiCheckEmailCode(req, reply) {
+		try {
+			if (!req.body || !req.body.email || !req.body.code) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Email and code are required"] 
+				});
+			}
+
+			// Check stored code
+			if (!global.resetCodes || !global.resetCodes.has(req.body.email)) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["No verification code found. Please request a new one."] 
+				});
+			}
+
+			const storedData = global.resetCodes.get(req.body.email);
+			
+			// Check if code expired
+			if (Date.now() > storedData.expires) {
+				global.resetCodes.delete(req.body.email);
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Verification code expired. Please request a new one."] 
+				});
+			}
+
+			// Verify code (case-insensitive)
+			if (req.body.code.toLowerCase() !== storedData.code.toLowerCase()) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Invalid verification code"] 
+				});
+			}
+
+			// Code is valid, clean up
+			global.resetCodes.delete(req.body.email);
+
+			return reply.code(200).send({ 
+				success: ["Code verified successfully"], 
+				error: [] 
+			});
+
+		} catch (err) {
+			console.error("Error verifying reset code:", err);
+			return reply.code(500).send({ 
+				success: [], 
+				error: ["An error occurred while verifying the code"] 
+			});
+		}
+	},
+
+	// API version of newPassword that doesn't use sessions
+	apiNewPassword: async function apiNewPassword(req, reply) {
+		try {
+			if (!req.body || !req.body.email || !req.body.password || !req.body.confirmPassword) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["All fields are required"] 
+				});
+			}
+
+			// Add email to the request body for auth-service
+			req.body.new2FA = false; // Keep existing 2FA settings by default
+
+			const response = await axios.post("http://auth-service:3001/newPassword", req.body);
+
+			return reply.code(200).send({ 
+				success: ["Password updated successfully"], 
+				error: [] 
+			});
+
+		} catch (err) {
+			if (err?.response?.status === 409) {
+				return reply.code(400).send({ 
+					success: [], 
+					error: ["Cannot use the same password"] 
+				});
+			}
+			return reply.code(500).send({ 
+				success: [], 
+				error: ["An error occurred while updating your password"] 
+			});
+		}
+	},
+
 	//TESTS
 	hello: async function testAuthServiceConnection (req, reply) {
 		try {

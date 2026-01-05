@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
         'Cookie': `jwt=${jwt.value}`,
       },
       credentials: 'include',

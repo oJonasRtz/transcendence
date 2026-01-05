@@ -179,8 +179,9 @@ export async function changeEmail(_state: { error?: string; success?: string } |
       console.error('Failed to sync email to Prisma:', prismaError);
     }
 
-    // Revalidate all relevant paths to show updated email
+    // Revalidate all relevant paths to show updated email and verification status
     revalidatePath('/dashboard/settings/email');
+    revalidatePath('/dashboard/settings/email-verification');
     revalidatePath('/dashboard');
 
     return { success: 'Email updated successfully!' };

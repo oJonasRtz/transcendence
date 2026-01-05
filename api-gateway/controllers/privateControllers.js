@@ -791,8 +791,13 @@ const privateControllers = {
                         return reply.redirect("/home");
 
                 } catch (err) {
-                        console.error("API-GATEWAY setAuthEmail error:", err);
-			const error = ["Error trying to change your email"];
+                        console.error("API-GATEWAY setAuthEmail error:", err?.response?.data || err.message);
+			let error = ["Error trying to change your email"];
+
+			if (err?.response?.status === 409) {
+				error = ["This email address is already in use by another account"];
+			}
+
 			if (req.isApiRequest) {
 				return reply.send({ success: [], error });
 			}
@@ -861,8 +866,14 @@ const privateControllers = {
 				req.session.error = error;
 				return reply.redirect("/changeNickname");
 			}
-			console.error("API-GATEWAY setAuthNickname error:", err);
-			const error = ["Error trying to change your nickname"];
+
+			console.error("API-GATEWAY setAuthNickname error:", err?.response?.data || err.message);
+			let error = ["Error trying to change your nickname"];
+
+			if (err?.response?.status === 409) {
+				error = ["This nickname is already taken by another user"];
+			}
+
 			if (req.isApiRequest) {
 				return reply.send({ success: [], error });
 			}
@@ -930,8 +941,14 @@ const privateControllers = {
 				req.session.error = error;
 				return reply.redirect("/changeUsername");
 			}
-			console.error("Api-Gateway setAuthUsername:", err);
-			const error = ["Error during setting your new username"];
+
+			console.error("Api-Gateway setAuthUsername:", err?.response?.data || err.message);
+			let error = ["Error during setting your new username"];
+
+			if (err?.response?.status === 409) {
+				error = ["This username is already taken by another user"];
+			}
+
 			if (req.isApiRequest) {
 				return reply.send({ success: [], error });
 			}

@@ -8,8 +8,10 @@ import {
 import { ButtonGlimmer } from './button-glimmer';
 import { login } from '@/app/actions/auth';
 import Captcha from './captcha';
+import LoginMessages from './login-messages';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginForm() {
   const [error, setError] = useState('');
@@ -43,6 +45,9 @@ export default function LoginForm() {
 
   return (
     <form action={handleSubmit} className="space-y-6 font-sans">
+      {/* Success Messages */}
+      <LoginMessages />
+
       {/* Header - Space Terminal Style */}
       <div className="space-y-2 border-b border-white/10 pb-4">
         <h2 className="text-2xl font-black tracking-tight text-white">
@@ -145,6 +150,16 @@ export default function LoginForm() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Forgot Password Link */}
+      <div className="text-center pt-2">
+        <Link 
+          href="/forgot-password"
+          className="text-sm text-slate-400 hover:text-blue-400 transition-colors font-medium"
+        >
+          Forgot your password?
+        </Link>
       </div>
 
       {/* Footer Stats */}

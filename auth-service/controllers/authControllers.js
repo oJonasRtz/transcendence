@@ -276,7 +276,10 @@ const authControllers = {
 			await axios.post("http://sqlite-db:3002/setAuthUsername", req.body);
 			return reply.code(200).send("Username changed successfully");
 		} catch (err) {
-			console.error("Auth-service setAuthData error:", err);
+			console.error("Auth-service setAuthUsername error:", err?.response?.data || err.message);
+			if (err?.response?.status === 409) {
+				return reply.code(409).send("Username already exists");
+			}
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -288,7 +291,10 @@ const authControllers = {
 			await axios.post("http://sqlite-db:3002/setAuthNickname", req.body);
 			return reply.code(200).send("Nickname changed successfully");
 		} catch (err) {
-			console.error("Auth-service setAuthNickname error:", err);
+			console.error("Auth-service setAuthNickname error:", err?.response?.data || err.message);
+			if (err?.response?.status === 409) {
+				return reply.code(409).send("Nickname already exists");
+			}
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -298,9 +304,12 @@ const authControllers = {
 			if (!req.body || !req.body.user_id || !req.body.email)
 				return reply.code(400).send("You need to inform your user_id and e-mail");
 			await axios.post("http://sqlite-db:3002/setAuthEmail", req.body);
-			return reply.code(200).send("Nickname changed successfully");
+			return reply.code(200).send("Email changed successfully");
 		} catch (err) {
-			console.error("Auth-service setAuthEmail error:", err);
+			console.error("Auth-service setAuthEmail error:", err?.response?.data || err.message);
+			if (err?.response?.status === 409) {
+				return reply.code(409).send("Email already exists");
+			}
 			return reply.code(500).send("An error happened");
 		}
 	},

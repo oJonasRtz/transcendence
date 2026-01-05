@@ -31,6 +31,20 @@ export async function detectApiRequest(req, reply) {
 	// Store flag in request for hooks and controllers to check
 	req.isApiRequest = isApiRequest;
 
+	// Debug logging for verification status endpoint
+	if (req.url === '/getVerificationStatus') {
+		console.log('=== getVerificationStatus Request Debug ===');
+		console.log('Accept:', acceptHeader);
+		console.log('Content-Type:', contentType);
+		console.log('X-Requested-With:', req.headers['x-requested-with']);
+		console.log('Origin:', req.headers['origin']);
+		console.log('Referer:', req.headers['referer']);
+		console.log('NextJS Host:', nextjsHost);
+		console.log('isApiRequest:', isApiRequest);
+		console.log('JWT Cookie:', req.cookies?.jwt ? 'Present' : 'Missing');
+		console.log('=========================================');
+	}
+
 	return; // Continue to next handler
 }
 
