@@ -4,6 +4,7 @@ import privateRoutes from './routes/privateRoutes.js';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { authHook, validatorHook, require2faHook } from './hooks/hooks.js';
+import { detectApiRequest } from './hooks/apiMiddleware.js';
 import path from 'path';
 import formBody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
@@ -17,11 +18,9 @@ import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
 import http from 'http';
 import https from 'https';
-import { MatchClient } from './utils/MatchClient.class.js';
 
 dotenv.config();
 
-export const matchClient = new Map(); // <token, MatchClient>
 // It is a temporary configuration
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -109,6 +108,10 @@ app.register(fastifyView, {
 });
 
 // You can add prefix: /api to prefix every route prefix: '/api'
+
+// Register API detection middleware FIRST (before validatorHook)
+// This sets req.isApiRequest flag for subsequent hooks to check
+app.addHook('preHandler', detectApiRequest);
 
 app.addHook('preHandler', validatorHook);
 

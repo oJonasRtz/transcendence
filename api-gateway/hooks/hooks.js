@@ -3,9 +3,6 @@ import jwt from "jsonwebtoken";
 import { checkNameSecurity } from "../utils/apiCheckUsername.js";
 import { Filter } from "bad-words";
 import fs from "fs";
-import { matchClient } from "../app.js";
-import { match } from "assert";
-import { MatchClient } from "../utils/MatchClient.class.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -171,23 +168,10 @@ export async function authHook(req, reply) {
     req.jwt = token; // original jwt
     req.user = data; // decoded data
     req.user.isOnline = true;
-    req.user.state = 'IDLE';
     await axios.post("https://users-service:3003/setIsOnline", {
       user_id: data.user_id,
       isOnline: true,
     });
-
-    if (!matchClient.has(token)) {
-      const mc = new MatchClient();
-      mc.connect({
-        name: data.username,
-        email: data.email,
-        id: data.user_id,
-        token: token,
-      });
-      matchClient.set(token, mc);
-    }
-    
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       const token = req.cookies.jwt;
@@ -197,10 +181,6 @@ export async function authHook(req, reply) {
         user_id: data.user_id,
         isOnline: false,
       });
-
-      const match = matchClient.get(req.jwt);
-      if (match)
-        await match.disconnect();
 
       await req.session.destroy();
 
