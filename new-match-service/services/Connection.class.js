@@ -32,7 +32,7 @@ export class Connection {
 	}
 	
 	#getUrl() {
-		return `ws://${this.#server.ip}:${this.#server.port}/`;
+		return `wss://${this.#server.ip}:${this.#server.port}/`;
 	}
 
 	connect() {

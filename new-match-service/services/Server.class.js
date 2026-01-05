@@ -5,9 +5,15 @@ import formbody from "@fastify/formbody";
 import { Client } from "./Client.class.js";
 import crypto from "crypto";
 import { Party } from "./Party.class.js";
+import fs from "fs";
 
 export class Server {
-	#app = fastify();
+	#app = fastify({
+		https: {
+			key: fs.readFileSync('./ssl/server.key'),
+			cert: fs.readFileSync('./ssl/server.cert')
+		}
+	});
 	#myRoutes = [
 		{ method: 'POST', url: '/invite', handler: this.#invite.bind(this) },
 		{ method: 'POST', url: '/join_party/:token', handler: this.#joinParty.bind(this) },
@@ -227,6 +233,12 @@ export class Server {
 	 * @returns {boolean} - True if the invite was invalidated, false otherwise
 	 */
 	#checkInvite({owner, createdAt}, token) {
+		if (!owner || !owner.party) {
+			this.#invites.delete(token);
+			this.#invitesOwners.delete(owner);
+			return true;
+		}
+
 		if ((owner && owner.party.state === 'IDLE')
 			|| Date.now() - createdAt <= this.#invitesValidityTime)
 			return false;

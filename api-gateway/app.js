@@ -16,6 +16,7 @@ import fastifyStatic from "@fastify/static";
 import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
 import http from 'http';
+import https from 'https';
 
 dotenv.config();
 
@@ -29,10 +30,19 @@ const __dirname = dirname(__filename);
 //console.log(__dirname);
 
 const app = fastify({
+	// serverFactory: (handler, opts) => {
+	// 	const server = http.createServer((req, res) => {
+	// 		handler(req, res);
+	// 	});
+	// 	return server;
+	// }
 	serverFactory: (handler, opts) => {
-		const server = http.createServer((req, res) => {
+		const server = https.createServer({
+			key: fs.readFileSync('./ssl/server.key'),
+			cert: fs.readFileSync('./ssl/server.cert')
+		}, (req, res) => {
 			handler(req, res);
-		});
+		})
 		return server;
 	}
 });
