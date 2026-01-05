@@ -442,18 +442,24 @@ const databaseControllers = {
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setAuthUsername SQLITE-DB error:", err?.response?.data || err.message);
+			if (err.code === 'SQLITE_CONSTRAINT' || err.message?.includes('UNIQUE constraint failed')) {
+				return reply.code(409).send("USERNAME_ALREADY_EXISTS");
+			}
 			return reply.code(500).send("An error happened");
 		}
 	},
 
 	setAuthNickname: async function setAuthNickname(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.user_id || !req.body.username)
+			if (!req.body || !req.body.user_id || !req.body.nickname)
 				return reply.code(400).send("You need to inform your user_id and a new nickname here");
 			await databaseModels.setAuthNickname(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setAuthNickname SQLITE-DB error:", err?.response?.data || err.message);
+			if (err.code === 'SQLITE_CONSTRAINT' || err.message?.includes('UNIQUE constraint failed')) {
+				return reply.code(409).send("NICKNAME_ALREADY_EXISTS");
+			}
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -466,6 +472,9 @@ const databaseControllers = {
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setAuthEmail SQLITE-DB error:", err?.response?.data || err.message);
+			if (err.code === 'SQLITE_CONSTRAINT' || err.message?.includes('UNIQUE constraint failed')) {
+				return reply.code(409).send("EMAIL_ALREADY_EXISTS");
+			}
 			return reply.code(500).send("An error happened");
 		}
 	},
