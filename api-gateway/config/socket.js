@@ -133,8 +133,15 @@ export default async function registerServer(io) {
 		});
 
 		socket.on("join", async () => {
-			const exist = Array.from(users.values()).some(u => u.name === socket.username);
-			if (exist) return ;
+			// Kick any existing socket with the same username (stale connection)
+			for (const [socketId, user] of users.entries()) {
+				if (user.name === socket.username) {
+					users.delete(socketId);
+					io.to(socketId).emit("kicked", "Connected from another location");
+					io.sockets.sockets.get(socketId)?.disconnect(true);
+					break;
+				}
+			}
 			users.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
 			try {
 				notifications.length = 0;
