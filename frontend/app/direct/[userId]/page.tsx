@@ -64,7 +64,6 @@ export default function DirectMessagePage({ params }: PageProps) {
       setNotifications(notifications);
     });
 
-    socket.on("disconnect", () => {});
 
     socket.on("kicked", (reason: string) => {
       setNotifications([{ content: reason, isSystem: true }]);
@@ -206,6 +205,7 @@ export default function DirectMessagePage({ params }: PageProps) {
               placeholder="Type a message..."
               className="flex-1 px-3 py-2 border rounded"
               autoComplete="off"
+              // suppressHydrationWarning is used to avoid hydration mismatches caused by autoComplete="off"
               suppressHydrationWarning
             />
             <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
