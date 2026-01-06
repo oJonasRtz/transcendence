@@ -104,9 +104,23 @@ export default async function registerServer(io) {
 		socket.on("joinPrivate", async ({ target_id }) => {
 			await axios.post("http://chat-service:3005/setTargetId", { user_id: socket.user_id, public_id: target_id });
 			notifications.length = 0;
-			const exist = Array.from(privateUsers.values()).some(u => u.name === socket.username);
-			if (exist) return ;
-			privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
+			// Kick any existing socket with the same username (stale connection)
+			if (!socket.privateUserLock) {
+				socket.privateUserLock = true;
+				const toDelete = [];
+				for (const [socketId, user] of privateUsers.entries()) {
+					if (user.name === socket.username) {
+						toDelete.push(socketId);
+					}
+				}
+				for (const socketId of toDelete) {
+					privateUsers.delete(socketId);
+					io.to(socketId).emit("kicked", "Connected from another location");
+					io.sockets.sockets.get(socketId)?.disconnect(true);
+				}
+				privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
+				socket.privateUserLock = false;
+			}
 
 			let official = new Map();
 
@@ -134,15 +148,22 @@ export default async function registerServer(io) {
 
 		socket.on("join", async () => {
 			// Kick any existing socket with the same username (stale connection)
-			for (const [socketId, user] of users.entries()) {
-				if (user.name === socket.username) {
+			if (!socket.userLock) {
+				socket.userLock = true;
+				const toDelete = [];
+				for (const [socketId, user] of users.entries()) {
+					if (user.name === socket.username) {
+						toDelete.push(socketId);
+					}
+				}
+				for (const socketId of toDelete) {
 					users.delete(socketId);
 					io.to(socketId).emit("kicked", "Connected from another location");
 					io.sockets.sockets.get(socketId)?.disconnect(true);
-					break;
 				}
+				users.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
+				socket.userLock = false;
 			}
-			users.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
 			try {
 				notifications.length = 0;
 				const res = await axios.post("http://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
