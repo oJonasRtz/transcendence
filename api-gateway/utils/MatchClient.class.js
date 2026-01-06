@@ -52,6 +52,21 @@ export class MatchClient {
     this.#listeners();
   }
 
+  enqueue() {
+    this.#send({
+      type: "ENQUEUE",
+      id: this.#info.id,
+      game_type: "RANKED"
+    });
+  }
+
+  dequeue() {
+    this.#send({
+      type: "DEQUEUE",
+      id: this.#info.id
+    });
+  }
+
   #send(data) {
     if (!this.#ws || this.#ws.readyState !== WebSocket.OPEN) return;
     this.#ws.send(JSON.stringify(data));

@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import { checkNameSecurity } from "../utils/apiCheckUsername.js";
 import { Filter } from "bad-words";
 import fs from "fs";
+import { matchClient } from "../app.js";
+import { match } from "assert";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
@@ -172,6 +174,15 @@ export async function authHook(req, reply) {
       user_id: data.user_id,
       isOnline: true,
     });
+
+    if (!matchClient.isConnected) {
+      const { user_id, username, email } = data;
+      matchClient.connect({
+        id: user_id,
+        name: username,
+        email: data.email,
+      });
+    }
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       const token = req.cookies.jwt;

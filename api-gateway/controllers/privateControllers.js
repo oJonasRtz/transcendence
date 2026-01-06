@@ -12,13 +12,12 @@ import { checkImageSafety } from "../utils/apiCheckImages.js";
 import { fileTypeFromFile } from "file-type";
 import sharp from "sharp";
 import { MatchClient } from "../utils/MatchClient.class.js";
+import { matchClient } from "../app.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
-let inQueue = false;
-const lobby = new MatchClient("wss://match-service:3010");
 
 const privateControllers = {
   goFlappyBird: function goFlappyBird(req, reply) {
@@ -37,30 +36,11 @@ const privateControllers = {
   },
 
   joinQueue: async function joinQueue(req, reply) {
-    if (inQueue) return;
-
-    const payload = {
-      type: "ENQUEUE",
-      email: req.user.email,
-      user_id: req.user.user_id,
-    };
-
-    matchClient.sendMessage(payload);
-    inQueue = true;
-    console.log(`User ${req.user.email} joined the queue`);
+    matchClient .enqueue();
   },
 
   leaveQueue: async function leaveQueue(req, reply) {
-    if (!inQueue) return;
-
-    const payload = {
-      type: "DEQUEUE",
-      email: req.user.email,
-      user_id: req.user.user_id,
-    };
-    matchClient.sendMessage(payload);
-    inQueue = false;
-    console.log(`User ${req.user.email} left the queue`);
+    matchClient .dequeue();
   },
 
   helloDb: async function testPrivateRoute(req, reply) {
