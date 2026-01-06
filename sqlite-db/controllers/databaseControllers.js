@@ -299,6 +299,18 @@ const databaseControllers = {
 		}
 	},
 
+	getRank: async function getRank(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const rank = await databaseModels.getRank(fastify, req.body.email);
+			return reply.code(200).send({ rank: rank });
+		} catch (err) {
+			console.error("getRank SQLITE-DB error", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	setUserAvatar: async function setUserAvatar(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.user_id || !req.body.avatar)

@@ -13,6 +13,7 @@ const routes = [
 	{ method: 'POST', url: '/getInGame', handler: usersControllers.getInGame },
 	{ method: 'POST', url: '/setInQueue', handler: usersControllers.setInQueue },
 	{ method: 'POST', url: '/setRank', handler: usersControllers.setRank },
+	{ method: 'POST', url: '/getRank', handler: usersControllers.getRank },
 	{ method: 'POST', url: '/getUserStatus', handler: usersControllers.getUserStatus },
 	{ method: 'POST', url: '/setMatchId', handler: usersControllers.setMatchId },
 	{ method: 'POST', url: '/getMatchId', handler: usersControllers.getMatchId },
