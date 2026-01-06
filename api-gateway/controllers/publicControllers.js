@@ -152,13 +152,6 @@ const publicControllers = {
         return reply.redirect("/login");
       }
 
-      if (!matchClient.isConnected) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const {username, email, user_id} = decoded;
-
-        matchClient.connect({name: username, email: email, id: user_id});
-      }
-
       const isProduction = process.env.NODE_ENV === "production";
 
       reply.setCookie("jwt", token, {
