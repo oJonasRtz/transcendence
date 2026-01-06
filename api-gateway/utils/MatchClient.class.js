@@ -10,9 +10,18 @@ export class MatchClient {
     id: null
   };
   #isConnected = false;
+  #state = 'IDLE';
+  #handlers = {
+    'STATE_CHANGE': ({state}) => {this.#state = state;},
+    'CONNECTED': () => {this.#isConnected = true; console.log("Match Service connection established");},
+  };
 
   get isConnected() {
     return this.#isConnected;
+  }
+
+  get state() {
+    return this.#state;
   }
 
   #listeners() {
@@ -28,15 +37,13 @@ export class MatchClient {
     this.#ws.on("message", (message) => {
       try {
         const data = JSON.parse(message);
-        
-        const {type} = data;
-
-        if (type === "CONNECTED") {
-          console.log("Match Service connection established");
-          this.#isConnected = true;
-        }
-
         console.log("Received message from Match Service:", data);
+
+        const {type} = data;
+        if (!type || !(type in this.#handlers)) 
+          throw new Error("__TYPE_ERROR__");
+
+        this.#handlers[type](data);
       } catch (error) {
         console.error("Error parsing message from Match Service:", error);        
       }
