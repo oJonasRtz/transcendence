@@ -19,6 +19,7 @@ const routes = [
 	{ method: 'POST', url: '/setInQueue', handler: databaseControllers.setInQueue },
 	{ method: 'POST', url: '/get2FAEnable', handler: databaseControllers.get2FAEnable },
 	{ method: 'POST', url: '/setRank', handler: databaseControllers.setRank },
+	{ method: 'POST', url: '/getRank', handler: databaseControllers.getRank },
 	{ method: 'POST', url: '/get2FASecret', handler: databaseControllers.get2FASecret },
 	{ method: 'POST', url: '/getInGame', handler: databaseControllers.getInGame },
 	{ method: 'POST', url: '/setInGame', handler: databaseControllers.setInGame },

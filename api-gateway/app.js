@@ -17,9 +17,11 @@ import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
 import http from 'http';
 import https from 'https';
+import { MatchClient } from './utils/MatchClient.class.js';
 
 dotenv.config();
 
+export const matchClient = new MatchClient();
 // It is a temporary configuration
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 

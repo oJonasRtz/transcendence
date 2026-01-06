@@ -156,6 +156,14 @@ const databaseModels = {
 		return (true);
 	},
 
+	getRank: async function getRank(fastify, email) {
+		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ email ]);
+		if (!user_id)
+			return (null);
+		const rank = await fastify.db.get("SELECT rank FROM users WHERE user_id = ?", [ user_id.id ]);
+		return (rank?.rank ?? null);
+	},
+
 	getUserStatus: async function getUserStatus(fastify, data) {
 		const user_id = await fastify.db.get("SELECT user_id FROM auth WHERE email = ?", [ data.email ]);
 		if (!user_id)
