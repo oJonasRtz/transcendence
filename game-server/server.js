@@ -3,12 +3,25 @@ import { lobby, matches } from "./server.shared.js";
 import { handleTypes } from "./controllers/handleTypes.js";
 import 'dotenv/config';
 import { ddosDetect, removeConnection } from './controllers/ddosDetector.js';
+import fs from 'fs';
+import https from 'https';
 
-//port 8443 for tests with wss, change to 443  for production
-//.env nao esta funcionando ainda verificar futuramente
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 const PORT = process.env.PORT || 8443;
 const HOST = "0.0.0.0";
-const wss = new WebSocketServer({ port: PORT, host: HOST });
+
+const tls = {
+	key: fs.readFileSync('./ssl/server.key'),
+	cert: fs.readFileSync('./ssl/server.cert')
+}
+const server = https.createServer(tls);
+
+const wss = new WebSocketServer({ server});
+
+server.listen(PORT, HOST, () => {
+	console.log(`WebSocket server is running on wss://${HOST}:${PORT}`);
+});
 
 wss.on("connection", (ws) => {
 	ws.player = null;

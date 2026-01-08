@@ -10,8 +10,8 @@ all: down up
 # generate tsl certificates
 tls:
 	@echo Generating TLS certificates
-	@chmod +x ./nginx/ssl/generate-certs.sh
-	@bash ./nginx/ssl/generate-certs.sh
+	@chmod +x ./shared/ssl/genCert.sh
+	@bash ./shared/ssl/genCert.sh
 
 # Shutdown all services
 
