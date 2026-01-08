@@ -151,7 +151,7 @@ export default function ChatPage() {
       </div>
 
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto max-h-[400px]">
           {messages.map((msg, idx) => (
@@ -165,7 +165,7 @@ export default function ChatPage() {
                 alt="avatar"
                 className="w-[60px] h-[60px] rounded-full object-cover"
               />
-              <div>
+              <div className="min-w-0 break-words">
                 <strong className="block">
                   {msg.isSystem ? "SYSTEM" : msg.username || "Anonymous"}
                 </strong>
@@ -210,7 +210,7 @@ export default function ChatPage() {
               alt="system"
               className="w-[60px] h-[60px] rounded-full object-cover"
             />
-            <div>
+            <div className="min-w-0 break-words">
               <strong className="block">SYSTEM</strong>
               {renderMessageContent(note)}
             </div>
