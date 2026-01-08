@@ -22,6 +22,10 @@ services:
     container_name: frontend
     networks:
       - "transcendence"
+    environment:
+      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+    volumes:
+      - ./shared/ssl:/app/ssl:ro
 
   api-gateway:
     build: ./api-gateway
