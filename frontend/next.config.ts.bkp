@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   async rewrites() {
-    const apiGateway = 'https://api-gateway:3000';
+    const apiGateway = 'http://api-gateway:3000';
 
     // Routes handled by api-gateway
     const apiRoutes = [
