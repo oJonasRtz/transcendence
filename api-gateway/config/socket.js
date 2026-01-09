@@ -119,29 +119,29 @@ export default async function registerServer(io) {
     socket.currentChannel = null; // the first channel is not a channel :D
     // connection
 
-    socket.on("joinPrivate", async ({ target_id }) => {
-      await axios.post("https://chat-service:3005/setTargetId", {
-        user_id: socket.user_id,
-        public_id: target_id,
+		socket.on("joinPrivate", async ({ target_id }) => {
+			await axios.post("https://chat-service:3005/setTargetId", {
+        user_id: socket.user_id, 
+        public_id: target_id
       });
-      notifications.length = 0;
-      const exist = Array.from(privateUsers.values()).some(
-        (u) => u.name === socket.username
-      );
-      if (exist) return;
-      privateUsers.set(socket.id, {
-        name: socket.username,
-        public_id: socket.public_id,
-        user_id: socket.user_id,
-      });
-
-      let official = new Map();
-
-      official.set(socket.id, {
-        name: socket.username,
-        public_id: socket.public_id,
-        avatar: `avatar_${socket.user_id}`,
-      });
+			notifications.length = 0;
+			// Kick any existing socket with the same username (stale connection)
+			if (!socket.privateUserLock) {
+				socket.privateUserLock = true;
+				const toDelete = [];
+				for (const [socketId, user] of privateUsers.entries()) {
+					if (user.name === socket.username) {
+						toDelete.push(socketId);
+					}
+				}
+				for (const socketId of toDelete) {
+					privateUsers.delete(socketId);
+					io.to(socketId).emit("kicked", "Connected from another location");
+					io.sockets.sockets.get(socketId)?.disconnect(true);
+				}
+				privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
+				socket.privateUserLock = false;
+			}
 
       for (const [socketId, user] of privateUsers.entries()) {
         if (user.public_id === target_id) {
@@ -177,46 +177,40 @@ export default async function registerServer(io) {
       }
     });
 
-    socket.on("join", async () => {
-      const exist = Array.from(users.values()).some(
-        (u) => u.name === socket.username
-      );
-      if (exist) return;
-      users.set(socket.id, {
-        name: socket.username,
-        public_id: socket.public_id,
-        avatar: `avatar_${socket.user_id}`,
-      });
-      try {
-        notifications.length = 0;
-        const res = await axios.post(
-          "https://users-service:3003/getUserAvatar",
-          { user_id: socket.user_id, email: socket.email }
-        );
-        await axios.post("https://chat-service:3005/storeMessage", {
-          name: `${socket.username}`,
-          isSystem: true,
-          avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png",
-          isLink: false,
-          msg: `system: ${socket.username} joined to the chat`,
-        });
-        await reloadEverything(socket.username);
-      } catch (err) {
-        console.error(
-          `Error updating status of the user ${socket.username}:`,
-          err
-        );
-      }
-      const response = await axios.get(
-        "https://users-service:3003/getAllBlacklist"
-      );
-      const blacklist = response?.data ?? [];
+		socket.on("join", async () => {
+			// Kick any existing socket with the same username (stale connection)
+			if (!socket.userLock) {
+				socket.userLock = true;
+				const toDelete = [];
+				for (const [socketId, user] of users.entries()) {
+					if (user.name === socket.username) {
+						toDelete.push(socketId);
+					}
+				}
+				for (const socketId of toDelete) {
+					users.delete(socketId);
+					io.to(socketId).emit("kicked", "Connected from another location");
+					io.sockets.sockets.get(socketId)?.disconnect(true);
+				}
+				users.set(socket.id, { name: socket.username, public_id: socket.public_id, avatar: `avatar_${socket.user_id}` });
+				socket.userLock = false;
+			}
+			try {
+				notifications.length = 0;
+				const res = await axios.post("https://users-service:3003/getUserAvatar", { user_id: socket.user_id, email: socket.email });
+				await axios.post("https://chat-service:3005/storeMessage", { name: `${socket.username}`, isSystem: true, avatar: res?.data.avatar ?? "/app/public/images/default_avatar.png" , isLink: false, msg: `system: ${socket.username} joined to the chat` } );
+				await reloadEverything(socket.username);
+			} catch (err) { 
+				console.error(`Error updating status of the user ${socket.username}:`, err);
+			}
+			const response = await axios.get("https://users-service:3003/getAllBlacklist");
+                        const blacklist = response?.data ?? [];
 
-      const senderName = socket.username;
+                        const senderName = socket.username;
 
-      if (!senderName) return;
+                        if (!senderName) return ;
 
-      /*const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
+                        /*const blockUserTargets = blacklist.filter(target => target.owner_username === senderName).map(user => user.target_username);
 
                         for (const [socketId, user] of users.entries()) {
                                 if (blockUserTargets.includes(user.name)) {

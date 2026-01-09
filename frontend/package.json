@@ -22,6 +22,7 @@
     "process": "^0.11.10",
     "react": "latest",
     "react-dom": "latest",
+    "socket.io-client": "^4.8.3",
     "tailwindcss": "3.4.17",
     "typescript": "5.7.3",
     "use-debounce": "^10.0.4",
