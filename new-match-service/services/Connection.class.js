@@ -76,7 +76,7 @@ export class Connection {
 		console.log(`vamos remover o match ${match_id} do lobby`);
 
 		try {
-			await lobby.end_game({setter: this, stats}, timeout);
+			await lobby.end_game({setter: this, stats, match_id}, timeout);
 		} catch (error) {
 			console.error("Connection.#endGame: Error ending game:", error.message);
 		}

@@ -7,6 +7,8 @@ const MINPTS = 15;
 const MAXGAINPTS = 25;
 const MAXLOSSPTS = 20;
 
+const __MIN_RANK_POSSIBLE__ = -30;
+
 export class Lobby extends EventEmitter {
 	#clients = [];
 	#ids = {
@@ -86,16 +88,16 @@ export class Lobby extends EventEmitter {
 		return this.#clients.length === this.#maxPlayers[this.type];
 	}
 
-	async end_game({setter, stats}, timeout = false) {
+	async end_game({setter, match_id, stats}, timeout = false) {
 		if (!(setter instanceof Connection))
 			throw new Error('PERMISSION_DENIED');
 
 		if (this.#end_game) return;
 
-		if (!stats || !stats.players || !stats.matchId)
+		if (!timeout && (!stats || !stats.players))
 			throw new Error('INVALID_STATS');
 		
-		const match_id = stats.matchId;
+
 		if (!this.#ids.match_id.has(match_id))
 			throw new Error('INVALID_MATCH_ID');
 
@@ -103,9 +105,12 @@ export class Lobby extends EventEmitter {
 
 		switch (this.type) {
 			case 'RANKED':
-				if (timeout)
-					this.#broadcast({type: 'MATCH_TIMEOUT', match_id});
 				this.#end_game = true;
+				if (timeout) {
+					this.#broadcast({type: 'MATCH_TIMEOUT', match_id});
+					this.emit('END_GAME');
+					return;
+				}
 				const p = stats.players;
 				const winner = Object.values(p).find(player => player.winner).id;
 				const calc = this.#calculateRank({score1: p[1].score, score2: p[2].score});
@@ -115,6 +120,8 @@ export class Lobby extends EventEmitter {
 					const pts = isWinner ? calc.gain : calc.loss;
 
 					rank += pts;
+					if (rank < __MIN_RANK_POSSIBLE__)
+						rank = __MIN_RANK_POSSIBLE__;
 					c.rank = rank;
 					await data.sendRequest('/setRank', {email: c.email, rank});
 				}
