@@ -22,7 +22,7 @@ import { MatchClient } from './utils/MatchClient.class.js';
 
 dotenv.config();
 
-export const matchClient = new Set(); // <token, MatchClient>
+export const matchClient = new Map(); // <token, MatchClient>
 // It is a temporary configuration
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 

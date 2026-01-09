@@ -1,4 +1,4 @@
-import {server} from '../app.js';
+import {server, data} from '../app.js';
 
 export class Client {
 	#info = {
@@ -12,7 +12,7 @@ export class Client {
 	#state = 'IDLE';
 	//Finite State Machine methods
 	#FSM = {
-		IDLE: (payload) => this.#idle(payload),
+		IDLE: async (payload) => await this.#idle(payload),
 		IN_QUEUE: async (payload) => await this.#in_queue(payload),
 		IN_GAME: async (payload) => await this.#in_game(payload),
 	}
@@ -66,10 +66,21 @@ export class Client {
 		this.#info.name = name;
 		this.#info.email = email;
 
-		//get Rank on database using email
-
 		this.#listeners();
 		this.#idle({});
+	}
+
+	async #getRank() {
+		const rank = await data.sendRequest('getRank', { email: this.#info.email });
+		this.#info.rank = rank.rank;
+	}
+
+	get rank() {
+		return this.#info.rank;
+	}
+
+	set rank(value) {
+		this.#info.rank = value;
 	}
 
 	get isConnected() {
@@ -82,6 +93,10 @@ export class Client {
 
 	get actions() {
 		return Object.keys(this.#actions);
+	}
+
+	get email() {
+		return this.#info.email;
 	}
 
 	get party() {
@@ -108,8 +123,13 @@ export class Client {
 		return true;
 	}
 
-	#idle({}) {
+	async #idle({}) {
+		if (!this.#info.rank)
+			await this.#getRank();
+
 		console.log("Client entered IDLE state");
+		console.log(`Client ${this.#info.name} Rank: ` + this.#info.rank);
+		
 		this.send({
 			type: 'STATE_CHANGE',
 			state: 'IDLE',

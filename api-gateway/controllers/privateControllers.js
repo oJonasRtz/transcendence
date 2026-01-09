@@ -12,13 +12,12 @@ import { checkImageSafety } from "../utils/apiCheckImages.js";
 import { fileTypeFromFile } from "file-type";
 import sharp from "sharp";
 import { MatchClient } from "../utils/MatchClient.class.js";
+import { matchClient } from "../app.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
-let inQueue = false;
-const lobby = new MatchClient("wss://match-service:3010");
 
 const privateControllers = {
   goFlappyBird: function goFlappyBird(req, reply) {
@@ -37,30 +36,54 @@ const privateControllers = {
   },
 
   joinQueue: async function joinQueue(req, reply) {
-    if (inQueue) return;
+    try {
+      console.log('JOIN QUEUE REQUEST');
 
-    const payload = {
-      type: "ENQUEUE",
-      email: req.user.email,
-      user_id: req.user.user_id,
-    };
+      const token = req.jwt;
+      if (!token) throw new Error("No token provided");
 
-    matchClient.sendMessage(payload);
-    inQueue = true;
-    console.log(`User ${req.user.email} joined the queue`);
+      const match = matchClient.get(token);
+      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+      match.enqueue();
+      return reply.code(204).send();
+    } catch (error) {
+      console.error("JOIN QUEUE ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
   },
 
   leaveQueue: async function leaveQueue(req, reply) {
-    if (!inQueue) return;
+    try {
+      console.log('LEAVE QUEUE REQUEST');
 
-    const payload = {
-      type: "DEQUEUE",
-      email: req.user.email,
-      user_id: req.user.user_id,
-    };
-    matchClient.sendMessage(payload);
-    inQueue = false;
-    console.log(`User ${req.user.email} left the queue`);
+      const token = req.jwt;
+      if (!token) throw new Error("No token provided");
+
+      const match = matchClient.get(token);
+      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+      match.dequeue();
+      return reply.code(204).send();
+    } catch (error) {
+      console.error("LEAVE QUEUE ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
+  },
+
+  matchFound: async function matchFound(req, reply) {
+    try {
+      const token = req.jwt;
+      if (!token) throw new Error("No token provided");
+
+      const match = matchClient.get(token);
+      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+      reply.redirect('/pong');
+    } catch (error) {
+      console.error("MATCH FOUND ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
   },
 
   helloDb: async function testPrivateRoute(req, reply) {

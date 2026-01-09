@@ -59,7 +59,7 @@ export class Game {
 			if (this.ball) {
 				this.engine.remove(this.ball);
 				this.ball = null;
-				console.log("Ball removed from the game");
+				// console.log("Ball removed from the game");
 			}
 			return;
 		}
@@ -67,7 +67,7 @@ export class Game {
 		if (!this.ball) {
 			this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
 			this.addToGame([this.ball]);
-			console.log("Ball added to the game");
+			// console.log("Ball added to the game");
 		}
 	}
 	private addPaddles() {

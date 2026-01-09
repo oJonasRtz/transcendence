@@ -1,4 +1,6 @@
 import WebSocket from "ws";
+import { matchClient } from "../app.js";
+import axios from "axios";
 
 export class MatchClient {
   #ws = null;
@@ -7,13 +9,21 @@ export class MatchClient {
   #info = {
     name: null,
     email: null,
-    id: null
+    id: null,
+    token: null,
   };
   #isConnected = false;
   #state = 'IDLE';
+  #match_id = null;
   #handlers = {
     'STATE_CHANGE': ({state}) => {this.#state = state;},
     'CONNECTED': () => {this.#isConnected = true; console.log("Match Service connection established");},
+    'MATCH_FOUND': async ({match_id}) => {
+      this.#match_id = match_id;
+      console.log(`Match found! Match ID: ${match_id}`);
+      await axios.post('https://api-gateway:3000/matchFound');
+    },
+    'MATCH_ENDED': () => this.#match_id = null,
   };
 
   get isConnected() {
@@ -45,25 +55,33 @@ export class MatchClient {
 
         this.#handlers[type](data);
       } catch (error) {
-        console.error("Error parsing message from Match Service:", error);        
+        console.error("Error parsing message from Match Service:", error.message);        
       }
+    });
+    this.#ws.on("close", () => {
+      if (matchClient.has(this.#info.token))
+        matchClient.delete(this.#info.token);
+    
+      this.#isConnected = false;
+      console.log("Disconnected from Match Service");
     });
   }
 
-  connect({name, email, id}) {
+  connect({name, email, id, token}) {
     this.#ws = new WebSocket(this.#url);
     this.#info.name = name;
     this.#info.id = id;
     this.#info.email = email;
+    this.#info.token = token;
     
     this.#listeners();
   }
 
-  enqueue() {
+  enqueue(type = 'RANKED') {
     this.#send({
       type: "ENQUEUE",
       id: this.#info.id,
-      game_type: "RANKED"
+      game_type: type
     });
   }
 
