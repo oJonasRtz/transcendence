@@ -395,10 +395,18 @@ const databaseModels = {
       "SELECT user_id FROM users WHERE public_id = ?",
       [body.public_id]
     );
+    // const data = await fastify.db.get(
+    //   "SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?",
+    //   [user_id.user_id]
+    // );
     const data = await fastify.db.get(
-      "SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?",
+      `SELECT users.*, auth.username, auth.email
+       FROM users 
+       JOIN auth ON auth.user_id = users.user_id
+       WHERE users.user_id = ?`,
       [user_id.user_id]
     );
+    
     return data ?? null;
   },
 

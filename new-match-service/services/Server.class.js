@@ -6,6 +6,7 @@ import { Client } from "./Client.class.js";
 import crypto from "crypto";
 import { Party } from "./Party.class.js";
 import fs from "fs";
+import { data } from "../app.js";
 
 export class Server {
 	#app = fastify({
@@ -19,6 +20,7 @@ export class Server {
 		{ method: 'POST', url: '/join_party/:token', handler: this.#joinParty.bind(this) },
 		{ method: 'POST', url: '/leave_party', handler: this.#leaveParty.bind(this) },
 		{ method: 'GET', url: '/party', handler: this.#getParty.bind(this) },
+		{ method: 'GET', url: '/getRank', handler: this.#getRank.bind(this) },
 		// { method: 'GET', url: '/get_tournaments', handler: this.#getTournaments.bind(this) },
 		// { method: 'POST', url: '/create_tournament', handler: this.#setTournament.bind(this) },
 	];
@@ -77,6 +79,38 @@ export class Server {
 	#routes_def() {
 		for (const route of this.#myRoutes)
 			this.#app.route(route);
+	}
+
+	async #getRank(req, reply) {
+		try {
+			const {email} = req.query;
+			if (!email || typeof email !== 'string' || email === 'undefined' || email.trim() === '')
+				throw new Error('INVALID_FORMAT');
+
+			const res = await data.sendRequest('getRank', {email});
+			const mmr = res.rank;
+
+			/*
+				mmr
+				0-99: BRONZE
+				100-199: SILVER
+				200-299: GOLD
+				300+: DIAMOND
+
+				pts
+					show 0-99 (bronze/silver/gold)
+					show mmr-300 (diamond)
+
+			*/
+			const ranks = ['BRONZE', 'SILVER', 'GOLD', 'DIAMOND'];
+			const key = mmr < 0 ? 0 : Math.min(Math.floor(mmr / 100), 3);
+			const pts = key < 3 ? mmr % 100 : mmr - 300;
+						
+			return reply.status(200).send({type: 'RANK_INFO', rank: ranks[key], pts, code: 200});
+		} catch (error) {
+			console.error('Server.#getRank: Error getting rank:', error.message);
+			return reply.status(400).send({type: 'ERROR', reason: error.message, code: 400});
+		}
 	}
 
 	createSoloParty({id, game_type}) {
