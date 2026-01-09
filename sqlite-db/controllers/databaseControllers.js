@@ -287,6 +287,18 @@ const databaseControllers = {
 		}
 	},
 
+	setUserState: async function setUserState(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || !req.body.state)
+				return reply.code(400).send("You need to inform an email and the state here");
+			await databaseModels.setUserState(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserState SQLITE-DB error", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	setRank: async function setRank(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.email || req.body.rank === undefined)

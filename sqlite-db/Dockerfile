@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y curl \
     && apt-get install -y nodejs
 
 RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
-    net-tools iputils-ping python3-setuptools
+    net-tools iputils-ping python3-setuptools sqlite3
 
 #install mkcert
 # RUN curl -L -o /usr/local/bin/mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64 && \

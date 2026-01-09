@@ -32,11 +32,13 @@
 			</form>
                 </section>
 		<h2><strong><%= data.username %></strong></h2>
-		<% if (data.isOnline) { %>
+		<!-- <% if (data.isOnline) { %>
 			<p style="color: green"><strong>Online</strong></p>
 		<% } else { %>
 			<p style="color: red"><strong>Offline</strong></p>
-		<% } %>
+		<% } %> -->
+		<p style="color: <%= data.state.colour %>"><strong><%= data.state.text %></strong></p>
+
 		<p><strong>Title: <%= data.title %></strong></p>
 		<p><strong>Ranking: <%= data.rank %>°</strong></p>
 		<p><strong>Experience Points: <%= data.experience_points %> </p>

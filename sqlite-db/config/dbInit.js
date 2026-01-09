@@ -37,6 +37,7 @@ export default async function initDatabase() {
 			isOnline BOOLEAN DEFAULT FALSE,
 			inQueue BOOLEAN DEFAULT FALSE,
 			inGame BOOLEAN DEFAULT FALSE,
+			state TEXT DEFAULT 'OFFLINE',
 			rank INTEGER DEFAULT 0,
 			public_id TEXT UNIQUE NOT NULL,
 			target_id TEXT NULL DEFAULT NULL,
