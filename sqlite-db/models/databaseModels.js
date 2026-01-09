@@ -224,6 +224,21 @@ const databaseModels = {
     return true;
   },
 
+  setUserState: async function setUserState(fastify, data) {
+	const row = await fastify.db.get(
+		"SELECT user_id FROM auth WHERE email = ?",
+		[data.email]
+	);
+
+	if (!row?.user_id) return false;
+
+	await fastify.db.run(
+		"UPDATE users SET state = ? WHERE user_id = ?",
+		[data.state, row.user_id]
+	)
+	return true;
+  },
+
   setRank: async function setRank(fastify, data) {
     const row = await fastify.db.get(
 		"SELECT user_id FROM auth WHERE email = ?",

@@ -19,6 +19,24 @@ const __dirname = dirname(__filename);
 
 const BASE_IMAGE_PATH = "/app/public/images/default.jpg";
 
+function getState(user) {
+  const colour = {
+    IDLE: "green",
+    OFFLINE: "red",
+    IN_GAME: "blue",
+    IN_QUEUE: "yellow",
+  }
+  const labels = {
+    IDLE: "ONLINE",
+    OFFLINE: "OFFLINE",
+    IN_GAME: "IN GAME",
+    IN_QUEUE: "IN QUEUE",
+  }
+  const key = user.isOnline ? user.state : "OFFLINE";
+
+  return {colour: colour[key], text: labels[key]};
+}
+
 const privateControllers = {
   goFlappyBird: function goFlappyBird(req, reply) {
     return reply.sendFile("flappy-bird/index.html");
@@ -152,6 +170,7 @@ const privateControllers = {
       );
 
       const data = myData?.data;
+      data.state = getState(data);
 
       return reply.view("home", { username, success, data, avatar, error });
     } catch (err) {
@@ -175,6 +194,10 @@ const privateControllers = {
 
       reply.clearCookie("jwt");
       reply.clearCookie("session");
+
+      const match = matchClient.get(token);
+      if (match && match.isConnected)
+          match.disconnect();
 
       await axios.post("https://auth-service:3001/set2FAValidate", {
         email: decoded.email,
@@ -722,6 +745,9 @@ const privateControllers = {
 
       const users = response?.data ?? [];
 
+      for (const user of users)
+        user.state = getState(user);
+
       return reply.view("seeAllUsers", { success, error, users });
     } catch (err) {
       console.error("API-GATEWAY seeAllUsers:", err);
@@ -738,6 +764,8 @@ const privateControllers = {
         { public_id: user }
       );
       const data = response?.data;
+      data.state = getState(data);
+
       return reply.view("publicProfile", { data });
     } catch (err) {
       console.error("API-GATEWAY seeProfile Error:", err);

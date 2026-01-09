@@ -16,7 +16,13 @@ export class MatchClient {
   #state = 'IDLE';
   #match_id = null;
   #handlers = {
-    'STATE_CHANGE': ({state}) => {this.#state = state;},
+    'STATE_CHANGE': async ({state}) => {
+      this.#state = state;
+      await axios.post('https://users-service:3003/setUserState', {
+        email: this.#info.email,
+        state: state
+      })
+    },
     'CONNECTED': () => {this.#isConnected = true; console.log("Match Service connection established");},
     'MATCH_FOUND': async ({match_id}) => {
       this.#match_id = match_id;
@@ -99,6 +105,14 @@ export class MatchClient {
 
   get messages() {
     return this.#messages;
+  }
+
+  disconnect() {
+    if (!this.#ws) return;
+
+    this.#ws.close();
+    this.#ws = null;
+    this.#isConnected = false;
   }
 }
 

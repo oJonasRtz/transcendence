@@ -140,6 +140,23 @@ const usersControllers = {
     }
   },
 
+  setUserState: async function setUserState(req, reply) {
+    try {
+      if (!req.body || !req.body.email || !req.body.state)
+        return reply
+          .code(400)
+          .send("You need to inform an email and the state");
+      await axios.post("https://sqlite-db:3002/setUserState", req.body);
+      return reply.code(200).send("Success");
+    } catch (err) {
+      console.error(
+        "USERS-SERVICE setUserState",
+        err?.response?.data || err.message
+      );
+      return reply.code(500).send("An error happened");
+    }
+  },
+
   setRank: async function setRank(req, reply) {
     try {
       if (!req.body || !req.body.email || req.body.rank === undefined)
