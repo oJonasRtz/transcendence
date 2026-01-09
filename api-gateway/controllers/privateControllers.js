@@ -37,6 +37,18 @@ function getState(user) {
   return {colour: colour[key], text: labels[key]};
 }
 
+async function getRank(user) {
+  try {
+    const res = await axios.get('https://match-service:3010/getRank?email='+ user.email);
+    const data = res.data;
+
+    return data;
+  } catch (error) {
+    console.error("GET RANK ERROR:", error.message);
+    return {rank: 'UNRANKED', pts: 0};
+  }
+}
+
 const privateControllers = {
   goFlappyBird: function goFlappyBird(req, reply) {
     return reply.sendFile("flappy-bird/index.html");
@@ -171,6 +183,8 @@ const privateControllers = {
 
       const data = myData?.data;
       data.state = getState(data);
+      const rank = await getRank(req.user);
+      data.rank = rank;
 
       return reply.view("home", { username, success, data, avatar, error });
     } catch (err) {
@@ -765,6 +779,8 @@ const privateControllers = {
       );
       const data = response?.data;
       data.state = getState(data);
+      const rank = await getRank(data);
+      data.rank = rank;
 
       return reply.view("publicProfile", { data });
     } catch (err) {

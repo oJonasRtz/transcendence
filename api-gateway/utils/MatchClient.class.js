@@ -27,7 +27,7 @@ export class MatchClient {
     'MATCH_FOUND': async ({match_id}) => {
       this.#match_id = match_id;
       console.log(`Match found! Match ID: ${match_id}`);
-      await axios.post('https://api-gateway:3000/matchFound');
+      // await axios.post('https://api-gateway:3000/matchFound');
     },
     'MATCH_ENDED': () => this.#match_id = null,
   };
