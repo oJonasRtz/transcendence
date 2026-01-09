@@ -281,8 +281,8 @@ export default async function registerServer(io) {
       let privateMessages = [];
       try {
         invitation = await axios.post("https://match-service:3010/invite", {
-          userName: `${socket.username}`,
-          public_id: target_id,
+          id: `${socket.user_id}`,
+          game_type: "RANKED",
         });
 
         const userAvatar = await axios.post(
@@ -391,8 +391,8 @@ export default async function registerServer(io) {
       let response = null;
       try {
         response = await axios.post("https://match-service:3010/invite", {
-          userName: `${socket.username}`,
-          public_id: socket.public_id,
+          id: `${socket.user_id}`,
+          game_type: "RANKED",
         });
         socket.emit("updateMessages", messages);
 
