@@ -22,11 +22,12 @@
 					<% users.forEach(user => { %>
 					<li class="flex items-center gap-4 p-4 bg-gray-900 rounded-lg shadow-md hover:bg-gray-800 transition">
 						<img src="<%= user.avatar %>" width="60" height="60">
-						<% if (user.isOnline) { %>
+						<!-- <% if (user.isOnline) { %>
 							<strong><p style="color: green">Online</p></strong>
 						<% } else { %>
 							<strong><p style="color: red">Offline</p></strong>
-						<% } %>
+						<% } %> -->
+						<p style="color: <%= user.state.colour %>"><strong><%= user.state.text %></strong></p>
 						<a href="/seeProfile?user=<%=encodeURIComponent(user.public_id)%>" class="text-blue-400 font-bold hover:underline">
 							<strong><%= user.username %></strong>
 						</a>

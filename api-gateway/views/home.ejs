@@ -51,7 +51,7 @@
 						<p style="color: red"> <%= err %> </p>
 					<% }) %>
 				<% } %>
-				<% if (data.inQueue) { %>
+				<!-- <% if (data.inQueue) { %>
 					<p style="color: orange"><strong>I am waiting for a match</strong></p>
 				<% } else { %>
 					<p style="color: orange"><strong>I am not waiting for a match</strong></p>
@@ -60,14 +60,15 @@
 					<p style="color: purple"><strong>I am in a match</strong></p>
 				<% } else { %>
 					<p style="color: purple"><strong> I am not in a match</strong></p>
-				<% } %>
+				<% } %> -->
 			</section>
 			<section>
-				<% if (data.isOnline) { %>
+				<!-- <% if (data.isOnline) { %>
 					<p style="color: green"><strong>Online</strong></p>
 				<% } else { %>
 					<p style="color: red"><strong>Offline</strong</p>
-				<% } %>
+				<% } %> -->
+				<p style="color: <%= data.state.colour %>"><strong><%= data.state.text %></strong></p>
 				<p><strong>Friends:</strong> <%= data.friends %> </p>
 				<% if (data.description) { %>
 					<p><strong>Description:</strong> <%= data.description %> </p>

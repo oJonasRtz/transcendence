@@ -189,6 +189,7 @@ export class Client {
 
 		this.#game.lobby = lobby;
 		this.#game.lobby_id = lobby.id;
+		const actualRank = this.#info.rank;
 
 
 		console.log(this.#info.name + " a partida comecou e to esperando terminar");		
@@ -199,9 +200,13 @@ export class Client {
 		this.#game.lobby = null;
 		this.#game.lobby_id = null;
 		this.#game.party = null;
+		
+		const	diff = this.#info.rank - actualRank;
 
 		this.send({
 			type: 'MATCH_ENDED',
+			pts: diff,
+			rank: this.#info.rank,
 		});
 
 		this.#changeState('IDLE', {});
