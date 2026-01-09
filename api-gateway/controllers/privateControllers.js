@@ -36,11 +36,54 @@ const privateControllers = {
   },
 
   joinQueue: async function joinQueue(req, reply) {
-    matchClient .enqueue();
+    try {
+      console.log('JOIN QUEUE REQUEST');
+
+      const token = req.jwt;
+      if (!token) throw new Error("No token provided");
+
+      const match = matchClient.get(token);
+      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+      match.enqueue();
+      return reply.code(204).send();
+    } catch (error) {
+      console.error("JOIN QUEUE ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
   },
 
   leaveQueue: async function leaveQueue(req, reply) {
-    matchClient .dequeue();
+    try {
+      console.log('LEAVE QUEUE REQUEST');
+
+      const token = req.jwt;
+      if (!token) throw new Error("No token provided");
+
+      const match = matchClient.get(token);
+      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+      match.dequeue();
+      return reply.code(204).send();
+    } catch (error) {
+      console.error("LEAVE QUEUE ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
+  },
+
+  matchFound: async function matchFound(req, reply) {
+    try {
+      const token = req.jwt;
+      if (!token) throw new Error("No token provided");
+
+      const match = matchClient.get(token);
+      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+      reply.redirect('/pong');
+    } catch (error) {
+      console.error("MATCH FOUND ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
   },
 
   helloDb: async function testPrivateRoute(req, reply) {

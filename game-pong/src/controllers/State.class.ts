@@ -39,6 +39,10 @@ export class State {
 		down: false
 	}
 
+	public getPing() {
+		return this.latency.ms;
+	}
+
 	//Identity methods
 	public setIdentity(data: StartType) {
 		this.identity.setInfo(data);

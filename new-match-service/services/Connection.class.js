@@ -48,10 +48,10 @@ export class Connection {
 			});
 		};
 
-		this.#socket.onmessage = (event) => {
+		this.#socket.onmessage = async (event) => {
 			const message = JSON.parse(event.data);
 
-			this.#handleMessage(message);
+			await this.#handleMessage(message);
 		};
 
 		this.#socket.onerror = (error) => {
@@ -65,7 +65,7 @@ export class Connection {
 		};
 	}
 
-	#endGame(match_id, timeout = false) {
+	async #endGame(match_id, stats, timeout = false) {
 		const lobby = this.#matchesRunning.get(match_id);
 
 		console.log("chegamos na endGame");
@@ -75,8 +75,11 @@ export class Connection {
 
 		console.log(`vamos remover o match ${match_id} do lobby`);
 
-
-		lobby.end_game({setter: this, match_id}, timeout);
+		try {
+			await lobby.end_game({setter: this, stats}, timeout);
+		} catch (error) {
+			console.error("Connection.#endGame: Error ending game:", error.message);
+		}
 		this.#send({
 			type: this.#types.sends.REMOVEMATCH,
 			matchId: match_id,
@@ -86,13 +89,13 @@ export class Connection {
 		console.log(`Connection.#endGame: Match ${match_id} ended and removed from running matches.`);
 	}
 
-	#handleMessage(message) {
+	async #handleMessage(message) {
 		const map = {
 			[this.#types.recieves.CONNECTED]: () => {
 				console.log("Connection.#handleMessage: Connected to lobby server.");
 			},
-			[this.#types.recieves.GAME_END]: () => {
-				this.#endGame(message.matchId);
+			[this.#types.recieves.GAME_END]: async () => {
+				await this.#endGame(message.matchId, message);
 			},
 			[this.#types.recieves.MATCHCREATED]: () => {
 				const next = this.#matchQueue.shift();

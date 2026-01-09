@@ -47,8 +47,8 @@ export class Connection {
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      if (data.type !== types.PONG && data.type !== types.PING)
-        console.log("Message from server:", { data });
+      // if (data.type !== types.PONG && data.type !== types.PING)
+      //   console.log("Message from server:", { data });
 
       this.handleType(data);
     };
@@ -101,11 +101,11 @@ export class Connection {
   }
   private updateState(data: Object): void {
     try {
-      console.log("Updating state with data:", data);
+      // console.log("Updating state with data:", data);
 
       const { ball, game, players } = data as any;
 
-      console.log("[updateState] Ball data:", ball);
+      // console.log("[updateState] Ball data:", ball);
       gameState.setBall({ exist: ball.exists, vector: ball.position });
 
       for (const [key, val] of Object.entries(players as Record<string, PlayerState>)) {

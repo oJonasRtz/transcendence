@@ -75,6 +75,14 @@ export class Client {
 		this.#info.rank = rank.rank;
 	}
 
+	get rank() {
+		return this.#info.rank;
+	}
+
+	set rank(value) {
+		this.#info.rank = value;
+	}
+
 	get isConnected() {
 		return this.#ws !== null;
 	}
@@ -85,6 +93,10 @@ export class Client {
 
 	get actions() {
 		return Object.keys(this.#actions);
+	}
+
+	get email() {
+		return this.#info.email;
 	}
 
 	get party() {
@@ -112,13 +124,12 @@ export class Client {
 	}
 
 	async #idle({}) {
-		if (!this.#info.rank) {
-			const rank = await this.#getRank();
-			this.#info.rank = rank;
-			console.log(`Client ${this.#info.name} rank fetched: ${this.#info.rank}`);
-		}
+		if (!this.#info.rank)
+			await this.#getRank();
 
 		console.log("Client entered IDLE state");
+		console.log(`Client ${this.#info.name} Rank: ` + this.#info.rank);
+		
 		this.send({
 			type: 'STATE_CHANGE',
 			state: 'IDLE',

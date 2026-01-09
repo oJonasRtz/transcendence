@@ -1,7 +1,11 @@
 import { Client } from "./Client.class.js";
 import { Connection } from "./Connection.class.js";
 import { EventEmitter } from "events";
-import { gameServer } from "../app.js";
+import { data, gameServer } from "../app.js";
+
+const MINPTS = 15;
+const MAXGAINPTS = 25;
+const MAXLOSSPTS = 20;
 
 export class Lobby extends EventEmitter {
 	#clients = [];
@@ -82,12 +86,16 @@ export class Lobby extends EventEmitter {
 		return this.#clients.length === this.#maxPlayers[this.type];
 	}
 
-	end_game({setter, match_id}, timeout = false) {
+	async end_game({setter, stats}, timeout = false) {
 		if (!(setter instanceof Connection))
 			throw new Error('PERMISSION_DENIED');
 
 		if (this.#end_game) return;
 
+		if (!stats || !stats.players || !stats.matchId)
+			throw new Error('INVALID_STATS');
+		
+		const match_id = stats.matchId;
 		if (!this.#ids.match_id.has(match_id))
 			throw new Error('INVALID_MATCH_ID');
 
@@ -98,6 +106,19 @@ export class Lobby extends EventEmitter {
 				if (timeout)
 					this.#broadcast({type: 'MATCH_TIMEOUT', match_id});
 				this.#end_game = true;
+				const p = stats.players;
+				const winner = Object.values(p).find(player => player.winner).id;
+				const calc = this.#calculateRank({score1: p[1].score, score2: p[2].score});
+				for (const c of this.#clients) {
+					let rank = c.rank;
+					const isWinner = c.id === winner;
+					const pts = isWinner ? calc.gain : calc.loss;
+
+					rank += pts;
+					c.rank = rank;
+					await data.sendRequest('/setRank', {email: c.email, rank});
+				}
+
 				this.emit('END_GAME');
 				break;
 		}
@@ -107,5 +128,16 @@ export class Lobby extends EventEmitter {
 		this.#clients.forEach(client => {
 			client.send(message);
 		});
+	}
+
+	#calculateRank({score1, score2}) {
+		const scale = Math.max(score1, score2);
+		const diff = Math.abs(score1 - score2);
+		const ratio = Math.min((diff === 1 ? 0 : diff) / scale, 1);
+
+		const gain = Math.round(MINPTS + (MAXGAINPTS - MINPTS) * ratio);
+		const loss = -Math.round(MINPTS + (MAXLOSSPTS - MINPTS) * ratio);
+
+		return {gain, loss};
 	}
 }
