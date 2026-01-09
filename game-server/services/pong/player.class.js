@@ -26,7 +26,7 @@ export class Player {
 	}
 	get info() {
 		return {
-			id: this.#slot,
+			id: this.#id,
 			name: this.#name,
 			score: this.#score,
 			position: {...this.#paddle.position},

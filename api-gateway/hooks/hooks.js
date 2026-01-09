@@ -182,8 +182,9 @@ export async function authHook(req, reply) {
         name: data.username,
         email: data.email,
         id: data.user_id,
+        token: token,
       });
-      matchClient.add(token, mc);
+      matchClient.set(token, mc);
     }
     
   } catch (err) {

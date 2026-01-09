@@ -7,23 +7,17 @@
 		<link rel="stylesheet" href="/public/css/styles.css">
 		<title>Match Making</title>
     </head>
-    <body class="bg-cover bg-fixed min-h-screen flex justify-center items-center text-white">
+    <body class="bg-cover bg-fixed min-h-screen flex justify-center items-center text-white bg-black">
         <div class="relative flex flex-col border bg-slate-700 justify-center items-center rounded-xl shadow-md p-6">
-            <button id="joinQueueBtn" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3 mb-4">Join Queue</button>
-            <button id="leaveQueueBtn" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3">Quit Queue</button>
+            <div id="queueTimer" class="mt-4 text-lg font-semibold hidden">
+                ⏱ Tempo na fila: <span id="time">00:00</span>
+            </div>
+            <form action="/joinQueue" method="POST">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3 mb-4">Join</button>
+            </form>
+            <form action="/leaveQueue" method="POST">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3">Leave</button>
+            </form>
         </div>
-        <div id="wsMessages" class="text-center mt-6 border bg-red-600"></div>
-        <script>
-            const join = document.getElementById('joinQueueBtn');
-            const leave = document.getElementById('leaveQueueBtn');
-
-            join.addEventListener('click', async () => {
-                await fetch('/match/join/', {method: 'POST'});
-            })
-
-            leave.addEventListener('click', async () => {
-                await fetch('/match/leave/', {method: 'POST'});
-            });
-        </script>
     </body>
 </html>
