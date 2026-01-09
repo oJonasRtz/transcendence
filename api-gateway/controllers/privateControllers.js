@@ -181,8 +181,20 @@ const privateControllers = {
         { user_id: req.user.user_id }
       );
 
+      if (!matchClient.has(token)) {
+        const mc = new MatchClient();
+        mc.connect({
+          name: req.user.username,
+          email: req.user.email,
+          id: req.user.user_id,
+          token: token,
+        });
+        matchClient.set(token, mc);
+      }
+
+      const match = matchClient.get(token);
       const data = myData?.data;
-      data.state = getState(data);
+      data.state = getState({isOnline: req.user.isOnline, state: match.state});
       const rank = await getRank(req.user);
       data.rank = rank;
 
@@ -200,6 +212,7 @@ const privateControllers = {
     const decoded = jwt.decode(token) || {};
 
     req.user.isOnline = false;
+    req.user.state = 'OFFLINE';
 
     try {
       await axios.post("https://users-service:3003/setIsOnline", req.user);
@@ -211,7 +224,7 @@ const privateControllers = {
 
       const match = matchClient.get(token);
       if (match && match.isConnected)
-          match.disconnect();
+         await match.disconnect();
 
       await axios.post("https://auth-service:3001/set2FAValidate", {
         email: decoded.email,

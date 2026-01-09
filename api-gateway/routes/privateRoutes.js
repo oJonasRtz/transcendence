@@ -41,7 +41,7 @@ const routes = [
 	{ method: 'POST', url: '/setAcceptFriend', handler: privateControllers.setAcceptFriend },
 	{ method: 'POST', url: '/deleteAFriend', handler: privateControllers.deleteAFriend },
 	{ method: 'GET', url: '/directMessage', handler: privateControllers.directMessage },
-	{ method: 'GET', url: '/set2FAOnOff', handler: privateControllers.set2FAOnOff }
+	{ method: 'GET', url: '/set2FAOnOff', handler: privateControllers.set2FAOnOff },
 ];
 
 export default async function privateRoutes(fastify, options) {

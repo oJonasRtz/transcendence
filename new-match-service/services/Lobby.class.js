@@ -8,6 +8,7 @@ const MAXGAINPTS = 25;
 const MAXLOSSPTS = 20;
 
 const __MIN_RANK_POSSIBLE__ = -30;
+const __MAX_RANK_POSSIBLE__ = Number.MAX_SAFE_INTEGER - 200;
 
 export class Lobby extends EventEmitter {
 	#clients = [];
@@ -120,6 +121,8 @@ export class Lobby extends EventEmitter {
 					const pts = isWinner ? calc.gain : calc.loss;
 
 					rank += pts;
+					if (rank > __MAX_RANK_POSSIBLE__)
+						rank = __MAX_RANK_POSSIBLE__;
 					if (rank < __MIN_RANK_POSSIBLE__)
 						rank = __MIN_RANK_POSSIBLE__;
 					c.rank = rank;
