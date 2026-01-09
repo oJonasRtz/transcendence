@@ -171,6 +171,7 @@ export async function authHook(req, reply) {
     req.jwt = token; // original jwt
     req.user = data; // decoded data
     req.user.isOnline = true;
+    req.user.state = 'IDLE';
     await axios.post("https://users-service:3003/setIsOnline", {
       user_id: data.user_id,
       isOnline: true,
@@ -196,6 +197,10 @@ export async function authHook(req, reply) {
         user_id: data.user_id,
         isOnline: false,
       });
+
+      const match = matchClient.get(req.jwt);
+      if (match)
+        await match.disconnect();
 
       await req.session.destroy();
 

@@ -20,8 +20,8 @@ export class MatchClient {
       this.#state = state;
       await axios.post('https://users-service:3003/setUserState', {
         email: this.#info.email,
-        state: state
-      })
+        state: state,
+      });
     },
     'CONNECTED': () => {this.#isConnected = true; console.log("Match Service connection established");},
     'MATCH_FOUND': async ({match_id}) => {
@@ -107,12 +107,16 @@ export class MatchClient {
     return this.#messages;
   }
 
-  disconnect() {
+  async disconnect() {
     if (!this.#ws) return;
 
     this.#ws.close();
     this.#ws = null;
-    this.#isConnected = false;
+    this .#isConnected = false;
+    await axios.post('https://users-service:3003/setUserState', {
+      email: this.#info.email,
+      state: 'OFFLINE',
+    });
   }
 }
 
