@@ -73,11 +73,11 @@ export async function validatorHook(req, reply) {
         typeof req.body.captchaInput !== "string",
       message: "The code must be a string",
     },
-    // {
-    //   condition:
-    //     req.body.captchaInput && req.session.captcha !== req.body.captchaInput,
-    //   message: "Invalid code",
-    // },
+    {
+      condition:
+        req.body.captchaInput && req.session.captcha !== req.body.captchaInput,
+      message: "Invalid code",
+    },
     {
       condition:
         req.body.email !== undefined &&
