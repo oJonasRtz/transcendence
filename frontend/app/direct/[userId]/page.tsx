@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, FormEvent, use } from "react";
+import { useEffect, useState, useRef, FormEvent } from "react";
 import { io, Socket } from "socket.io-client";
 import Link from "next/link";
 
@@ -27,22 +27,24 @@ interface Notification {
 }
 
 interface PageProps {
-  params: Promise<{ userId: string }>;
+  params: { userId: string };
 }
 
 export default function DirectMessagePage({ params }: PageProps) {
-  const { userId: targetId } = use(params);
+  const { userId: targetId } = params;
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [inputValue, setInputValue] = useState("");
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketBaseUrl =
+    process.env.NEXT_PUBLIC_API_GATEWAY_URL || window.location.origin;
 
   useEffect(() => {
     if (!targetId) return;
 
-    const socket = io(window.location.origin, {
+    const socket = io(socketBaseUrl, {
       transports: ["websocket"],
       withCredentials: true,
     });

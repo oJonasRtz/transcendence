@@ -33,9 +33,11 @@ export default function ChatPage() {
   const [inputValue, setInputValue] = useState("");
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketBaseUrl =
+    process.env.NEXT_PUBLIC_API_GATEWAY_URL || window.location.origin;
 
   useEffect(() => {
-    const socket = io(window.location.origin, {
+    const socket = io(socketBaseUrl, {
       transports: ["websocket"],
       withCredentials: true,
     });
