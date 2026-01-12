@@ -21,12 +21,13 @@ const routes = [
 	{ method: 'POST', url: '/setAuthPassword', handler: privateControllers.setAuthPassword },
 	{ method: 'GET', url: '/changeDescription', handler: privateControllers.changeDescription },
 	{ method: 'POST', url: '/setUserDescription', handler: privateControllers.setUserDescription },
-	{ method: 'GET', url: '/match', handler: privateControllers.match },
+	{ method: 'GET', url: '/matchMaking', handler: privateControllers.match },
 	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers },
 	{ method: 'GET', url: '/seeProfile', handler: privateControllers.seeProfile },
 	{ method: 'GET', url: '/chatAllUsers', handler: privateControllers.chatAllUsers },
-	{ method: 'POST', url: '/match/join', handler: privateControllers.joinQueue },
-	{ method: 'POST', url: '/match/leave', handler: privateControllers.leaveQueue },
+	{ method: 'POST', url: '/joinQueue', handler: privateControllers.joinQueue },
+	{ method: 'POST', url: '/leaveQueue', handler: privateControllers.leaveQueue },
+	{ method: 'GET', url: '/matchFound', handler: privateControllers.matchFound },
 	{ method: 'GET', url: '/deleteUserAccount', handler: privateControllers.deleteUserAccount },
 	{ method: 'POST', url: '/blockTheUser', handler: privateControllers.blockTheUser },
 	{ method: 'POST', url: '/friendInvite', handler: privateControllers.friendInvite },
@@ -40,7 +41,7 @@ const routes = [
 	{ method: 'POST', url: '/setAcceptFriend', handler: privateControllers.setAcceptFriend },
 	{ method: 'POST', url: '/deleteAFriend', handler: privateControllers.deleteAFriend },
 	{ method: 'GET', url: '/directMessage', handler: privateControllers.directMessage },
-	{ method: 'GET', url: '/set2FAOnOff', handler: privateControllers.set2FAOnOff }
+	{ method: 'GET', url: '/set2FAOnOff', handler: privateControllers.set2FAOnOff },
 ];
 
 export default async function privateRoutes(fastify, options) {

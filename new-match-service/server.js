@@ -1,3 +1,4 @@
-import app from "./app.js";
+import {server, gameServer} from "./app.js";
 
-app.server.listen(3020);
+server.listen(3010);
+gameServer.connect();

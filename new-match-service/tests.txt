@@ -1,0 +1,90 @@
+
+- Connect to service
+	wscat -n -c wss://localhost/match-ws/
+
+- User 1
+	- Message
+		{"type":"CONNECT","id":"1","email":"user1@example.com","name":"Raltz"}
+	- Response expected
+		{"type":"STATE_CHANGE","state":"IDLE"}
+		{"type":"CONNECTED","code":200}
+
+	- message
+		{"type":"ENQUEUE","id":"1","game_type":"RANKED"}
+	- Response expected
+		{"type":"STATE_CHANGE","state":"IN_QUEUE"}
+		{"type":"PARTY_UPDATED"}
+
+- User 2
+	- Message
+		{"type":"CONNECT","id":"2","email":"user2@example.com","name":"Kirlia"}
+	- Response expected
+		{"type":"STATE_CHANGE","state":"IDLE"}
+		{"type":"CONNECTED","code":200}
+
+	- message
+		{"type":"ENQUEUE","id":"2","game_type":"RANKED"}
+- Response expecte
+		{"type":"STATE_CHANGE","state":"IDLE"}
+		{"type":"CONNECTED","code":200}
+
+- When both is in queue
+	- Response expected(both)
+		{"type":"MATCH_FOUND","match_id":"<id_do_lobby>"}
+		{"type":"STATE_CHANGE","state":"IN_GAME"}
+
+routes calls
+	- /Invite
+		- curl -X POST https://localhost/match/invite \
+		-H "Content-Type: application/json" \
+		-d '{"id":"1","game_type":"RANKED"}'
+
+		- Success
+			{
+				"type": "INVITE_CREATED",
+				"link": "https://localhost/match/join_party/<token>",
+				"code": 200
+			}
+
+	-/join_party
+		- use the link return of /invite
+		- curl -X POST https://localhost/match/join_party/1dc22c2c573de370fbdd772f80692265 \
+			-H "Content-Type: application/json" \
+			-d '{"id":"2"}' -k
+		- Success
+			{
+				"type": "JOINED_PARTY",
+				"code": 200
+			}
+	
+	-/leve_party
+		- curl -X POST https://localhost/match/leave_party \
+			-H "Content-Type: application/json" \
+			-d '{"id":"1"}'
+	-Success
+		{type: 'LEFT_PARTY', code: 200}
+
+	- /party
+		curl -X GET "https://localhost/match/party?id=1" -H "Content-Type: application/json" -k
+
+		- Success
+			{
+				"type":"PARTY_INFO",
+				"party":{
+					"game_type":"RANKED",
+					"clients":[
+						{
+							"id":"1",
+							"name":"Raltz",
+							"rank":null,
+							"isLeader":true
+						},
+						{
+							"id":"2",
+							"name":"Kirlia",
+							"rank":null,
+							"isLeader":false
+						}
+					]},
+				"code":200
+			}

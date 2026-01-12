@@ -12,7 +12,12 @@ dotenv.config();
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const app = fastify();
+const app = fastify({
+	https: {
+		key: fs.readFileSync('./ssl/server.key'),
+		cert: fs.readFileSync('./ssl/server.cert')
+	}
+});
 
 app.register(cookie, {
         secret: process.env.COOKIE_SECRET || "purpleVoid",

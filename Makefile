@@ -1,21 +1,17 @@
 # Start all services
-up: tsl get-ip build
+up: tls build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 
 # Main 
 all: down up
 
-#get ip
-get-ip:
-	@echo "Getting server IP address"
-	@bash ./shared/ip/getIp.sh
 
 # generate tsl certificates
-tsl:
-	@echo "Generating TLS certificates"
-	@chmod +x ./nginx/ssl/mkcert.sh
-	@bash ./nginx/ssl/mkcert.sh
+tls:
+	@echo Generating TLS certificates
+	@chmod +x ./shared/ssl/genCert.sh
+	@bash ./shared/ssl/genCert.sh
 
 # Shutdown all services
 
@@ -65,6 +61,7 @@ server: restart-game-server
 pong: restart-game-pong
 flappy: restart-game-flappy-bird
 match: restart-match-service
+front: restart-frontend
 
 # Restart all the services (RESTART, MAN)
 
@@ -77,4 +74,4 @@ remake: clean up
 game-logs:
 	@docker compose logs -f game-server
 
-.PHONY: up down build clean fclean re remake tsl
+.PHONY: up down build clean fclean re remake tls

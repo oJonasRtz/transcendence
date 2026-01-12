@@ -1,11 +1,10 @@
 export function chat() {
-    const SOCKET_URL = "http://localhost:3000";
+    const SOCKET_URL = window.location.origin;
     const socket = io(SOCKET_URL, {
         transports: ["websocket"],
         withCredentials: true
     });
     // Capture the form and also the input
-    const public_id = document.body.dataset.public_id;
     const form = document.getElementById("sendForm");
     const input = document.getElementById("message");
     const invite = document.getElementById("sendInvite");
@@ -27,10 +26,9 @@ export function chat() {
         });
     }
     //const avatar = document.body.dataset.avatar;
-    console.log("Public_id:", public_id);
     //console.log("Avatar:", avatar);
     socket.on("connect", () => {
-        socket.emit("join", { public_id });
+        socket.emit("join");
     });
     /*socket.on("serverMessage", (msg: string) => {
         const messagesDiv = document.getElementById("messages");
@@ -53,11 +51,17 @@ export function chat() {
             return;
         usersDiv.innerHTML = "";
         users.forEach(user => {
+            const img = document.createElement("img");
             const a = document.createElement("a");
+            img.src = `/public/uploads/${user.avatar}.png`;
+            img.style.width = "60px";
+            img.style.height = "60px";
             a.textContent = `${user.name}`;
             a.href = `/seeProfile?user=${user.public_id}`;
             a.style.fontWeight = "bold";
             a.style.padding = "4px 0";
+            usersDiv.style.display = "flex";
+            usersDiv.appendChild(img);
             usersDiv.appendChild(a);
             usersDiv.appendChild(document.createElement("br"));
             usersDiv.scrollTop = usersDiv.scrollHeight;
@@ -118,6 +122,54 @@ export function chat() {
             messagesDiv.appendChild(div);
         });
         console.log("MESSAGES:", msgs);
+    });
+    socket.on("updateNotifications", (notes) => {
+        const notificationsDiv = document.getElementById("notifications");
+        if (!notificationsDiv)
+            return;
+        notificationsDiv.innerHTML = ""; // extremely IMPORTANT!!! You need to clean everything before to add more
+        notes.forEach(note => {
+            const div = document.createElement("div");
+            div.style.display = "flex";
+            div.style.alignItems = "flex-start";
+            div.style.gap = "12px";
+            div.style.padding = "8px 4px";
+            const img = document.createElement("img");
+            img.src = "/public/images/system.png";
+            img.width = 60;
+            img.height = 60;
+            img.style.borderRadius = "50%";
+            img.style.objectFit = "cover";
+            const textBox = document.createElement("div");
+            const username = document.createElement("strong");
+            username.textContent = "SYSTEM";
+            username.style.display = "block";
+            let contentEl;
+            if (note.isLink) {
+                const a = document.createElement("a");
+                a.href = note.content;
+                a.textContent = "Pong Invitation";
+                a.target = "_blank"; // Open the link in another page
+                a.rel = "noopener noreferrer"; // protection to use _blank to avoid the page opened obtain access to our website and avoid the another page to know where the user come from
+                a.style.color = "#4da3ff"; // vibrant blue
+                contentEl = a;
+            }
+            else {
+                const span = document.createElement("span");
+                if (note.isSystem && !note.content && note.isLimit !== true)
+                    span.textContent = `system: wait to send another invitation`;
+                else if (note.isSystem && !note.content && note.isLimit === true)
+                    span.textContent = `system: You cannot send a message above 200 characters`;
+                else
+                    span.textContent = note.content;
+                contentEl = span;
+            }
+            textBox.appendChild(username);
+            textBox.appendChild(contentEl);
+            div.appendChild(img);
+            div.appendChild(textBox);
+            notificationsDiv.appendChild(div);
+        });
     });
     socket.on("updateChannels", (channels) => {
         console.log("CHANNELS:", channels);

@@ -120,8 +120,8 @@ const databaseControllers = {
 
 	validateUserEmail: async function validateUserEmail(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email)
-				return reply.code(400).send("You need to inform an email here");
+			if (!req.body || !req.body.email || req.body.stats === undefined)
+				return reply.code(400).send("You need to inform an email and put a valid status here");
 			await databaseModels.activateEmail(fastify, req.body);
 
 			return reply.code(200).send("Success");
@@ -287,6 +287,18 @@ const databaseControllers = {
 		}
 	},
 
+	setUserState: async function setUserState(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email || !req.body.state)
+				return reply.code(400).send("You need to inform an email and the state here");
+			await databaseModels.setUserState(fastify, req.body);
+			return reply.code(200).send("Success");
+		} catch (err) {
+			console.error("setUserState SQLITE-DB error", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	setRank: async function setRank(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.email || req.body.rank === undefined)
@@ -295,6 +307,18 @@ const databaseControllers = {
 			return reply.code(200).send("Success");
 		} catch (err) {
 			console.error("setRank SQLITE-DB error", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getRank: async function getRank(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.email)
+				return reply.code(400).send("You need to inform an email here");
+			const rank = await databaseModels.getRank(fastify, req.body.email);
+			return reply.code(200).send({ rank: rank });
+		} catch (err) {
+			console.error("getRank SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}
 	},
@@ -656,7 +680,43 @@ const databaseControllers = {
                         console.error("SQLITE-DB set2FAOnOff ERROR:", err.message);
                         return reply.code(500).send("An error happened");
                 }
-        }
+        },
+
+	setTargetId: async function setTargetId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || !req.body.public_id)
+				return reply.code(400).send("You need to inform user_id / public_id here");
+			const message = await databaseModels.setTargetId(fastify, req.body);
+			return reply.code(201).send({ message: "Success" });
+		} catch (err) {
+			console.error("SQLITE-DB setTargetId ERROR:", err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getTargetId: async function getTargetId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.public_id)
+				return reply.code(400).send("You need to inform public_id here");
+			const target = await databaseModels.getTargetId(fastify, req.body);
+			return reply.code(201).send(target ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getTargetId ERROR:", err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getPublicId: async function getPublicId(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id here");
+			const public_id = await databaseModels.getPublicId(fastify, req.body);
+			return reply.code(201).send(public_id ?? null);
+		} catch (err) {
+			console.error("SQLITE-DB getPublicId ERROR:", err.message);
+			return reply.code(500).send("An error happened");
+		}
+	}
 };
 
 export default databaseControllers;

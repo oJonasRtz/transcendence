@@ -1,3 +1,5 @@
+import {server, data} from '../app.js';
+
 export class Client {
 	#info = {
 		id: null,
@@ -10,21 +12,30 @@ export class Client {
 	#state = 'IDLE';
 	//Finite State Machine methods
 	#FSM = {
-		IDLE: this.#idle.bind(this),
-		IN_QUEUE: this.#in_queue.bind(this),
-		IN_GAME: this.#in_game.bind(this),
+		IDLE: async (payload) => await this.#idle(payload),
+		IN_QUEUE: async (payload) => await this.#in_queue(payload),
+		IN_GAME: async (payload) => await this.#in_game(payload),
 	}
 	//Allowed state transitions
 	#transitions = {
-		IDLE: ['IN_QUEUE'],
+		IDLE: ['IN_QUEUE', 'IDLE'],
 		IN_QUEUE: ['IN_GAME', 'IDLE'],
 		IN_GAME: ['IDLE'],
 	}
 	//External actions that can be performed on the client
 	#actions = {
-		ENQUEUE: () => this.#changeState('IN_QUEUE', {}),
-		DEQUEUE: () => this.#changeState('IDLE', {}),
-		INVITE: () => this.#changeState('IDLE', {create_invite: true}),
+		ENQUEUE: async ({game_type}) => await this.#changeState('IN_QUEUE', {game_type}),
+		DEQUEUE: async () => {
+			if (this.promisses.reject) {
+				this.promisses.reject(new Error('DEQUEUED'));
+				this.promisses.resolve = null;
+				this.promisses.reject = null;
+			}
+
+			this.#game.party.dequeue();
+			await this.#changeState('IDLE', {});
+		},
+		INVITE: async () => this.#invite(),
 		EXIT: () => this.#disconnect(),
 	}
 	#disconnections = {
@@ -34,93 +45,193 @@ export class Client {
 	}
 	#valid_game_types = ['RANKED', 'TOURNAMENT'];
 	#game_type = null;
+	promisses = {
+		resolve: null,
+		reject: null,
+	};
 	#game = {
+		party: null,
 		match_id: null,
 		lobby_id: null,
 		lobby: null,
 	}
 
-	constructor ({ws, email, id, name, game_type}) {
-		if (![ws, email, id, name, game_type].every(Boolean)
-				|| !this.#valid_game_types.includes(game_type))
+	constructor ({ws, email, id, name}) {
+		if (![ws, email, id, name].every(Boolean))
 			throw new Error('INVALID_FORMAT');
 
-		this.#game_type = game_type;
+		// this.#game_type = game_type;
 		this.#ws = ws;
 		this.#info.id = id;
 		this.#info.name = name;
 		this.#info.email = email;
 
-		//get Rank on database using email
-
 		this.#listeners();
 		this.#idle({});
 	}
 
-	#idle({create_invite}) {
+	async #getRank() {
+		const rank = await data.sendRequest('getRank', { email: this.#info.email });
+		this.#info.rank = rank.rank;
+	}
 
-		if (create_invite) {
-			// Logic to create an invite can be added here
+	get rank() {
+		return this.#info.rank;
+	}
+
+	set rank(value) {
+		this.#info.rank = value;
+	}
+
+	get isConnected() {
+		return this.#ws !== null;
+	}
+
+	get name() {
+		return this.#info.name;
+	}
+
+	get actions() {
+		return Object.keys(this.#actions);
+	}
+
+	get email() {
+		return this.#info.email;
+	}
+
+	get party() {
+		return this.#game.party;
+	}
+
+	setParty(party) {
+		this.#game.party = party;
+	}
+
+	get id() {
+		return this.#info.id;
+	}
+
+	get rank() {
+		return this.#info.rank;
+	}
+
+	//Just check permission to invite
+	#invite() {
+		if (this.#state !== 'IDLE')
+			throw new Error('PERMISSION_DENIED');
+
+		return true;
+	}
+
+	async #idle({}) {
+		if (!this.#info.rank)
+			await this.#getRank();
+
+		console.log("Client entered IDLE state");
+		console.log(`Client ${this.#info.name} Rank: ` + this.#info.rank);
+		
+		this.send({
+			type: 'STATE_CHANGE',
+			state: 'IDLE',
+		});
+	}
+
+	waitGame() {
+		return new Promise((resolve, reject) => {
+			this.promisses.resolve = resolve;
+			this.promisses.reject = reject;
+		})
+	}
+
+	async #in_queue({game_type}) {
+		if (!game_type || !this.#valid_game_types.includes(game_type))
+			throw new Error('INVALID_FORMAT');
+
+		console.log("Client entered IN_QUEUE state");
+		this.send({
+			type: 'STATE_CHANGE',
+			state: 'IN_QUEUE',
+		});
+
+		try {
+
+			this.#game_type = game_type;
+			const party = this.#game.party
+				|| server.createSoloParty({id: this.#info.id, game_type});
+
+			party.enqueue(this);
+
+			this.#game.party = party;
+			const payload = await this.waitGame();
+
+			await this.#changeState('IN_GAME', payload);
+		} catch (error) {
+			if (error.message === 'DEQUEUED')
+				return;
+
+			console.error('Client.#in_queue: Error during matchmaking enqueue:', error.message);
+			this.#changeState('IDLE', {});
+			this.send({
+				type: 'ERROR',
+				reason: error.message,
+				code: 400,
+			});
 		}
 	}
+	async #in_game({lobby}) {
+		console.log("Client entered IN_GAME state");
+		this.send({
+			type: 'STATE_CHANGE',
+			state: 'IN_GAME',
+		});
+		if (!lobby)
+			throw new Error('INVALID_FORMAT');
 
-	async #in_queue({}) {
+		this.#game.lobby = lobby;
+		this.#game.lobby_id = lobby.id;
+		const actualRank = this.#info.rank;
 
-		//match found
-		// const matchPayload = await matchmaking.joinQueue({
-		// 	client: this,
-		// 	type: this.#game_type
-		//	rank: this.#info.rank
-		// })
-		// this.#changeState('IN_GAME', matchPayload);
-	}
-	async #in_game({match_id, lobby}) {
-		// if (!match_id || !lobby)
-		// 	throw new Error('INVALID_FORMAT');
 
-		// this.#game.match_id = match_id;
-		// this.#game.lobby = lobby;
-		// this.#game.lobby_id = lobby.id;
-
-		// this.send({
-		// 	type: 'MATCH_FOUND',
-		// 	match_id,
-		// });
-
-		// await lobby.waitEnd();
+		console.log(this.#info.name + " a partida comecou e to esperando terminar");		
+		await lobby.waitEnd();
+		console.log(this.#info.name + " a partida terminou");
 		
-		// this.#game.match_id = null;
-		// this.#game.lobby = null;
-		// this.#game.lobby_id = null;
+		this.#game.match_id = null;
+		this.#game.lobby = null;
+		this.#game.lobby_id = null;
+		this.#game.party = null;
+		
+		const	diff = this.#info.rank - actualRank;
 
-		// this.send({
-		// 	type: 'MATCH_ENDED',
-		// });
+		this.send({
+			type: 'MATCH_ENDED',
+			pts: diff,
+			rank: this.#info.rank,
+		});
 
-		// this.#changeState('IDLE', {});
+		this.#changeState('IDLE', {});
 	}
 
-	handleActions(data) {
+	async handleActions(data) {
 		try {
-			const {to} = data;
+			const {type, id} = data;
 
-			if (!to || !(to in this.#actions))
+			if (!type || !(type in this.#actions) || !id || id !== this.#info.id)
 				throw new Error('INVALID_ACTION');
 
-			return this.#actions[to](data);
+			return await this.#actions[type](data);
 		} catch (error) {
 			console.error('Client.handleMessage: Error handling message:', error.message);
-			throw new Error(error.message);
 		}
 	}
 
-	#changeState(to, payload = {}) {
+	async #changeState(to, payload = {}) {
 		const allowed = this.#transitions[this.#state];
 		if (!allowed.includes(to))
 			throw new Error('INVALID_STATE_TRANSITION');
 
 		this.#state = to;
-		this.#FSM[this.#state](payload);
+		await this.#FSM[this.#state](payload);
 	}
 
 	#listeners() {
@@ -131,8 +242,16 @@ export class Client {
 			this.#flushPending();
 		});
 
-		this.#ws.on('close', () => {
-			console.log(`Client ${this.#info.email} disconnected.`);
+		this.#ws.on('error', (error) => {
+			this.#disconnect();
+			console.error(`Client ${this.#info.email} WebSocket error:`, error.message);
+		});
+
+		this.#ws.on('close', (code, reason) => {
+			this.#disconnect();
+
+			const r = reason?.toString() || 'No reason provided';
+			console.log(`Client ${this.#info.email} disconnected. Reason: ${r} (Code: ${code})`);
 		});
 	}
 
@@ -166,20 +285,22 @@ export class Client {
 	send(data) {
 		if (!data)
 			return;
-		if (this.#ws.readyState !== this.#ws.OPEN)
+		if (!this.#ws || this.#ws.readyState !== this.#ws.OPEN)
 			return this.#sendBuffer.push(data);
 
 		this.#ws.send(JSON.stringify(data));
 	}
 
 	#disconnect() {
-		if (!this.#ws || this.#ws.readyState !== this.#ws.OPEN)
+		if (!this.#ws)
 			return;
 		
 		const res = this.#disconnections[this.#state]();
 		this.#ws.close();
 		this.#ws = null;
-		return res;
+
+		if (res === "REMOVE")
+			server.removeClient(this.#info.id);
 	}
 
 	#inIdleDisconnect() {
@@ -190,6 +311,7 @@ export class Client {
 	#inQueueDisconnect() {
 		// matchmaking.dequeue({client: this, type: this.#game_type});
 		this.#sendBuffer = [];
+		this.#changeState('IDLE', {});
 		return ("REMOVE");
 	}
 

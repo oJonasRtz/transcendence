@@ -2,8 +2,10 @@ import { lobby, matches, types } from "../server.shared.js";
 import { handleConnect } from "./handleConnect.js";
 
 const handlers = {
-	[types.recieves.PING]: ({data, match}) =>
-		match.pong(data.id),
+	[types.recieves.PING]: ({data, match}) =>  {
+		if (match) return;
+		match.pong(data.id);
+	},
 	[types.recieves.NEW_MATCH]: ({data, ws}) =>
 		lobby.createMatch({players: data.players, maxPlayers: data.maxPlayers}, ws),
 	[types.recieves.REMOVE_MATCH]: ({match}) =>
@@ -54,6 +56,9 @@ export function handleTypes(ws, data) {
 		// 	return;
 		// if ((!match && (!newConnection || !type === types.recieves.NEW_MATCH)) || (!newConnection && !validateData(id, 'number')))
 		// 	return;
+
+		if (!match && (!newConnection && type !== types.recieves.NEW_MATCH))
+			return;
 
 		const handler = handlers[type];
 		if (!handler) { 

@@ -13,6 +13,7 @@ const routes = [
 	{ method: 'POST', url: '/getInGame', handler: usersControllers.getInGame },
 	{ method: 'POST', url: '/setInQueue', handler: usersControllers.setInQueue },
 	{ method: 'POST', url: '/setRank', handler: usersControllers.setRank },
+	{ method: 'POST', url: '/getRank', handler: usersControllers.getRank },
 	{ method: 'POST', url: '/getUserStatus', handler: usersControllers.getUserStatus },
 	{ method: 'POST', url: '/setMatchId', handler: usersControllers.setMatchId },
 	{ method: 'POST', url: '/getMatchId', handler: usersControllers.getMatchId },
@@ -26,7 +27,9 @@ const routes = [
 	{ method: 'POST', url: '/getAllPendencies', handler: usersControllers.getAllPendencies },
 	{ method: 'POST', url: '/setAcceptFriend', handler: usersControllers.setAcceptFriend },
 	{ method: 'POST', url: '/deleteAFriend', handler: usersControllers.deleteAFriend },
-	{ method: 'GET', url: '/getAllBlacklist', handler: usersControllers.getAllBlacklist }
+	{ method: 'GET', url: '/getAllBlacklist', handler: usersControllers.getAllBlacklist },
+	{ method: 'POST', url: '/getPublicId', handler: usersControllers.getPublicId },
+	{ method: 'POST', url: '/setUserState', handler: usersControllers.setUserState }
 ];
 
 export default async function usersRoutes(fastify, options) {

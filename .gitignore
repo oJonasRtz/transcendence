@@ -13,3 +13,6 @@ blacklist.txt
 # Grafana secure password
 monitoring/.grafana-password.txt
 a/
+
+# AI code assistant files
+CLAUDE.md

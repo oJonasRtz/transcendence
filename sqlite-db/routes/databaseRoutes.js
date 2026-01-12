@@ -19,6 +19,7 @@ const routes = [
 	{ method: 'POST', url: '/setInQueue', handler: databaseControllers.setInQueue },
 	{ method: 'POST', url: '/get2FAEnable', handler: databaseControllers.get2FAEnable },
 	{ method: 'POST', url: '/setRank', handler: databaseControllers.setRank },
+	{ method: 'POST', url: '/getRank', handler: databaseControllers.getRank },
 	{ method: 'POST', url: '/get2FASecret', handler: databaseControllers.get2FASecret },
 	{ method: 'POST', url: '/getInGame', handler: databaseControllers.getInGame },
 	{ method: 'POST', url: '/setInGame', handler: databaseControllers.setInGame },
@@ -56,7 +57,11 @@ const routes = [
 	{ method: 'GET', url: '/getAllBlacklist', handler: databaseControllers.getAllBlacklist },
 	{ method: 'POST', url: '/getAllPrivateMessages', handler: databaseControllers.getAllPrivateMessages },
 	{ method: 'POST', url: '/storePrivateMessage', handler: databaseControllers.storePrivateMessage },
-	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff }
+	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff },
+	{ method: 'POST', url: '/setTargetId', handler: databaseControllers.setTargetId },
+	{ method: 'POST', url: '/getTargetId', handler: databaseControllers.getTargetId },
+	{ method: 'POST', url: '/getPublicId', handler: databaseControllers.getPublicId },
+	{ method: 'POST', url: '/setUserState', handler: databaseControllers.setUserState }
 ];
 
 export default async function databaseRoutes(fastify, options) {

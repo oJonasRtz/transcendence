@@ -1,10 +1,19 @@
-import { Client } from "./Client.class";
-import { Connection } from "./Connection.class";
+import { Client } from "./Client.class.js";
+import { Connection } from "./Connection.class.js";
+import { EventEmitter } from "events";
+import { data, gameServer } from "../app.js";
 
-export class Lobby {
+const MINPTS = 15;
+const MAXGAINPTS = 25;
+const MAXLOSSPTS = 20;
+
+const __MIN_RANK_POSSIBLE__ = -30;
+const __MAX_RANK_POSSIBLE__ = Number.MAX_SAFE_INTEGER - 200;
+
+export class Lobby extends EventEmitter {
 	#clients = [];
 	#ids = {
-		match_id: null,
+		match_id: new Set(),
 		Lobby_id: null,
 	};
 	#valid_types = ['RANKED', 'TOURNAMENT'];
@@ -16,6 +25,7 @@ export class Lobby {
 	#end_game = false;
 
 	constructor ({type, clients = [], id}) {
+		super();
 		if (!this.#valid_types.includes(type)
 				|| !id
 				|| !Array.isArray(clients)
@@ -27,21 +37,101 @@ export class Lobby {
 		this.#clients = clients;
 		this.#ids.Lobby_id = id;
 
+		try{
+			this.#manageMatch();
+		}catch(error){
+			console.error('Lobby: Error managing match:', error.message);
+		}
+	}
+	async #newMatch({players}) {
+		if (!gameServer)
+			throw new Error('NO_GAME_SERVER_AVAILABLE');
+
+		const match_id = await gameServer.newMatch(players, 2, 'PONG', this);
+		this.#ids.match_id.add(match_id);
+		return match_id;
+	}
+
+	async #manageMatch() {
+		if (!gameServer)
+			throw new Error('NO_GAME_SERVER_AVAILABLE');
+
+		switch (this.type) {
+			case 'RANKED':
+				const players = {};
+				this.#clients.forEach((client, index) => {{
+					players[index + 1] = {name: client.name, id: client.id};
+				}})
+				const match_id = await this.#newMatch({players});
+				this.#broadcast({type: 'MATCH_FOUND', match_id});
+				break;
+			case 'TOURNAMENT':
+				while (!this.#end_game) {
+					const gamesCount = 0;
+					const howManyGames = this.#clients.length;
+
+					if (gamesCount >= howManyGames) break;
+				}
+				break;
+		}
 	}
 
 	async waitEnd() {
-		return 
+		if (this.#end_game)
+			return;
+
+		return new Promise((resolve) => {
+			this.once('END_GAME', resolve);
+		});
 	}
 
 	get isFull() {
 		return this.#clients.length === this.#maxPlayers[this.type];
 	}
 
-	setEnd_game({value, setter}) {
+	async end_game({setter, match_id, stats}, timeout = false) {
 		if (!(setter instanceof Connection))
 			throw new Error('PERMISSION_DENIED');
 
-		this.#end_game = Boolean(value);
+		if (this.#end_game) return;
+
+		if (!timeout && (!stats || !stats.players))
+			throw new Error('INVALID_STATS');
+		
+
+		if (!this.#ids.match_id.has(match_id))
+			throw new Error('INVALID_MATCH_ID');
+
+		this.#ids.match_id.delete(match_id);
+
+		switch (this.type) {
+			case 'RANKED':
+				this.#end_game = true;
+				if (timeout) {
+					this.#broadcast({type: 'MATCH_TIMEOUT', match_id});
+					this.emit('END_GAME');
+					return;
+				}
+				const p = stats.players;
+				const winner = Object.values(p).find(player => player.winner).id;
+				const calc = this.#calculateRank({score1: p[1].score, score2: p[2].score});
+				for (const c of this.#clients) {
+					let rank = c.rank;
+					const isWinner = c.id === winner;
+					const pts = isWinner ? calc.gain : calc.loss;
+
+					rank += pts;
+					if (rank > __MAX_RANK_POSSIBLE__)
+						rank = __MAX_RANK_POSSIBLE__;
+					if (rank < __MIN_RANK_POSSIBLE__)
+						rank = __MIN_RANK_POSSIBLE__;
+					c.rank = rank;
+					await data.sendRequest('/setRank', {email: c.email, rank});
+				}
+
+				this.emit('END_GAME');
+				break;
+		}
 	}
 
 	#broadcast(message) {
@@ -49,148 +139,15 @@ export class Lobby {
 			client.send(message);
 		});
 	}
+
+	#calculateRank({score1, score2}) {
+		const scale = Math.max(score1, score2);
+		const diff = Math.abs(score1 - score2);
+		const ratio = Math.min((diff === 1 ? 0 : diff) / scale, 1);
+
+		const gain = Math.round(MINPTS + (MAXGAINPTS - MINPTS) * ratio);
+		const loss = -Math.round(MINPTS + (MAXLOSSPTS - MINPTS) * ratio);
+
+		return {gain, loss};
+	}
 }
-
-
-// export class Lobby {
-// 	#states = ['IDLE', 'QUEUE', 'IN_GAME'];
-// 	#types = ['RANKED', 'TOURNAMENT'];
-// 	#type = null;
-// 	#state = null;
-// 	#clients = new Map();
-// 	#clientsLimit = {
-// 		RANKED: 2,
-// 		TOURNAMENT: 4
-// 	};
-// 	#maxClients = null;
-// 	#id = null;
-// 	#stateMachine = {
-// 		IDLE: this.#idle,
-// 		QUEUE: this.#in_queue,
-// 		IN_GAME: this.#in_game
-// 	}
-// 	#interval = null;
-
-// 	constructor({type, state, owner, id}) {
-// 		if (![type, state, id, owner].every(Boolean)
-// 				|| !this.#types.includes(type)
-// 				|| !this.#states.includes(state)
-// 				|| !(owner instanceof Client))
-// 			throw new Error('INVALID_FORMAT');
-
-// 		this.#type = type;
-// 		this.#state = state;
-// 		this.addClient(owner);
-// 		this.#id = id;
-// 		this.#maxClients = this.#clientsLimit[type];
-
-// 		this.startFSM();
-// 	}
-
-// 	startFSM(time = 1000) {
-// 		if (this.#interval)
-// 			return;
-
-// 		this.#interval = setInterval(() => {
-// 			this.#stateMachine[this.#state]();
-// 		}, time);
-// 	}
-
-// 	stopFSM() {
-// 		if (this.#interval) {
-// 			clearInterval(this.#interval);
-// 			this.#interval = null;
-// 		}
-// 	}
-
-// 	get game_type() {
-// 		return this.#type;
-// 	}
-// 	get state() {
-// 		return this.#state;
-// 	}
-// 	get isFull() {
-// 		return this.#clients.size === this.#maxClients;
-// 	}
-
-// 	/*
-// 		State = IN_GAME type = any
-// 		What it can do:
-// 			- Can't change state
-// 			- calculate results and update database when games are over
-// 			- finish the connections
-// 			- type = TOURNAMENT
-// 				- build tournament keys
-// 				- manage tournament brackets
-// 				- all clients play at least two games
-// 				keys exemple:
-// 					B1: P1 vs P2	-	B1(W) vs B2(W)
-// 					B2: P3 vs P4	-	B1(L) vs B2(L)
-// 				- the final scores are calculated based on positions in the brackets
-// 				Scores exemple:
-// 					1st place: +100 points
-// 					2nd place: +50 points
-// 					3rd place: -50 points
-// 					4th place: -100 points
-// 	*/
-// 	#in_game(){}
-
-// 	/*
-// 		State = IDLE type = any
-// 		What it can do:
-// 			- Create invite link
-// 			- change to QUEUE state
-// 	*/
-// 	#idle() {
-
-// 	}
-
-// 	/*
-// 		State = QUEUE type = any
-// 		What it can do:
-// 			- change back to IDLE state if DEQUEUED
-// 			- check if full -> change to IN_GAME state
-// 	*/
-// 	#in_queue() {
-// 		/*
-// 			join the matchmaking system and wait
-
-// 			Create a matchMaking class
-// 				-> it'll have
-// 					const queue = {
-// 						RANKED: Set<Lobby>,
-// 						TOURNAMENT: Set<Lobby>
-// 					};
-// 				-> it'll try to match lobbies every X seconds
-// 				-> when matched move all player for one the lobbies and delete the others
-
-// 		*/
-
-// 		// if (this.isFull)
-// 		// 	this.#updateState('IN_GAME');
-// 	}
-
-// 	//state = IN_GAME type = TOURNAMENT
-// 	#buidTournamentKeys() {
-// 		if (this.#type !== 'TOURNAMENT')
-// 			return [];
-// 	}
-
-// 	addClient(client) {
-// 		if (this.#clients.size === this.#clientsLimit)
-// 			throw new Error('LOBBY_FULL');
-
-// 		this.#clients.set(client.id, client);
-// 	}
-
-// 	isClientInLobby(clientId) {
-// 		return this.#clients.has(clientId);
-// 	}
-
-// 	#updateState(newState) {
-// 		if (!this.#states.includes(newState))
-// 			throw new Error('INVALID_STATE');
-
-// 		this.#state = newState;
-// 	}
-// }
