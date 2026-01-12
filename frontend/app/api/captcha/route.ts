@@ -12,7 +12,7 @@ const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://local
 export async function GET(request: NextRequest) {
   try {
     // Fetch CAPTCHA from api-gateway (which forwards to auth-service)
-    const response = await fetch(`${API_GATEWAY_URL}/getCaptcha`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/captcha`, {
       method: 'GET',
     });
 
@@ -24,11 +24,11 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    const { code, data: imageData } = data;
+    const { captchaId, image } = data;
 
-    // Store the CAPTCHA code in a temporary cookie (5 minutes expiry)
+    // Store the CAPTCHA id in a temporary cookie (5 minutes expiry)
     const cookieStore = await cookies();
-    cookieStore.set('captcha_code', code, {
+    cookieStore.set('captcha_id', captchaId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
       maxAge: 5 * 60, // 5 minutes
     });
 
-    // Return only the image data to the client (not the answer!)
+    // Return only the image data to the client
     return NextResponse.json({
-      image: imageData,
+      image,
     });
   } catch (error) {
     console.error('Error generating CAPTCHA');

@@ -18,43 +18,31 @@ export async function login(formData: FormData) {
     return { error: errors.email?.[0] || errors.password?.[0] || 'Invalid input' };
   }
 
-  // Validate CAPTCHA
+  const cookieStore = await cookies();
+  const captchaId = cookieStore.get('captcha_id');
+
   if (!captchaInput) {
     return { error: 'Please enter the CAPTCHA code' };
   }
 
-  // Get stored CAPTCHA code from cookie
-  const cookieStore = await cookies();
-  const storedCaptcha = cookieStore.get('captcha_code');
-
-  if (!storedCaptcha) {
+  if (!captchaId) {
     return { error: 'CAPTCHA expired. Please refresh and try again.' };
   }
 
-  // Verify CAPTCHA (case-insensitive)
-  if (captchaInput.toLowerCase() !== storedCaptcha.value.toLowerCase()) {
-    return { error: 'Invalid code' };
-  }
-
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/checkLogin`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        email: email, // auth-service expects 'email' field
+        email,
         password: password,
-        captchaInput: storedCaptcha.value, // Send validated CAPTCHA
+        captchaId: captchaId.value,
+        captchaInput,
       }),
       credentials: 'include',
-      redirect: 'manual', // Don't follow redirects, we want to handle them
     });
-
-    // Backend redirects (302) mean validation errors occurred
-    if (response.type === 'opaqueredirect' || response.status === 302) {
-      return { error: 'Invalid credentials' };
-    }
 
     // Parse JSON response
     let data;
@@ -64,9 +52,8 @@ export async function login(formData: FormData) {
       return { error: 'Invalid credentials' };
     }
 
-    // Check if response contains error array (from auth-service)
-    if (data?.error && data.error.length > 0) {
-      return { error: data.error[0] };
+    if (!response.ok) {
+      return { error: data?.error || 'Invalid credentials' };
     }
 
     // Check if 2FA is required
@@ -80,9 +67,9 @@ export async function login(formData: FormData) {
         path: '/',
         maxAge: 5 * 60, // 5 minutes to complete 2FA
       });
-      
-      // Clear CAPTCHA cookie
-      cookieStore.delete('captcha_code');
+
+      // Clear CAPTCHA id cookie
+      cookieStore.delete('captcha_id');
       
       // Return indicator that 2FA is needed
       return { requires2FA: true };
@@ -103,8 +90,8 @@ export async function login(formData: FormData) {
         maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching backend)
       });
 
-      // Clear CAPTCHA cookie after successful login
-      cookieStore.delete('captcha_code');
+      // Clear CAPTCHA id cookie after successful login
+      cookieStore.delete('captcha_id');
 
       // Return success to indicate redirect should happen
       return { success: true };
@@ -140,45 +127,32 @@ export async function signup(formData: FormData) {
     return { error: 'Please enter the CAPTCHA code' };
   }
 
-  // Get stored CAPTCHA code from cookie
   const cookieStore = await cookies();
-  const storedCaptcha = cookieStore.get('captcha_code');
-
-  if (!storedCaptcha) {
+  const captchaId = cookieStore.get('captcha_id');
+  if (!captchaId) {
     return { error: 'CAPTCHA expired. Please refresh and try again.' };
-  }
-
-  // Verify CAPTCHA (case-insensitive)
-  if (captchaInput.toLowerCase() !== storedCaptcha.value.toLowerCase()) {
-    return { error: 'Invalid code' };
   }
 
   // Generate a UUID for the new user
   const user_id = crypto.randomUUID();
 
   try {
-    const response = await fetch(`${API_GATEWAY_URL}/checkRegister`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user_id, // Required by auth-service
         username,
         email,
         password,
-        confirmPassword: password, // Required by auth-service
-        nickname: nickname || username, // Use username if nickname is empty
-        captchaInput: storedCaptcha.value, // Send validated CAPTCHA to backend
+        confirmPassword: password,
+        nickname: nickname || username,
+        captchaId: captchaId.value,
+        captchaInput,
       }),
       credentials: 'include',
-      redirect: 'manual', // Don't follow redirects
     });
-
-    // Backend redirects (302) mean validation errors occurred
-    if (response.type === 'opaqueredirect' || response.status === 302) {
-      return { error: 'Registration failed. Please check your input.' };
-    }
 
     // Parse JSON response
     let data;
@@ -188,9 +162,8 @@ export async function signup(formData: FormData) {
       return { error: 'Registration failed. Please try again.' };
     }
 
-    // Check if response contains error array (from auth-service)
-    if (data?.error && data.error.length > 0) {
-      return { error: data.error[0] };
+    if (!response.ok) {
+      return { error: data?.error || 'Registration failed. Please try again.' };
     }
 
     // Registration successful!
@@ -198,7 +171,7 @@ export async function signup(formData: FormData) {
     // No need to sync immediately after registration since auto-login follows
 
     // Auto-login without requiring CAPTCHA again (user just verified with CAPTCHA)
-    const loginResponse = await fetch(`${API_GATEWAY_URL}/checkLogin`, {
+    const loginResponse = await fetch(`${API_GATEWAY_URL}/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -206,7 +179,8 @@ export async function signup(formData: FormData) {
       body: JSON.stringify({
         email,
         password,
-        captchaInput: storedCaptcha.value, // Reuse the CAPTCHA from registration (already validated)
+        captchaId: captchaId.value,
+        captchaInput,
       }),
       credentials: 'include',
     });
@@ -216,8 +190,8 @@ export async function signup(formData: FormData) {
     if (loginData?.token) {
       const cookieStore = await cookies();
 
-      // Clear CAPTCHA cookie
-      cookieStore.delete('captcha_code');
+      // Clear CAPTCHA id cookie
+      cookieStore.delete('captcha_id');
 
       // Set JWT cookie
       cookieStore.set('jwt', loginData.token, {
@@ -232,7 +206,7 @@ export async function signup(formData: FormData) {
 
     // If auto-login fails, redirect to login page
     const cookieStore = await cookies();
-    cookieStore.delete('captcha_code');
+    cookieStore.delete('captcha_id');
     redirect('/login?registered=true');
   } catch (error) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
@@ -270,7 +244,7 @@ export async function logout() {
   cookieStore.delete('jwt');
   cookieStore.delete('pending_2fa_token');
   cookieStore.delete('session');
-  cookieStore.delete('captcha_code');
+  cookieStore.delete('captcha_id');
 
   // redirect() must be called outside try-catch in Next.js 15
   redirect('/login');

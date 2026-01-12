@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     }
 
     // Call the backend to verify the 2FA code
-    const response = await fetch(`${API_GATEWAY_URL}/verifyLogin2FA`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/verify-2fa`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

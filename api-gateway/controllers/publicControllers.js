@@ -4,13 +4,35 @@ import sharp from "sharp";
 import sendMail from "../utils/sendMail.js";
 import { mkdir } from "node:fs/promises";
 import { randomUUID } from "crypto";
+import speakeasy from "speakeasy";
 import { matchClient } from "../app.js";
 
 const publicControllers = {
+  // JSON API stores (in-memory, short-lived)
+  captchaStore: new Map(),
+  pending2FA: new Map(),
+
   //GETTERS
 
   getIcon: function getIcon(req, reply) {
     return reply.sendFile("favicon.ico");
+  },
+
+  // JSON: Get captcha for Next.js
+  getCaptchaJson: async function getCaptchaJson(req, reply) {
+    try {
+      const response = await axios.get("https://auth-service:3001/getCaptcha");
+      const { code, data } = response.data;
+      const captchaId = randomUUID();
+      const expiresAt = Date.now() + 5 * 60 * 1000;
+
+      publicControllers.captchaStore.set(captchaId, { code, expiresAt });
+
+      return reply.code(200).send({ captchaId, image: data });
+    } catch (err) {
+      console.error("Error loading captcha:", err.message);
+      return reply.code(500).send({ error: "Failed to generate CAPTCHA" });
+    }
   },
 
   homePage: function getHomePage(req, reply) {
@@ -73,6 +95,147 @@ const publicControllers = {
   },
 
   //SETTERS
+
+  // JSON: Login for Next.js
+  loginJson: async function loginJson(req, reply) {
+    try {
+      const { email, password, captchaId, captchaInput } = req.body || {};
+      if (!email || !password || !captchaId || !captchaInput) {
+        return reply.code(400).send({ error: "Missing credentials or captcha" });
+      }
+
+      const captchaRecord = publicControllers.captchaStore.get(captchaId);
+      if (!captchaRecord || captchaRecord.expiresAt < Date.now()) {
+        publicControllers.captchaStore.delete(captchaId);
+        return reply.code(400).send({ error: "CAPTCHA expired" });
+      }
+      if (captchaInput.toLowerCase() !== captchaRecord.code.toLowerCase()) {
+        return reply.code(400).send({ error: "Invalid code" });
+      }
+
+      // Invalidate captcha after use
+      publicControllers.captchaStore.delete(captchaId);
+
+      const response = await axios.post(
+        "https://auth-service:3001/checkLogin",
+        { email, password }
+      );
+
+      const token = response?.data?.token;
+      if (!token) {
+        return reply.code(401).send({ error: "Invalid credentials" });
+      }
+
+      // Check if 2FA is enabled
+      const twoFARes = await axios.post(
+        "https://auth-service:3001/get2FAEnable",
+        { email }
+      );
+      const twoFactorEnable = twoFARes?.data?.twoFactorEnable;
+
+      if (twoFactorEnable) {
+        const tempToken = randomUUID();
+        publicControllers.pending2FA.set(tempToken, {
+          token,
+          email,
+          expiresAt: Date.now() + 5 * 60 * 1000,
+        });
+        return reply.code(200).send({ requires2FA: true, tempToken });
+      }
+
+      return reply.code(200).send({ token });
+    } catch (err) {
+      console.error("Login JSON error:", err.message);
+      return reply.code(500).send({ error: "Login failed" });
+    }
+  },
+
+  // JSON: Register for Next.js
+  registerJson: async function registerJson(req, reply) {
+    try {
+      const { username, nickname, email, password, confirmPassword, captchaId, captchaInput } =
+        req.body || {};
+
+      if (!username || !nickname || !email || !password || !confirmPassword) {
+        return reply.code(400).send({ error: "Please fill all fields" });
+      }
+      if (!captchaId || !captchaInput) {
+        return reply.code(400).send({ error: "Missing captcha" });
+      }
+
+      const captchaRecord = publicControllers.captchaStore.get(captchaId);
+      if (!captchaRecord || captchaRecord.expiresAt < Date.now()) {
+        publicControllers.captchaStore.delete(captchaId);
+        return reply.code(400).send({ error: "CAPTCHA expired" });
+      }
+      if (captchaInput.toLowerCase() !== captchaRecord.code.toLowerCase()) {
+        return reply.code(400).send({ error: "Invalid code" });
+      }
+      publicControllers.captchaStore.delete(captchaId);
+
+      const user_id = randomUUID();
+      const response = await axios.post(
+        "https://auth-service:3001/checkRegister",
+        {
+          user_id,
+          username,
+          nickname,
+          email,
+          password,
+          confirmPassword,
+        }
+      );
+
+      return reply.code(200).send({ success: response?.data?.success || [] });
+    } catch (err) {
+      if (err?.response?.status === 409) {
+        return reply.code(409).send({ error: "User already exists" });
+      }
+      console.error("Register JSON error:", err.message);
+      return reply.code(500).send({ error: "Registration failed" });
+    }
+  },
+
+  // JSON: Verify 2FA for login
+  verify2FALoginJson: async function verify2FALoginJson(req, reply) {
+    try {
+      const { tempToken, code } = req.body || {};
+      if (!tempToken || !code) {
+        return reply.code(400).send({ error: "Missing verification data" });
+      }
+
+      const pending = publicControllers.pending2FA.get(tempToken);
+      if (!pending || pending.expiresAt < Date.now()) {
+        publicControllers.pending2FA.delete(tempToken);
+        return reply.code(401).send({ error: "Session expired" });
+      }
+
+      const secretRes = await axios.post(
+        "https://auth-service:3001/get2FASecret",
+        { email: pending.email }
+      );
+      const secret = secretRes?.data?.twoFactorSecret;
+      if (!secret) {
+        return reply.code(400).send({ error: "2FA not configured" });
+      }
+
+      const verified = speakeasy.totp.verify({
+        secret,
+        encoding: "base32",
+        token: code,
+      });
+
+      if (!verified) {
+        return reply.code(400).send({ error: "Invalid verification code" });
+      }
+
+      publicControllers.pending2FA.delete(tempToken);
+      return reply.code(200).send({ token: pending.token });
+    } catch (err) {
+      console.error("Verify 2FA JSON error:", err.message);
+      return reply.code(500).send({ error: "Verification failed" });
+    }
+  },
 
   checkRegister: async function tryRegisterNewUser(req, reply) {
     let success = [];
