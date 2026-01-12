@@ -32,5 +32,5 @@
     "scripts/seed.js",
     ".next/dev/types/**/*.ts"
 , "prisma/migrate.ts", "prisma/migrate.js"  ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "prisma.config.ts", "prisma/**"]
 }
