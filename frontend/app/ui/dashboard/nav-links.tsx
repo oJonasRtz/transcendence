@@ -2,6 +2,7 @@
 
 import {
   Cog6ToothIcon as SettingsIcon,
+  ChatBubbleLeftRightIcon,
   HomeIcon,
   TrophyIcon,
 } from '@heroicons/react/24/outline';
@@ -18,6 +19,7 @@ const links = [
     href: '/dashboard/matches',
     icon: TrophyIcon,
   },
+  { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon },
 ];
 
