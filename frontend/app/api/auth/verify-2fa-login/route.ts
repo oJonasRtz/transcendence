@@ -56,26 +56,6 @@ export async function POST(request: Request) {
       // Clear the pending token
       cookieStore.delete('pending_2fa_token');
 
-      // Sync user to Prisma
-      try {
-        const { getUser } = await import('@/app/lib/auth');
-        const { getUserProfile } = await import('@/app/lib/backend-api');
-        const { syncUserToPrisma } = await import('@/app/lib/sync');
-
-        const authUser = await getUser();
-
-        if (authUser && authUser.public_id) {
-          const backendUser = await getUserProfile(authUser.public_id);
-
-          if (backendUser) {
-            await syncUserToPrisma(backendUser, authUser.email);
-            console.log('[Auth] User synced to Prisma after 2FA:', authUser.email);
-          }
-        }
-      } catch (prismaError) {
-        console.error('[Auth] Failed to sync user to Prisma:', prismaError);
-      }
-
       return NextResponse.json({ success: true });
     }
 

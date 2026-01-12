@@ -2,14 +2,11 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "postinstall": "prisma generate",
     "dev": "next dev --turbopack -p 3042",
     "start": "next start -p 3042"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@prisma/adapter-pg": "^5.19.0",
-    "@prisma/client": "^5.19.0",
     "@tailwindcss/forms": "^0.5.10",
     "autoprefixer": "10.4.20",
     "bcrypt": "^5.1.1",
@@ -35,15 +32,12 @@
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
     "dotenv": "^17.2.3",
-    "prisma": "^5.19.0",
     "tsx": "^4.21.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
-      "@prisma/engines",
       "bcrypt",
       "esbuild",
-      "prisma",
       "sharp"
     ]
   }

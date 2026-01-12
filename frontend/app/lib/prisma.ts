@@ -1,28 +1,34 @@
-import { PrismaClient } from '../../prisma/generated';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+type PrismaMethod = (...args: unknown[]) => Promise<unknown>;
 
-// Create PostgreSQL connection pool with proper configuration
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-});
-
-// Create Prisma adapter with the pool instance
-const adapter = new PrismaPg(pool);
-
-// Initialize Prisma Client with the adapter and logging
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+const methodHandlers: Record<string, PrismaMethod> = {
+  findMany: async () => [],
+  findFirst: async () => null,
+  findUnique: async () => null,
+  create: async () => null,
+  update: async () => null,
+  updateMany: async () => ({ count: 0 }),
+  upsert: async () => null,
+  delete: async () => null,
+  count: async () => 0,
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter: adapter as any,
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  });
+function createModelProxy() {
+  return new Proxy(
+    {},
+    {
+      get: (_target, prop) => {
+        if (typeof prop === 'string' && methodHandlers[prop]) {
+          return methodHandlers[prop];
+        }
+        return async () => null;
+      },
+    }
+  );
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+export const prisma = new Proxy(
+  {},
+  {
+    get: () => createModelProxy(),
+  }
+);

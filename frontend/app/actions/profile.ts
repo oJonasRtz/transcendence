@@ -75,22 +75,6 @@ export async function changeUsername(_state: { error?: string; success?: string 
       }
     }
 
-    // Sync to Prisma - fetch fresh data from backend and sync with new username
-    try {
-      const authUser = await getUser();
-      if (authUser && authUser.public_id) {
-        const { getUserProfile } = await import('@/app/lib/backend-api');
-        const { syncUserToPrisma } = await import('@/app/lib/sync');
-
-        const backendUser = await getUserProfile(authUser.public_id);
-        if (backendUser) {
-          await syncUserToPrisma(backendUser, authUser.email);
-        }
-      }
-    } catch (prismaError) {
-      console.error('Failed to sync username to Prisma:', prismaError);
-    }
-
     // Revalidate all relevant paths to show updated username
     revalidatePath('/dashboard/settings/username');
     revalidatePath('/dashboard');
@@ -161,22 +145,6 @@ export async function changeEmail(_state: { error?: string; success?: string } |
           maxAge: 60 * 60, // 1 hour
         });
       }
-    }
-
-    // Sync to Prisma - fetch fresh data from backend and sync with new email
-    try {
-      const authUser = await getUser();
-      if (authUser && authUser.public_id) {
-        const { getUserProfile } = await import('@/app/lib/backend-api');
-        const { syncUserToPrisma } = await import('@/app/lib/sync');
-
-        const backendUser = await getUserProfile(authUser.public_id);
-        if (backendUser) {
-          await syncUserToPrisma(backendUser, email);
-        }
-      }
-    } catch (prismaError) {
-      console.error('Failed to sync email to Prisma:', prismaError);
     }
 
     // Revalidate all relevant paths to show updated email and verification status
@@ -439,22 +407,6 @@ export async function changeAvatar(_state: { error?: string; success?: string } 
     // Check for errors
     if (data?.error && data.error.length > 0) {
       return { error: data.error[0] };
-    }
-
-    // Sync to Prisma - fetch fresh data from backend
-    try {
-      const authUser = await getUser();
-      if (authUser && authUser.public_id) {
-        const { getUserProfile } = await import('@/app/lib/backend-api');
-        const { syncUserToPrisma } = await import('@/app/lib/sync');
-
-        const backendUser = await getUserProfile(authUser.public_id);
-        if (backendUser) {
-          await syncUserToPrisma(backendUser, authUser.email);
-        }
-      }
-    } catch (prismaError) {
-      console.error('Failed to sync avatar to Prisma:', prismaError);
     }
 
     // Revalidate paths

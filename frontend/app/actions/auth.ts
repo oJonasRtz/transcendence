@@ -106,33 +106,6 @@ export async function login(formData: FormData) {
       // Clear CAPTCHA cookie after successful login
       cookieStore.delete('captcha_code');
 
-      // Sync user to Prisma using hybrid sync strategy
-      try {
-        const { getUser } = await import('@/app/lib/auth');
-        const { getUserProfile } = await import('@/app/lib/backend-api');
-        const { syncUserToPrisma } = await import('@/app/lib/sync');
-
-        const authUser = await getUser();
-
-        if (authUser && authUser.public_id) {
-          // Fetch full user profile from backend SQLite
-          const backendUser = await getUserProfile(authUser.public_id);
-
-          if (backendUser) {
-            // Sync to Prisma PostgreSQL
-            // Pass email from JWT token since backend doesn't return it
-            await syncUserToPrisma(backendUser, authUser.email);
-            console.log('[Auth] User synced to Prisma successfully:', authUser.email);
-          } else {
-            console.error('[Auth] Backend user not found for public_id:', authUser.public_id);
-          }
-        }
-      } catch (prismaError) {
-        // Log but don't fail login if Prisma sync fails
-        console.error('[Auth] Failed to sync user to Prisma:', prismaError);
-        // Continue anyway - dashboard will handle this
-      }
-      
       // Return success to indicate redirect should happen
       return { success: true };
     }
