@@ -1,11 +1,23 @@
 // app/ui/dashboard/friends-list.tsx
-import { getFriends } from '@/app/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
 export default async function FriendsList({ userId }: { userId: number }) {
-  const allFriends = await getFriends(userId);
+  const allFriends = [
+    {
+      id: 301,
+      username: 'Ion',
+      avatar: '/images/avatar2.png',
+      isOnline: true,
+    },
+    {
+      id: 302,
+      username: 'Drift',
+      avatar: '/images/avatar3.png',
+      isOnline: true,
+    },
+  ];
   const onlineFriends = allFriends.filter((friend) => friend.isOnline);
 
   return (

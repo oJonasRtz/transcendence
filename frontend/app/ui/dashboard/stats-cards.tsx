@@ -1,5 +1,4 @@
 // app/ui/dashboard/stats-cards.tsx
-import { getDashboardStats } from '@/app/lib/data';
 import {
   TrophyIcon,
   StarIcon,
@@ -8,7 +7,12 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default async function StatsCards({ userId }: { userId: number }) {
-  const stats = await getDashboardStats(userId);
+  const stats = {
+    ranking: 1240,
+    level: 7,
+    wins: 12,
+    winStreak: 3,
+  };
 
   return (
     <>

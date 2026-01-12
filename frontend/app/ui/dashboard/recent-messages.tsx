@@ -1,13 +1,23 @@
 // app/ui/dashboard/recent-messages.tsx
-import { getUserConversations, getUnreadMessageCount } from '@/app/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function RecentMessages({ userId }: { userId: number }) {
-  const [conversations, unreadCount] = await Promise.all([
-    getUserConversations(userId),
-    getUnreadMessageCount(userId),
-  ]);
+  const conversations = [
+    {
+      id: 401,
+      otherUser: {
+        username: 'Orbit',
+        avatar: '/images/avatar4.png',
+        isOnline: true,
+      },
+      lastMessage: {
+        content: 'Queueing for a match?',
+        createdAt: new Date().toISOString(),
+      },
+    },
+  ];
+  const unreadCount = 1;
 
   const recentConversations = conversations.slice(0, 5);
 

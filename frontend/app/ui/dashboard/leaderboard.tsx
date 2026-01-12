@@ -1,13 +1,41 @@
 // app/ui/dashboard/leaderboard.tsx
-import { getLeaderboard, getUserRankPosition } from '@/app/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function Leaderboard({ userId }: { userId: number }) {
-  const [leaderboard, userRank] = await Promise.all([
-    getLeaderboard(10),
-    getUserRankPosition(userId),
-  ]);
+  const leaderboard = [
+    {
+      id: 1,
+      ranking: 1890,
+      user: {
+        id: 101,
+        username: 'Nova',
+        avatar: '/images/avatar1.png',
+        isOnline: true,
+      },
+    },
+    {
+      id: 2,
+      ranking: 1760,
+      user: {
+        id: 102,
+        username: 'Quark',
+        avatar: '/images/avatar2.png',
+        isOnline: false,
+      },
+    },
+    {
+      id: 3,
+      ranking: 1655,
+      user: {
+        id: 103,
+        username: 'Pulse',
+        avatar: '/images/avatar3.png',
+        isOnline: true,
+      },
+    },
+  ];
+  const userRank = 42;
 
   return (
     <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">

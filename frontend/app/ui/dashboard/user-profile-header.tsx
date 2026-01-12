@@ -1,8 +1,11 @@
 import { poppins as futuraPtBold } from '@/app/ui/fonts';
-import { getUserById } from '@/app/lib/data';
 
 export default async function UserProfileHeader({ userId }: { userId: number }) {
-  const user = await getUserById(userId);
+  const user = {
+    username: 'Player',
+    avatar: '/images/default_avatar.png',
+    isOnline: true,
+  };
 
   return (
     <div className="w-full max-w-4xl">
@@ -41,4 +44,3 @@ export default async function UserProfileHeader({ userId }: { userId: number }) 
     </div>
   );
 }
-

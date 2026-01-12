@@ -1,5 +1,4 @@
 // app/ui/dashboard/activity-feed.tsx
-import { getActivityFeed } from '@/app/lib/data';
 import {
   BoltIcon,
   StarIcon,
@@ -7,7 +6,33 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default async function ActivityFeed({ userId }: { userId: number }) {
-  const activities = await getActivityFeed(userId, 10);
+  const activities = [
+    {
+      type: 'match',
+      date: new Date(),
+      data: {
+        player1Id: userId,
+        player1: { username: 'You' },
+        player2: { username: 'Nebula' },
+      },
+    },
+    {
+      type: 'achievement',
+      date: new Date(Date.now() - 3600000),
+      data: {
+        achievement: { name: 'First Win' },
+      },
+    },
+    {
+      type: 'friendship',
+      date: new Date(Date.now() - 7200000),
+      data: {
+        userId,
+        user: { username: 'You' },
+        friend: { username: 'Ion' },
+      },
+    },
+  ];
 
   return (
     <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">

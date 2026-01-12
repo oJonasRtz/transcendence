@@ -1,10 +1,30 @@
 // app/ui/dashboard/recent-matches.tsx
-import { getMatchHistory } from '@/app/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default async function RecentMatches({ userId }: { userId: number }) {
-  const matches = await getMatchHistory(userId, 5);
+  const matches = [
+    {
+      id: 1,
+      player1Id: userId,
+      player2Id: 201,
+      player1: { username: 'You', avatar: '/images/default_avatar.png' },
+      player2: { username: 'Nebula', avatar: '/images/avatar4.png' },
+      result: 'player1Win',
+      score: '11 - 7',
+      playedAt: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      player1Id: 202,
+      player2Id: userId,
+      player1: { username: 'Photon', avatar: '/images/avatar5.png' },
+      player2: { username: 'You', avatar: '/images/default_avatar.png' },
+      result: 'player2Win',
+      score: '11 - 9',
+      playedAt: new Date(Date.now() - 86400000).toISOString(),
+    },
+  ];
 
   return (
     <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
