@@ -20,5 +20,5 @@ COPY . .
 
 EXPOSE 3000
 
-# Next.js reads PORT from environment automatically
-CMD ["pnpm", "dev"]
+# Run Next.js on 3000 so nginx can proxy to the frontend container
+CMD ["pnpm", "exec", "next", "dev", "--turbopack", "-p", "3000"]

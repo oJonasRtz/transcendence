@@ -85,6 +85,9 @@ services:
     build: ./game-server
     image: game-server:1.0.0
     container_name: game-server
+    environment:
+      LOBBY_ID: 1
+      LOBBY_PASS: changeme
     networks:
       - "game"
       - "transcendence"
