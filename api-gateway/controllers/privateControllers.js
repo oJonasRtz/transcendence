@@ -1003,6 +1003,72 @@ const privateControllers = {
       return reply.redirect("/home");
     }
   },
+
+  // JSON API Endpoints for Next.js frontend
+  getProfileData: async function getProfileData(req, reply) {
+    try {
+      const { public_id } = req.query;
+      if (!public_id) {
+        return reply.status(400).send({ error: "public_id is required" });
+      }
+      const response = await axios.post(
+        "https://users-service:3003/getDataByPublicId",
+        { public_id }
+      );
+      const data = response?.data;
+      data.state = getState(data);
+      data.rank = await getRank(data);
+      return reply.send(data);
+    } catch (err) {
+      console.error("API-GATEWAY getProfileData Error:", err.message);
+      return reply.status(500).send({ error: "Error fetching profile data" });
+    }
+  },
+
+  apiFriendInvite: async function apiFriendInvite(req, reply) {
+    try {
+      if (!req.body || !req.body.public_id) {
+        return reply.status(400).send({ success: false, message: "public_id is required" });
+      }
+      req.body.user_id = req.user.user_id;
+      await axios.post("https://users-service:3003/friendInvite", req.body);
+      return reply.send({ success: true, message: "Friend invitation sent" });
+    } catch (err) {
+      if (err?.response?.status === 403 || err?.response?.data?.message === "SAME_USER") {
+        return reply.status(403).send({ success: false, message: "You cannot add yourself as a friend" });
+      }
+      if (err?.response?.data?.message === "ALREADY_FRIENDS") {
+        return reply.status(400).send({ success: false, message: "Already friends or invitation pending" });
+      }
+      console.error("API-GATEWAY apiFriendInvite Error:", err.message);
+      return reply.status(500).send({ success: false, message: "Error sending friend invitation" });
+    }
+  },
+
+  apiBlockUser: async function apiBlockUser(req, reply) {
+    try {
+      if (!req.body || !req.body.public_id) {
+        return reply.status(400).send({ success: false, message: "public_id is required" });
+      }
+      req.body.user_id = req.user.user_id;
+      const response = await axios.post(
+        "https://users-service:3003/blockTheUser",
+        req.body
+      );
+      const blocked = response?.status === 201;
+      return reply.send({
+        success: true,
+        blocked,
+        message: blocked ? "User blocked" : "User unblocked"
+      });
+    } catch (err) {
+      if (err?.response?.status === 403 || err?.response?.data?.message === "SAME_USER") {
+        return reply.status(403).send({ success: false, message: "You cannot block yourself" });
+      }
+      console.error("API-GATEWAY apiBlockUser Error:", err.message);
+      return reply.status(500).send({ success: false, message: "Error blocking/unblocking user" });
+    }
+  },
 };
 
 export default privateControllers;
