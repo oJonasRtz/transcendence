@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     // Call the backend apiCheckEmailCode endpoint
-    const response = await fetch(`${API_GATEWAY_URL}/apiCheckEmailCode`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/verify-reset-code`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

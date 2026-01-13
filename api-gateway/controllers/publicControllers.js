@@ -259,6 +259,77 @@ const publicControllers = {
     }
   },
 
+  // JSON: Forgot password (send code)
+  forgotPasswordJson: async function forgotPasswordJson(req, reply) {
+    try {
+      if (!req.body || !req.body.email) {
+        return reply.code(400).send({ error: "Missing email" });
+      }
+
+      await axios.post("https://auth-service:3001/checkEmail", req.body);
+
+      const response = await axios.get("https://auth-service:3001/getCaptcha");
+      const { code } = response.data;
+
+      const receiver = req.body.email;
+      const subject = "Forgot Password - Transcendence";
+      const webPage = `
+                                <h2>Forgot Password - Your Pong Transcendence</h2>
+                                <p>Please, you need to inform the code below to change the password of your account</p>
+                                <p>The code is <strong>${code}</strong>. Type it in the verify page to validate it</p>
+                        `;
+      await sendMail(receiver, subject, webPage);
+
+      return reply.code(200).send({ success: true, code });
+    } catch (err) {
+      if (err?.response?.status === 404)
+        return reply.code(404).send({ error: "User not found" });
+      console.error("Forgot password JSON error:", err.message);
+      return reply.code(500).send({ error: "Failed to send reset code" });
+    }
+  },
+
+  // JSON: Verify reset code
+  verifyResetCodeJson: async function verifyResetCodeJson(req, reply) {
+    try {
+      const { code } = req.body || {};
+      if (!code) return reply.code(400).send({ error: "Missing code" });
+
+      const response = await axios.post("https://auth-service:3001/checkEmailCode", {
+        code,
+      });
+
+      return reply.code(200).send({ success: true, data: response?.data || {} });
+    } catch (err) {
+      if (err?.response?.status === 401)
+        return reply.code(401).send({ error: "Invalid code" });
+      console.error("Verify reset code JSON error:", err.message);
+      return reply.code(500).send({ error: "Failed to verify code" });
+    }
+  },
+
+  // JSON: Reset password
+  resetPasswordJson: async function resetPasswordJson(req, reply) {
+    try {
+      const { email, newPassword } = req.body || {};
+      if (!email || !newPassword)
+        return reply.code(400).send({ error: "Missing fields" });
+
+      const response = await axios.post("https://auth-service:3001/newPassword", {
+        email,
+        newPassword,
+        confirmPassword: newPassword,
+      });
+
+      return reply.code(200).send({ success: true, data: response?.data || {} });
+    } catch (err) {
+      if (err?.response?.status === 401)
+        return reply.code(401).send({ error: "Invalid code" });
+      console.error("Reset password JSON error:", err.message);
+      return reply.code(500).send({ error: "Failed to reset password" });
+    }
+  },
+
   checkRegister: async function tryRegisterNewUser(req, reply) {
     let success = [];
     let error = [];

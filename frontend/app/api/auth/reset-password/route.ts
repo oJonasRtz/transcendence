@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Call the backend apiNewPassword endpoint (stateless API version)
-    const response = await fetch(`${API_GATEWAY_URL}/apiNewPassword`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

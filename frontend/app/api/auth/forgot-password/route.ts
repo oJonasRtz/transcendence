@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     }
 
     // Call the backend apiCheckEmail endpoint
-    const response = await fetch(`${API_GATEWAY_URL}/apiCheckEmail`, {
+    const response = await fetch(`${API_GATEWAY_URL}/api/forgot-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
