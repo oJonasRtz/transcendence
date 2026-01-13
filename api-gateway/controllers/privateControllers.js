@@ -37,17 +37,19 @@ function getState(user) {
   return {colour: colour[key], text: labels[key]};
 }
 
-async function getRank(user) {
-  try {
-    const res = await axios.get('https://match-service:3010/getRank?email='+ user.email);
-    const data = res.data;
+// async function getRank(user) {
+//   try {
+//     const res = await axios.get('https://users-service:3003/getRank', {
+//       user_id: user.user_id
+//     });
+//     const data = res.data;
 
-    return data;
-  } catch (error) {
-    console.error("GET RANK ERROR:", error.message);
-    return {rank: 'UNRANKED', pts: 0};
-  }
-}
+//     return data;
+//   } catch (error) {
+//     console.error("GET RANK ERROR:", error.message);
+//     return {rank: 'UNRANKED', pts: 0};
+//   }
+// }
 
 const privateControllers = {
   goFlappyBird: function goFlappyBird(req, reply) {
@@ -194,10 +196,13 @@ const privateControllers = {
 
       const match = matchClient.get(token);
       const data = myData?.data;
-      data.state = getState({isOnline: req.user.isOnline, state: match.state});
-      const rank = await getRank(req.user);
-      data.rank = rank;
 
+      // console.log("USER Info: " + JSON.stringify(data));
+
+      data.state = getState({isOnline: req.user.isOnline, state: match.state});
+      // const rank = await getRank(req.user);
+      // data.rank = rank;
+// 
       return reply.view("home", { username, success, data, avatar, error });
     } catch (err) {
       console.error("getHomePage API-GATEWAY ERROR:", err);
@@ -791,9 +796,12 @@ const privateControllers = {
         { public_id: user }
       );
       const data = response?.data;
+
+      console.log("User info: " +  JSON.stringify(data));
+
       data.state = getState(data);
-      const rank = await getRank(data);
-      data.rank = rank;
+      // const rank = await getRank(data);
+      // data.rank = rank;
 
       return reply.view("publicProfile", { data });
     } catch (err) {

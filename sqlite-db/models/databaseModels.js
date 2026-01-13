@@ -325,14 +325,43 @@ const databaseModels = {
     return true;
   },
 
+  // getUserInformation: async function getUserInformation(fastify, data) {
+  //   const response = await fastify.db.get(
+  //     "SELECT * FROM users WHERE user_id = ?",
+  //     [data.user_id]
+  //   );
+  //   return response ?? null;
+  // },
+
   getUserInformation: async function getUserInformation(fastify, data) {
     const response = await fastify.db.get(
-      "SELECT * FROM users WHERE user_id = ?",
+      `
+      SELECT
+        *,
+        CASE
+          WHEN level >= 50 THEN 'Imortal'
+          WHEN level >= 45 THEN 'Legend'
+          WHEN level >= 40 THEN 'Elite'
+          WHEN level >= 35 THEN 'Champion'
+          WHEN level >= 30 THEN 'Veteran'
+          WHEN level >= 25 THEN 'Striker'
+          WHEN level >= 20 THEN 'Duelist'
+          WHEN level >= 15 THEN 'Fighter'
+          WHEN level >= 10 THEN 'Trainee'
+          WHEN level >= 5  THEN 'Fresh Blood'
+          ELSE 'Rookie'
+        END AS title
+      FROM users
+      WHERE user_id = ?
+      `,
       [data.user_id]
     );
+  
     return response ?? null;
   },
+  
 
+  
   setUserTitle: async function setUserTitle(fastify, data) {
     await fastify.db.run("UPDATE users SET title = ? WHERE user_id = ?", [
       data.title,
@@ -342,19 +371,19 @@ const databaseModels = {
   },
 
   setUserExperience: async function setUserExperience(fastify, data) {
-    const TITLES = {
-      1: 'Rookie',
-      5: 'Fresh Blood',
-      10: 'Trainee',
-      15: 'Fighter',
-      20: 'Duelist',
-      25: 'Striker',
-      30: 'Veteran',
-      35: 'Champion',
-      40: 'Elite',
-      45: 'Legend',
-      50: 'Imortal'
-    }
+    // const TITLES = {
+    //   1: 'Rookie',
+    //   5: 'Fresh Blood',
+    //   10: 'Trainee',
+    //   15: 'Fighter',
+    //   20: 'Duelist',
+    //   25: 'Striker',
+    //   30: 'Veteran',
+    //   35: 'Champion',
+    //   40: 'Elite',
+    //   45: 'Legend',
+    //   50: 'Imortal'
+    // }
     const XP_PER_LEVEL = 500;
 
     const {user_id, experience} = data;
@@ -370,8 +399,8 @@ const databaseModels = {
       level++;
     }
 
-    if (TITLES[level])
-      await this.setUserTitle(fastify, { user_id, title: TITLES[level] });
+    // if (TITLES[level])
+    //   await this.setUserTitle(fastify, { user_id, title: TITLES[level] });
 
     await fastify.db.run(
       "UPDATE users SET experience_points = ?, level = ? WHERE user_id = ?",
@@ -437,25 +466,64 @@ const databaseModels = {
     return users ?? null;
   },
 
+  // getDataByPublicId: async function getAllUsersInformation(fastify, body) {
+  //   const user_id = await fastify.db.get(
+  //     "SELECT user_id FROM users WHERE public_id = ?",
+  //     [body.public_id]
+  //   );
+  //   // const data = await fastify.db.get(
+  //   //   "SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?",
+  //   //   [user_id.user_id]
+  //   // );
+  //   const data = await fastify.db.get(
+  //     `SELECT users.*, auth.username, auth.email
+  //      FROM users 
+  //      JOIN auth ON auth.user_id = users.user_id
+  //      WHERE users.user_id = ?`,
+  //     [user_id.user_id]
+  //   );
+    
+  //   return data ?? null;
+  // },
+
   getDataByPublicId: async function getAllUsersInformation(fastify, body) {
     const user_id = await fastify.db.get(
       "SELECT user_id FROM users WHERE public_id = ?",
       [body.public_id]
     );
-    // const data = await fastify.db.get(
-    //   "SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id WHERE users.user_id = ?",
-    //   [user_id.user_id]
-    // );
+  
+    if (!user_id?.user_id)
+      return null;
+  
     const data = await fastify.db.get(
-      `SELECT users.*, auth.username, auth.email
-       FROM users 
-       JOIN auth ON auth.user_id = users.user_id
-       WHERE users.user_id = ?`,
+      `
+      SELECT
+        users.*,
+        auth.username,
+        auth.email,
+        CASE
+          WHEN users.level >= 50 THEN 'Imortal'
+          WHEN users.level >= 45 THEN 'Legend'
+          WHEN users.level >= 40 THEN 'Elite'
+          WHEN users.level >= 35 THEN 'Champion'
+          WHEN users.level >= 30 THEN 'Veteran'
+          WHEN users.level >= 25 THEN 'Striker'
+          WHEN users.level >= 20 THEN 'Duelist'
+          WHEN users.level >= 15 THEN 'Fighter'
+          WHEN users.level >= 10 THEN 'Trainee'
+          WHEN users.level >= 5  THEN 'Fresh Blood'
+          ELSE 'Rookie'
+        END AS title
+      FROM users
+      JOIN auth ON auth.user_id = users.user_id
+      WHERE users.user_id = ?
+      `,
       [user_id.user_id]
     );
-    
+  
     return data ?? null;
   },
+  
 
   deleteUserAccount: async function deleteUserAccount(fastify, data) {
     await fastify.db.run("DELETE FROM auth WHERE user_id = ?", [data.user_id]);
