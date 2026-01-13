@@ -39,10 +39,27 @@ export async function GET(request: NextRequest) {
           Cookie: `jwt=${jwt.value}`,
         },
         credentials: 'include',
+        redirect: 'manual',
       }
     );
 
-    const data = await response.json();
+    if (response.status >= 300 && response.status < 400) {
+      return NextResponse.json(
+        { error: 'Session expired. Please log in again.' },
+        { status: 401 }
+      );
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    let data: any = null;
+    if (contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      return NextResponse.json(
+        { error: 'Unexpected response from backend.' },
+        { status: 502 }
+      );
+    }
     if (!response.ok) {
       const backendError = Array.isArray(data?.error)
         ? data.error[0]

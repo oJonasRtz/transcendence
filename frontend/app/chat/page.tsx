@@ -138,17 +138,17 @@ export default function ChatPage() {
         <h3 className="font-bold">Users</h3>
         {users.map((user) => (
           <div key={user.public_id} className="flex items-center gap-2">
-            <img
-              src={`/public/uploads/${user.avatar}.png`}
-              alt={user.name}
-              className="w-[60px] h-[60px] rounded-full object-cover"
-            />
-            <a
-              href={`/seeProfile?user=${user.public_id}`}
-              className="font-bold"
+            <Link
+              href={`/profile/${user.public_id}`}
+              className="flex items-center gap-2"
             >
-              {user.name}
-            </a>
+              <img
+                src={`/public/uploads/${user.avatar}.png`}
+                alt={user.name}
+                className="w-[60px] h-[60px] rounded-full object-cover"
+              />
+              <span className="font-bold">{user.name}</span>
+            </Link>
           </div>
         ))}
       </div>

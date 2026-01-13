@@ -160,9 +160,13 @@ export async function validatorHook(req, reply) {
 }
 
 export async function authHook(req, reply) {
+  const isApiRequest = req.url?.startsWith("/api/");
   const token = req.cookies?.jwt;
   // Check if the user has a token
   if (!token) {
+    if (isApiRequest) {
+      return reply.code(401).send({ error: "Unauthorized" });
+    }
     return reply.redirect("/login");
   }
 
@@ -211,9 +215,18 @@ export async function authHook(req, reply) {
         email: data.email,
         signal: false,
       });
+      if (isApiRequest) {
+        return reply.code(401).send({ error: "Session expired" });
+      }
       return reply.redirect("/login");
     } else if (err.name === "JsonWebTokenError") {
+      if (isApiRequest) {
+        return reply.code(401).send({ error: "Invalid session" });
+      }
       return reply.redirect("/login");
+    }
+    if (isApiRequest) {
+      return reply.code(500).send({ error: "Authentication internal error" });
     }
     return reply.code(500).send("Authentication internal error");
   }

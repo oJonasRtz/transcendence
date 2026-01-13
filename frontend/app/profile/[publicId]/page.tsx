@@ -45,7 +45,16 @@ export default function ProfilePage({ params }: PageProps) {
           credentials: 'include',
         });
         if (!res.ok) {
-          throw new Error('Failed to fetch profile');
+          let message = 'Failed to fetch profile';
+          try {
+            const data = await res.json();
+            if (data?.error) {
+              message = data.error;
+            }
+          } catch {
+            // Ignore non-JSON error responses.
+          }
+          throw new Error(message);
         }
         const data = await res.json();
         setProfile(data);

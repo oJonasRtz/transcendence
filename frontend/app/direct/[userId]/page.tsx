@@ -158,16 +158,16 @@ export default function DirectMessagePage({ params }: PageProps) {
           <h3 className="font-bold">Participants</h3>
           {users.map((user) => (
             <div key={user.public_id} className="flex items-center gap-2">
-              <img
-                src={`/public/uploads/${user.avatar}.png`}
-                alt={user.name}
-                className="w-[60px] h-[60px] rounded-full object-cover"
-              />
               <Link
-                href={`/seeProfile?user=${user.public_id}`}
-                className="font-bold"
+                href={`/profile/${user.public_id}`}
+                className="flex items-center gap-2 font-bold"
               >
-                {user.name}
+                <img
+                  src={`/public/uploads/${user.avatar}.png`}
+                  alt={user.name}
+                  className="w-[60px] h-[60px] rounded-full object-cover"
+                />
+                <span>{user.name}</span>
               </Link>
             </div>
           ))}
