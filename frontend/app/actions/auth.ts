@@ -18,7 +18,12 @@ export async function login(formData: FormData) {
   const validation = loginSchema.safeParse({ email, password });
   if (!validation.success) {
     const errors = validation.error.flatten().fieldErrors;
-    return { error: errors.email?.[0] || errors.password?.[0] || 'Invalid input' };
+    const formErrors = validation.error.flatten().formErrors;
+    const allErrors = [
+      ...Object.values(errors).flat(),
+      ...formErrors,
+    ].filter(Boolean);
+    return { error: allErrors.length ? allErrors.join(' • ') : 'Invalid input' };
   }
 
   const cookieStore = await cookies();
@@ -56,7 +61,14 @@ export async function login(formData: FormData) {
     }
 
     if (!response.ok) {
-      return { error: data?.error || 'Invalid credentials' };
+      const backendError = Array.isArray(data?.error)
+        ? data.error[0]
+        : data?.error;
+      const normalizedError =
+        backendError === 'Invalid code'
+          ? 'CAPTCHA code is incorrect. Please try again.'
+          : backendError;
+      return { error: normalizedError || 'Invalid credentials' };
     }
 
     // Check if 2FA is required
@@ -127,14 +139,13 @@ export async function signup(formData: FormData) {
   });
   if (!validation.success) {
     const errors = validation.error.flatten().fieldErrors;
+    const formErrors = validation.error.flatten().formErrors;
+    const allErrors = [
+      ...Object.values(errors).flat(),
+      ...formErrors,
+    ].filter(Boolean);
     return {
-      error:
-        errors.username?.[0] ||
-        errors.email?.[0] ||
-        errors.password?.[0] ||
-        errors.confirmPassword?.[0] ||
-        errors.nickname?.[0] ||
-        'Invalid input'
+      error: allErrors.length ? allErrors.join(' • ') : 'Invalid input'
     };
   }
 
@@ -177,7 +188,10 @@ export async function signup(formData: FormData) {
     }
 
     if (!response.ok) {
-      return { error: data?.error || 'Registration failed. Please try again.' };
+      const backendError = Array.isArray(data?.error)
+        ? data.error[0]
+        : data?.error;
+      return { error: backendError || 'Registration failed. Please try again.' };
     }
 
     if (data?.requires2FA && data?.tempToken) {

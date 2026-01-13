@@ -145,6 +145,18 @@ const publicControllers = {
 
       return reply.code(200).send({ token });
     } catch (err) {
+      const status = err?.response?.status || 500;
+      const backendPayload = err?.response?.data;
+      const backendError =
+        backendPayload?.error ||
+        backendPayload?.success ||
+        backendPayload;
+      const message = Array.isArray(backendError)
+        ? backendError[0]
+        : backendError;
+      if (status === 401 || status === 404) {
+        return reply.code(status).send({ error: message || "Invalid credentials" });
+      }
       console.error("Login JSON error:", err.message);
       return reply.code(500).send({ error: "Login failed" });
     }
