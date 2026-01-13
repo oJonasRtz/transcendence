@@ -24,6 +24,7 @@ services:
       - "transcendence"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - API_GATEWAY_URL=https://api-gateway:3000
     volumes:
       - ./shared/ssl:/app/ssl:ro
 
@@ -293,4 +294,3 @@ networks:
 
   db_connection:
     driver: bridge
-

@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://localhost:3000';
 
 /**
  * Hybrid Approach Backend API

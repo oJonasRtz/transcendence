@@ -12,7 +12,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [gameKey, setGameKey] = useState(0);
-  const gameUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000'}/flappy-bird`;
+  const gameUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'https://localhost:3000'}/flappy-bird`;
 
   const handleRestart = () => {
     // Force iframe reload by changing the key

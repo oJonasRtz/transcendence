@@ -4,7 +4,10 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { loginSchema, signupSchema } from '@/app/lib/validations';
 
-const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
+const API_GATEWAY_URL =
+  process.env.API_GATEWAY_URL ||
+  process.env.NEXT_PUBLIC_API_GATEWAY_URL ||
+  'https://localhost:3000';
 
 export async function login(formData: FormData) {
   const email = formData.get('email') as string;

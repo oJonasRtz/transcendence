@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 const API_GATEWAY_URL =
   process.env.API_GATEWAY_URL ||
   process.env.NEXT_PUBLIC_API_GATEWAY_URL ||
-  'http://localhost:3000';
+  'https://localhost:3000';
 
 /**
  * GET /api/2fa/qr-code
