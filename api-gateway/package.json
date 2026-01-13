@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/styles.css --watch",
     "build:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/css/styles.css",
-    "dev:ts": "npx tsc --watch",
-    "build:ts": "npx tsc"
+    "dev:ts": "echo \"TypeScript not configured\"",
+    "build:ts": "echo \"TypeScript not configured\""
   },
   "author": "Time do Balacobako",
   "license": "ISC",
@@ -40,8 +40,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10",
-    "socket.io-client": "^4.8.1",
-    "typescript": "^5.9.3",
-    "undici-types": "^7.16.0"
+    "socket.io-client": "^4.8.1"
   }
 }
