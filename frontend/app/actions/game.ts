@@ -17,7 +17,7 @@ export async function joinQueue() {
       redirect('/login');
     }
 
-    const response = await fetch(`${API_GATEWAY_URL}/match/join`, {
+    const response = await fetch(`${API_GATEWAY_URL}/joinQueue`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export async function leaveQueue() {
       redirect('/login');
     }
 
-    const response = await fetch(`${API_GATEWAY_URL}/match/leave`, {
+    const response = await fetch(`${API_GATEWAY_URL}/leaveQueue`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

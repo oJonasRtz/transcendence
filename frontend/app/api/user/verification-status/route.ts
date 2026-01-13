@@ -2,7 +2,10 @@ import { NextRequest } from 'next/server';
 import { getUser } from '@/app/lib/auth';
 import { cookies } from 'next/headers';
 
-const API_GATEWAY_URL = process.env.API_GATEWAY_URL || 'http://localhost:3000';
+const API_GATEWAY_URL =
+  process.env.API_GATEWAY_URL ||
+  process.env.NEXT_PUBLIC_API_GATEWAY_URL ||
+  'http://localhost:3000';
 
 /**
  * GET /api/user/verification-status
