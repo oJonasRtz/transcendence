@@ -58,8 +58,11 @@ export async function changeUsername(_state: { error?: string; success?: string 
     const data = await response.json();
 
     // Check for errors
-    if (data?.error && data.error.length > 0) {
-      return { error: data.error[0] };
+    if (!response.ok) {
+      const backendError = Array.isArray(data?.error)
+        ? data.error[0]
+        : data?.error;
+      return { error: backendError || 'Avatar upload failed' };
     }
 
     // Extract new JWT from Set-Cookie header and update Next.js cookie

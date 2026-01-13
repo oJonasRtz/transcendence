@@ -412,10 +412,18 @@ const privateControllers = {
   },
 
   upload: async function upload(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
       const file = await req.file();
 
       if (!file) {
+        if (wantsJson) {
+          return reply.code(400).send({ error: "You need to send an image" });
+        }
         req.session.error = ["You need to send an image"];
         return reply.redirect("/home");
       }
@@ -430,6 +438,11 @@ const privateControllers = {
       const ext = path.extname(file.filename);
 
       if (!allowed_extensions.includes(ext)) {
+        if (wantsJson) {
+          return reply
+            .code(415)
+            .send({ error: "Forbidden extension detected" });
+        }
         req.session.error = ["Forbidden extension detected"];
         return reply.redirect("/home");
       }
@@ -444,6 +457,11 @@ const privateControllers = {
 
       if (!type || !type.mime.startsWith("image/")) {
         await unlink(filePath);
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: "The file is not a valid image" });
+        }
         req.session.error = ["The file is not a valid image"];
         return reply.redirect("/home");
       }
@@ -454,6 +472,11 @@ const privateControllers = {
       // Innapropriate image
       if (response.nsfw) {
         await unlink(filePath); // destroy the innapropriate file
+        if (wantsJson) {
+          return reply.code(422).send({
+            error: "Innapropriate image detected! Be careful choosing images!",
+          });
+        }
         req.session.error = [
           "Innapropriate image detected! Be careful choosing images!",
         ];
@@ -462,6 +485,9 @@ const privateControllers = {
 
       // Corrupted image
       if (response.isError) {
+        if (wantsJson) {
+          return reply.code(400).send({ error: "Invalid image" });
+        }
         req.session.error = ["Invalid image"];
         return reply.redirect("/home");
       }
@@ -493,6 +519,9 @@ const privateControllers = {
         avatar: avatarDb,
       });
 
+      if (wantsJson) {
+        return reply.send({ success: true, avatar: avatarDb });
+      }
       req.session.success = ["Upload successfully"];
       return reply.redirect("/home");
     } catch (err) {
@@ -501,6 +530,9 @@ const privateControllers = {
       } catch {}
 
       console.error("API-GATEWAY upload error:", err);
+      if (wantsJson) {
+        return reply.code(500).send({ error: "Error in the upload process" });
+      }
       req.session.error = ["Error in the upload process"];
       return reply.redirect("/home");
     }
