@@ -21,6 +21,10 @@ export const signupSchema = z.object({
     .string()
     .min(8, 'Password must contain eight or more characters')
     .regex(passwordRegex, 'Password must have numbers, letters, special characters'),
+  confirmPassword: z
+    .string()
+    .min(8, 'Password must contain eight or more characters')
+    .regex(passwordRegex, 'Password must have numbers, letters, special characters'),
   nickname: z
     .string()
     .min(3, 'Invalid nickname')
@@ -28,6 +32,9 @@ export const signupSchema = z.object({
     .regex(usernameRegex, 'Invalid nickname')
     .optional()
     .or(z.literal('')),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

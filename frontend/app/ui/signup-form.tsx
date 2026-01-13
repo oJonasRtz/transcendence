@@ -14,6 +14,11 @@ import { useState } from 'react';
 export default function SignupForm() {
   const [error, setError] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [nickname, setNickname] = useState('');
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
@@ -59,6 +64,8 @@ export default function SignupForm() {
               required
               minLength={3}
               disabled={isPending}
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
             />
             <UserIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
             {/* Cyber grid effect on focus */}
@@ -83,6 +90,8 @@ export default function SignupForm() {
               placeholder="agent@transcendence.net"
               required
               disabled={isPending}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
             />
             <AtSymbolIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
             {/* Cyber grid effect on focus */}
@@ -108,6 +117,35 @@ export default function SignupForm() {
               required
               minLength={8}
               disabled={isPending}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <KeyIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
+            {/* Cyber grid effect on focus */}
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 opacity-0 transition-opacity peer-focus:opacity-100 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Confirm Password Field */}
+        <div>
+          <label
+            className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-300"
+            htmlFor="confirmPassword"
+          >
+            <span className="text-blue-400">04</span> // Confirm Key
+          </label>
+          <div className="relative group">
+            <input
+              className="peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              id="confirmPassword"
+              type="password"
+              name="confirmPassword"
+              placeholder="••••••••••••"
+              required
+              minLength={8}
+              disabled={isPending}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
             />
             <KeyIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
             {/* Cyber grid effect on focus */}
@@ -121,7 +159,7 @@ export default function SignupForm() {
             className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-300"
             htmlFor="nickname"
           >
-            <span className="text-blue-400">04</span> // NickName <span className="text-slate-500">(Optional)</span>
+            <span className="text-blue-400">05</span> // NickName <span className="text-slate-500">(Optional)</span>
           </label>
           <div className="relative group">
             <input
@@ -131,6 +169,8 @@ export default function SignupForm() {
               name="nickname"
               placeholder="display_name"
               disabled={isPending}
+              value={nickname}
+              onChange={(event) => setNickname(event.target.value)}
             />
             <UserIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
             {/* Cyber grid effect on focus */}
@@ -143,7 +183,7 @@ export default function SignupForm() {
           <div className="mb-3 flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
             <span className="text-xs font-bold uppercase tracking-widest text-slate-300">
-              <span className="text-blue-400">05</span> // Verification
+              <span className="text-blue-400">06</span> // Verification
             </span>
           </div>
           <Captcha />

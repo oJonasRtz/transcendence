@@ -113,11 +113,18 @@ export async function signup(formData: FormData) {
   const username = formData.get('username') as string;
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
   const nickname = formData.get('nickname') as string;
   const captchaInput = formData.get('captcha') as string;
 
   // Validate input
-  const validation = signupSchema.safeParse({ username, email, password, nickname });
+  const validation = signupSchema.safeParse({
+    username,
+    email,
+    password,
+    confirmPassword,
+    nickname,
+  });
   if (!validation.success) {
     const errors = validation.error.flatten().fieldErrors;
     return {
@@ -147,7 +154,7 @@ export async function signup(formData: FormData) {
         username,
         email,
         password,
-        confirmPassword: password,
+        confirmPassword,
         nickname: nickname || username,
         captchaId: captchaId.value,
         captchaInput,
