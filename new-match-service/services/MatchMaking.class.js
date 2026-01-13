@@ -2,6 +2,8 @@ import { Lobby } from "./Lobby.class.js";
 import { Party } from "./Party.class.js";
 import crypto from 'crypto';
 
+const DIFF_TO_ALLOW = 100;
+
 export class MatchMaking {
 	#queue = {
 		RANKED: [], // <party>
@@ -34,11 +36,20 @@ export class MatchMaking {
 				const queue = this.#queue[type];
 				const max = this.#maxPlayers[type];
 
+				queue.sort((a, b) => a.rank - b.rank);
+
+				const baseParty = queue[0];
+				if (!baseParty) continue;
+
+				const baseRank = baseParty.rank;
+
 				let collected = [];
 				let cnt = 0;
-
+				
 				//match
 				for (const party of queue) {
+					if (Math.abs(party.rank - baseRank) > DIFF_TO_ALLOW) continue;
+
 					if (cnt + party.size > max) continue;
 
 					collected.push(party);

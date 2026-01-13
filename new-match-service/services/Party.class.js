@@ -27,6 +27,15 @@ export class Party {
 		return this.#createdByInvite;
 	}
 
+	get rank() {
+		let avgRank = 0;
+		for (const client of this.#clients) {
+			avgRank += client.rank;
+		}
+
+		return Math.floor(avgRank / this.#clients.size);
+	}
+
 	set createdByInvite(value) {
 		this.#createdByInvite = Boolean(value);
 	}
