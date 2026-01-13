@@ -186,6 +186,28 @@ const publicControllers = {
         }
       );
 
+      // Create default avatar (same as legacy register)
+      await mkdir("/app/public/uploads", { recursive: true });
+      await sharp("/app/public/images/default.jpg")
+        .resize(350, 350)
+        .composite([
+          {
+            input: Buffer.from(
+              `<svg width="350" height="350">
+                         <circle cx="175" cy="175" r="175" fill="white"/>
+                         </svg>`
+            ),
+            blend: "dest-in",
+          },
+        ])
+        .png()
+        .toFile(`/app/public/uploads/avatar_${user_id}.png`);
+      const avatar = `/public/uploads/avatar_${user_id}.png`;
+      await axios.post("https://users-service:3003/setUserAvatar", {
+        user_id,
+        avatar,
+      });
+
       return reply.code(200).send({ success: response?.data?.success || [] });
     } catch (err) {
       if (err?.response?.status === 409) {

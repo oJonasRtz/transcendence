@@ -187,6 +187,19 @@ export async function signup(formData: FormData) {
 
     const loginData = await loginResponse.json();
 
+    if (loginData?.requires2FA && loginData?.tempToken) {
+      const cookieStore = await cookies();
+      cookieStore.set('pending_2fa_token', loginData.tempToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 5 * 60,
+      });
+      cookieStore.delete('captcha_id');
+      redirect('/login/2fa');
+    }
+
     if (loginData?.token) {
       const cookieStore = await cookies();
 
