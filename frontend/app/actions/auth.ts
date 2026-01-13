@@ -137,8 +137,6 @@ export async function signup(formData: FormData) {
   }
 
   // Generate a UUID for the new user
-  const user_id = crypto.randomUUID();
-
   try {
     const response = await fetch(`${API_GATEWAY_URL}/api/register`, {
       method: 'POST',
@@ -169,30 +167,9 @@ export async function signup(formData: FormData) {
       return { error: data?.error || 'Registration failed. Please try again.' };
     }
 
-    // Registration successful!
-    // Note: User sync will happen automatically on login below
-    // No need to sync immediately after registration since auto-login follows
-
-    // Auto-login without requiring CAPTCHA again (user just verified with CAPTCHA)
-    const loginResponse = await fetch(`${API_GATEWAY_URL}/api/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        captchaId: captchaId.value,
-        captchaInput,
-      }),
-      credentials: 'include',
-    });
-
-    const loginData = await loginResponse.json();
-
-    if (loginData?.requires2FA && loginData?.tempToken) {
+    if (data?.requires2FA && data?.tempToken) {
       const cookieStore = await cookies();
-      cookieStore.set('pending_2fa_token', loginData.tempToken, {
+      cookieStore.set('pending_2fa_token', data.tempToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -203,14 +180,14 @@ export async function signup(formData: FormData) {
       redirect('/login/2fa');
     }
 
-    if (loginData?.token) {
+    if (data?.token) {
       const cookieStore = await cookies();
 
       // Clear CAPTCHA id cookie
       cookieStore.delete('captcha_id');
 
       // Set JWT cookie
-      cookieStore.set('jwt', loginData.token, {
+      cookieStore.set('jwt', data.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',

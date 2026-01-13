@@ -208,7 +208,32 @@ const publicControllers = {
         avatar,
       });
 
-      return reply.code(200).send({ success: response?.data?.success || [] });
+      const loginResponse = await axios.post(
+        "https://auth-service:3001/checkLogin",
+        { email, password }
+      );
+      const token = loginResponse?.data?.token;
+      if (!token) {
+        return reply.code(200).send({ success: response?.data?.success || [] });
+      }
+
+      const twoFARes = await axios.post(
+        "https://auth-service:3001/get2FAEnable",
+        { email }
+      );
+      const twoFactorEnable = twoFARes?.data?.twoFactorEnable;
+
+      if (twoFactorEnable) {
+        const tempToken = randomUUID();
+        publicControllers.pending2FA.set(tempToken, {
+          token,
+          email,
+          expiresAt: Date.now() + 5 * 60 * 1000,
+        });
+        return reply.code(200).send({ requires2FA: true, tempToken });
+      }
+
+      return reply.code(200).send({ token });
     } catch (err) {
       if (err?.response?.status === 409) {
         return reply.code(409).send({ error: "User already exists" });
