@@ -36,7 +36,7 @@ export function waitGameStart(): Promise<void> {
  * @param {number|string} data.playerId - The player's identification number.
  * @returns Wait a promisse till the game ends.
 */
-async function startPong(data: StartType): Promise<void> {
+export async function startPong(data: StartType): Promise<void> {
   showDisconnectScreen();
   gameState.setIdentity(data);
   await waitGameStart();

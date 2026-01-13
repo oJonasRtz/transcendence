@@ -360,8 +360,6 @@ const databaseModels = {
     return response ?? null;
   },
   
-
-  
   setUserTitle: async function setUserTitle(fastify, data) {
     await fastify.db.run("UPDATE users SET title = ? WHERE user_id = ?", [
       data.title,
@@ -371,19 +369,19 @@ const databaseModels = {
   },
 
   setUserExperience: async function setUserExperience(fastify, data) {
-    // const TITLES = {
-    //   1: 'Rookie',
-    //   5: 'Fresh Blood',
-    //   10: 'Trainee',
-    //   15: 'Fighter',
-    //   20: 'Duelist',
-    //   25: 'Striker',
-    //   30: 'Veteran',
-    //   35: 'Champion',
-    //   40: 'Elite',
-    //   45: 'Legend',
-    //   50: 'Imortal'
-    // }
+    const TITLES = {
+      1: 'Rookie',
+      5: 'Fresh Blood',
+      10: 'Trainee',
+      15: 'Fighter',
+      20: 'Duelist',
+      25: 'Striker',
+      30: 'Veteran',
+      35: 'Champion',
+      40: 'Elite',
+      45: 'Legend',
+      50: 'Imortal'
+    }
     const XP_PER_LEVEL = 500;
 
     const {user_id, experience} = data;
@@ -399,8 +397,8 @@ const databaseModels = {
       level++;
     }
 
-    // if (TITLES[level])
-    //   await this.setUserTitle(fastify, { user_id, title: TITLES[level] });
+    if (TITLES[level])
+      await this.setUserTitle(fastify, { user_id, title: TITLES[level] });
 
     await fastify.db.run(
       "UPDATE users SET experience_points = ?, level = ? WHERE user_id = ?",
