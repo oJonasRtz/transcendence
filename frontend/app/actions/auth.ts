@@ -128,7 +128,13 @@ export async function signup(formData: FormData) {
   if (!validation.success) {
     const errors = validation.error.flatten().fieldErrors;
     return {
-      error: errors.username?.[0] || errors.email?.[0] || errors.password?.[0] || errors.nickname?.[0] || 'Invalid input'
+      error:
+        errors.username?.[0] ||
+        errors.email?.[0] ||
+        errors.password?.[0] ||
+        errors.confirmPassword?.[0] ||
+        errors.nickname?.[0] ||
+        'Invalid input'
     };
   }
 
