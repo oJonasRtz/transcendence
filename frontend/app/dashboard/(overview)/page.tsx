@@ -27,13 +27,11 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  const userId = 0;
-
   return (
     <main className="p-4 md:p-6 lg:p-8">
 
       <div className="grid place-items-center mb-6">
-        <UserProfileHeader userId={userId} />
+        <UserProfileHeader user={authUser} />
       </div>
 
       {/* Play Button */}
@@ -44,7 +42,7 @@ export default async function DashboardPage() {
       {/* Stats Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <Suspense fallback={<StatsCardsSkeleton />}>
-          <StatsCards userId={userId} />
+          <StatsCards userId={0} />
         </Suspense>
       </div>
 
@@ -53,26 +51,26 @@ export default async function DashboardPage() {
         {/* Left Column (2/3 width) */}
         <div className="lg:col-span-2 space-y-6">
           <Suspense fallback={<RecentMatchesSkeleton />}>
-            <RecentMatches userId={userId} />
+            <RecentMatches userId={0} />
           </Suspense>
 
           <Suspense fallback={<ActivityFeedSkeleton />}>
-            <ActivityFeed userId={userId} />
+            <ActivityFeed userId={0} />
           </Suspense>
         </div>
 
         {/* Right Column (1/3 width) */}
         <div className="space-y-6">
           <Suspense fallback={<LeaderboardSkeleton />}>
-            <Leaderboard userId={userId} />
+            <Leaderboard userId={0} />
           </Suspense>
 
           <Suspense fallback={<FriendsListSkeleton />}>
-            <FriendsList userId={userId} />
+            <FriendsList userId={0} />
           </Suspense>
 
           <Suspense fallback={<RecentMessagesSkeleton />}>
-            <RecentMessages userId={userId} />
+            <RecentMessages userId={0} />
           </Suspense>
         </div>
       </div>
