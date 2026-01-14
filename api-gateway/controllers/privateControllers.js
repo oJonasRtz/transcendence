@@ -37,19 +37,17 @@ function getState(user) {
   return {colour: colour[key], text: labels[key]};
 }
 
-// async function getRank(user) {
-//   try {
-//     const res = await axios.get('https://users-service:3003/getRank', {
-//       user_id: user.user_id
-//     });
-//     const data = res.data;
-
-//     return data;
-//   } catch (error) {
-//     console.error("GET RANK ERROR:", error.message);
-//     return {rank: 'UNRANKED', pts: 0};
-//   }
-// }
+async function getRank(user) {
+  try {
+    const res = await axios.post("https://users-service:3003/getRank", {
+      user_id: user.user_id,
+    });
+    return res?.data ?? { rank: "UNRANKED", pts: 0 };
+  } catch (error) {
+    console.error("GET RANK ERROR:", error.message);
+    return { rank: "UNRANKED", pts: 0 };
+  }
+}
 
 const privateControllers = {
   goFlappyBird: function goFlappyBird(req, reply) {
@@ -1117,7 +1115,12 @@ const privateControllers = {
       );
       const data = response?.data;
       data.state = getState(data);
-      data.rank = await getRank(data);
+      try {
+        data.rank = await getRank(data);
+      } catch (err) {
+        console.error("API-GATEWAY getRank fallback:", err.message);
+        data.rank = { rank: "UNRANKED", pts: 0 };
+      }
       return reply.send(data);
     } catch (err) {
       console.error("API-GATEWAY getProfileData Error:", err.message);
