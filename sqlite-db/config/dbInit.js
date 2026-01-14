@@ -56,6 +56,13 @@ export default async function initDatabase() {
 		);
 	`);
 
+	// Migrations for existing databases (add missing columns)
+	const usersColumns = await db.all("PRAGMA table_info(users)");
+	const usersColumnNames = new Set(usersColumns.map((col) => col.name));
+	if (!usersColumnNames.has("level")) {
+		await db.exec("ALTER TABLE users ADD COLUMN level INTEGER DEFAULT 1");
+	}
+
 	await db.exec(`CREATE TABLE IF NOT EXISTS messages (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         content TEXT NOT NULL,
