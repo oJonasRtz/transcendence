@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Run Next.js on 3000 so nginx can proxy to the frontend container
-CMD ["pnpm", "exec", "next", "dev", "--turbopack", "-p", "3000"]
+CMD ["pnpm", "exec", "next", "dev", "-p", "3000"]
