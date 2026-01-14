@@ -1,7 +1,11 @@
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'purpleVoid';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required for frontend auth');
+}
 
 export interface User {
   user_id: string; // UUID from backend JWT payload

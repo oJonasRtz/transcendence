@@ -22,9 +22,12 @@ services:
     container_name: frontend
     networks:
       - "transcendence"
+    env_file:
+      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
       - API_GATEWAY_URL=https://api-gateway:3000
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./shared/ssl:/app/ssl:ro
 
@@ -39,8 +42,11 @@ services:
     networks:
       - "transcendence"
       - "game"
+    env_file:
+      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - api-gateway:/app/public
       - flappy-bird-dist:/app/public/flappy-bird
@@ -56,8 +62,11 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
+    env_file:
+      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./shared/ssl:/app/ssl:ro
 

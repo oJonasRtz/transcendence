@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  process.env.NEXT_PUBLIC_JWT_SECRET ||
-  'purpleVoid';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required for frontend middleware');
+}
 
 // Routes that require authentication
 const protectedRoutes = ['/dashboard', '/messages', '/friends', '/settings', '/matchmaking'];

@@ -10,6 +10,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+if (!process.env.JWT_SECRET) {
+	throw new Error("JWT_SECRET is required for auth-service");
+}
+
 // It is a temporary configuration
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 

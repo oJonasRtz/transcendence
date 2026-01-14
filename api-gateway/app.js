@@ -21,6 +21,10 @@ import { MatchClient } from './utils/MatchClient.class.js';
 
 dotenv.config();
 
+if (!process.env.JWT_SECRET) {
+	throw new Error("JWT_SECRET is required for api-gateway");
+}
+
 export const matchClient = new Map(); // <token, MatchClient>
 // It is a temporary configuration
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
