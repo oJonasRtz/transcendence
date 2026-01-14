@@ -1,3 +1,16 @@
+# Create .env files:
+
+.env.dev
+  SSL=false
+  password=search
+
+.env.prod
+
+# Suggestion for dev/prod commands:
+
+alias dcdev='docker compose --env-file .env.dev'
+alias dcprod='docker compose --env-file .env.prod'
+
 # Create logs file if not created yet:
 
 touch ./infrastructure/logging/logs/app.log
@@ -16,7 +29,7 @@ docker compose up -d --build kibana
 
 # Create the custom role with the correct privileges
 
-curl -u elastic:search -X PUT "localhost:9200/_security/role/kibana_data_reader" -H "Content-Type: application/json" -d '{
+curl -k -u elastic:search -X PUT "localhost:9200/_security/role/kibana_data_reader" -H "Content-Type: application/json" -d '{
   "indices": [
     {
       "names": [ "fastify-logs-*" ],
@@ -27,7 +40,7 @@ curl -u elastic:search -X PUT "localhost:9200/_security/role/kibana_data_reader"
 
 # Create or update admin login with correct roles (Kibana UI + data access):
 
-curl -u elastic:search -X PUT "localhost:9200/_security/user/nasserdmin" -H "Content-Type: application/json" -d '{
+curl -k -u elastic:search -X PUT "localhost:9200/_security/user/nasserdmin" -H "Content-Type: application/json" -d '{
   "roles": ["kibana_admin", "kibana_data_reader"],
   "password": "nassword"
 }'

@@ -18,9 +18,12 @@ services:
     environment:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
-      - ELASTIC_PASSWORD=search
-      - xpack.security.enrollment.enabled=true
-      - xpack.security.http.ssl.enabled=false
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enrollment.enabled=${ELASTIC_SSL_ENABLED}
+      - xpack.security.http.ssl.enabled=${ELASTIC_SSL_ENABLED}
+      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12
+      # - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/elasticsearch.key
+      # - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/elasticsearch.crt
     ports:
       - 9200:9200
     networks:
@@ -28,6 +31,7 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
       - esconfig:/usr/share/elasticsearch/config
+      - ${ELASTIC_CERTS_PATH}:/usr/share/elasticsearch/config/certs
 
   kibana:
     image: kibana:8.12.0
@@ -39,10 +43,16 @@ services:
     depends_on:
       - elasticsearch
     environment:
-      - ELASTICSEARCH_USERNAME=kibanasser
-      - ELASTICSEARCH_PASSWORD=search
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=${KIBANA_USER}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASS}
+      - SERVER_SSL_ENABLED=${ELASTIC_SSL_ENABLED}
+      - SERVER_SSL_CERTIFICATE=/usr/share/kibana/config/certs/kibana.crt
+      - SERVER_SSL_KEY=/usr/share/kibana/config/certs/kibana.key
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=none
     volumes:
       - kibdata:/usr/share/kibana/data
+      - ./${ELASTIC_CERTS_PATH}:/usr/share/kibana/config/certs
 
   logstash:
     image: logstash:8.12.0
@@ -50,10 +60,13 @@ services:
     volumes:
       - ./infrastructure/logging/logs/app.log:/usr/share/logstash/logs/app.log
       - ./infrastructure/logging/logs/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+        - ./${ELASTIC_CERTS_PATH}:/usr/share/logstash/config/certs
     networks:
       - elk-net
     depends_on:
       - elasticsearch
+    environment:
+      - ELASTIC_CERTS_PATH=${ELASTIC_CERTS_PATH}
 
   k6:
     image: grafana/k6:latest
