@@ -6,6 +6,7 @@ import { KeyIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import AcmeLogo from '@/app/ui/pong-logo';
 import Starfield from '@/app/ui/starfield';
 import { ButtonGlimmer } from '@/app/ui/button-glimmer';
+import { passwordRegex } from '@/app/lib/validations';
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
@@ -35,6 +36,11 @@ export default function ResetPasswordPage() {
 
     if (password.length < 8) {
       setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      setError('Password must have numbers, letters, special characters');
       return;
     }
 

@@ -181,7 +181,7 @@ export default function VerifyResetCodePage() {
                       id="code"
                       type="text"
                       value={code}
-                      onChange={(e) => setCode(e.target.value.toUpperCase())}
+                      onChange={(e) => setCode(e.target.value)}
                       placeholder="ENTER CODE HERE"
                       required
                       disabled={isLoading}

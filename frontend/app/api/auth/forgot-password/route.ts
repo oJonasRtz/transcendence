@@ -26,13 +26,13 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       return NextResponse.json({ 
-        error: data.error?.[0] || 'An error occurred' 
+        error: data.error || 'An error occurred' 
       }, { status: response.status });
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: data.success?.[0] || 'Verification code sent to your email' 
+      message: data.message || 'Verification code sent to your email' 
     });
 
   } catch (error) {

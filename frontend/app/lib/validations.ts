@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Match backend validation exactly: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+export const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
 // Match backend validation exactly: /^[a-zA-Z0-9._-]{3,20}$/
 const usernameRegex = /^[a-zA-Z0-9._-]{3,20}$/;

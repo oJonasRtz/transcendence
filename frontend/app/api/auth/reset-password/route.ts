@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { passwordRegex } from '@/app/lib/validations';
 
 const API_GATEWAY_URL =
   process.env.API_GATEWAY_URL ||
@@ -21,9 +22,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
     }
 
-    // Verify the reset token
-    if (!verifyResetToken(token, email)) {
-      return NextResponse.json({ error: 'Invalid or expired reset token' }, { status: 400 });
+    if (!passwordRegex.test(password)) {
+      return NextResponse.json(
+        { error: 'Password must have numbers, letters, special characters' },
+        { status: 400 }
+      );
     }
 
     // Call the backend apiNewPassword endpoint (stateless API version)
@@ -34,6 +37,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         email,
+        token,
         password,
         confirmPassword
       }),
@@ -43,7 +47,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       return NextResponse.json({
-        error: data.error?.[0] || 'Failed to reset password'
+        error: data.error || 'Failed to reset password'
       }, { status: response.status });
     }
 
@@ -58,27 +62,5 @@ export async function POST(request: Request) {
       { error: 'An error occurred while processing your request' },
       { status: 500 }
     );
-  }
-}
-
-// Verify the reset token (simple implementation)
-function verifyResetToken(token: string, email: string): boolean {
-  try {
-    const decoded = atob(token);
-    const [tokenEmail, timestamp, _] = decoded.split(':');
-    
-    // Check if email matches
-    if (tokenEmail !== email) {
-      return false;
-    }
-    
-    // Check if token is not older than 1 hour (3600000ms)
-    const tokenTime = parseInt(timestamp);
-    const now = Date.now();
-    const oneHour = 60 * 60 * 1000;
-    
-    return (now - tokenTime) < oneHour;
-  } catch {
-    return false;
   }
 }

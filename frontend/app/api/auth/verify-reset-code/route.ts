@@ -26,17 +26,14 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       return NextResponse.json({ 
-        error: data.error?.[0] || 'Invalid verification code' 
+        error: data.error || 'Invalid verification code' 
       }, { status: response.status });
     }
 
-    // Success - code was verified, generate a temporary token for password reset
-    const resetToken = generateResetToken(email);
-    
     return NextResponse.json({ 
       success: true, 
       message: data.success?.[0] || 'Code verified successfully',
-      token: resetToken
+      token: data.token
     });
 
   } catch (error) {
@@ -46,11 +43,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-}
-
-// Simple token generation for password reset
-function generateResetToken(email: string): string {
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2);
-  return btoa(`${email}:${timestamp}:${randomString}`);
 }

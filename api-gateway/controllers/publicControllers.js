@@ -7,10 +7,25 @@ import { randomUUID } from "crypto";
 import speakeasy from "speakeasy";
 import { matchClient } from "../app.js";
 
+function isRateLimited(store, key, limit, windowMs) {
+  if (!key) return false;
+  const now = Date.now();
+  const entries = store.get(key) || [];
+  const fresh = entries.filter((ts) => now - ts < windowMs);
+  fresh.push(now);
+  store.set(key, fresh);
+  return fresh.length > limit;
+}
+
 const publicControllers = {
   // JSON API stores (in-memory, short-lived)
   captchaStore: new Map(),
   pending2FA: new Map(),
+  resetCodeStore: new Map(),
+  resetTokenStore: new Map(),
+  forgotPasswordLimiter: new Map(),
+  verifyResetLimiter: new Map(),
+  resetPasswordLimiter: new Map(),
 
   //GETTERS
 
@@ -299,16 +314,22 @@ const publicControllers = {
   // JSON: Forgot password (send code)
   forgotPasswordJson: async function forgotPasswordJson(req, reply) {
     try {
+      if (isRateLimited(publicControllers.forgotPasswordLimiter, req.ip, 5, 15 * 60 * 1000)) {
+        return reply.code(429).send({ error: "Too many requests. Try again later." });
+      }
       if (!req.body || !req.body.email) {
         return reply.code(400).send({ error: "Missing email" });
       }
 
-      await axios.post("https://auth-service:3001/checkEmail", req.body);
+      const email = req.body.email.toLowerCase();
+      await axios.post("https://auth-service:3001/checkEmail", { email });
 
       const response = await axios.get("https://auth-service:3001/getCaptcha");
       const { code } = response.data;
+      const expiresAt = Date.now() + 10 * 60 * 1000;
+      publicControllers.resetCodeStore.set(email, { code, expiresAt });
 
-      const receiver = req.body.email;
+      const receiver = email;
       const subject = "Forgot Password - Transcendence";
       const webPage = `
                                 <h2>Forgot Password - Your Pong Transcendence</h2>
@@ -317,7 +338,7 @@ const publicControllers = {
                         `;
       await sendMail(receiver, subject, webPage);
 
-      return reply.code(200).send({ success: true, code });
+      return reply.code(200).send({ success: true });
     } catch (err) {
       if (err?.response?.status === 404)
         return reply.code(404).send({ error: "User not found" });
@@ -329,17 +350,35 @@ const publicControllers = {
   // JSON: Verify reset code
   verifyResetCodeJson: async function verifyResetCodeJson(req, reply) {
     try {
-      const { code } = req.body || {};
-      if (!code) return reply.code(400).send({ error: "Missing code" });
+      if (isRateLimited(publicControllers.verifyResetLimiter, req.ip, 10, 15 * 60 * 1000)) {
+        return reply.code(429).send({ error: "Too many attempts. Try again later." });
+      }
+      const { email, code } = req.body || {};
+      if (!email || !code) {
+        return reply.code(400).send({ error: "Missing email or code" });
+      }
 
-      const response = await axios.post("https://auth-service:3001/checkEmailCode", {
-        code,
+      const normalizedEmail = email.toLowerCase();
+      const record = publicControllers.resetCodeStore.get(normalizedEmail);
+      if (!record || record.expiresAt < Date.now()) {
+        publicControllers.resetCodeStore.delete(normalizedEmail);
+        return reply.code(401).send({ error: "Invalid or expired code" });
+      }
+
+      if (record.code.toLowerCase() !== code.toLowerCase()) {
+        return reply.code(401).send({ error: "Invalid or expired code" });
+      }
+
+      publicControllers.resetCodeStore.delete(normalizedEmail);
+      const resetToken = randomUUID();
+      const expiresAt = Date.now() + 10 * 60 * 1000;
+      publicControllers.resetTokenStore.set(resetToken, {
+        email: normalizedEmail,
+        expiresAt,
       });
 
-      return reply.code(200).send({ success: true, data: response?.data || {} });
+      return reply.code(200).send({ success: true, token: resetToken });
     } catch (err) {
-      if (err?.response?.status === 401)
-        return reply.code(401).send({ error: "Invalid code" });
       console.error("Verify reset code JSON error:", err.message);
       return reply.code(500).send({ error: "Failed to verify code" });
     }
@@ -348,15 +387,36 @@ const publicControllers = {
   // JSON: Reset password
   resetPasswordJson: async function resetPasswordJson(req, reply) {
     try {
-      const { email, newPassword } = req.body || {};
-      if (!email || !newPassword)
+      if (isRateLimited(publicControllers.resetPasswordLimiter, req.ip, 5, 15 * 60 * 1000)) {
+        return reply.code(429).send({ error: "Too many requests. Try again later." });
+      }
+      const { email, token, password, confirmPassword } = req.body || {};
+      if (!email || !token || !password || !confirmPassword) {
         return reply.code(400).send({ error: "Missing fields" });
+      }
+
+      if (password !== confirmPassword) {
+        return reply.code(400).send({ error: "Passwords do not match" });
+      }
+
+      const normalizedEmail = email.toLowerCase();
+      const record = publicControllers.resetTokenStore.get(token);
+      if (!record || record.expiresAt < Date.now()) {
+        publicControllers.resetTokenStore.delete(token);
+        return reply.code(401).send({ error: "Invalid or expired reset token" });
+      }
+
+      if (record.email !== normalizedEmail) {
+        return reply.code(401).send({ error: "Invalid or expired reset token" });
+      }
 
       const response = await axios.post("https://auth-service:3001/newPassword", {
-        email,
-        newPassword,
-        confirmPassword: newPassword,
+        email: normalizedEmail,
+        password,
+        confirmPassword,
       });
+
+      publicControllers.resetTokenStore.delete(token);
 
       return reply.code(200).send({ success: true, data: response?.data || {} });
     } catch (err) {
