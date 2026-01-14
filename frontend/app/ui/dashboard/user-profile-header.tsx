@@ -48,7 +48,7 @@ export default async function UserProfileHeader({ user }: { user: User }) {
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition duration-300"></div>
             <img
-              src={avatar || '/images/default_avatar.png'}
+              src={avatar || '/public/images/default.jpg'}
               alt="User Avatar"
               className="relative h-40 w-40 rounded-full border-4 border-white/20 shadow-2xl"
             />
@@ -63,7 +63,7 @@ export default async function UserProfileHeader({ user }: { user: User }) {
               <span className="text-blue-400">//</span> Welcome back,
             </h2>
             <p className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 animate-gradient">
-              {user?.username || 'Player'}
+              {user?.nickname || user?.username || 'Player'}
             </p>
             <p className="mt-4 text-sm font-mono uppercase tracking-widest text-slate-400">
               <span className="text-green-400">●</span> SYSTEM ONLINE

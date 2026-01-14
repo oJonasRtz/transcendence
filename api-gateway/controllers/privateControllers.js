@@ -694,8 +694,18 @@ const privateControllers = {
   },
 
   setAuthNickname: async function setAuthNickname(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
       if (!req.body || !req.body.nickname) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["You need to fill everything"] });
+        }
         req.session.error = ["You need to fill everything"];
         return reply.redirect("/changeNickname");
       }
@@ -718,6 +728,11 @@ const privateControllers = {
       const token = response?.data.token;
 
       if (!token) {
+        if (wantsJson) {
+          return reply
+            .code(500)
+            .send({ error: ["Error recreating the jwt"] });
+        }
         req.session.error = ["Error recreating the jwt"];
         return reply.redirect("/home");
       }
@@ -732,21 +747,46 @@ const privateControllers = {
         maxAge: 60 * 60 * 1000, // 1h
       });
 
+      if (wantsJson) {
+        return reply.send({
+          success: ["Nickname changed successfully"],
+          token,
+        });
+      }
+
       return reply.redirect("/home");
     } catch (err) {
       if (err.message === "You cannot use that nickname") {
+        if (wantsJson) {
+          return reply.code(403).send({ error: ["Forbidden nickname"] });
+        }
         req.session.error = ["Forbidden nickname"];
         return reply.redirect("/changeNickname");
       }
       console.error("API-GATEWAY setAuthNickname error:", err);
+      if (wantsJson) {
+        return reply
+          .code(500)
+          .send({ error: ["Error trying to change your nickname"] });
+      }
       req.session.error = ["Error trying to change your nickname"];
       return reply.redirect("/home");
     }
   },
 
   setAuthUsername: async function setAuthUsername(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
       if (!req.body || !req.body.username) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["You need to fill everything"] });
+        }
         req.session.error = ["You need to fill everything"];
         return reply.redirect("/changeUsername");
       }
@@ -769,6 +809,11 @@ const privateControllers = {
       const token = response?.data.token;
 
       if (!token) {
+        if (wantsJson) {
+          return reply
+            .code(500)
+            .send({ error: ["Error recreating the jwt"] });
+        }
         req.session.error = ["Error recreating the jwt"];
         return reply.redirect("/home");
       }
@@ -783,13 +828,28 @@ const privateControllers = {
         maxAge: 60 * 60 * 1000, // 1h
       });
 
+      if (wantsJson) {
+        return reply.send({
+          success: ["Username changed successfully"],
+          token,
+        });
+      }
+
       return reply.redirect("/home");
     } catch (err) {
       if (err.message === "You cannot use that username") {
+        if (wantsJson) {
+          return reply.code(403).send({ error: ["Forbidden username"] });
+        }
         req.session.error = ["Forbidden username"];
         return reply.redirect("/changeUsername");
       }
       console.error("Api-Gateway setAuthUsername:", err);
+      if (wantsJson) {
+        return reply
+          .code(500)
+          .send({ error: ["Error during setting your new username"] });
+      }
       req.session.error = ["Error during setting your new username"];
       return reply.redirect("/changeUsername");
     }

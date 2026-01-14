@@ -45,7 +45,9 @@ export default function AvatarUploadForm({ user }: AvatarUploadFormProps) {
   const [state, formAction] = useActionState(changeAvatar, undefined);
   const [showSuccess, setShowSuccess] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(user.avatar || null);
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(
+    user.avatar || '/public/images/default.jpg'
+  );
 
   // Handle file preview
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,17 +121,11 @@ export default function AvatarUploadForm({ user }: AvatarUploadFormProps) {
           </label>
           <div className="relative group w-40 h-40">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition duration-300"></div>
-            {currentAvatarUrl ? (
-              <img
-                src={currentAvatarUrl}
-                alt="Current Avatar"
-                className="relative h-40 w-40 rounded-full border-4 border-white/20 shadow-2xl object-cover transition-all duration-300"
-              />
-            ) : (
-              <div className="relative h-40 w-40 rounded-full border-4 border-white/20 shadow-2xl bg-white/5 flex items-center justify-center">
-                <PhotoIcon className="h-16 w-16 text-slate-500" />
-              </div>
-            )}
+            <img
+              src={currentAvatarUrl || '/public/images/default.jpg'}
+              alt="Current Avatar"
+              className="relative h-40 w-40 rounded-full border-4 border-white/20 shadow-2xl object-cover transition-all duration-300"
+            />
           </div>
         </div>
 
