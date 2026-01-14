@@ -81,8 +81,8 @@
 					<p><strong>IsEmailConfirmed: <span style="color: red">NO</span></strong></p>
 				<% } %>
 				<p><strong>Title:</strong> <%= data.title %> </p>
-				<p><strong>Rank: </strong> <%= data.rank.rank %> <%= data.rank.pts%> pts </p>
-				<p><strong>Experience Points:</strong> <%= data.experience_points %> </p>
+				<p><strong>Rank: </strong> <%= data.tier %> <%= data.rank_points%> pts </p>
+				<p><strong>Level:</strong> <%= data.level %>: <%= data.experience_points %> pts </p>
 				<p><strong>Wins:</strong> <%= data.wins %> </p>
 				<p><strong>Losses:</strong> <%= data.losses %> </p>
 				<% if ((Number(data.wins) + Number(data.losses)) === 0) { %>

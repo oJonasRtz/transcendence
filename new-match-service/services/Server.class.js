@@ -105,7 +105,7 @@ export class Server {
 			const ranks = ['BRONZE', 'SILVER', 'GOLD', 'DIAMOND'];
 			const key = mmr < 0 ? 0 : Math.min(Math.floor(mmr / 100), 3);
 			const pts = key < 3 ? mmr % 100 : mmr - 300;
-						
+
 			return reply.status(200).send({type: 'RANK_INFO', rank: ranks[key], pts, code: 200});
 		} catch (error) {
 			console.error('Server.#getRank: Error getting rank:', error.message);

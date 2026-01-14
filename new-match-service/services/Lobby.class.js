@@ -119,14 +119,20 @@ export class Lobby extends EventEmitter {
 					let rank = c.rank;
 					const isWinner = c.id === winner;
 					const pts = isWinner ? calc.gain : calc.loss;
+					//let xp = c.xp;
+					//const xpPts = this.#calculateXP(isWinner ? 1 : 2);
 
+					//xp += xpPts;
 					rank += pts;
+					//Add maxLimit to xp too to lvl 10
 					if (rank > __MAX_RANK_POSSIBLE__)
 						rank = __MAX_RANK_POSSIBLE__;
 					if (rank < __MIN_RANK_POSSIBLE__)
 						rank = __MIN_RANK_POSSIBLE__;
 					c.rank = rank;
-					await data.sendRequest('/setRank', {email: c.email, rank});
+					//c.xp = xp;
+					await data.sendRequest('/setRank', {user_id: c.id, rank});
+					//await data.sendRequest('/setXp', {user_id: c.id, xp});
 				}
 
 				this.emit('END_GAME');
@@ -149,5 +155,24 @@ export class Lobby extends EventEmitter {
 		const loss = -Math.round(MINPTS + (MAXLOSSPTS - MINPTS) * ratio);
 
 		return {gain, loss};
+	}
+
+	/**
+	 * Calculates XP based on position and match type
+	 * 
+	 * @param {number} position - The finishing position of the player
+	 * @returns {number} - The calculated XP
+	 */
+	#calculateXP(position) {
+		const	BASE_XP = 50;
+		const	WIN_BONUS = 30;
+		const	TOURNAMENT_BONUS = 20;
+
+		const isTournament = this.type === 'TOURNAMENT';
+
+		if (isTournament)
+			return (BASE_XP + ((position === 1) * WIN_BONUS) + TOURNAMENT_BONUS) * 2;
+
+		return BASE_XP + ((position === 1) * WIN_BONUS);
 	}
 }

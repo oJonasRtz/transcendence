@@ -301,7 +301,7 @@ const databaseControllers = {
 
 	setRank: async function setRank(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email || req.body.rank === undefined)
+			if (!req.body || !req.body.user_id || req.body.rank === undefined)
 				return reply.code(400).send("You need to inform an email and the rank here");
 			await databaseModels.setRank(fastify, req.body);
 			return reply.code(200).send("Success");
@@ -313,10 +313,10 @@ const databaseControllers = {
 
 	getRank: async function getRank(fastify, req, reply) {
 		try {
-			if (!req.body || !req.body.email)
+			if (!req.body || !req.body.user_id)
 				return reply.code(400).send("You need to inform an email here");
-			const rank = await databaseModels.getRank(fastify, req.body.email);
-			return reply.code(200).send({ rank: rank });
+			const rank = await databaseModels.getRank(fastify, req.body.user_id);
+			return reply.code(200).send(rank ?? {});
 		} catch (err) {
 			console.error("getRank SQLITE-DB error", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");

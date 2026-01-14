@@ -139,9 +139,24 @@ const usersControllers = {
     }
   },
 
+  setUserXp: async function setUserXp(req, reply) {
+    try {
+      if (!req.body || !req.body.user_id || req.body.xp === undefined)
+        return reply
+          .code(400)
+          .send("You need to inform an email and the xp amount");
+
+      await axios.post("https://sqlite-db:3002/setUserExperience", req.body);
+      return reply.code(200).send("Success");
+    } catch (error) {
+      console.error("USERS-SERVICE setUserXp", error.message);
+      return reply.code(500).send("An error happened");
+    }
+  },
+
   setRank: async function setRank(req, reply) {
     try {
-      if (!req.body || !req.body.email || req.body.rank === undefined)
+      if (!req.body || !req.body.user_id || req.body.rank === undefined)
         return reply.code(400).send("You need to inform an email and the rank");
       await axios.post("https://sqlite-db:3002/setRank", req.body);
       return reply.code(200).send("Success");
@@ -156,7 +171,7 @@ const usersControllers = {
 
   getRank: async function getRank(req, reply) {
     try {
-      if (!req.body || !req.body.email)
+      if (!req.body || !req.body.user_id)
         return reply.code(400).send("You need to inform an email here");
       const rank = await axios.post("https://sqlite-db:3002/getRank", req.body);
       return reply.code(200).send(rank?.data ?? {});
