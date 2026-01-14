@@ -71,6 +71,14 @@ export class MatchClient {
       this.#isConnected = false;
       console.log("Disconnected from Match Service");
     });
+
+    this.#ws.on("error", (error) => {
+      if (matchClient.has(this.#info.token)) {
+        matchClient.delete(this.#info.token);
+      }
+      this.#isConnected = false;
+      console.error("Match Service connection error:", error.message);
+    });
   }
 
   connect({name, email, id, token}) {
