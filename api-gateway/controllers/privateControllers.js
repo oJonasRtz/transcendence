@@ -50,6 +50,8 @@ async function getRank(user) {
 }
 
 const privateControllers = {
+  // JSON API store for email verification (in-memory, short-lived)
+  emailVerificationStore: new Map(),
   goFlappyBird: function goFlappyBird(req, reply) {
     return reply.sendFile("flappy-bird/index.html");
   },
@@ -279,6 +281,45 @@ const privateControllers = {
     }
   },
 
+  // JSON: Send verification code for Next.js
+  sendVerificationEmailJson: async function sendVerificationEmailJson(req, reply) {
+    try {
+      const { email, user_id } = req.user || {};
+      if (!email || !user_id) {
+        return reply.code(401).send({ error: "Unauthorized" });
+      }
+
+      const userInfoRes = await axios.post(
+        "https://users-service:3003/getUserInformation",
+        { user_id }
+      );
+      if (userInfoRes?.data?.isEmailConfirmed) {
+        return reply.code(200).send({
+          success: true,
+          alreadyVerified: true,
+        });
+      }
+
+      const response = await axios.get("https://auth-service:3001/getCaptcha");
+      const { code } = response.data;
+      const expiresAt = Date.now() + 5 * 60 * 1000;
+      privateControllers.emailVerificationStore.set(email, { code, expiresAt });
+
+      const subject = "Confirm your e-mail, Transcendence Pong";
+      const webPage = `
+				<h2>Confirm your e-mail</h2>
+				<p>Congratulations! Confirming your e-mail is a great choice to recover your password easily later</p>
+				<p> Your code is <strong>${code}</strong>. Please inform it to us. See you =D</p>
+			`;
+
+      await sendMail(email, subject, webPage);
+      return reply.code(200).send({ success: true });
+    } catch (err) {
+      console.error("SEND VERIFICATION JSON ERROR:", err?.message || err);
+      return reply.code(500).send({ error: "Failed to send verification code" });
+    }
+  },
+
   confirmUserEmailCode: async function confirmUserEmailCode(req, reply) {
     const error = req.session.error || [];
     delete req.session.error;
@@ -306,6 +347,79 @@ const privateControllers = {
       console.error("VALIDATE USER EMAIL CODE API-GATEWAY:", err);
       req.session.error = ["An error happened trying to validating your code"];
       return reply.redirect("/confirmUserEmailCode");
+    }
+  },
+
+  // JSON: Verify email code for Next.js
+  verifyEmailCodeJson: async function verifyEmailCodeJson(req, reply) {
+    try {
+      const { email, user_id } = req.user || {};
+      const { code } = req.body || {};
+      if (!email || !user_id) {
+        return reply.code(401).send({ error: "Unauthorized" });
+      }
+      if (!code) {
+        return reply.code(400).send({ error: "Missing code" });
+      }
+
+      const userInfoRes = await axios.post(
+        "https://users-service:3003/getUserInformation",
+        { user_id }
+      );
+      if (userInfoRes?.data?.isEmailConfirmed) {
+        return reply.code(200).send({
+          success: true,
+          alreadyVerified: true,
+        });
+      }
+
+      const record = privateControllers.emailVerificationStore.get(email);
+      if (!record || record.expiresAt < Date.now()) {
+        privateControllers.emailVerificationStore.delete(email);
+        return reply.code(401).send({ error: "Invalid or expired code" });
+      }
+
+      if (record.code.toLowerCase() !== String(code).toLowerCase()) {
+        return reply.code(401).send({ error: "Invalid or expired code" });
+      }
+
+      privateControllers.emailVerificationStore.delete(email);
+      await axios.post("https://users-service:3003/validateUserEmail", {
+        email,
+        user_id,
+        stats: true,
+      });
+
+      return reply.code(200).send({ success: true });
+    } catch (err) {
+      console.error("VERIFY EMAIL JSON ERROR:", err?.message || err);
+      return reply.code(500).send({ error: "Failed to verify code" });
+    }
+  },
+
+  // JSON: Email verification status for Next.js
+  getVerificationStatus: async function getVerificationStatus(req, reply) {
+    try {
+      const { email, user_id } = req.user || {};
+      if (!email || !user_id) {
+        return reply.code(401).send({ error: "Unauthorized" });
+      }
+
+      const [userInfoRes, twoFaRes] = await Promise.all([
+        axios.post("https://users-service:3003/getUserInformation", { user_id }),
+        axios.post("https://auth-service:3001/get2FAEnable", { email }),
+      ]);
+
+      const isEmailVerified = userInfoRes?.data?.isEmailConfirmed ?? false;
+      const has2FA = twoFaRes?.data?.twoFactorEnable ?? false;
+
+      return reply.code(200).send({
+        isEmailVerified,
+        has2FA,
+      });
+    } catch (err) {
+      console.error("GET VERIFICATION STATUS ERROR:", err?.message || err);
+      return reply.code(500).send({ error: "Failed to get verification status" });
     }
   },
 

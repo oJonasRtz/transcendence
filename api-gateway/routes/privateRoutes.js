@@ -46,6 +46,9 @@ const routes = [
 	{ method: 'GET', url: '/api/profile', handler: privateControllers.getProfileData },
 	{ method: 'POST', url: '/api/friendInvite', handler: privateControllers.apiFriendInvite },
 	{ method: 'POST', url: '/api/blockUser', handler: privateControllers.apiBlockUser },
+	{ method: 'POST', url: '/api/email/send-verification', handler: privateControllers.sendVerificationEmailJson },
+	{ method: 'POST', url: '/api/email/verify-code', handler: privateControllers.verifyEmailCodeJson },
+	{ method: 'GET', url: '/getVerificationStatus', handler: privateControllers.getVerificationStatus },
 ];
 
 export default async function privateRoutes(fastify, options) {

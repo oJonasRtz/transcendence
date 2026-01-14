@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
     // Get cookies to authenticate with api-gateway
     const cookieStore = await cookies();
     const jwt = cookieStore.get('jwt');
-    const sessionCookie = cookieStore.get('session');
 
     if (!jwt) {
       return Response.json({ 
@@ -46,21 +45,18 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Build cookie header with both jwt and session (required for captcha validation)
-    let cookieHeader = `jwt=${jwt.value}`;
-    if (sessionCookie) {
-      cookieHeader += `; session=${sessionCookie.value}`;
-    }
+    // Build cookie header with jwt only
+    const cookieHeader = `jwt=${jwt.value}`;
 
-    // Call api-gateway endpoint
-    const response = await fetch(`${API_GATEWAY_URL}/validateUserEmailCode`, {
+    // Call api-gateway JSON endpoint
+    const response = await fetch(`${API_GATEWAY_URL}/api/email/verify-code`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Cookie': cookieHeader,
       },
-      body: JSON.stringify({ captchaInput: code }),
+      body: JSON.stringify({ code }),
       credentials: 'include',
     });
 

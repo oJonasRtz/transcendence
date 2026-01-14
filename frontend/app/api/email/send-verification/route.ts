@@ -41,21 +41,18 @@ export async function POST(request: NextRequest) {
       cookieHeader += `; session=${sessionCookie.value}`;
     }
 
-    // Call api-gateway endpoint
-    const response = await fetch(`${API_GATEWAY_URL}/confirmUserEmail`, {
-      method: 'GET',
+    // Call api-gateway JSON endpoint
+    const response = await fetch(`${API_GATEWAY_URL}/api/email/send-verification`, {
+      method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Cookie': cookieHeader,
       },
       credentials: 'include',
+      body: JSON.stringify({}),
     });
-
     const data = await response.json();
-
-    // Get the session cookie from api-gateway response and pass it to the client
-    const setCookieHeader = response.headers.get('set-cookie');
     
     if (!response.ok) {
       return Response.json({
@@ -64,18 +61,10 @@ export async function POST(request: NextRequest) {
       }, { status: response.status });
     }
 
-    // Create response with the session cookie forwarded
-    const jsonResponse = NextResponse.json({
+    return NextResponse.json({
       success: data.success || ['Verification code sent to your email'],
       error: [],
     });
-
-    // Forward the session cookie from api-gateway to the browser
-    if (setCookieHeader) {
-      jsonResponse.headers.set('Set-Cookie', setCookieHeader);
-    }
-
-    return jsonResponse;
   } catch (error) {
     console.error('[API] Send verification error:', error);
     return Response.json({

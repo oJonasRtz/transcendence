@@ -47,13 +47,20 @@ export default function EmailVerificationPage() {
       });
       
       const data = await response.json();
-      
-      if (data.error && data.error.length > 0) {
-        setError(data.error[0]);
-      } else {
-        setSuccess(data.success?.[0] || 'Verification code sent to your email');
-        setStep('code-sent');
+      if (!response.ok) {
+        setError(data.error || 'Failed to send verification code');
+        return;
       }
+
+      if (data.alreadyVerified) {
+        setIsVerified(true);
+        setStep('verified');
+        setSuccess('Your email is already verified!');
+        return;
+      }
+
+      setSuccess('Verification code sent to your email');
+      setStep('code-sent');
     } catch (err) {
       setError('Failed to send verification code. Please try again.');
     } finally {
@@ -79,20 +86,27 @@ export default function EmailVerificationPage() {
       });
       
       const data = await response.json();
-      
-      if (data.error && data.error.length > 0) {
-        setError(data.error[0]);
-      } else {
-        setSuccess(data.success?.[0] || 'Email verified successfully!');
-        setStep('verified');
-        setIsVerified(true);
-        
-        // Dispatch custom event to trigger sidebar status refresh
-        window.dispatchEvent(new Event('emailVerificationChanged'));
-        
-        // Also refresh the router state
-        router.refresh();
+      if (!response.ok) {
+        setError(data.error || 'Invalid verification code');
+        return;
       }
+
+      if (data.alreadyVerified) {
+        setIsVerified(true);
+        setStep('verified');
+        setSuccess('Your email is already verified!');
+        return;
+      }
+
+      setSuccess('Email verified successfully!');
+      setStep('verified');
+      setIsVerified(true);
+      
+      // Dispatch custom event to trigger sidebar status refresh
+      window.dispatchEvent(new Event('emailVerificationChanged'));
+      
+      // Also refresh the router state
+      router.refresh();
     } catch (err) {
       setError('Failed to verify code. Please try again.');
     } finally {
