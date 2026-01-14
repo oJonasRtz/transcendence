@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, KeyIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { ButtonGlimmer } from '@/app/ui/button-glimmer';
 
 export default function EmailVerificationPage() {
   const [step, setStep] = useState<'loading' | 'initial' | 'code-sent' | 'verified'>('loading');
@@ -213,70 +214,98 @@ export default function EmailVerificationPage() {
             </p>
             
             <div className="space-y-4">
-              <div>
-                <label htmlFor="code" className="block text-sm font-medium text-slate-300 mb-2">
-                  Verification Code
-                </label>
-                <input
-                  type="text"
-                  id="code"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Enter 6-digit code"
-                  maxLength={6}
-                  className="w-full px-4 py-3 rounded-lg
-                           bg-white/5 border border-white/10
-                           text-white text-center text-2xl tracking-widest font-mono
-                           placeholder-slate-500
-                           focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50
-                           transition-all duration-300"
-                />
+              {error && (
+                <div className="p-3 rounded-lg border border-red-500/20 bg-red-500/10 backdrop-blur-md">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />
+                    <p className="text-xs font-bold uppercase tracking-wider text-red-300">
+                      VERIFICATION FAILED
+                    </p>
+                  </div>
+                  <p className="text-sm text-red-200 mt-1">{error}</p>
+                </div>
+              )}
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  verifyCode();
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label
+                    className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-300"
+                    htmlFor="code"
+                  >
+                    <span className="text-blue-400">01</span> // Verification Code
+                  </label>
+                  <div className="relative group">
+                    <input
+                      className="peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed font-mono tracking-wider"
+                      id="code"
+                      type="text"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="ENTER CODE HERE"
+                      required
+                      disabled={loading}
+                    />
+                    <KeyIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 opacity-0 transition-opacity peer-focus:opacity-100 pointer-events-none" />
+                  </div>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Check your email inbox and spam folder.
+                  </p>
+                </div>
+
+                <ButtonGlimmer
+                  type="submit"
+                  className="w-full h-12 text-sm font-bold uppercase tracking-wider shadow-lg shadow-blue-500/20"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      VERIFYING CODE...
+                    </span>
+                  ) : (
+                    'VERIFY CODE →'
+                  )}
+                </ButtonGlimmer>
+              </form>
+
+              <div className="pt-4 border-t border-white/10">
+                <div className="text-center space-y-2">
+                  <p className="text-xs text-slate-500">
+                    Didn't receive the code?
+                  </p>
+                  <button
+                    onClick={sendCode}
+                    disabled={loading}
+                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-wider font-semibold disabled:opacity-50"
+                  >
+                    Resend Code
+                  </button>
+                </div>
               </div>
 
-              <button
-                onClick={verifyCode}
-                disabled={loading || !code.trim()}
-                className="w-full px-6 py-3 rounded-lg
-                         bg-blue-600 hover:bg-blue-700
-                         text-white font-semibold
-                         border border-blue-500/50
-                         transition-all duration-300
-                         disabled:opacity-50 disabled:cursor-not-allowed
-                         hover:shadow-lg hover:shadow-blue-500/20"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Verifying...
-                  </span>
-                ) : (
-                  'Verify Code'
-                )}
-              </button>
-
-              <button
-                onClick={sendCode}
-                disabled={loading}
-                className="w-full px-4 py-2 rounded-lg
-                         bg-white/5 hover:bg-white/10
-                         text-slate-400 hover:text-white
-                         border border-white/10
-                         transition-all duration-300
-                         disabled:opacity-50 disabled:cursor-not-allowed
-                         text-sm"
-              >
-                Resend Code
-              </button>
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
+                    <span className="font-mono text-slate-500">Awaiting Verification</span>
+                  </div>
+                  <span className="font-mono text-slate-600">v2.0.42</span>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {/* Error Message */}
-        {error && (
+        {error && step !== 'code-sent' && (
           <div className="mt-6 p-4 rounded-lg bg-red-500/10 border border-red-500/50 flex items-start gap-3">
             <XCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-red-400 text-sm">{error}</p>

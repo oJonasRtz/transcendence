@@ -756,14 +756,38 @@ const privateControllers = {
   },
 
   setAuthEmail: async function setAuthEmail(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
       if (!req.body || !req.body.email) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["You need to fill everything"] });
+        }
         req.session.error = ["You need to fill everything"];
         return reply.redirect("/changeEmail");
       }
 
       req.body.user_id = req.user.user_id;
       req.body.username = req.user.username;
+      if (req.body.email === req.user.email) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["Email is already in use"] });
+        }
+        req.session.error = ["Email is already in use"];
+        return reply.redirect("/changeEmail");
+      }
+
+      const twoFaRes = await axios.post("https://auth-service:3001/get2FAEnable", {
+        email: req.user.email,
+      });
+      const had2FA = twoFaRes?.data?.twoFactorEnable ?? false;
 
       await axios.post("https://auth-service:3001/setAuthEmail", req.body);
 
@@ -771,6 +795,17 @@ const privateControllers = {
         email: req.body.email,
         user_id: req.user.user_id,
         stats: false,
+      });
+
+      if (had2FA) {
+        await axios.post("https://auth-service:3001/set2FAOnOff", {
+          user_id: req.user.user_id,
+        });
+      }
+
+      await axios.post("https://auth-service:3001/set2FAValidate", {
+        email: req.body.email,
+        signal: false,
       });
 
       req.session.success = ["Email changed successfully"];
@@ -783,6 +818,9 @@ const privateControllers = {
       const token = response?.data.token;
 
       if (!token) {
+        if (wantsJson) {
+          return reply.code(500).send({ error: ["Error recreating the jwt"] });
+        }
         req.session.error = ["Error recreating the jwt"];
         return reply.redirect("/home");
       }
@@ -797,9 +835,22 @@ const privateControllers = {
         maxAge: 60 * 60 * 1000, // 1h
       });
 
+      if (wantsJson) {
+        return reply.code(200).send({ success: true });
+      }
       return reply.redirect("/home");
     } catch (err) {
+      if (err?.response?.status === 409) {
+        if (wantsJson) {
+          return reply.code(409).send({ error: ["Email already in use"] });
+        }
+        req.session.error = ["Email already in use"];
+        return reply.redirect("/changeEmail");
+      }
       console.error("API-GATEWAY setAuthEmail error:", err);
+      if (wantsJson) {
+        return reply.code(500).send({ error: ["Error trying to change your email"] });
+      }
       req.session.error = ["Error trying to change your email"];
       return reply.redirect("/changeEmail");
     }

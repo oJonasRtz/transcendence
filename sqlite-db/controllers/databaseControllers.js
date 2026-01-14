@@ -465,6 +465,8 @@ const databaseControllers = {
 			await databaseModels.setAuthEmail(fastify, req.body);
 			return reply.code(200).send("Success");
 		} catch (err) {
+			if (err?.statusCode === 409 || err?.message === "EMAIL_IN_USE")
+				return reply.code(409).send("Email already in use");
 			console.error("setAuthEmail SQLITE-DB error:", err?.response?.data || err.message);
 			return reply.code(500).send("An error happened");
 		}

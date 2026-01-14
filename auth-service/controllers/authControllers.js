@@ -360,8 +360,11 @@ const authControllers = {
           .code(400)
           .send("You need to inform your user_id and e-mail");
       await axios.post("https://sqlite-db:3002/setAuthEmail", req.body);
-      return reply.code(200).send("Nickname changed successfully");
+      return reply.code(200).send("Email changed successfully");
     } catch (err) {
+      if (err?.response?.status === 409) {
+        return reply.code(409).send("Email already in use");
+      }
       console.error("Auth-service setAuthEmail error:", err);
       return reply.code(500).send("An error happened");
     }

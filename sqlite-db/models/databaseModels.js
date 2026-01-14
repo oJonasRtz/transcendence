@@ -433,6 +433,15 @@ const databaseModels = {
   },
 
   setAuthEmail: async function setAuthEmail(fastify, data) {
+    const existing = await fastify.db.get(
+      "SELECT user_id FROM auth WHERE email = ?",
+      [data.email]
+    );
+    if (existing && existing.user_id !== data.user_id) {
+      const error = new Error("EMAIL_IN_USE");
+      error.statusCode = 409;
+      throw error;
+    }
     await fastify.db.run("UPDATE auth SET email = ? WHERE user_id = ?", [
       data.email,
       data.user_id,
