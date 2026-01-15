@@ -405,13 +405,28 @@ const privateControllers = {
         return reply.code(401).send({ error: "Unauthorized" });
       }
 
-      const [userInfoRes, twoFaRes] = await Promise.all([
-        axios.post("https://users-service:3003/getUserInformation", { user_id }),
-        axios.post("https://auth-service:3001/get2FAEnable", { email }),
-      ]);
+      let isEmailVerified = false;
+      let has2FA = false;
 
-      const isEmailVerified = userInfoRes?.data?.isEmailConfirmed ?? false;
-      const has2FA = twoFaRes?.data?.twoFactorEnable ?? false;
+      try {
+        const userInfoRes = await axios.post(
+          "https://users-service:3003/getUserInformation",
+          { user_id }
+        );
+        isEmailVerified = userInfoRes?.data?.isEmailConfirmed ?? false;
+      } catch (err) {
+        console.error("getVerificationStatus user info error:", err?.message || err);
+      }
+
+      try {
+        const twoFaRes = await axios.post(
+          "https://auth-service:3001/get2FAEnable",
+          { email }
+        );
+        has2FA = twoFaRes?.data?.twoFactorEnable ?? false;
+      } catch (err) {
+        console.error("getVerificationStatus 2FA error:", err?.message || err);
+      }
 
       return reply.code(200).send({
         isEmailVerified,
@@ -424,6 +439,11 @@ const privateControllers = {
   },
 
   get2FAQrCode: async function get2FAQrCode(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
       const token = req.cookies.jwt;
       const decoded = await jwt.verify(token, process.env.JWT_SECRET);
@@ -431,6 +451,11 @@ const privateControllers = {
         email: decoded.email,
       });
       if (!res.data.twoFactorEnable) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["2FA not activated"] });
+        }
         req.session.error = ["You do not have 2FA activated at the moment"];
         return reply.redirect("/home");
       }
@@ -439,17 +464,31 @@ const privateControllers = {
         { email: decoded.email }
       );
       if (response.data.qrCodeDataURL == null && response.data.image == null) {
+        if (wantsJson) {
+          return reply
+            .code(500)
+            .send({ error: ["Error generating the qrCode"] });
+        }
         return reply.code(500).send("Error generating the qrCode");
       }
 
       const qrCodeDataURL = response.data.qrCodeDataURL;
       const image = response.data.image;
 
+      if (wantsJson) {
+        return reply.code(200).send({ qrCodeDataURL, image });
+      }
+
       req.session.qrCodeDataURL = qrCodeDataURL;
       req.session.image = image;
       return reply.redirect("/check2FAQrCode");
     } catch (err) {
       console.error("get2FAQrCode");
+      if (wantsJson) {
+        return reply
+          .code(500)
+          .send({ error: ["Error getting get2FAQrCode"] });
+      }
       req.session.error = ["Error getting get2FAQrCode"];
       return reply.redirect("/home");
     }
@@ -479,7 +518,53 @@ const privateControllers = {
   },
 
   validate2FAQrCode: async function validate2FAQrCode(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
+      if (wantsJson) {
+        if (!req.body || !req.body.code) {
+          return reply
+            .code(400)
+            .send({ error: ["Verification code is required"] });
+        }
+        const token = req.cookies.jwt;
+        const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+        const response = await axios.post(
+          "https://auth-service:3001/get2FASecret",
+          { email: decoded.email }
+        );
+        if (!response.data.twoFactorSecret) {
+          return reply
+            .code(400)
+            .send({ error: ["2FA not configured"] });
+        }
+
+        const verified = speakeasy.totp.verify({
+          secret: response.data.twoFactorSecret,
+          encoding: "base32",
+          token: String(req.body.code).trim(),
+          window: 1,
+        });
+
+        if (!verified) {
+          return reply
+            .code(400)
+            .send({ error: ["Invalid verification code"] });
+        }
+
+        await axios.post("https://auth-service:3001/set2FAValidate", {
+          email: decoded.email,
+          signal: true,
+        });
+
+        return reply
+          .code(200)
+          .send({ success: ["2FA verified successfully"] });
+      }
+
       if (!req.session.canValidate) {
         req.session.error = ["You need to follow step by step"];
         delete req.session.canValidate;
@@ -1250,19 +1335,42 @@ const privateControllers = {
   },
 
   set2FAOnOff: async function set2FAOnOff(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
       const result = await axios.post("https://auth-service:3001/set2FAOnOff", {
         user_id: req.user.user_id,
       });
+      let enabled = false;
+      let successMessage = "2FA status updated";
       if (result?.data.message === "2FA_ENABLED") {
         req.session.success = ["2FA enabled successfully"];
+        enabled = true;
+        successMessage = "2FA enabled successfully";
       } else if (result?.data.message === "2FA_DISABLED") {
         req.session.success = ["2FA disabled successfully"];
+        enabled = false;
+        successMessage = "2FA disabled successfully";
+      }
+      if (wantsJson) {
+        return reply.code(200).send({
+          enabled,
+          message: result?.data?.message,
+          success: [successMessage],
+        });
       }
       return reply.redirect("/home");
     } catch (err) {
       console.error("API-GATEWAY set2FAOnOff");
       req.session.error = ["Error setting the new status of 2FA"];
+      if (wantsJson) {
+        return reply
+          .code(500)
+          .send({ error: ["Error setting the new status of 2FA"] });
+      }
       return reply.redirect("/home");
     }
   },

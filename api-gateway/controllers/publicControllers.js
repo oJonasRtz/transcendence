@@ -296,7 +296,8 @@ const publicControllers = {
       const verified = speakeasy.totp.verify({
         secret,
         encoding: "base32",
-        token: code,
+        token: String(code).trim(),
+        window: 1,
       });
 
       if (!verified) {

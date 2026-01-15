@@ -46,8 +46,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect to dashboard if trying to access auth routes while authenticated
-  if (isAuthRoute && isAuthenticated) {
+  // Redirect to dashboard only for GET requests on auth routes.
+  // Server actions use POST and must not be redirected.
+  if (isAuthRoute && isAuthenticated && request.method === 'GET') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
