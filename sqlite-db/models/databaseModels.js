@@ -763,13 +763,12 @@ const databaseModels = {
           [data.user_id]
         );
         return "2FA_DISABLED";
-      } else {
-        await fastify.db.run(
-          "UPDATE auth SET twoFactorEnable = true, twoFactorSecret = null WHERE user_id = ?",
-          [data.user_id]
-        );
-        return "2FA_ENABLED";
       }
+      await fastify.db.run(
+        "UPDATE auth SET twoFactorEnable = true WHERE user_id = ?",
+        [data.user_id]
+      );
+      return "2FA_ENABLED";
     } catch (err) {
       console.error("SQLITE-DB MODELS set2FAOnOff ERROR:", err.message);
       return "An error happened";

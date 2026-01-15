@@ -207,21 +207,18 @@ const authControllers = {
           .send({ qrCodeDataURL: qrCodeDataURL, image: null });
       }
 
-      /*const otpauth = speakeasy.otpauthURL({
-				secret: twoFactorSecret?.data.twoFactorSecret,
-				label: `Transcendence: ${req.body.email}`,
-				issuer: "Transcendence",
-				encoding: "base32",
-			});
+      const otpauth = speakeasy.otpauthURL({
+        secret: twoFactorSecret?.data.twoFactorSecret,
+        label: `Transcendence: ${req.body.email}`,
+        issuer: "Transcendence",
+        encoding: "base32",
+      });
 
-			const qrCodeDataURL = await qrcode.toDataURL(otpauth);*/
-
-      const qrCodeDataURL = "/public/images/road_closed.jpg";
-      const image = "/public/images/road_closed.jpg";
+      const qrCodeDataURL = await qrcode.toDataURL(otpauth);
 
       return reply
         .code(200)
-        .send({ qrCodeDataURL: qrCodeDataURL, image: image });
+        .send({ qrCodeDataURL: qrCodeDataURL, image: null });
     } catch (err) {
       console.error("Auth-Service get2FAQrCode:", err);
       return reply.code(500).send("An error happened");

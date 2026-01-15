@@ -244,8 +244,21 @@ export async function require2faHook(req, reply) {
   const token = req.cookies?.jwt;
   let decoded = null;
   try {
+    const accept = req.headers?.accept || "";
+    const isJsonRequest =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
+    if (
+      req.url === "/getVerificationStatus" ||
+      req.url === "/get2FAQrCode" ||
+      req.url?.startsWith("/api/email/")
+    ) {
+      return;
+    }
     if (req.url === "/check2FAQrCode" || req.url === "/validate2FAQrCode")
       return;
+    if (isJsonRequest) return;
     if (!token) return reply.redirect("/login");
     decoded = jwt.verify(token, process.env.JWT_SECRET) ?? {};
     const twoFactorEnable = await axios.post(
