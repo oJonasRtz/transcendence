@@ -22,6 +22,7 @@ const routes = [
 	{ method: 'GET', url: '/changeDescription', handler: privateControllers.changeDescription },
 	{ method: 'POST', url: '/setUserDescription', handler: privateControllers.setUserDescription },
 	{ method: 'GET', url: '/matchMaking', handler: privateControllers.match },
+	{ method: 'GET', url: '/matchMaking/:token', handler: privateControllers.match },
 	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers },
 	{ method: 'GET', url: '/seeProfile', handler: privateControllers.seeProfile },
 	{ method: 'GET', url: '/chatAllUsers', handler: privateControllers.chatAllUsers },

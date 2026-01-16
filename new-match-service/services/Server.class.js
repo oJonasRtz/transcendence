@@ -184,13 +184,13 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const address = `https://${req.headers.host}`;
-			const link = `${address}/join_party/` + token;
+			// const address = `https://${req.headers.host}`;
+			// const link = `${address}/join_party/` + token;
 
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			this.#invitesOwners.add(client);
 
-			return reply.status(200).send({type: 'INVITE_CREATED', link, code: 200});
+			return reply.status(200).send({type: 'INVITE_CREATED', token, code: 200});
 		} catch (error) {
 			console.error('Server.#invite: Error handling invite:', error.message);
 			return reply.status(400).send({type: 'ERROR', reason: error.message, code: 400});

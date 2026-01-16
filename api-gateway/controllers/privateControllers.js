@@ -13,6 +13,7 @@ import { fileTypeFromFile } from "file-type";
 import sharp from "sharp";
 import { MatchClient } from "../utils/MatchClient.class.js";
 import { matchClient } from "../app.js";
+import { waitForDebugger } from "inspector";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -61,10 +62,22 @@ const privateControllers = {
   },
 
   match: async function match(req, reply) {
-    return reply.view("matchMaking", {
-      email: req.user.email,
-      user_id: req.user.user_id,
-    });
+    const {token} = req.params;
+    console.log("id: " + req.user.user_id);
+
+    if (token) {
+      console.log("temos um token: " + token);
+      try {
+        const url = 'https://match-service:3010/join_party/' + token;
+        await axios.post(url, {id: req.user.user_id});
+      } catch (error) {
+        console.error("MATCH PAGE ERROR:", error.message);    
+      }
+    }
+
+    const match = matchClient.get(req.jwt);
+    const state = match ? match.state : 'OFFLINE';
+    return reply.view("matchMaking", {state});
   },
 
   joinQueue: async function joinQueue(req, reply) {
