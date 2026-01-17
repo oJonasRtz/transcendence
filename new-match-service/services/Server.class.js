@@ -184,8 +184,8 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const address = `https://${req.headers.host}`;
-			const link = `${address}/join_party/` + token;
+			const address = `https://localhost/matchMaking/`;
+			const link = address + token;
 
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			this.#invitesOwners.add(client);

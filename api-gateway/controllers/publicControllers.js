@@ -77,6 +77,7 @@ const publicControllers = {
 
       return reply.view("login", { success, error, captcha: data });
     } catch (err) {
+      console.error("Error loading captcha for login page:", err.message);
       req.session.error = [`Error loading the captcha D= : ${err.message}`];
       return reply.redirect("/login");
     }

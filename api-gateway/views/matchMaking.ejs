@@ -7,11 +7,11 @@
 		<link rel="stylesheet" href="/public/css/styles.css">
 		<title>Match Making</title>
     </head>
-    <body class="bg-cover bg-fixed min-h-screen flex justify-center items-center text-white bg-black">
+    <body class="bg-cover bg-fixed min-h-screen flex flex-col justify-center items-center text-white bg-black">
+        <a href="/home">Home</a>
         <div class="relative flex flex-col border bg-slate-700 justify-center items-center rounded-xl shadow-md p-6">
-            <div id="queueTimer" class="mt-4 text-lg font-semibold hidden">
-                ⏱ Tempo na fila: <span id="time">00:00</span>
-            </div>
+            <p class="absolute top-4 text-2xl font-bold">Match Making</p>
+            <p>State <%= state %></p>
             <form action="/joinQueue" method="POST">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold rounded-lg px-6 py-3 mb-4">Join</button>
             </form>
