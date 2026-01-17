@@ -4,12 +4,12 @@ import type { StartType } from "./types";
 
 const temp = {
   1: {
-    name: "aaaa",
-    playerId: "c6cc6382-d8d9-4543-887d-97cb8e396a32",
+    name: "cccc",
+    playerId: "acf1b908-94ca-43dc-a74d-25b77199f86b",
   },
   2: {
-    name: "bbbb",
-    playerId: "cb4cf326-52b0-4c25-a6db-97f924d9a57b",
+    name: "dddd",
+    playerId: "c856b7b3-c065-49b5-986f-4bdff97ee5a4",
   },
 };
 

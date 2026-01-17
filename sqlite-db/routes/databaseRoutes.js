@@ -8,21 +8,15 @@ const routes = [
 	{ method: 'POST', url: '/registerNewUser', handler: databaseControllers.registerNewUser },
 	{ method: 'POST', url: '/tryLoginTheUser', handler: databaseControllers.tryLoginTheUser },
 	{ method: 'POST', url: '/getUserData', handler: databaseControllers.getUserData },
-	{ method: 'POST', url: '/getMatchId', handler: databaseControllers.getMatchId },
-	{ method: 'POST', url: '/setMatchId', handler: databaseControllers.setMatchId },
 	{ method: 'POST', url: '/getUserStatus', handler: databaseControllers.getUserStatus },
 	{ method: 'POST', url: '/checkEmail', handler: databaseControllers.checkEmail },
 	{ method: 'POST', url: '/newPassword', handler: databaseControllers.newPassword },
 	{ method: 'POST', url: '/createNewUser', handler: databaseControllers.createNewUser },
 	{ method: 'POST', url: '/validateUserEmail', handler: databaseControllers.validateUserEmail },
-	{ method: 'POST', url: '/getQueue', handler: databaseControllers.getQueue },
-	{ method: 'POST', url: '/setInQueue', handler: databaseControllers.setInQueue },
 	{ method: 'POST', url: '/get2FAEnable', handler: databaseControllers.get2FAEnable },
 	{ method: 'POST', url: '/setRank', handler: databaseControllers.setRank },
 	{ method: 'POST', url: '/getRank', handler: databaseControllers.getRank },
 	{ method: 'POST', url: '/get2FASecret', handler: databaseControllers.get2FASecret },
-	{ method: 'POST', url: '/getInGame', handler: databaseControllers.getInGame },
-	{ method: 'POST', url: '/setInGame', handler: databaseControllers.setInGame },
 	{ method: 'POST', url: '/set2FASecret', handler: databaseControllers.set2FASecret },
 	{ method: 'POST', url: '/get2FAValidate', handler: databaseControllers.get2FAValidate },
 	{ method: 'POST', url: '/set2FAValidate', handler: databaseControllers.set2FAValidate },
@@ -36,7 +30,6 @@ const routes = [
 	{ method: 'POST', url: '/setUserFriends', handler: databaseControllers.setUserFriends },
 	{ method: 'POST', url: '/setUserWins', handler: databaseControllers.setUserWins },
 	{ method: 'POST', url: '/setUserLosses', handler: databaseControllers.setUserLosses },
-	{ method: 'POST', url: '/setUserTitle', handler: databaseControllers.setUserTitle },
 	{ method: 'POST', url: '/getAuthData', handler: databaseControllers.getAuthData },
 	{ method: 'POST', url: '/setAuthUsername', handler: databaseControllers.setAuthUsername },
 	{ method: 'POST', url: '/setAuthNickname', handler: databaseControllers.setAuthNickname },
@@ -61,7 +54,10 @@ const routes = [
 	{ method: 'POST', url: '/setTargetId', handler: databaseControllers.setTargetId },
 	{ method: 'POST', url: '/getTargetId', handler: databaseControllers.getTargetId },
 	{ method: 'POST', url: '/getPublicId', handler: databaseControllers.getPublicId },
-	{ method: 'POST', url: '/setUserState', handler: databaseControllers.setUserState }
+	{ method: 'POST', url: '/setUserState', handler: databaseControllers.setUserState },
+
+	{ method: 'POST', url: '/addHistory', handler: databaseControllers.addHistory },
+	{ method: 'POST', url: '/getHistory', handler: databaseControllers.getHistory },
 ];
 
 export default async function databaseRoutes(fastify, options) {

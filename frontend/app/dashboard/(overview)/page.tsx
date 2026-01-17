@@ -42,7 +42,7 @@ export default async function DashboardPage() {
       {/* Stats Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <Suspense fallback={<StatsCardsSkeleton />}>
-          <StatsCards userId={0} />
+          <StatsCards userId={authUser} />
         </Suspense>
       </div>
 

@@ -210,7 +210,13 @@ const privateControllers = {
       const match = matchClient.get(token);
       const data = myData?.data;
 
-      // console.log("USER Info: " + JSON.stringify(data));
+      const history = await axios.post(
+        "https://users-service:3003/getHistory",
+        { user_id: req.user.user_id }
+      );
+
+      console.log("History: " + JSON.stringify(history.data));
+      console.log("USER Info: " + JSON.stringify(data));
 
       data.state = getState({isOnline: req.user.isOnline, state: match.state});
       // const rank = await getRank(req.user);
@@ -1195,7 +1201,7 @@ const privateControllers = {
       );
       const data = response?.data;
 
-      console.log("User info: " +  JSON.stringify(data));
+      console.log("Public User info: " +  JSON.stringify(data));
 
       data.state = getState(data);
       // const rank = await getRank(data);

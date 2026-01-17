@@ -17,6 +17,52 @@ const usersControllers = {
     }
   },
 
+  addHistory: async function addHistory(req, reply) {
+    try {
+      const {stats} = req.body;
+      if (stats === undefined)
+        throw new error("INVALID_FORMAT");
+
+      await axios.post("https://sqlite-db:3002/addHistory", req.body);
+      return reply.code(200).send("Success");
+    } catch (error) {
+      console.error("USERS-SERVICE addHistory", error.message);
+      return reply.code(500).send("An error happened");
+    }
+  },
+
+  getHistory: async function getHistory(req, reply) {
+    try {
+      if (!req.body || !req.body.user_id)
+        return reply.code(400).send("You need to inform user id here");
+      const history = await axios.post(
+        "https://sqlite-db:3002/getHistory",
+        req.body
+      );
+      return reply.code(200).send(history?.data ?? {});
+    } catch (err) {
+      console.error(
+        "Users-Service getHistory",
+        err?.response?.data || err.message
+      );
+      return reply.code(500).send("Internal Server Error");
+    }
+  },
+
+  setUserExperience: async function setUserExperience(req, reply) {
+    try {
+      const {user_id, experience} = req.body;
+      if (user_id === undefined || experience === undefined)
+        throw new error("INVALID_FORMAT");
+
+      await axios.post("https://sqlite-db:3002/setUserExperience", req.body);
+      return reply.code(200).send("Success");
+    } catch (error) {
+      console.error("USERS-SERVICE setUserXp", error.message);
+      return reply.code(500).send("An error happened");
+    }
+  },
+
   validateUserEmail: async function validateUserEmail(req, reply) {
     try {
       if (
@@ -57,70 +103,6 @@ const usersControllers = {
     }
   },
 
-  getQueue: async function getQueue(req, reply) {
-    try {
-      const queue = await axios.post("https://sqlite-db:3002/getQueue", {});
-      return reply.code(200).send(queue?.data ?? {});
-    } catch (err) {
-      console.error(
-        "Users-Service getQueue",
-        err?.response?.data || err.messageor
-      );
-      return reply.code(500).send("Internal Server Error");
-    }
-  },
-
-  getMatchId: async function getMatchId(req, reply) {
-    try {
-      if (!req.body || !req.body.email)
-        return reply.code(400).send("You need to inform an email here");
-      const matchId = await axios.post(
-        "https://sqlite-db:3002/getMatchId",
-        req.body
-      );
-      return reply.code(200).send(matchId?.data ?? {});
-    } catch (err) {
-      console.error(
-        "Users-Service getMatchId",
-        err?.response?.data || err.message
-      );
-      return reply.code(500).send("Internal Server Error");
-    }
-  },
-
-  setMatchId: async function setMatchId(req, reply) {
-    try {
-      if (!req.body || !req.body.email || req.body.match_id === undefined)
-        return reply
-          .code(400)
-          .send("You need to inform an email and the match_id");
-      await axios.post("https://sqlite-db:3002/setMatchId", req.body);
-      return reply.code(200).send("Success");
-    } catch (err) {
-      console.error(
-        "USERS-SERVICE setMatchId",
-        err?.response?.data || err.message
-      );
-      return reply.code(500).send("An error happened");
-    }
-  },
-
-  setInQueue: async function setInQueue(req, reply) {
-    try {
-      if (!req.body || !req.body.email || req.body.inQueue === undefined)
-        return reply
-          .code(400)
-          .send("You need to inform an email and the signal for inQueue");
-      await axios.post("https://sqlite-db:3002/setInQueue", req.body);
-      return reply.code(200).send("Success");
-    } catch (err) {
-      console.error(
-        "USERS-SERVICE setIsQueue",
-        err?.response?.data || err.message
-      );
-      return reply.code(500).send("An error happened");
-    }
-  },
 
   setUserState: async function setUserState(req, reply) {
     try {

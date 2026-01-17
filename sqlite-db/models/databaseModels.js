@@ -3,6 +3,8 @@ import { stat } from "node:fs";
 import { randomUUID } from "crypto";
 import { nanoid } from "nanoid";
 
+const XP_PER_LEVEL = 500;
+
 const databaseModels = {
   getUserData: async function getUserData(fastify, email) {
     let object = await fastify.db.get(
@@ -11,6 +13,100 @@ const databaseModels = {
     );
     if (!object) object = null;
     return object;
+  },
+
+  addHistory: async function addHistory(fastify, data) {
+    const {matchId, players, time} = data;
+
+    const result = await fastify.db.run(
+      "INSERT INTO history (match_id, created_at, duration, game_type) VALUES (?, ?, ?, ?)",
+      [matchId, time.startedAt, time.duration, 'RANKED']
+    );
+
+    const history_id = result.lastID;
+
+    const insertPlayers = await fastify.db.prepare(
+      "INSERT INTO history_players (history_id, user_id, position, score, isWinner) VALUES (?, ?, ?, ?, ?)"
+    );
+
+    const sortedPlayers = Object.values(players).sort((a, b) => a.score - b.score);
+
+    for (let i = 0; i < sortedPlayers.length; i++) {
+      const player = sortedPlayers[i];
+      await insertPlayers.run([
+        history_id,
+        player.id,
+        i + 1,
+        player.score,
+        player.winner,
+      ]);
+    }
+
+    await insertPlayers.finalize();
+
+    return true;
+  },
+
+  getHistory: async function getHistory(fastify, user_id) {
+    const rows = await fastify.db.all(`
+      SELECT 
+        h.id AS history_id,
+        h.match_id,
+        h.created_at,
+        h.game_type,
+        h.duration,
+        hp.user_id,
+        hp.score,
+        hp.position,
+        hp.isWinner
+      FROM history h
+      JOIN history_players hp ON hp.history_id = h.id
+      WHERE h.id IN (
+        SELECT history_id FROM history_players WHERE user_id = ?
+      )
+      ORDER BY h.created_at DESC
+    `, [user_id]
+    );
+
+    const historyMap = new Map();
+    let   total = 0;
+    let   wins = 0;
+    
+    rows.forEach(row => {
+      if (!historyMap.has(row.history_id)) {
+        historyMap.set(row.history_id, {
+          match_id: row.match_id,
+          created_at: row.created_at,
+          game_type: row.game_type,
+          duration: row.duration,
+          players: []
+        });
+      }
+      historyMap.get(row.history_id).players.push({
+        user_id: row.user_id,
+        score: row.score,
+        position: row.position,
+        isWinner: !!row.isWinner
+      });
+
+      if (row.user_id === user_id) {
+        total++;
+        if (row.isWinner) wins++;
+      }
+    });
+
+    const losses = total - wins;
+    const win_rate = total > 0 ? Number((wins / total * 100).toFixed(2)) : 0;
+
+    return {
+      stats: {
+        total_games: total,
+        wins,
+        losses,
+        win_rate
+      },
+      history: Array.from(historyMap.values())
+    };
   },
 
   getUserPassword: async function getUserPassword(fastify, email) {
@@ -240,42 +336,45 @@ const databaseModels = {
   },
 
   setRank: async function setRank(fastify, data) {
-    const RANKS = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER'];
-    const POINTS_PER_RANK = 100;
-    const MAX_RANK = Number.MAX_SAFE_INTEGER - 200;
+    try {
+      const {user_id, rank} = data;
+      if (user_id === undefined || rank === undefined)
+        throw new Error("MISSING_PARAMETERS");
 
-    const {user_id, rank} = data;
+      const info = await this.getUserInformationRaw(fastify, { user_id });
+      let newRank = (info.rank ?? 0) + rank;
 
-    const info = await this.getRank(fastify, user_id);
-    let newRank = (info.mmr ?? 0) + (rank ?? 0);
-    if (newRank >= MAX_RANK)
-      newRank = MAX_RANK;
-    if (newRank < 0)
-      newRank = 0;
+      if (newRank < 0) newRank = 0;
 
-    let tierIndex = Math.floor(newRank / POINTS_PER_RANK);
-    if (tierIndex >= RANKS.length)
-      tierIndex = RANKS.length - 1;
-    const tier = RANKS[tierIndex];
-
-    const pts = tierIndex < RANKS.length - 1
-        ? newRank % POINTS_PER_RANK
-        : newRank - POINTS_PER_RANK * (RANKS.length - 1);
-
-    await fastify.db.run(
-      "UPDATE users SET rank = ?, rank_points = ?, tier = ? WHERE user_id = ?",
-      [newRank, pts, tier, user_id]
-    );
-
-    return true;
+      await fastify.db.run(
+        "UPDATE users SET rank = ? WHERE user_id = ?",
+        [newRank, user_id]
+      );
+      return true;
+    } catch (error) {
+      console.error("setRank error:", error);
+      return null;
+    }
   },
 
   getRank: async function getRank(fastify, user_id) {
-    const info = await this.getUserInformation(fastify, { user_id });
+    const info = await this.getUserInformationRaw(fastify, { user_id });
+    if (!info) return {rank: 0, rank_points: 0, tier: 'BRONZE'};
+
+    const RANKS = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND', 'MASTER'];
+    const POINTS_PER_RANK = 100;
+
+    const mmr = info?.rank ?? 0;
+    const tierIndex = Math.min(Math.floor(mmr / POINTS_PER_RANK), RANKS.length - 1);
+    const tier = RANKS[tierIndex];
+    const rank_points = tierIndex < RANKS.length - 1
+              ? mmr % POINTS_PER_RANK
+              : mmr - POINTS_PER_RANK * (RANKS.length - 1);
+
     return {
-      mmr: info.rank ?? 0,
-      pts: info.rank_points ?? 0,
-      tier: info.tier ?? 'BRONZE'
+      rank: mmr,
+      tier,
+      rank_points,
     };
   },
 
@@ -325,39 +424,68 @@ const databaseModels = {
     return true;
   },
 
-  // getUserInformation: async function getUserInformation(fastify, data) {
-  //   const response = await fastify.db.get(
-  //     "SELECT * FROM users WHERE user_id = ?",
-  //     [data.user_id]
-  //   );
-  //   return response ?? null;
-  // },
-
-  getUserInformation: async function getUserInformation(fastify, data) {
+  getUserInformationRaw: async function getUserInformationRaw(fastify, data) {
     const response = await fastify.db.get(
-      `
-      SELECT
-        *,
-        CASE
-          WHEN level >= 50 THEN 'Imortal'
-          WHEN level >= 45 THEN 'Legend'
-          WHEN level >= 40 THEN 'Elite'
-          WHEN level >= 35 THEN 'Champion'
-          WHEN level >= 30 THEN 'Veteran'
-          WHEN level >= 25 THEN 'Striker'
-          WHEN level >= 20 THEN 'Duelist'
-          WHEN level >= 15 THEN 'Fighter'
-          WHEN level >= 10 THEN 'Trainee'
-          WHEN level >= 5  THEN 'Fresh Blood'
-          ELSE 'Rookie'
-        END AS title
-      FROM users
-      WHERE user_id = ?
-      `,
+      "SELECT * FROM users WHERE user_id = ?",
       [data.user_id]
     );
-  
     return response ?? null;
+  },
+
+  getUserExperience: async function getUserExperience(fastify, user_id) {
+    const TITLES = [
+      'Rookie',
+      'Fresh Blood',
+      'Trainee',
+      'Fighter',
+      'Duelist',
+      'Striker',
+      'Veteran',
+      'Champion',
+      'Elite',
+      'Legend',
+      'Imortal'
+    ];
+
+    const info = await this.getUserInformationRaw(fastify, { user_id });
+    if (!info)
+      return {
+        level: 1,
+        experience_points: 0,
+        title: TITLES[0],
+        experience_to_next_level: XP_PER_LEVEL
+      };
+
+    const xp = info.experience_points ?? 0;
+    const level = info.level ?? 1;
+    const titleIndex = Math.min(Math.floor((level - 1) / 5), TITLES.length - 1);
+    const title = TITLES[titleIndex];
+
+    return {
+      level,
+      experience_points: xp,
+      title,
+      experience_to_next_level: XP_PER_LEVEL - xp
+    }
+  },
+
+  getUserInformation: async function getUserInformation(fastify, data) {
+    const user = await this.getUserInformationRaw(fastify, data);
+    if (!user) return null;
+
+    const rankData = await this.getRank(fastify, data.user_id);
+    const xpData = await this.getUserExperience(fastify, data.user_id);
+    
+    return {
+      ...user,
+      tier: rankData.tier,
+      rank: rankData.rank,
+      rank_points: rankData.rank_points,
+      level: xpData.level,
+      experience_points: xpData.experience_points,
+      title: xpData.title,
+      experience_to_next_level: xpData.experience_to_next_level
+    };
   },
   
   setUserTitle: async function setUserTitle(fastify, data) {
@@ -369,41 +497,32 @@ const databaseModels = {
   },
 
   setUserExperience: async function setUserExperience(fastify, data) {
-    const TITLES = {
-      1: 'Rookie',
-      5: 'Fresh Blood',
-      10: 'Trainee',
-      15: 'Fighter',
-      20: 'Duelist',
-      25: 'Striker',
-      30: 'Veteran',
-      35: 'Champion',
-      40: 'Elite',
-      45: 'Legend',
-      50: 'Imortal'
+    try {
+      const {user_id, experience} = data;
+      if (user_id === undefined || experience === undefined)
+        throw new Error("MISSING_PARAMETERS");
+
+      const info = await this.getUserInformationRaw(fastify, { user_id });
+      let newXp = experience + (info.experience_points ?? 0);
+      let newLevel = info.level ?? 1;
+
+      if (newXp < 0) newXp = 0;
+
+      while (newXp >= XP_PER_LEVEL) {
+        newXp -= XP_PER_LEVEL;
+        newLevel++;
+      }
+
+      await fastify.db(
+        'UPDATE users SET experience_points = ?, level = ? WHERE user_id = ?',
+        [newXp, newLevel, user_id]
+      )
+
+      return true;
+    } catch (error) {
+      console.error("setUserExperience error:", error);
+      return null;
     }
-    const XP_PER_LEVEL = 500;
-
-    const {user_id, experience} = data;
-
-    const info = await this.getUserInformation(fastify, { user_id });
-    let   xp = (info.experience_points ?? 0) + (experience ?? 0);
-    if (xp < 0)
-      xp = 0;
-    let   level = info.level ?? 1;
-
-    while (xp >= XP_PER_LEVEL) {
-      xp -= XP_PER_LEVEL;
-      level++;
-    }
-
-    if (TITLES[level])
-      await this.setUserTitle(fastify, { user_id, title: TITLES[level] });
-
-    await fastify.db.run(
-      "UPDATE users SET experience_points = ?, level = ? WHERE user_id = ?",
-      [xp, level, data.user_id]
-    );
   },
 
   // Auth configuration
@@ -494,41 +613,35 @@ const databaseModels = {
   // },
 
   getDataByPublicId: async function getAllUsersInformation(fastify, body) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM users WHERE public_id = ?",
+    const user = await fastify.db.get(
+      'SELECT user_id FROM users WHERE public_id = ?',
       [body.public_id]
     );
-  
-    if (!user_id?.user_id)
-      return null;
-  
-    const data = await fastify.db.get(
-      `
-      SELECT
-        users.*,
-        auth.username,
-        auth.email,
-        CASE
-          WHEN users.level >= 50 THEN 'Imortal'
-          WHEN users.level >= 45 THEN 'Legend'
-          WHEN users.level >= 40 THEN 'Elite'
-          WHEN users.level >= 35 THEN 'Champion'
-          WHEN users.level >= 30 THEN 'Veteran'
-          WHEN users.level >= 25 THEN 'Striker'
-          WHEN users.level >= 20 THEN 'Duelist'
-          WHEN users.level >= 15 THEN 'Fighter'
-          WHEN users.level >= 10 THEN 'Trainee'
-          WHEN users.level >= 5  THEN 'Fresh Blood'
-          ELSE 'Rookie'
-        END AS title
-      FROM users
-      JOIN auth ON auth.user_id = users.user_id
-      WHERE users.user_id = ?
-      `,
-      [user_id.user_id]
+
+    if (!user?.user_id) return null;
+
+    const baseUser = await this.getUserInformationRaw(fastify, { user_id: user.user_id });
+    if (!baseUser) return null;
+
+    const authData = await fastify.db.get(
+      'SELECT username, email FROM auth WHERE user_id = ?',
+      [user.user_id]
     );
-  
-    return data ?? null;
+
+    const rankData = await this.getRank(fastify, user.user_id);
+    const xpData = await this.getUserExperience(fastify, user.user_id);
+
+    return {
+      ...baseUser,
+      ...authData,
+      tier: rankData.tier,
+      rank: rankData.rank,
+      rank_points: rankData.rank_points,
+      level: xpData.level,
+      experience_points: xpData.experience_points,
+      title: xpData.title,
+      experience_to_next_level: xpData.experience_to_next_level
+    }
   },
   
 
