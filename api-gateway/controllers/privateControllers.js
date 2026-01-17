@@ -215,9 +215,29 @@ const privateControllers = {
         { user_id: req.user.user_id }
       );
 
-      console.log("History: " + JSON.stringify(history.data));
-      console.log("USER Info: " + JSON.stringify(data));
+      const h = history?.data || [];
+      console.log(`[\x1b[33m${req.user.username}\x1b[34m USER Info:\x1b[0m] ${JSON.stringify(data)}`);
+      console.log(`[\x1b[33m${req.user.username}\x1b[34m STATS Info:\x1b[0m] ${JSON.stringify(h.stats)}`);
+      console.log('HISTORY');
+      console.log("---------------------------");
+      for (const match of h.history) {
+        console.log("\x1b[34mMatch ID: \x1b[0m", match.match_id);
+        console.log("\x1b[34mData: \x1b[0m", match.created_at);
+        console.log("\x1b[34mTipo: \x1b[0m", match.game_type);
+        console.log("\x1b[34mDuração: \x1b[0m", match.duration);
+        for (const player of match.players) {
+          console.log("\x1b[34m  Player: \x1b[0m", player.user_id);
+          console.log("\x1b[34m  Username: \x1b[0m", player.username);
+          console.log("\x1b[34m  Score: \x1b[0m", player.score);
+          console.log("\x1b[34m  Posição: \x1b[0m", player.position);
+          console.log("\x1b[34m  Winner: \x1b[0m", player.isWinner);
+        }
+        console.log("---------------------------");
+      }
 
+      data.wins = h.stats.wins;
+      data.losses = h.stats.losses;
+      data.win_rate = h.stats.win_rate;
       data.state = getState({isOnline: req.user.isOnline, state: match.state});
       // const rank = await getRank(req.user);
       // data.rank = rank;

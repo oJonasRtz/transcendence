@@ -85,11 +85,7 @@
 				<p><strong>Level:</strong> <%= data.level %>: <%= data.experience_points %> pts </p>
 				<p><strong>Wins:</strong> <%= data.wins %> </p>
 				<p><strong>Losses:</strong> <%= data.losses %> </p>
-				<% if ((Number(data.wins) + Number(data.losses)) === 0) { %>
-					<p><strong>Win rate:</strong> 0%</p>
-				<% } else { %>
-					<p><strong>Win rate:</strong> <%= ((Number(data.wins) / (Number(data.wins) + Number(data.losses))) * 100).toFixed(2) %>% </p>
-				<% } %>
+				<p><strong>Win rate:</strong> <%= data.win_rate%>%</p>
 
 				<p>Pong is a multiplayer game. You can be happy here.</p>
 			</section>

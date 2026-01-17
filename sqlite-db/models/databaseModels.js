@@ -29,7 +29,7 @@ const databaseModels = {
       "INSERT INTO history_players (history_id, user_id, position, score, isWinner) VALUES (?, ?, ?, ?, ?)"
     );
 
-    const sortedPlayers = Object.values(players).sort((a, b) => a.score - b.score);
+    const sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
 
     for (let i = 0; i < sortedPlayers.length; i++) {
       const player = sortedPlayers[i];
@@ -58,8 +58,10 @@ const databaseModels = {
         hp.user_id,
         hp.score,
         hp.position,
-        hp.isWinner
+        hp.isWinner,
+        a.username
       FROM history h
+      JOIN auth a ON a.user_id = hp.user_id
       JOIN history_players hp ON hp.history_id = h.id
       WHERE h.id IN (
         SELECT history_id FROM history_players WHERE user_id = ?
@@ -84,6 +86,7 @@ const databaseModels = {
       }
       historyMap.get(row.history_id).players.push({
         user_id: row.user_id,
+        username: row.username,
         score: row.score,
         position: row.position,
         isWinner: !!row.isWinner
