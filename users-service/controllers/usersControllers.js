@@ -121,21 +121,6 @@ const usersControllers = {
     }
   },
 
-  setUserXp: async function setUserXp(req, reply) {
-    try {
-      if (!req.body || !req.body.user_id || req.body.xp === undefined)
-        return reply
-          .code(400)
-          .send("You need to inform an email and the xp amount");
-
-      await axios.post("https://sqlite-db:3002/setUserExperience", req.body);
-      return reply.code(200).send("Success");
-    } catch (error) {
-      console.error("USERS-SERVICE setUserXp", error.message);
-      return reply.code(500).send("An error happened");
-    }
-  },
-
   setRank: async function setRank(req, reply) {
     try {
       if (!req.body || !req.body.user_id || req.body.rank === undefined)
@@ -160,24 +145,6 @@ const usersControllers = {
     } catch (err) {
       console.error(
         "Users-Service getRank",
-        err?.response?.data || err.message
-      );
-      return reply.code(500).send("Internal Server Error");
-    }
-  },
-
-  getUserStatus: async function getUserStatus(req, reply) {
-    try {
-      if (!req.body || !req.body.email)
-        return reply.code(400).send("You need to inform an email here");
-      const status = await axios.post(
-        "https://sqlite-db:3002/getUserStatus",
-        req.body
-      );
-      return reply.code(200).send(status?.data ?? {});
-    } catch (err) {
-      console.error(
-        "Users-Service getUserStatus",
         err?.response?.data || err.message
       );
       return reply.code(500).send("Internal Server Error");
@@ -236,41 +203,6 @@ const usersControllers = {
         err?.response?.data || err.message
       );
       return reply.code(500).send("Error setting an avatar");
-    }
-  },
-
-  getInGame: async function getInGame(req, reply) {
-    try {
-      if (!req.body || !req.body.email)
-        return reply.code(400).send("You need to inform an email here");
-      const inGame = await axios.post(
-        "https://sqlite-db:3002/getInGame",
-        req.body
-      );
-      return reply.code(200).send(inGame ?? {});
-    } catch (err) {
-      console.error(
-        "Users-Service getInGame",
-        err?.response?.data || err.message
-      );
-      return reply.code(500).send("Internal Server Error");
-    }
-  },
-
-  setInGame: async function setInGame(req, reply) {
-    try {
-      if (!req.body || !req.body.email || req.body.inGame === undefined)
-        return reply
-          .code(400)
-          .send("You need to inform an email and the signal for inGame");
-      await axios.post("https://sqlite-db:3002/setInGame", req.body);
-      return reply.code(200).send("Success");
-    } catch (err) {
-      console.error(
-        "USERS-SERVICE setInGame",
-        err?.response?.data || err.message
-      );
-      return reply.code(500).send("An error happened");
     }
   },
 

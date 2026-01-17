@@ -228,19 +228,6 @@ const databaseControllers = {
 		}
 	},
 
-	getUserStatus: async function getUserStatus(fastify, req, reply) {
-		try {
-			if (!req.body || !req.body.email)
-				return reply.code(400).send("You need to inform an email here");
-			const status = await databaseModels.getUserStatus(fastify, req.body.email);
-			return reply.code(200).send({ status: status });
-		} catch (err) {
-			console.error("getUserStatus SQLITE-DB error", err?.response?.data || err.message);
-			return reply.code(500).send("An error happened");
-		}
-	},
-
-
 	getMatchId: async function getMatchId(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.email)

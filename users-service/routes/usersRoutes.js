@@ -10,7 +10,6 @@ const routes = [
 	{ method: 'POST', url: '/setUserAvatar', handler: usersControllers.setUserAvatar },
 	{ method: 'POST', url: '/setRank', handler: usersControllers.setRank },
 	{ method: 'POST', url: '/getRank', handler: usersControllers.getRank },
-	{ method: 'POST', url: '/getUserStatus', handler: usersControllers.getUserStatus },
 	{ method: 'POST', url: '/getUserInformation', handler: usersControllers.getUserInformation },
 	{ method: 'POST', url: '/setUserDescription', handler: usersControllers.setUserDescription },
 	{ method: 'GET', url: '/getAllUsersInformation', handler: usersControllers.getAllUsersInformation },

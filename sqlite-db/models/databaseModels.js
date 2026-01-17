@@ -367,26 +367,6 @@ const databaseModels = {
     };
   },
 
-  getUserStatus: async function getUserStatus(fastify, data) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM auth WHERE email = ?",
-      [data.email]
-    );
-    if (!user_id) return {};
-
-    const status = await fastify.db.get(
-      "SELECT isOnline, inQueue, inGame FROM users WHERE user_id = ?",
-      [user_id.id]
-    );
-
-    return (
-      (status.inGame && "IN_GAME") ||
-      (status.inQueue && "IN_QUEUE") ||
-      (status.isOnline && "ONLINE") ||
-      "OFFLINE"
-    );
-  },
-
   getUserInformationRaw: async function getUserInformationRaw(fastify, data) {
     const response = await fastify.db.get(
       "SELECT * FROM users WHERE user_id = ?",

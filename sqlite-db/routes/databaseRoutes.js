@@ -8,7 +8,6 @@ const routes = [
 	{ method: 'POST', url: '/registerNewUser', handler: databaseControllers.registerNewUser },
 	{ method: 'POST', url: '/tryLoginTheUser', handler: databaseControllers.tryLoginTheUser },
 	{ method: 'POST', url: '/getUserData', handler: databaseControllers.getUserData },
-	{ method: 'POST', url: '/getUserStatus', handler: databaseControllers.getUserStatus },
 	{ method: 'POST', url: '/checkEmail', handler: databaseControllers.checkEmail },
 	{ method: 'POST', url: '/newPassword', handler: databaseControllers.newPassword },
 	{ method: 'POST', url: '/createNewUser', handler: databaseControllers.createNewUser },
