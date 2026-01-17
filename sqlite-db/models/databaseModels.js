@@ -292,17 +292,6 @@ const databaseModels = {
     return true;
   },
 
-  setInQueue: async function setInQueue(fastify, data) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM auth WHERE email = ?",
-      [data.email]
-    );
-    await fastify.db.run("UPDATE users SET inQueue = ? WHERE user_id = ?", [
-      data.inQueue,
-      user_id.id,
-    ]);
-    return true;
-  },
 
   getUserAvatar: async function getUserAvatar(fastify, data) {
     const avatar = await fastify.db.get(
@@ -398,32 +387,6 @@ const databaseModels = {
     );
   },
 
-  getInGame: async function getInGame(fastify, email) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM auth WHERE email = ?",
-      [email]
-    );
-    if (!user_id) return null;
-    const inGame = await fastify.db.get(
-      "SELECT inGame FROM users WHERE user_id = ?",
-      [user_id.id]
-    );
-    return inGame ?? null;
-  },
-
-  setInGame: async function setInGame(fastify, data) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM auth WHERE email = ?",
-      [data.email]
-    );
-    if (!user_id) return null;
-    await fastify.db.run("UPDATE users SET inGame = ? WHERE user_id = ?", [
-      data.inGame,
-      user_id.id,
-    ]);
-    return true;
-  },
-
   getUserInformationRaw: async function getUserInformationRaw(fastify, data) {
     const response = await fastify.db.get(
       "SELECT * FROM users WHERE user_id = ?",
@@ -487,14 +450,6 @@ const databaseModels = {
       experience_to_next_level: xpData.experience_to_next_level
     };
   },
-  
-  setUserTitle: async function setUserTitle(fastify, data) {
-    await fastify.db.run("UPDATE users SET title = ? WHERE user_id = ?", [
-      data.title,
-      data.user_id,
-    ]);
-    return true;
-  },
 
   setUserExperience: async function setUserExperience(fastify, data) {
     try {
@@ -504,19 +459,11 @@ const databaseModels = {
 
       const info = await this.getUserInformationRaw(fastify, { user_id });
       let newXp = experience + (info.experience_points ?? 0);
-      let newLevel = info.level ?? 1;
 
-      if (newXp < 0) newXp = 0;
-
-      while (newXp >= XP_PER_LEVEL) {
-        newXp -= XP_PER_LEVEL;
-        newLevel++;
-      }
-
-      await fastify.db(
-        'UPDATE users SET experience_points = ?, level = ? WHERE user_id = ?',
-        [newXp, newLevel, user_id]
-      )
+      await fastify.db.run(
+        `UPDATE users SET experience_points = ? WHERE user_id = ?`,
+        [ newXp, user_id ]
+      );
 
       return true;
     } catch (error) {

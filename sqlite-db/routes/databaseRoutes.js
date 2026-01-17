@@ -28,8 +28,6 @@ const routes = [
 	{ method: 'POST', url: '/setUserDescription', handler: databaseControllers.setUserDescription },
 	{ method: 'POST', url: '/setUserExperience', handler: databaseControllers.setUserExperience },
 	{ method: 'POST', url: '/setUserFriends', handler: databaseControllers.setUserFriends },
-	{ method: 'POST', url: '/setUserWins', handler: databaseControllers.setUserWins },
-	{ method: 'POST', url: '/setUserLosses', handler: databaseControllers.setUserLosses },
 	{ method: 'POST', url: '/getAuthData', handler: databaseControllers.getAuthData },
 	{ method: 'POST', url: '/setAuthUsername', handler: databaseControllers.setAuthUsername },
 	{ method: 'POST', url: '/setAuthNickname', handler: databaseControllers.setAuthNickname },
