@@ -312,7 +312,7 @@ const usersControllers = {
 
   setUserDescription: async function setUserDescription(req, reply) {
     try {
-      if (!req.body || !req.body.user_id || !req.body.description)
+      if (!req.body || !req.body.user_id || req.body.description === undefined)
         return reply
           .code(400)
           .send("You need to inform an user_id and a description here");
@@ -323,7 +323,7 @@ const usersControllers = {
       return reply.code(200).send(response?.data ?? null);
     } catch (err) {
       console.error("USERS-SERVICE setUserDescription");
-      return reply.code(500).send(response?.data ?? null);
+      return reply.code(500).send(err?.response?.data || "An error happened");
     }
   },
 

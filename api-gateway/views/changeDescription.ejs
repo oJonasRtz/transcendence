@@ -32,7 +32,8 @@
 			<form action="/setUserDescription" method="POST">
 				<label>Type your description here:</label><br>
 				<!-- New knowledge, how to make textarea :) -->
-				<textarea name="description" placeholder="Type your description here" class="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500" rows=5 required></textarea><br><br>
+				<textarea name="description" placeholder="Type your description here" class="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500" rows=5 maxlength="500"><%= currentDescription || '' %></textarea><br><br>
+				<p class="text-xs text-gray-500">Maximum 500 characters. Leave empty to clear your description.</p><br>
 				<button type="submit">Submit</button>
 			</form>
 		</section>

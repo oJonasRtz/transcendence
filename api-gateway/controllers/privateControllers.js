@@ -773,28 +773,73 @@ const privateControllers = {
   changeDescription: async function changeDescription(req, reply) {
     const success = req.session.success ?? [];
     const error = req.session.error ?? [];
+    let currentDescription = "";
 
     delete req.session.success;
     delete req.session.error;
 
-    return reply.view("changeDescription", { success, error });
+    try {
+      const response = await axios.post(
+        "https://users-service:3003/getUserInformation",
+        { user_id: req.user.user_id }
+      );
+      currentDescription = response?.data?.description || "";
+    } catch (err) {
+      console.error(
+        "API-GATEWAY changeDescription Error:",
+        err?.response?.data || err.message
+      );
+    }
+
+    return reply.view("changeDescription", { success, error, currentDescription });
   },
 
   setUserDescription: async function setUserDescription(req, reply) {
+    const accept = req.headers?.accept || "";
+    const wantsJson =
+      accept.includes("application/json") ||
+      req.headers?.["x-requested-with"] === "XMLHttpRequest";
+
     try {
-      if (!req.body || !req.body.description) {
+      if (!req.body || req.body.description === undefined) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["Description is required"] });
+        }
         req.session.error = ["You need to fill all information"];
         return reply.redirect("/changeDescription");
       }
-      req.body.user_id = req.user.user_id;
+
+      const description = String(req.body.description);
+      if (description.length > 500) {
+        if (wantsJson) {
+          return reply
+            .code(400)
+            .send({ error: ["Description must be at most 500 characters"] });
+        }
+        req.session.error = ["Description must be at most 500 characters"];
+        return reply.redirect("/changeDescription");
+      }
+
       await axios.post(
         "https://users-service:3003/setUserDescription",
-        req.body
+        { user_id: req.user.user_id, description }
       );
       req.session.success = ["Description changed successfully"];
+      if (wantsJson) {
+        return reply
+          .code(200)
+          .send({ success: ["Description changed successfully"] });
+      }
       return reply.redirect("/home");
     } catch (err) {
       console.error("API-GATEWAY setUserDescription Error:", err);
+      if (wantsJson) {
+        return reply
+          .code(500)
+          .send({ error: ["Error setting your new description"] });
+      }
       req.session.error = ["Error setting your new description"];
       return reply.redirect("/changeDescription");
     }
