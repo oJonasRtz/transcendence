@@ -17,7 +17,7 @@ async function DescriptionFormContent() {
   try {
     const cookieStore = await cookies();
     const jwt = cookieStore.get('jwt');
-    const headerList = headers();
+    const headerList = await headers();
     const host = headerList.get('x-forwarded-host') || headerList.get('host');
     const protocol =
       headerList.get('x-forwarded-proto') ||
