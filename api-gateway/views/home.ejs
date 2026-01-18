@@ -113,6 +113,11 @@
 							<ul style="list-style: none; padding-left: 0;">
 							<% game.players.forEach(player => { %>
 								<li style="margin-left: 20px;">
+								<img 
+									src="<%= player.avatar %>"
+									alt="avatar"
+									style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;"
+								/>
 								<strong><%= player.name %></strong> —
 								Score: <%= player.score %>
 								</li>

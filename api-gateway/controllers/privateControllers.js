@@ -237,6 +237,8 @@ const privateControllers = {
       // data.wins = h.stats.wins;
       // data.losses = h.stats.losses;
       // data.win_rate = h.stats.win_rate;
+
+      console.log("history: " + JSON.stringify(h));
       data.state = getState({isOnline: req.user.isOnline, state: match.state});
       // const rank = await getRank(req.user);
       // data.rank = rank;

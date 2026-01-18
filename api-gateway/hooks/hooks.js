@@ -191,7 +191,7 @@ export async function authHook(req, reply) {
           "https://users-service:3003/getUserInformation",
           { user_id: data.user_id }
         );
-
+        console.log("authHOOk res: " + JSON.stringify(res.data));
         const nickname = res?.data?.nickname;
         const mc = new MatchClient();
         mc.connect({

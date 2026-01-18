@@ -57,11 +57,13 @@ const databaseModels = {
         h.duration,
         hp.user_id,
         hp.score,
-        hp.isWinner,
-        a.nickname
+        a.nickname,
+        u.avatar,
+        u.public_id
       FROM history h
       JOIN history_players hp ON hp.history_id = h.id
       JOIN auth a ON a.user_id = hp.user_id
+      JOIN users u ON u.user_id = hp.user_id
       WHERE h.id IN (
         SELECT history_id FROM history_players WHERE user_id = ?
       )
@@ -89,9 +91,10 @@ const databaseModels = {
 
       game.players.push({
         user_id: row.user_id,
+        public_id: row.public_id,
         name: row.nickname,
         score: row.score,
-        isWinner: !!row.isWinner
+        avatar: row.avatar,
       });
 
       if (row.user_id === user_id) {
@@ -358,7 +361,11 @@ const databaseModels = {
 
   getUserInformationRaw: async function getUserInformationRaw(fastify, data) {
     const response = await fastify.db.get(
-      "SELECT * FROM users WHERE user_id = ?",
+      `SELECT users.*, auth.nickname
+      FROM users
+      JOIN auth ON auth.user_id = users.user_id
+      WHERE users.user_id = ?
+      `,
       [data.user_id]
     );
     return response ?? null;
@@ -388,9 +395,15 @@ const databaseModels = {
         experience_to_next_level: XP_PER_LEVEL
       };
 
-    const xp = info.experience_points ?? 0;
-    const level = info.level ?? 1;
-    const titleIndex = Math.min(Math.floor((level - 1) / 5), TITLES.length - 1);
+    let xp = info.experience_points ?? 0;
+    let level = 1;
+    
+
+    while(xp >= XP_PER_LEVEL) {
+      level++;
+      xp -= XP_PER_LEVEL;
+    }
+    const titleIndex = Math.min(level - 1, TITLES.length - 1);
     const title = TITLES[titleIndex];
 
     return {
