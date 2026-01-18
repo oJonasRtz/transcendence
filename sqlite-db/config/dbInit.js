@@ -50,7 +50,7 @@ export default async function initDatabase() {
 		await db.exec(`
 			CREATE TABLE IF NOT EXISTS history (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				match_id INTEGER NOT NULL,
+				match_id INTEGER UNIQUE NOT NULL,
 				created_at TEXT DEFAULT '00/00/0000 | 00:00:00',
 				game_type TEXT DEFAULT 'RANKED',
 				duration TEXT DEFAULT '00:00'
@@ -62,11 +62,11 @@ export default async function initDatabase() {
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				user_id TEXT NOT NULL,
 				history_id INTEGER NOT NULL,
-				position INTEGER NOT NULL,
 				score INTEGER NOT NULL,
 				isWinner BOOLEAN DEFAULT FALSE,
 				FOREIGN KEY (history_id) REFERENCES history(id),
-				FOREIGN KEY (user_id) REFERENCES users(user_id)
+				FOREIGN KEY (user_id) REFERENCES users(user_id),
+				UNIQUE(history_id, user_id)
 			);
 		`);
 

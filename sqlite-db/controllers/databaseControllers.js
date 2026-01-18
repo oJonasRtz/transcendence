@@ -23,7 +23,9 @@ const databaseControllers = {
 		try {
 			if (!req.body || !req.body.user_id)
 				return reply.code(400).send("You need to inform your user_id here");
-			const history = await databaseModels.getHistory(fastify, req.body.user_id);
+
+			const limit = req.body.limit || 20;
+			const history = await databaseModels.getHistory(fastify, req.body.user_id, limit);
 			return reply.code(200).send(history ?? []);
 		} catch (err) {
 			console.error("getHistory SQLITE-DB error:", err?.response?.data || err.message);

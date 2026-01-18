@@ -26,7 +26,7 @@ const databaseModels = {
     const history_id = result.lastID;
 
     const insertPlayers = await fastify.db.prepare(
-      "INSERT INTO history_players (history_id, user_id, position, score, isWinner) VALUES (?, ?, ?, ?, ?)"
+      "INSERT INTO history_players (history_id, user_id, score, isWinner) VALUES (?, ?, ?, ?)"
     );
 
     const sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
@@ -47,7 +47,7 @@ const databaseModels = {
     return true;
   },
 
-  getHistory: async function getHistory(fastify, user_id) {
+  getHistory: async function getHistory(fastify, user_id, limit = 20) {
     const rows = await fastify.db.all(`
       SELECT 
         h.id AS history_id,
@@ -57,12 +57,11 @@ const databaseModels = {
         h.duration,
         hp.user_id,
         hp.score,
-        hp.position,
         hp.isWinner,
-        a.username
+        a.nickname
       FROM history h
-      JOIN auth a ON a.user_id = hp.user_id
       JOIN history_players hp ON hp.history_id = h.id
+      JOIN auth a ON a.user_id = hp.user_id
       WHERE h.id IN (
         SELECT history_id FROM history_players WHERE user_id = ?
       )
@@ -81,20 +80,26 @@ const databaseModels = {
           created_at: row.created_at,
           game_type: row.game_type,
           duration: row.duration,
-          players: []
+          players: [],
+          isVictory: false
         });
       }
-      historyMap.get(row.history_id).players.push({
+
+      const game = historyMap.get(row.history_id);
+
+      game.players.push({
         user_id: row.user_id,
-        username: row.username,
+        name: row.nickname,
         score: row.score,
-        position: row.position,
         isWinner: !!row.isWinner
       });
 
       if (row.user_id === user_id) {
         total++;
-        if (row.isWinner) wins++;
+        if (row.isWinner){
+          wins++;
+          game.isVictory = true;
+        }
       }
     });
 
@@ -108,7 +113,7 @@ const databaseModels = {
         losses,
         win_rate
       },
-      history: Array.from(historyMap.values())
+      history: Array.from(historyMap.values()).slice(0, limit)
     };
   },
 
@@ -119,48 +124,6 @@ const databaseModels = {
     );
     if (!object) object = null;
     return object;
-  },
-
-  getQueue: async function getQueue(fastify) {
-    const queue = await fastify.db.all(`
-			SELECT 
-				a.username,
-				u.rank,
-				u.user_id,
-				a.email
-			FROM users u
-			JOIN auth a ON a.id = u.user_id
-			WHERE u.isOnline = TRUE
-			AND u.inQueue = TRUE
-		`);
-
-    return queue ?? [];
-  },
-
-  getMatchId: async function getMatchId(fastify, email) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM auth WHERE email = ?",
-      [email]
-    );
-    if (!user_id) return null;
-    const match_id = await fastify.db.get(
-      "SELECT match_id FROM users WHERE user_id = ?",
-      [user_id.id]
-    );
-    return match_id?.match_id ?? null;
-  },
-
-  setMatchId: async function setMatchId(fastify, email, match_id) {
-    const user_id = await fastify.db.get(
-      "SELECT user_id FROM auth WHERE email = ?",
-      [email]
-    );
-    if (!user_id) return null;
-    await fastify.db.run("UPDATE users SET match_id = ? WHERE user_id = ?", [
-      match_id,
-      user_id.id,
-    ]);
-    return true;
   },
 
   registerNewUser: async function registerNewUser(
@@ -282,17 +245,40 @@ const databaseModels = {
   },
 
   setIsOnline: async function setIsOnline(fastify, data) {
-    if (data.isOnline === true)
+    const STATUS = {
+      true: 'IDLE',
+      false: 'OFFLINE',
+    };
+
+    try {
+      const {isOnline, user_id} = data;
+      if (user_id === undefined || isOnline === undefined)
+        throw new Error("MISSING_PARAMETERS");
+
+      const online =  !!isOnline;
+
       await fastify.db.run(
-        "UPDATE users SET isOnline = ? WHERE user_id = ? AND isOnline = false",
-        [data.isOnline, data.user_id]
+        "UPDATE users SET isOnline = ?, state = ? WHERE user_id = ?",
+        [online, STATUS[online], user_id]
       );
-    else if (data.isOnline === false)
-      await fastify.db.run(
-        "UPDATE users SET isOnline = ? WHERE user_id = ? AND isOnline = true",
-        [data.isOnline, data.user_id]
-      );
-    return true;
+      return true;
+    } catch (error) {
+      console.error("setIsOnline error:", error);
+      return null;
+    }
+
+    // if (data.isOnline === true)
+    //   await fastify.db.run(
+    //     "UPDATE users SET isOnline = ? WHERE user_id = ? AND isOnline = false",
+    //     [data.isOnline, data.user_id]
+    //   );
+    // else if (data.isOnline === false)
+    //   await fastify.db.run(
+    //     "UPDATE users SET isOnline = ? WHERE user_id = ? AND isOnline = true",
+    //     [data.isOnline, data.user_id]
+    //   );
+
+    // return true;
   },
 
 
@@ -411,7 +397,7 @@ const databaseModels = {
       level,
       experience_points: xp,
       title,
-      experience_to_next_level: XP_PER_LEVEL - xp
+      experience_to_next_level: Math.max(0, XP_PER_LEVEL - xp)
     }
   },
 

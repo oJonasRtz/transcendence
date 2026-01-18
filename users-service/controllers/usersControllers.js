@@ -153,10 +153,10 @@ const usersControllers = {
 
   setIsOnline: async function setIsOnline(req, reply) {
     try {
-      if (!req.body || !req.body.user_id || req.body.isOnline === undefined)
+      if (!req.body || !req.body.user_id || req.body.isOnline === undefined || ['boolean', 'number'].includes(typeof req.body.isOnline) === false)
         return reply
           .code(400)
-          .send("You need to inform an email and the signal for isOnline");
+          .send("INVALID_PARAMETERS");
       await axios.post("https://sqlite-db:3002/setIsOnline", req.body);
       return reply.code(200).send("Success");
     } catch (err) {

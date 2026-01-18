@@ -38,7 +38,8 @@ clean: down
 fclean: down
 	@echo "Erasing everything"
 	@docker system prune -a -f --volumes
-
+	@rm -f ./shared/ssl/server.crt ./shared/ssl/server.key
+	
 # Restart an individual service
 # how to use:
 # make restart-service
