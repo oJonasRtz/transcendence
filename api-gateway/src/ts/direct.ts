@@ -1,3 +1,11 @@
+type chatUser = {
+  name: string;
+  avatar: string;
+  public_id: string;
+};
+
+declare const io: any;
+
 export function direct() {
 
 const SOCKET_URL = window.location.origin;
@@ -203,4 +211,3 @@ socket.on("disconnect", () => {
 });
 
 }
-
