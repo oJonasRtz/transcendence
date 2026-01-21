@@ -38,9 +38,7 @@ export default function ChatPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [hideSystemMessages, setHideSystemMessages] = useState(false);
-  const [mobilePanel, setMobilePanel] = useState<"chat" | "users" | "alerts">(
-    "chat"
-  );
+  const [mobilePanel, setMobilePanel] = useState<"chat" | "users">("chat");
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // Temporary: use API gateway host so sockets work in dev on port 3042.
@@ -66,15 +64,16 @@ export default function ChatPage() {
       setMessages(msgs);
     });
 
-    socket.on("updateNotifications", (notifications: Notification[]) => {
-      setNotifications(notifications);
+    socket.on("updateNotifications", (incoming: Notification[]) => {
+      if (!incoming || incoming.length === 0) return;
+      setNotifications((prev) => [...incoming, ...prev]);
     });
 
     socket.on("disconnect", () => {
     });
 
     socket.on("kicked", (reason: string) => {
-      setNotifications([{ content: reason, isSystem: true }]);
+      setNotifications((prev) => [{ content: reason, isSystem: true }, ...prev]);
     });
 
     // Handle page unload (URL change, tab close, refresh)
@@ -130,6 +129,10 @@ export default function ChatPage() {
     socketRef.current?.emit("sendInvite");
   };
 
+  const handleDismissNotification = (index: number) => {
+    setNotifications((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
   const renderMessageContent = (msg: Message | Notification) => {
     if (msg.isLink) {
       return (
@@ -181,14 +184,11 @@ export default function ChatPage() {
           {[
             { id: "chat", label: "Chat" },
             { id: "users", label: "Users" },
-            { id: "alerts", label: "Alerts" },
           ].map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() =>
-                setMobilePanel(tab.id as "chat" | "users" | "alerts")
-              }
+              onClick={() => setMobilePanel(tab.id as "chat" | "users")}
               className={clsx(
                 "flex-1 rounded-md px-3 py-2 text-center transition",
                 mobilePanel === tab.id
@@ -201,7 +201,7 @@ export default function ChatPage() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_260px]">
+        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
           <CardShell
             className={clsx(
               "h-[520px] flex-col lg:flex",
@@ -338,49 +338,43 @@ export default function ChatPage() {
             </div>
           </CardShell>
 
-          <CardShell
-            className={clsx(
-              "h-[520px] flex-col lg:flex",
-              mobilePanel === "alerts" ? "flex" : "hidden"
-            )}
-          >
-            <CardHeader
-              title="Notifications"
-              subtitle="System status"
-              accentClassName="text-purple-400"
-            />
-            <div className="flex-1 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
-              {notifications.length === 0 ? (
-                <EmptyState
-                  title="All clear"
-                  message="System alerts appear here."
-                />
-              ) : (
-                notifications.map((note, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 p-4 transition hover:bg-white/5"
-                  >
-                    <img
-                      src="/public/images/system.png"
-                      alt="system"
-                      className="h-10 w-10 rounded-full border border-white/10 object-cover"
-                    />
-                    <div className="min-w-0">
-                      <p className="text-xs font-mono uppercase tracking-wider text-slate-400">
-                        System
-                      </p>
-                      <div className="text-sm text-slate-200">
-                        {renderMessageContent(note)}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </CardShell>
         </div>
       </div>
+
+      {notifications.length > 0 ? (
+        <div className="pointer-events-none fixed left-1/2 top-8 z-50 flex w-[min(360px,90vw)] -translate-x-1/2 flex-col gap-3">
+          {notifications.map((note, idx) => (
+            <div
+              key={`${idx}-${note.content}`}
+              className="pointer-events-auto relative rounded-lg border border-red-500/40 bg-slate-950/90 p-4 shadow-xl shadow-red-500/10 backdrop-blur"
+            >
+              <button
+                type="button"
+                onClick={() => handleDismissNotification(idx)}
+                className="absolute right-2 top-2 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-xs font-mono uppercase tracking-wider text-slate-300 transition hover:border-red-400/60 hover:text-white"
+                aria-label="Dismiss notification"
+              >
+                Close
+              </button>
+              <div className="flex items-center gap-3">
+                <img
+                  src="/public/images/system.png"
+                  alt="system"
+                  className="h-9 w-9 rounded-full border border-red-500/40 object-cover"
+                />
+                <div className="min-w-0">
+                  <p className="text-xs font-mono uppercase tracking-wider text-red-300">
+                    System Alert
+                  </p>
+                  <div className="text-sm text-slate-100">
+                    {renderMessageContent(note)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </main>
   );
 }
