@@ -108,7 +108,7 @@ export class Connection {
 				console.error(`Connection.#handleMessage: Error from server: ${message.error}`);
 			},
 			["TIMEOUT_REMOVE"]: () => {
-				this.#endGame(message.matchId, true);
+				this.#endGame(message.matchId, null, true);
 			}
 		}
 		try {

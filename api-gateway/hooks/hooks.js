@@ -179,6 +179,7 @@ export async function authHook(req, reply) {
     req.user = data; // decoded data
     req.user.isOnline = true;
     req.user.state = 'IDLE';
+
     try {
       await axios.post("https://users-service:3003/setIsOnline", {
         user_id: data.user_id,
@@ -186,19 +187,28 @@ export async function authHook(req, reply) {
       });
 
       if (!matchClient.has(token)) {
+        const res = await axios.post(
+          "https://users-service:3003/getUserInformation",
+          { user_id: data.user_id }
+        );
+        console.log("authHOOk res: " + JSON.stringify(res.data));
+        const nickname = res?.data?.nickname;
         const mc = new MatchClient();
         mc.connect({
-          name: data.username,
+          name: nickname,
           email: data.email,
           id: data.user_id,
           token: token,
         });
         matchClient.set(token, mc);
       }
+
     } catch (err) {
       console.error("authHook user state/match init failed:", err?.message || err);
     }
     
+    
+
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       const token = req.cookies.jwt;

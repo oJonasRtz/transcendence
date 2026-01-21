@@ -71,8 +71,14 @@ export class Client {
 	}
 
 	async #getRank() {
-		const rank = await data.sendRequest('getRank', { user_id: this.#info.id });
-		this.#info.rank = rank.mmr;
+		const res = await data.sendRequest('getRank', { user_id: this.#info.id });
+
+		if (!res || res.rank === undefined) {
+			this.#info.rank = 0;
+			console.log("nao achei o rank");
+			return;
+		}
+		this.#info.rank = res.rank;
 	}
 
 	get rank() {

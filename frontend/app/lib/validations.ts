@@ -32,6 +32,9 @@ export const signupSchema = z.object({
     .regex(usernameRegex, 'Invalid nickname')
     .optional()
     .or(z.literal('')),
+  termsAccepted: z.boolean().refine((value) => value, {
+    message: 'You must accept the Terms of Service and Privacy Policy',
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],

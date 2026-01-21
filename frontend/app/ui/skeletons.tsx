@@ -1,6 +1,8 @@
 // Loading animation
 const shimmer =
   'before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent';
+const dashboardShimmer =
+  'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent';
 
 export function CardSkeleton() {
   return (
@@ -84,61 +86,82 @@ export function LatestInvoicesSkeleton() {
 
 export default function DashboardSkeleton() {
   return (
-    <main className="p-4 md:p-6 lg:p-8">
-      {/* User Profile Header Skeleton */}
-      <div className="grid place-items-center mb-6">
-        <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 animate-pulse">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-white/10" />
-            <div className="flex-1">
-              <div className="h-8 bg-white/10 rounded w-48 mb-2" />
-              <div className="h-4 bg-white/10 rounded w-64 mb-3" />
-              <div className="h-5 bg-green-500/20 rounded w-20" />
+    <main className="p-4 md:p-6 lg:p-8 space-y-6">
+      <div
+        className={`rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl ${dashboardShimmer}`}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10" />
+        <div className="relative p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center gap-6">
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full bg-white/10" />
+              <div className="absolute bottom-1 right-1 h-4 w-4 rounded-full bg-green-400/30 border-2 border-slate-900" />
             </div>
+            <div className="space-y-3">
+              <div className="h-3 w-24 rounded bg-white/10" />
+              <div className="h-8 w-40 rounded bg-white/20" />
+              <div className="h-4 w-28 rounded bg-white/10" />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto lg:ml-auto">
+            <div className="h-12 w-full sm:w-40 rounded-lg bg-white/10" />
+            <div className="h-12 w-full sm:w-36 rounded-lg bg-white/5 border border-white/10" />
           </div>
         </div>
       </div>
 
-      {/* Play Button Skeleton */}
-      <div className="flex justify-center mb-8 animate-pulse">
-        <div className="h-14 w-40 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-lg" />
-      </div>
-
-      {/* Stats Cards Skeleton */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="rounded-lg border border-white/10 bg-white/5 p-6 animate-pulse">
-            <div className="h-4 bg-white/10 rounded w-20 mb-3" />
-            <div className="h-8 bg-white/10 rounded w-16 mb-2" />
-            <div className="h-3 bg-white/10 rounded w-24" />
+          <div
+            key={i}
+            className={`rounded-lg bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-white/10 backdrop-blur-sm p-6 shadow-2xl ${dashboardShimmer}`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="h-3 w-20 rounded bg-white/10" />
+                <div className="h-8 w-16 rounded bg-white/20" />
+              </div>
+              <div className="h-12 w-12 rounded-lg bg-white/10 border border-white/20" />
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Recent Matches Skeleton */}
-          <div className="rounded-lg border border-white/10 bg-white/5 p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-40 mb-4" />
-            <div className="space-y-3">
+          <div
+            className={`rounded-lg bg-slate-900/80 backdrop-blur-sm border border-white/10 shadow-2xl ${dashboardShimmer}`}
+          >
+            <div className="border-b border-white/10 p-6">
+              <div className="h-6 w-40 bg-white/10 rounded" />
+            </div>
+            <div className="divide-y divide-white/5">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-20 bg-white/5 border border-white/10 rounded-lg" />
+                <div key={i} className="p-4 flex items-center space-x-4">
+                  <div className="h-12 w-12 bg-white/10 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 bg-white/15 rounded" />
+                    <div className="h-3 w-24 bg-white/10 rounded" />
+                  </div>
+                  <div className="h-7 w-16 bg-white/10 rounded-lg" />
+                </div>
               ))}
             </div>
           </div>
 
-          {/* Activity Feed Skeleton */}
-          <div className="rounded-lg border border-white/10 bg-white/5 p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-32 mb-4" />
-            <div className="space-y-3">
+          <div
+            className={`rounded-lg bg-slate-900/80 backdrop-blur-sm border border-white/10 shadow-2xl ${dashboardShimmer}`}
+          >
+            <div className="border-b border-white/10 p-6">
+              <div className="h-6 w-44 bg-white/10 rounded" />
+            </div>
+            <div className="divide-y divide-white/5">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10" />
-                  <div className="flex-1">
-                    <div className="h-4 bg-white/10 rounded w-3/4 mb-2" />
-                    <div className="h-3 bg-white/10 rounded w-1/2" />
+                <div key={i} className="p-4 flex items-center space-x-3">
+                  <div className="h-10 w-10 bg-white/10 rounded-lg" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-64 bg-white/15 rounded" />
+                    <div className="h-3 w-32 bg-white/10 rounded" />
                   </div>
                 </div>
               ))}
@@ -146,51 +169,69 @@ export default function DashboardSkeleton() {
           </div>
         </div>
 
-        {/* Right Column */}
         <div className="space-y-6">
-          {/* Leaderboard Skeleton */}
-          <div className="rounded-lg border border-white/10 bg-white/5 p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-32 mb-4" />
-            <div className="space-y-3">
+          <div
+            className={`rounded-lg bg-slate-900/80 backdrop-blur-sm border border-white/10 shadow-2xl ${dashboardShimmer}`}
+          >
+            <div className="border-b border-white/10 p-6">
+              <div className="h-6 w-36 bg-white/10 rounded mb-2" />
+              <div className="h-4 w-24 bg-white/5 rounded" />
+            </div>
+            <div className="divide-y divide-white/5">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded bg-white/10" />
-                  <div className="w-8 h-8 rounded-full bg-white/10" />
+                <div key={i} className="p-4 flex items-center space-x-4">
+                  <div className="h-4 w-8 bg-white/10 rounded" />
+                  <div className="h-10 w-10 bg-white/10 rounded-full" />
                   <div className="flex-1">
-                    <div className="h-4 bg-white/10 rounded w-24" />
+                    <div className="h-4 w-28 bg-white/15 rounded" />
                   </div>
-                  <div className="h-4 bg-white/10 rounded w-12" />
+                  <div className="space-y-1">
+                    <div className="h-5 w-12 bg-blue-500/20 rounded" />
+                    <div className="h-3 w-8 bg-white/10 rounded" />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Friends List Skeleton */}
-          <div className="rounded-lg border border-white/10 bg-white/5 p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-24 mb-4" />
-            <div className="space-y-3">
+          <div
+            className={`rounded-lg bg-slate-900/80 backdrop-blur-sm border border-white/10 shadow-2xl ${dashboardShimmer}`}
+          >
+            <div className="border-b border-white/10 p-6">
+              <div className="h-6 w-36 bg-white/10 rounded mb-2" />
+              <div className="h-4 w-20 bg-white/5 rounded" />
+            </div>
+            <div className="divide-y divide-white/5">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10" />
-                  <div className="flex-1">
-                    <div className="h-4 bg-white/10 rounded w-32 mb-1" />
-                    <div className="h-3 bg-green-500/20 rounded w-16" />
+                <div key={i} className="p-4 flex items-center space-x-3">
+                  <div className="h-10 w-10 bg-white/10 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-28 bg-white/15 rounded" />
+                    <div className="h-3 w-16 bg-green-500/20 rounded" />
                   </div>
+                  <div className="h-5 w-5 bg-blue-500/20 rounded" />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Messages Skeleton */}
-          <div className="rounded-lg border border-white/10 bg-white/5 p-6 animate-pulse">
-            <div className="h-6 bg-white/10 rounded w-36 mb-4" />
-            <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10" />
-                  <div className="flex-1">
-                    <div className="h-4 bg-white/10 rounded w-28 mb-2" />
-                    <div className="h-3 bg-white/10 rounded w-full" />
+          <div
+            className={`rounded-lg bg-slate-900/80 backdrop-blur-sm border border-white/10 shadow-2xl ${dashboardShimmer}`}
+          >
+            <div className="border-b border-white/10 p-6">
+              <div className="flex items-center justify-between">
+                <div className="h-6 w-32 bg-white/10 rounded" />
+                <div className="h-6 w-8 bg-red-500/20 rounded-lg" />
+              </div>
+            </div>
+            <div className="divide-y divide-white/5">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-4 flex items-start space-x-3">
+                  <div className="h-12 w-12 bg-white/10 rounded-full" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 bg-white/15 rounded" />
+                    <div className="h-3 w-48 bg-white/10 rounded" />
+                    <div className="h-3 w-20 bg-white/10 rounded" />
                   </div>
                 </div>
               ))}

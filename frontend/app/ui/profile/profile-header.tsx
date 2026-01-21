@@ -25,7 +25,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
     <div className="flex flex-col items-center mb-6">
       {/* Avatar */}
       <img
-        src={profile.avatar || '/public/images/default.jpg'}
+        src={profile.avatar || '/images/default_avatar.png'}
         alt={`${profile.username}'s avatar`}
         className="w-32 h-32 rounded-full object-cover border-4 border-white/20 mb-4"
       />

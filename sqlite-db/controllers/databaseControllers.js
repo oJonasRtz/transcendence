@@ -7,6 +7,32 @@ const databaseControllers = {
 		return reply.send("The sqlite-db is working perfectly");
 	},
 
+	addHistory: async function addHistory(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.stats)
+				return reply.code(400).send("INVALID_FORMAT");
+			await databaseModels.addHistory(fastify, req.body.stats);
+			return reply.code(201).send("History added successfully");
+		} catch (err) {
+			console.error("addHistory SQLITE-DB error:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
+	getHistory: async function getHistory(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform your user_id here");
+
+			const limit = req.body.limit || 20;
+			const history = await databaseModels.getHistory(fastify, req.body.user_id, limit);
+			return reply.code(200).send(history ?? []);
+		} catch (err) {
+			console.error("getHistory SQLITE-DB error:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	registerNewUser: async function registerNewUser(fastify, req, reply) {
 		try {
 			const { username, nickname, password, email, is2faEnable } = req.body;
@@ -203,19 +229,6 @@ const databaseControllers = {
 			return reply.code(500).send("An error happened");
 		}
 	},
-
-	getUserStatus: async function getUserStatus(fastify, req, reply) {
-		try {
-			if (!req.body || !req.body.email)
-				return reply.code(400).send("You need to inform an email here");
-			const status = await databaseModels.getUserStatus(fastify, req.body.email);
-			return reply.code(200).send({ status: status });
-		} catch (err) {
-			console.error("getUserStatus SQLITE-DB error", err?.response?.data || err.message);
-			return reply.code(500).send("An error happened");
-		}
-	},
-
 
 	getMatchId: async function getMatchId(fastify, req, reply) {
 		try {

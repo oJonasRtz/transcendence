@@ -1,51 +1,30 @@
 // app/ui/dashboard/recent-matches.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import { DashboardMatch } from '@/app/lib/dashboard-data';
+import { CardHeader, CardShell, EmptyState } from '@/app/ui/dashboard/card-primitives';
 
-export default async function RecentMatches({ userId }: { userId: number }) {
-  const matches = [
-    {
-      id: 1,
-      player1Id: userId,
-      player2Id: 201,
-      player1: { username: 'You', avatar: '/images/default_avatar.png' },
-      player2: { username: 'Nebula', avatar: '/images/avatar4.png' },
-      result: 'player1Win',
-      score: '11 - 7',
-      playedAt: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      player1Id: 202,
-      player2Id: userId,
-      player1: { username: 'Photon', avatar: '/images/avatar5.png' },
-      player2: { username: 'You', avatar: '/images/default_avatar.png' },
-      result: 'player2Win',
-      score: '11 - 9',
-      playedAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ];
+type RecentMatchesProps = {
+  matches?: DashboardMatch[];
+};
+
+export default async function RecentMatches({
+  matches = [],
+}: RecentMatchesProps) {
 
   return (
-    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
-      <div className="border-b border-white/10 p-6">
-        <h2 className="text-xl font-black tracking-tight text-white uppercase">
-          <span className="text-purple-400">//</span> Recent Matches
-        </h2>
-      </div>
+    <CardShell>
+      <CardHeader title="Recent Matches" accentClassName="text-purple-400" />
 
       <div className="divide-y divide-white/5">
         {matches.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="text-slate-500 font-mono text-sm">// NO MATCHES PLAYED YET</p>
-          </div>
+          <EmptyState
+            title="No matches yet"
+            message="Play your first match to see results here."
+          />
         ) : (
           matches.map((match) => {
-            const opponent =
-              match.player1Id === userId ? match.player2 : match.player1;
-            const isWin =
-              (match.player1Id === userId && match.result === 'player1Win') ||
-              (match.player2Id === userId && match.result === 'player2Win');
+            const isWin = match.result === 'win';
             const isDraw = match.result === 'draw';
 
             return (
@@ -57,15 +36,15 @@ export default async function RecentMatches({ userId }: { userId: number }) {
                   <div className="flex items-center space-x-4">
                     <div className="relative">
                       <Image
-                        src={opponent.avatar}
-                        alt={opponent.username}
+                        src={match.opponentAvatar}
+                        alt={match.opponentName}
                         width={48}
                         height={48}
                         className="rounded-full border-2 border-white/10 group-hover:border-purple-400/50 transition-colors"
                       />
                     </div>
                     <div>
-                      <p className="font-semibold text-white">{opponent.username}</p>
+                      <p className="font-semibold text-white">{match.opponentName}</p>
                       <p className="text-sm font-mono text-slate-400">
                         {new Date(match.playedAt).toLocaleDateString()}
                       </p>
@@ -99,13 +78,13 @@ export default async function RecentMatches({ userId }: { userId: number }) {
 
       <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
-          href="/matches"
+          href="/dashboard/matches"
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
-          View all matches 
+          View all matches
           <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
-    </div>
+    </CardShell>
   );
 }

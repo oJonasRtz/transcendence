@@ -6,6 +6,7 @@ import {
   UserIcon,
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 import { ButtonGlimmer } from './button-glimmer';
 import { signup } from '@/app/actions/auth';
 import Captcha from './captcha';
@@ -19,6 +20,7 @@ export default function SignupForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
@@ -188,13 +190,43 @@ export default function SignupForm() {
           </div>
           <Captcha />
         </div>
+
+        {/* Terms Acceptance */}
+        <div className="rounded-lg border border-white/10 bg-white/5 p-4 backdrop-blur-md">
+          <div className="flex items-start gap-3">
+            <input
+              id="termsAccepted"
+              name="termsAccepted"
+              type="checkbox"
+              className="mt-1 h-4 w-4 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-2 focus:ring-blue-500/50"
+              checked={termsAccepted}
+              onChange={(event) => setTermsAccepted(event.target.checked)}
+              disabled={isPending}
+              required
+            />
+            <label
+              htmlFor="termsAccepted"
+              className="text-xs text-slate-300 leading-relaxed"
+            >
+              I agree to the{' '}
+              <Link href="/terms" className="text-blue-400 hover:text-blue-300">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="text-blue-400 hover:text-blue-300">
+                Privacy Policy
+              </Link>
+              .
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Submit Button - Holographic Style */}
       <ButtonGlimmer
         type="submit"
         className="w-full h-12 text-sm font-bold uppercase tracking-wider shadow-lg shadow-blue-500/20"
-        disabled={isPending}
+        disabled={isPending || !termsAccepted}
       >
         {isPending ? (
           <span className="flex items-center justify-center gap-2">

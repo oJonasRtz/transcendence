@@ -83,13 +83,52 @@
 				<p><strong>Title:</strong> <%= data.title %> </p>
 				<p><strong>Rank: </strong> <%= data.tier %> <%= data.rank_points%> pts </p>
 				<p><strong>Level:</strong> <%= data.level %>: <%= data.experience_points %> pts </p>
-				<p><strong>Wins:</strong> <%= data.wins %> </p>
-				<p><strong>Losses:</strong> <%= data.losses %> </p>
-				<% if ((Number(data.wins) + Number(data.losses)) === 0) { %>
-					<p><strong>Win rate:</strong> 0%</p>
-				<% } else { %>
-					<p><strong>Win rate:</strong> <%= ((Number(data.wins) / (Number(data.wins) + Number(data.losses))) * 100).toFixed(2) %>% </p>
-				<% } %>
+				<p><strong>Wins:</strong> <%= history.stats.wins %> </p>
+				<p><strong>Losses:</strong> <%= history.stats.losses %> </p>
+				<p><strong>Win rate:</strong> <%= history.stats.win_rate%>%</p>
+				
+				<h1>History</h1>
+					<% if (history && history.history && history.history.length > 0) { %>
+					<section>
+						<% history.history.forEach(game => { %>
+						<article style="border: 1px solid black; padding: 10px; margin-bottom: 10px;">
+							
+							<div style="display: flex; align-items: center; margin-bottom: 8px;">
+							<span style="
+								display: inline-block;
+								width: 10px;
+								height: 10px;
+								border-radius: 50%;
+								background-color: <%= game.isVictory ? 'green' : 'red' %>;
+								margin-right: 6px;
+							"></span>
+							<strong><%= game.isVictory ? 'Victory' : 'Defeat' %></strong>
+							</div>
+
+							<p><strong>Game ID:</strong> <%= game.match_id %></p>
+							<p><strong>Date:</strong> <%= game.created_at %></p>
+							<p><strong>Type:</strong> <%= game.game_type %></p>
+							<p><strong>Duration:</strong> <%= game.duration %></p>
+
+							<ul style="list-style: none; padding-left: 0;">
+							<% game.players.forEach(player => { %>
+								<li style="margin-left: 20px;">
+								<img 
+									src="<%= player.avatar %>"
+									alt="avatar"
+									style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;"
+								/>
+								<strong><%= player.name %></strong> —
+								Score: <%= player.score %>
+								</li>
+							<% }) %>
+							</ul>
+						</article>
+						<% }) %>
+					</section>
+					<% } else { %>
+					<h3>You have no games played yet.</h3>
+					<% } %>
 
 				<p>Pong is a multiplayer game. You can be happy here.</p>
 			</section>

@@ -1,8 +1,32 @@
+type chatUser = {
+  name: string;
+  avatar: string;
+  public_id: string;
+};
+
 export function chat() {
+  const showSocketError = (message: string) => {
+    const banner = document.createElement("div");
+    banner.textContent = message;
+    banner.style.padding = "12px 16px";
+    banner.style.margin = "12px 0";
+    banner.style.border = "1px solid #ef4444";
+    banner.style.background = "rgba(239, 68, 68, 0.1)";
+    banner.style.color = "#fecaca";
+    banner.style.fontWeight = "bold";
+    banner.style.borderRadius = "8px";
+    document.body.prepend(banner);
+  };
+
+  const ioRef = (window as any).io;
+  if (!ioRef) {
+    showSocketError("Chat unavailable: socket.io failed to load.");
+    return;
+  }
 
 const SOCKET_URL = window.location.origin;
 
-const socket = io(SOCKET_URL, {
+const socket = ioRef(SOCKET_URL, {
     transports: ["websocket"], 
     withCredentials: true
 });
@@ -222,4 +246,3 @@ socket.on("disconnect", () => {
 });
 
 }
-

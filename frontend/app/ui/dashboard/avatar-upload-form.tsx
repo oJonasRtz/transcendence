@@ -46,7 +46,7 @@ export default function AvatarUploadForm({ user }: AvatarUploadFormProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(
-    user.avatar || '/public/images/default.jpg'
+    user.avatar || '/images/default_avatar.png'
   );
 
   // Handle file preview
@@ -122,7 +122,7 @@ export default function AvatarUploadForm({ user }: AvatarUploadFormProps) {
           <div className="relative group w-40 h-40">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition duration-300"></div>
             <img
-              src={currentAvatarUrl || '/public/images/default.jpg'}
+              src={currentAvatarUrl || '/images/default_avatar.png'}
               alt="Current Avatar"
               className="relative h-40 w-40 rounded-full border-4 border-white/20 shadow-2xl object-cover transition-all duration-300"
             />
