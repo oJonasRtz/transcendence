@@ -20,7 +20,7 @@ export default async function FriendsList({ friends }: FriendsListProps) {
         subtitle={`${onlineFriends.length} active`}
       />
 
-      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
         {onlineFriends.length === 0 ? (
           <EmptyState
             title="No friends online"

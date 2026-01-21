@@ -29,7 +29,7 @@ export default async function RecentMessages({
         }
       />
 
-      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
         {recentConversations.length === 0 ? (
           <EmptyState
             title="No messages yet"

@@ -3,6 +3,12 @@
 import { useEffect, useState, useRef, FormEvent } from "react";
 import { io, Socket } from "socket.io-client";
 import Link from "next/link";
+import clsx from "clsx";
+import {
+  CardHeader,
+  CardShell,
+  EmptyState,
+} from "@/app/ui/chat/chat-card-primitives";
 
 interface User {
   name: string;
@@ -31,6 +37,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [hideSystemMessages, setHideSystemMessages] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // Temporary: use API gateway host so sockets work in dev on port 3042.
@@ -86,9 +93,13 @@ export default function ChatPage() {
     };
   }, []);
 
+  const visibleMessages = hideSystemMessages
+    ? messages.filter((message) => !message.isSystem)
+    : messages;
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [visibleMessages.length]);
 
   const handleSendMessage = (e: FormEvent) => {
     e.preventDefault();
@@ -98,8 +109,7 @@ export default function ChatPage() {
     setInputValue("");
   };
 
-  const handleSendInvite = (e: FormEvent) => {
-    e.preventDefault();
+  const handleSendInvite = () => {
     socketRef.current?.emit("sendInvite");
   };
 
@@ -128,99 +138,193 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <Link href="/" className="text-blue-500 hover:underline w-fit">
-        ← Home
-      </Link>
-      <div className="flex gap-4">
-      {/* Users sidebar */}
-      <div className="w-48 flex flex-col gap-2">
-        <h3 className="font-bold">Users</h3>
-        {users.map((user) => (
-          <div key={user.public_id} className="flex items-center gap-2">
-            <Link
-              href={`/profile/${user.public_id}`}
-              className="flex items-center gap-2"
-            >
-              <img
-                src={`/public/uploads/${user.avatar}.png`}
-                alt={user.name}
-                className="w-[60px] h-[60px] rounded-full object-cover"
-              />
-              <span className="font-bold">{user.name}</span>
-            </Link>
-          </div>
-        ))}
-      </div>
+    <main className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+      <div className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-blue-500/10 blur-[140px]" />
+      <div className="pointer-events-none absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-indigo-500/10 blur-[160px]" />
 
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto max-h-[400px]">
-          {messages.map((msg, idx) => (
-            <div key={idx} className="flex items-start gap-3 p-2">
-              <img
-                src={
-                  msg.isSystem
-                    ? "/public/images/system.png"
-                    : msg.avatar || "/images/default_avatar.png"
-                }
-                alt="avatar"
-                className="w-[60px] h-[60px] rounded-full object-cover"
-              />
-              <div className="min-w-0 break-words">
-                <strong className="block">
-                  {msg.isSystem ? "SYSTEM" : msg.username || "Anonymous"}
-                </strong>
-                {renderMessageContent(msg)}
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
+      <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-xs font-mono uppercase tracking-widest text-slate-400">
+              <span className="text-blue-400">//</span> Global Channel
+            </p>
+            <h1 className="text-3xl font-black tracking-tight text-white">
+              Galactic Chat
+            </h1>
+          </div>
+          <Link
+            href="/dashboard"
+            className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-mono uppercase tracking-wider text-slate-300 transition hover:border-blue-500/40 hover:text-white"
+          >
+            ← Back to Dashboard
+          </Link>
         </div>
 
-        {/* Message form */}
-        <form onSubmit={handleSendMessage} className="flex gap-2 mt-4">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 px-3 py-2 border rounded"
-            autoComplete="off"
-            suppressHydrationWarning
-          />
-          <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-            Send
-          </button>
-        </form>
-
-        {/* Invite button */}
-        <form onSubmit={handleSendInvite} className="mt-2">
-          <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded">
-            Send Invite
-          </button>
-        </form>
-      </div>
-
-      {/* Notifications */}
-      <div className="w-64">
-        <h3 className="font-bold mb-2">Notifications</h3>
-        {notifications.map((note, idx) => (
-          <div key={idx} className="flex items-start gap-3 p-2">
-            <img
-              src="/public/images/system.png"
-              alt="system"
-              className="w-[60px] h-[60px] rounded-full object-cover"
+        <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_260px]">
+          <CardShell className="hidden h-[520px] flex-col lg:flex">
+            <CardHeader
+              title="Users Online"
+              subtitle={`${users.length} active`}
+              accentClassName="text-green-400"
             />
-            <div className="min-w-0 break-words">
-              <strong className="block">SYSTEM</strong>
-              {renderMessageContent(note)}
+            <div className="flex-1 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
+              {users.length === 0 ? (
+                <EmptyState
+                  title="No one here"
+                  message="Invite friends to join the channel."
+                />
+              ) : (
+                users.map((user) => (
+                  <Link
+                    key={user.public_id}
+                    href={`/profile/${user.public_id}`}
+                    className="flex items-center gap-3 p-4 transition hover:bg-white/5"
+                  >
+                    <img
+                      src={`/public/uploads/${user.avatar}.png`}
+                      alt={user.name}
+                      className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                    />
+                    <span className="truncate text-sm font-semibold text-slate-200">
+                      {user.name}
+                    </span>
+                  </Link>
+                ))
+              )}
             </div>
-          </div>
-        ))}
+          </CardShell>
+
+          <CardShell className="flex h-[70vh] min-h-[420px] flex-col lg:h-[520px]">
+            <CardHeader
+              title="Global Chat"
+              subtitle="Live channel // open to all"
+              accentClassName="text-blue-400"
+              action={
+                <label className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-slate-400">
+                  <input
+                    type="checkbox"
+                    className="h-3.5 w-3.5 rounded border-white/20 bg-white/10 text-blue-500 focus:ring-2 focus:ring-blue-500/40"
+                    checked={hideSystemMessages}
+                    onChange={(event) =>
+                      setHideSystemMessages(event.target.checked)
+                    }
+                  />
+                  Hide system
+                </label>
+              }
+            />
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3 scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
+              {visibleMessages.length === 0 ? (
+                <EmptyState
+                  title="No messages"
+                  message="Say hello to start the feed."
+                />
+              ) : (
+                visibleMessages.map((msg, idx) => {
+                  const isSystem = Boolean(msg.isSystem);
+                  return (
+                    <div
+                      key={idx}
+                      className={clsx(
+                        "flex items-start gap-3 rounded-lg border p-3 transition",
+                        isSystem
+                          ? "border-red-500/30 bg-red-500/10"
+                          : "border-white/10 bg-white/5 hover:bg-white/10"
+                      )}
+                    >
+                      <img
+                        src={
+                          msg.isSystem
+                            ? "/public/images/system.png"
+                            : msg.avatar || "/images/default_avatar.png"
+                        }
+                        alt="avatar"
+                        className="h-11 w-11 rounded-full border border-white/10 object-cover"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                          {msg.isSystem ? "System" : msg.username || "Anonymous"}
+                        </p>
+                        <div className="text-sm text-slate-200">
+                          {renderMessageContent(msg)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="border-t border-white/10 p-4">
+              <form
+                onSubmit={handleSendMessage}
+                className="flex flex-col gap-3 md:flex-row"
+              >
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Broadcast a message..."
+                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/30"
+                  autoComplete="off"
+                  suppressHydrationWarning
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-blue-500/20 transition hover:from-blue-600 hover:to-indigo-600"
+                >
+                  Send
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSendInvite}
+                  className="inline-flex items-center justify-center rounded-lg border border-white/15 bg-white/5 px-5 py-3 text-xs font-bold uppercase tracking-wider text-slate-200 transition hover:border-emerald-400/40 hover:text-white"
+                >
+                  Invite
+                </button>
+              </form>
+            </div>
+          </CardShell>
+
+          <CardShell className="hidden h-[520px] flex-col lg:flex">
+            <CardHeader
+              title="Notifications"
+              subtitle="System status"
+              accentClassName="text-purple-400"
+            />
+            <div className="flex-1 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
+              {notifications.length === 0 ? (
+                <EmptyState
+                  title="All clear"
+                  message="System alerts appear here."
+                />
+              ) : (
+                notifications.map((note, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-3 p-4 transition hover:bg-white/5"
+                  >
+                    <img
+                      src="/public/images/system.png"
+                      alt="system"
+                      className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-xs font-mono uppercase tracking-wider text-slate-400">
+                        System
+                      </p>
+                      <div className="text-sm text-slate-200">
+                        {renderMessageContent(note)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardShell>
+        </div>
       </div>
-      </div>
-    </div>
+    </main>
   );
 }
