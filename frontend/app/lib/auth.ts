@@ -28,6 +28,7 @@ export async function getUser(): Promise<User | null> {
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token.value, secret);
+
     return payload as unknown as User;
   } catch (error) {
     console.error('JWT verification failed:', error);

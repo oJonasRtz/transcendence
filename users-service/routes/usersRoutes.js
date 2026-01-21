@@ -5,18 +5,11 @@ const routes = [
 	{ method: 'POST', url: '/createNewUser', handler: usersControllers.createNewUser },
 	{ method: 'POST', url: '/validateUserEmail', handler: usersControllers.validateUserEmail },
 	{ method: 'POST', url: '/getIsOnline', handler: usersControllers.getIsOnline },
-	{ method: 'POST', url: '/getQueue', handler: usersControllers.getQueue },
 	{ method: 'POST', url: '/setIsOnline', handler: usersControllers.setIsOnline },
 	{ method: 'POST', url: '/getUserAvatar', handler: usersControllers.getUserAvatar },
 	{ method: 'POST', url: '/setUserAvatar', handler: usersControllers.setUserAvatar },
-	{ method: 'POST', url: '/setInGame', handler: usersControllers.setInGame },
-	{ method: 'POST', url: '/getInGame', handler: usersControllers.getInGame },
-	{ method: 'POST', url: '/setInQueue', handler: usersControllers.setInQueue },
 	{ method: 'POST', url: '/setRank', handler: usersControllers.setRank },
 	{ method: 'POST', url: '/getRank', handler: usersControllers.getRank },
-	{ method: 'POST', url: '/getUserStatus', handler: usersControllers.getUserStatus },
-	{ method: 'POST', url: '/setMatchId', handler: usersControllers.setMatchId },
-	{ method: 'POST', url: '/getMatchId', handler: usersControllers.getMatchId },
 	{ method: 'POST', url: '/getUserInformation', handler: usersControllers.getUserInformation },
 	{ method: 'POST', url: '/setUserDescription', handler: usersControllers.setUserDescription },
 	{ method: 'GET', url: '/getAllUsersInformation', handler: usersControllers.getAllUsersInformation },
@@ -29,7 +22,11 @@ const routes = [
 	{ method: 'POST', url: '/deleteAFriend', handler: usersControllers.deleteAFriend },
 	{ method: 'GET', url: '/getAllBlacklist', handler: usersControllers.getAllBlacklist },
 	{ method: 'POST', url: '/getPublicId', handler: usersControllers.getPublicId },
-	{ method: 'POST', url: '/setUserState', handler: usersControllers.setUserState }
+	{ method: 'POST', url: '/setUserState', handler: usersControllers.setUserState },
+	{ method: 'POST', url: '/setUserExperience', handler: usersControllers.setUserExperience },
+
+	{ method: 'POST', url: '/addHistory', handler: usersControllers.addHistory },
+	{ method: 'POST', url: '/getHistory', handler: usersControllers.getHistory },
 ];
 
 export default async function usersRoutes(fastify, options) {
