@@ -128,6 +128,7 @@ export async function signup(formData: FormData) {
   const confirmPassword = formData.get('confirmPassword') as string;
   const nickname = formData.get('nickname') as string;
   const captchaInput = formData.get('captcha') as string;
+  const termsAccepted = formData.get('termsAccepted') === 'on';
 
   // Validate input
   const validation = signupSchema.safeParse({
@@ -136,6 +137,7 @@ export async function signup(formData: FormData) {
     password,
     confirmPassword,
     nickname,
+    termsAccepted,
   });
   if (!validation.success) {
     const errors = validation.error.flatten().fieldErrors;
