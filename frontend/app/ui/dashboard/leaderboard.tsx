@@ -1,112 +1,87 @@
 // app/ui/dashboard/leaderboard.tsx
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  DashboardLeaderboardEntry,
+} from '@/app/lib/dashboard-data';
+import { CardHeader, CardShell, EmptyState } from '@/app/ui/dashboard/card-primitives';
 
-export default async function Leaderboard({ userId }: { userId: number }) {
-  const leaderboard = [
-    {
-      id: 1,
-      ranking: 1890,
-      user: {
-        id: 101,
-        username: 'Nova',
-        avatar: '/images/avatar1.png',
-        isOnline: true,
-      },
-    },
-    {
-      id: 2,
-      ranking: 1760,
-      user: {
-        id: 102,
-        username: 'Quark',
-        avatar: '/images/avatar2.png',
-        isOnline: false,
-      },
-    },
-    {
-      id: 3,
-      ranking: 1655,
-      user: {
-        id: 103,
-        username: 'Pulse',
-        avatar: '/images/avatar3.png',
-        isOnline: true,
-      },
-    },
-  ];
-  const userRank = 42;
+type LeaderboardProps = {
+  leaderboard: DashboardLeaderboardEntry[];
+  userRank?: number;
+};
 
+export default async function Leaderboard({
+  leaderboard,
+  userRank,
+}: LeaderboardProps) {
   return (
-    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
-      <div className="border-b border-white/10 p-6">
-        <h2 className="text-xl font-black tracking-tight text-white uppercase">
-          <span className="text-blue-400">//</span> Leaderboard
-        </h2>
-        {userRank && (
-          <p className="mt-2 text-sm font-mono text-slate-400">
-            <span className="text-blue-400">Your Rank:</span> #{userRank}
-          </p>
-        )}
-      </div>
+    <CardShell>
+      <CardHeader
+        title="Leaderboard"
+        accentClassName="text-blue-400"
+        subtitle={userRank ? `Your Rank: #${userRank}` : undefined}
+      />
 
       <div className="divide-y divide-white/5">
-        {leaderboard.map((entry, index) => {
-          const isCurrentUser = entry.user.id === userId;
-          const rankColors = ['text-yellow-400', 'text-slate-300', 'text-orange-500'];
+        {leaderboard.length === 0 ? (
+          <EmptyState
+            title="No leaderboard data"
+            message="Play matches to get ranked."
+          />
+        ) : (
+          leaderboard.map((entry, index) => {
+            const rankColors = ['text-yellow-400', 'text-slate-300', 'text-orange-500'];
 
-          return (
-            <div
-              key={entry.id}
-              className={`flex items-center space-x-4 p-4 transition-all duration-300 ${
-                isCurrentUser 
-                  ? 'bg-blue-500/10 border-l-4 border-blue-500' 
-                  : 'hover:bg-white/5'
-              }`}
-            >
-              <span
-                className={`w-8 text-lg font-black ${
-                  index < 3 ? rankColors[index] : 'text-slate-500'
-                }`}
+            return (
+              <div
+                key={entry.id}
+                className="flex items-center space-x-4 p-4 transition-all duration-300 hover:bg-white/5"
               >
-                #{index + 1}
-              </span>
+                <span
+                  className={`w-8 text-lg font-black ${
+                    index < 3 ? rankColors[index] : 'text-slate-500'
+                  }`}
+                >
+                  #{index + 1}
+                </span>
 
-              <div className="relative">
-                <Image
-                  src={entry.user.avatar}
-                  alt={entry.user.username}
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-white/10"
-                />
-                {entry.user.isOnline && (
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
-                )}
-              </div>
+                <div className="relative">
+                  <Image
+                    src={entry.avatar}
+                    alt={entry.username}
+                    width={40}
+                    height={40}
+                    className="rounded-full border-2 border-white/10"
+                  />
+                  {entry.isOnline && (
+                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
+                  )}
+                </div>
 
-              <div className="flex-1">
-                <p className="font-semibold text-white">{entry.user.username}</p>
-              </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-white">{entry.username}</p>
+                </div>
 
-              <div className="text-right">
-                <p className="font-black text-blue-400 text-lg">{entry.ranking}</p>
-                <p className="text-xs font-mono uppercase text-slate-500">ELO</p>
+                <div className="text-right">
+                  <p className="font-black text-blue-400 text-lg">{entry.ranking}</p>
+                  <p className="text-xs font-mono uppercase text-slate-500">ELO</p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
-          href="/leaderboard"
+          href="/dashboard/leaderboard"
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
-          View full leaderboard 
+          View full leaderboard
           <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
-    </div>
+    </CardShell>
   );
 }

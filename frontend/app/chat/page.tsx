@@ -163,7 +163,7 @@ export default function ChatPage() {
                 src={
                   msg.isSystem
                     ? "/public/images/system.png"
-                    : msg.avatar || "/app/public/images/default_avatar.png"
+                    : msg.avatar || "/images/default_avatar.png"
                 }
                 alt="avatar"
                 className="w-[60px] h-[60px] rounded-full object-cover"

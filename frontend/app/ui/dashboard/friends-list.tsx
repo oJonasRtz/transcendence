@@ -2,40 +2,30 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import { DashboardFriend } from '@/app/lib/dashboard-data';
+import { CardHeader, CardShell, EmptyState } from '@/app/ui/dashboard/card-primitives';
 
-export default async function FriendsList({ userId }: { userId: number }) {
-  const allFriends = [
-    {
-      id: 301,
-      username: 'Ion',
-      avatar: '/images/avatar2.png',
-      isOnline: true,
-    },
-    {
-      id: 302,
-      username: 'Drift',
-      avatar: '/images/avatar3.png',
-      isOnline: true,
-    },
-  ];
-  const onlineFriends = allFriends.filter((friend) => friend.isOnline);
+type FriendsListProps = {
+  friends: DashboardFriend[];
+};
+
+export default async function FriendsList({ friends }: FriendsListProps) {
+  const onlineFriends = friends.filter((friend) => friend.isOnline);
 
   return (
-    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
-      <div className="border-b border-white/10 p-6">
-        <h2 className="text-xl font-black tracking-tight text-white uppercase">
-          <span className="text-green-400">//</span> Online Friends
-        </h2>
-        <p className="mt-2 text-sm font-mono text-slate-400">
-          <span className="text-green-400">{onlineFriends.length}</span> active
-        </p>
-      </div>
+    <CardShell>
+      <CardHeader
+        title="Online Friends"
+        accentClassName="text-green-400"
+        subtitle={`${onlineFriends.length} active`}
+      />
 
       <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
         {onlineFriends.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="text-slate-500 font-mono text-sm">// NO FRIENDS ONLINE</p>
-          </div>
+          <EmptyState
+            title="No friends online"
+            message="Invite friends or check back later."
+          />
         ) : (
           onlineFriends.map((friend) => (
             <div
@@ -58,7 +48,10 @@ export default async function FriendsList({ userId }: { userId: number }) {
                 <p className="text-xs font-mono text-green-400 uppercase">Online</p>
               </div>
 
-              <button className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300">
+              <button
+                className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300"
+                aria-label={`Message ${friend.username}`}
+              >
                 <ChatBubbleLeftIcon className="h-5 w-5" />
               </button>
             </div>
@@ -68,13 +61,13 @@ export default async function FriendsList({ userId }: { userId: number }) {
 
       <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
-          href="/friends"
+          href="/dashboard/friends"
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
-          View all friends 
+          View all friends
           <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
       </div>
-    </div>
+    </CardShell>
   );
 }

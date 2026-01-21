@@ -4,53 +4,31 @@ import {
   StarIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
+import { DashboardActivity } from '@/app/lib/dashboard-data';
+import { CardHeader, CardShell, EmptyState } from '@/app/ui/dashboard/card-primitives';
 
-export default async function ActivityFeed({ userId }: { userId: number }) {
-  const activities = [
-    {
-      type: 'match',
-      date: new Date(),
-      data: {
-        player1Id: userId,
-        player1: { username: 'You' },
-        player2: { username: 'Nebula' },
-      },
-    },
-    {
-      type: 'achievement',
-      date: new Date(Date.now() - 3600000),
-      data: {
-        achievement: { name: 'First Win' },
-      },
-    },
-    {
-      type: 'friendship',
-      date: new Date(Date.now() - 7200000),
-      data: {
-        userId,
-        user: { username: 'You' },
-        friend: { username: 'Ion' },
-      },
-    },
-  ];
+type ActivityFeedProps = {
+  activity: DashboardActivity[];
+};
 
+export default async function ActivityFeed({ activity }: ActivityFeedProps) {
   return (
-    <div className="rounded-lg bg-slate-900/50 backdrop-blur-sm border border-white/10 shadow-2xl">
-      <div className="border-b border-white/10 p-6">
-        <h2 className="text-xl font-black tracking-tight text-white uppercase">
-          <span className="text-yellow-400">//</span> Recent Activity
-        </h2>
-      </div>
+    <CardShell>
+      <CardHeader title="Recent Activity" accentClassName="text-yellow-400" />
 
       <div className="divide-y divide-white/5">
-        {activities.length === 0 ? (
-          <div className="p-6 text-center">
-            <p className="text-slate-500 font-mono text-sm">// NO RECENT ACTIVITY</p>
-          </div>
+        {activity.length === 0 ? (
+          <EmptyState
+            title="No activity yet"
+            message="Play matches and unlock achievements to see updates here."
+          />
         ) : (
-          activities.map((activity, index) => (
-            <div key={index} className="p-4 hover:bg-white/5 transition-all duration-300">
-              {activity.type === 'match' && (
+          activity.map((item) => (
+            <div
+              key={item.id}
+              className="p-4 hover:bg-white/5 transition-all duration-300"
+            >
+              {item.type === 'match' && (
                 <ActivityItem
                   icon={BoltIcon}
                   iconColor="blue"
@@ -58,17 +36,15 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
                     <>
                       Played against{' '}
                       <span className="font-semibold text-blue-400">
-                        {activity.data.player1Id === userId
-                          ? activity.data.player2.username
-                          : activity.data.player1.username}
+                        {item.text.replace(/^Played against /, '')}
                       </span>
                     </>
                   }
-                  date={activity.date}
+                  date={item.date}
                 />
               )}
 
-              {activity.type === 'achievement' && (
+              {item.type === 'achievement' && (
                 <ActivityItem
                   icon={StarIcon}
                   iconColor="yellow"
@@ -76,15 +52,15 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
                     <>
                       Unlocked{' '}
                       <span className="font-semibold text-yellow-400">
-                        {activity.data.achievement.name}
+                        {item.text.replace(/^Unlocked /, '')}
                       </span>
                     </>
                   }
-                  date={activity.date}
+                  date={item.date}
                 />
               )}
 
-              {activity.type === 'friendship' && (
+              {item.type === 'friendship' && (
                 <ActivityItem
                   icon={UserGroupIcon}
                   iconColor="green"
@@ -92,20 +68,18 @@ export default async function ActivityFeed({ userId }: { userId: number }) {
                     <>
                       New friend:{' '}
                       <span className="font-semibold text-green-400">
-                        {activity.data.userId === userId
-                          ? activity.data.friend.username
-                          : activity.data.user.username}
+                        {item.text.replace(/^New friend: /, '')}
                       </span>
                     </>
                   }
-                  date={activity.date}
+                  date={item.date}
                 />
               )}
             </div>
           ))
         )}
       </div>
-    </div>
+    </CardShell>
   );
 }
 
@@ -118,7 +92,7 @@ function ActivityItem({
   icon: any;
   iconColor: 'blue' | 'yellow' | 'green';
   text: React.ReactNode;
-  date: Date;
+  date: string;
 }) {
   const colorClasses = {
     blue: 'bg-blue-500/10 text-blue-400 border-blue-500/30',

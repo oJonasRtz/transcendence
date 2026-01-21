@@ -48,7 +48,7 @@ export default async function UserProfileHeader({ user }: { user: User }) {
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition duration-300"></div>
             <img
-              src={avatar || '/public/images/default.jpg'}
+              src={avatar || '/images/default_avatar.png'}
               alt="User Avatar"
               className="relative h-40 w-40 rounded-full border-4 border-white/20 shadow-2xl"
             />

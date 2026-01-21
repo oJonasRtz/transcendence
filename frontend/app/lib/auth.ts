@@ -11,6 +11,7 @@ export interface User {
   user_id: string; // UUID from backend JWT payload
   email: string;
   username: string;
+  nickname?: string | null;
   public_id: string;
   iat: number;
   exp: number;
