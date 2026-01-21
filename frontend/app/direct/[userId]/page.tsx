@@ -43,6 +43,9 @@ export default function DirectMessagePage({ params }: PageProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [hideSystemMessages, setHideSystemMessages] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState<"chat" | "users" | "alerts">(
+    "chat"
+  );
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // Temporary: use API gateway host so sockets work in dev on port 3042.
@@ -99,6 +102,20 @@ export default function DirectMessagePage({ params }: PageProps) {
   const visibleMessages = hideSystemMessages
     ? messages.filter((message) => !message.isSystem)
     : messages;
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("chat:hideSystem");
+    if (stored === "true") {
+      setHideSystemMessages(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      "chat:hideSystem",
+      hideSystemMessages ? "true" : "false"
+    );
+  }, [hideSystemMessages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -194,8 +211,37 @@ export default function DirectMessagePage({ params }: PageProps) {
           </div>
         </div>
 
+        <div className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/5 p-1 text-xs font-mono uppercase tracking-wider text-slate-400 lg:hidden">
+          {[
+            { id: "chat", label: "Chat" },
+            { id: "users", label: "Users" },
+            { id: "alerts", label: "Alerts" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() =>
+                setMobilePanel(tab.id as "chat" | "users" | "alerts")
+              }
+              className={clsx(
+                "flex-1 rounded-md px-3 py-2 text-center transition",
+                mobilePanel === tab.id
+                  ? "bg-blue-500/20 text-blue-300"
+                  : "text-slate-400 hover:text-slate-200"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)_260px]">
-          <CardShell className="hidden h-[520px] flex-col lg:flex">
+          <CardShell
+            className={clsx(
+              "h-[520px] flex-col lg:flex",
+              mobilePanel === "users" ? "flex" : "hidden"
+            )}
+          >
             <CardHeader
               title="Participants"
               subtitle={`${users.length} connected`}
@@ -228,7 +274,12 @@ export default function DirectMessagePage({ params }: PageProps) {
             </div>
           </CardShell>
 
-          <CardShell className="flex h-[70vh] min-h-[420px] flex-col lg:h-[520px]">
+          <CardShell
+            className={clsx(
+              "h-[70vh] min-h-[420px] flex-col lg:h-[520px] lg:flex",
+              mobilePanel === "chat" ? "flex" : "hidden"
+            )}
+          >
             <CardHeader
               title="Direct Messages"
               subtitle="Encrypted relay // private link"
@@ -323,7 +374,12 @@ export default function DirectMessagePage({ params }: PageProps) {
             </div>
           </CardShell>
 
-          <CardShell className="hidden h-[520px] flex-col lg:flex">
+          <CardShell
+            className={clsx(
+              "h-[520px] flex-col lg:flex",
+              mobilePanel === "alerts" ? "flex" : "hidden"
+            )}
+          >
             <CardHeader
               title="Notifications"
               subtitle="System status"
