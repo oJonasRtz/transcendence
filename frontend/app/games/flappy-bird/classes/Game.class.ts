@@ -18,7 +18,7 @@ export class Game {
 			width: GAME_WIDTH,
 			height: GAME_HEIGHT,
 			backgroundColor: ex.Color.Blue,
-			displayMode: ex.DisplayMode.FillScreen,
+			displayMode: ex.DisplayMode.FitScreen,
 			canvasElement: document.createElement('canvas'),
 		});
 

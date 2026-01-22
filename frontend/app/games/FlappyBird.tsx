@@ -31,8 +31,8 @@ export default function FlappyBird({restartSignal}: {restartSignal: number}) {
 	return (
 		<div
 			id="flappy"
-			className="w-full h-full aspect-video rounded-lg"
-			style={{ minHeight: 600 }} 
+			className="w-full rounded-lg overflow-hidden"
+			style={{ minHeight: 540 }} 
 		/>
 	);
 }
