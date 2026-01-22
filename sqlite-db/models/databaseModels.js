@@ -57,6 +57,7 @@ const databaseModels = {
         h.duration,
         hp.user_id,
         hp.score,
+        hp.isWinner,
         a.nickname,
         u.avatar,
         u.public_id

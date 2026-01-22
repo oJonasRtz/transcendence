@@ -20,7 +20,6 @@ export class Server {
 		{ method: 'POST', url: '/join_party/:token', handler: this.#joinParty.bind(this) },
 		{ method: 'POST', url: '/leave_party', handler: this.#leaveParty.bind(this) },
 		{ method: 'GET', url: '/party', handler: this.#getParty.bind(this) },
-		{ method: 'GET', url: '/getRank', handler: this.#getRank.bind(this) },
 		// { method: 'GET', url: '/get_tournaments', handler: this.#getTournaments.bind(this) },
 		// { method: 'POST', url: '/create_tournament', handler: this.#setTournament.bind(this) },
 	];

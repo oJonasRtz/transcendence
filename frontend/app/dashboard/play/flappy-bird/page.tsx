@@ -1,6 +1,7 @@
 import { getUser } from '@/app/lib/auth';
 import { redirect } from 'next/navigation';
 import FlappyBirdGame from '@/app/ui/dashboard/flappy-bird-game';
+import FlappyBird from '@/app/games/FlappyBird';
 
 export default async function FlappyBirdPage() {
   const user = await getUser();

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
 import type { User } from '@/app/lib/auth';
+import FlappyBird from '@/app/games/FlappyBird';
 
 interface FlappyBirdGameProps {
   user: User;
@@ -13,10 +14,11 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [gameKey, setGameKey] = useState(0);
   const gameUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'https://localhost:3000'}/flappy-bird`;
+  const [restartSignal, setRestartSignal] = useState(0);
 
   const handleRestart = () => {
     // Force iframe reload by changing the key
-    setGameKey(prev => prev + 1);
+    setRestartSignal(prev => prev + 1);
   };
 
   return (
@@ -92,7 +94,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
 
         <div className="relative">
           {/* Game iframe */}
-          <iframe
+          {/* <iframe
             key={gameKey}
             ref={iframeRef}
             src={gameUrl}
@@ -100,7 +102,8 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
             style={{ minHeight: '600px' }}
             title="Flappy Bird Game"
             allow="accelerometer; gyroscope"
-          />
+          /> */}
+          <FlappyBird restartSignal={restartSignal} />
         </div>
       </div>
 
@@ -110,7 +113,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
         <ul className="space-y-2 text-slate-400 text-sm">
           <li className="flex items-start gap-2">
             <span className="text-green-400 mt-0.5">▸</span>
-            <span>Click or tap to make the bird flap</span>
+            <span>Click, tap, press ↑ or Space to flap</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-green-400 mt-0.5">▸</span>
