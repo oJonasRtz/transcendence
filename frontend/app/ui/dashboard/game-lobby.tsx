@@ -135,7 +135,7 @@ export default function GameLobby({ user }: GameLobbyProps) {
                   <h3 className="text-lg font-bold text-white mb-1">Pong</h3>
                   <p className="text-sm text-slate-400">Multiplayer</p>
                   <span className="inline-block mt-2 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs">
-                    Coming Soon
+                    Work in Progress
                   </span>
                 </button>
               </div>
@@ -145,10 +145,11 @@ export default function GameLobby({ user }: GameLobbyProps) {
                   if (selectedGame === 'flappy-bird') {
                     window.location.href = '/dashboard/play/flappy-bird';
                   } else {
-                    handleJoinQueue();
+                    // handleJoinQueue();
+                    window.location.href = '/dashboard/play/waiting-lobby';
                   }
                 }}
-                disabled={selectedGame === 'pong'}
+                // disabled={selectedGame === 'pong'}
                 className="group relative px-12 py-4 rounded-lg
                            bg-gradient-to-r from-blue-500 to-purple-600
                            hover:from-blue-600 hover:to-purple-700
@@ -159,8 +160,47 @@ export default function GameLobby({ user }: GameLobbyProps) {
               >
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400 to-purple-500
                                 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300 -z-10" />
-                {selectedGame === 'flappy-bird' ? 'Play Flappy Bird' : 'Find Match (Coming Soon)'}
+                {selectedGame === 'flappy-bird' ? 'Flappy Time!' : 'Paddle Up!'}
               </button>
+
+              {/* {selectedGame === 'flappy-bird' ? (
+                <button
+                  onClick={() => window.location.href = '/dashboard/play/flappy-bird'}
+                  className="group relative px-12 py-4 rounded-lg
+                            bg-gradient-to-r from-blue-500 to-purple-600
+                            hover:from-blue-600 hover:to-purple-700
+                            text-white font-bold text-lg
+                            transform transition-all duration-300
+                            hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/50"
+                >
+                  Play Flappy Bird
+                </button>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button
+                    onClick={() => window.location.href = '/dashboard/play/ranked'}
+                    className="group relative px-10 py-4 rounded-lg
+                              bg-purple-500/20 hover:bg-purple-500/30
+                              border border-purple-500/50 hover:border-purple-500/70
+                              text-purple-400 hover:text-purple-300
+                              font-bold transition-all duration-300"
+                  >
+                    Play Ranked
+                  </button>
+
+                  <button
+                    onClick={() => window.location.href = '/dashboard/play/tournament'}
+                    className="group relative px-10 py-4 rounded-lg
+                              bg-yellow-500/20 hover:bg-yellow-500/30
+                              border border-yellow-500/50 hover:border-yellow-500/70
+                              text-yellow-400 hover:text-yellow-300
+                              font-bold transition-all duration-300"
+                  >
+                    Join Tournament
+                  </button>
+                </div>
+              )} */}
+
             </div>
           )}
 

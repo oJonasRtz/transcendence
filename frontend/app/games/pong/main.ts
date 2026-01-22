@@ -38,7 +38,7 @@ export function waitGameStart(): Promise<void> {
  * @returns Wait a promisse till the game ends.
 */
 export async function startPong(data: StartType, container: HTMLElement): Promise<void> {
-  showDisconnectScreen();
+  showDisconnectScreen(container);
   gameState.setIdentity(data);
   await waitGameStart();
   hideDisconnectScreen();
@@ -49,12 +49,12 @@ export async function startPong(data: StartType, container: HTMLElement): Promis
 
 let disconnectScreen: HTMLDivElement | null = null;
 
-export function showDisconnectScreen() {
-	if (disconnectScreen) return; // já está visível
+export function showDisconnectScreen(container: HTMLElement) {
+	if (disconnectScreen) return;
 
 	disconnectScreen = document.createElement('div');
 	disconnectScreen.id = 'disconnect-screen';
-	disconnectScreen.style.position = 'fixed';
+	disconnectScreen.style.position = 'absolute';
 	disconnectScreen.style.top = '0';
 	disconnectScreen.style.left = '0';
 	disconnectScreen.style.width = '100%';
@@ -64,9 +64,9 @@ export function showDisconnectScreen() {
 	disconnectScreen.style.alignItems = 'center';
 	disconnectScreen.style.justifyContent = 'center';
 	disconnectScreen.style.gap = '15px';
-	disconnectScreen.style.zIndex = '9999';
+	disconnectScreen.style.zIndex = '10';
 
-	// Cria 3 bolinhas com contorno
+	// bolinhas
 	for (let i = 0; i < 3; i++) {
 		const dot = document.createElement('div');
 		dot.style.width = '20px';
@@ -78,9 +78,10 @@ export function showDisconnectScreen() {
 		disconnectScreen.appendChild(dot);
 	}
 
-	document.body.appendChild(disconnectScreen);
+	// garante que o container possa posicionar filhos absolutos
+	container.style.position = 'relative';
+	container.appendChild(disconnectScreen);
 
-	// Adiciona animação via CSS
 	const style = document.createElement('style');
 	style.innerHTML = `
 		@keyframes bounce {
@@ -90,6 +91,7 @@ export function showDisconnectScreen() {
 	`;
 	document.head.appendChild(style);
 }
+
 
 export function hideDisconnectScreen() {
 	if (!disconnectScreen) return;

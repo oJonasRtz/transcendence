@@ -10,6 +10,7 @@ type InfoType = {
 export class Match {
 	private serviceUrl: string = 'match-service:3010';
 	private ws: WebSocket | null = null;
+	private _game_type : 'RANKED' | 'TOURNAMENT' = 'RANKED';
 	private info: InfoType = {
 		name: null,
 		email: null,
@@ -26,6 +27,14 @@ export class Match {
 
 	get state(): string {
 		return this._state;
+	}
+
+	set game_type(type: 'RANKED' | 'TOURNAMENT') {
+		this._game_type = type;
+	}
+
+	get game_type(): 'RANKED' | 'TOURNAMENT' {
+		return this._game_type;
 	}
 
 	private listeners() {

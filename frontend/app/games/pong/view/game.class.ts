@@ -1,114 +1,115 @@
-import * as ex from 'excalibur';
-import { Paddle } from './actors/paddle';
-import { gameState, stats } from '../globals';
-import { Ball } from './actors/ball';
-import { ScoreBoard } from './ScoreBoard.class';
-import { hideDisconnectScreen, showDisconnectScreen } from '../main';
+import * as ex from "excalibur";
+import { Paddle } from "./actors/paddle";
+import { gameState, stats } from "../globals";
+import { Ball } from "./actors/ball";
+import { ScoreBoard } from "./ScoreBoard.class";
+import { hideDisconnectScreen, showDisconnectScreen } from "../main";
 
 export class Game {
-	private engine: ex.Engine;
-	private paddles: ex.Actor[] | null = null;
-	private ball: ex.Actor | null = null;
+  private engine: ex.Engine;
+  private paddles: ex.Actor[] | null = null;
+  private ball: ex.Actor | null = null;
 
-	private endPromisse !: Promise<void>;
-	private endResolve !: () => void;
-	private ended: boolean = false;
+  private endPromisse!: Promise<void>;
+  private endResolve!: () => void;
+  private ended: boolean = false;
 
-	constructor(container: HTMLElement) {
-		const canvas = document.createElement('canvas');
-		canvas.id = 'pong';
-		
-		container.innerHTML = '';
-		container.appendChild(canvas);
+  private container: HTMLElement;
 
-		this.engine = new ex.Engine({
-			canvasElement: canvas,
-			width: stats?.game?.width ?? 800,
-			height: stats?.game?.height ?? 600,
-			backgroundColor: new ex.Color(10, 20, 45, 1),
-			displayMode: ex.DisplayMode.FitScreen,
-		});
+  constructor(container: HTMLElement) {
+    const canvas = document.createElement("canvas");
+    canvas.id = "pong";
 
-		const score = new ScoreBoard(this.engine);
+    container.innerHTML = "";
+    container.appendChild(canvas);
+    this.container = container;
 
-		this.addToGame([score]);
-		this.addPaddles();
+    this.engine = new ex.Engine({
+      canvasElement: canvas,
+      width: stats?.game?.width ?? 800,
+      height: stats?.game?.height ?? 600,
+      backgroundColor: new ex.Color(10, 20, 45, 1),
+      displayMode: ex.DisplayMode.FitScreen,
+    });
 
-		this.engine.on('preupdate', () => {
-			const {gameEnd} = gameState.getGame();
+    const score = new ScoreBoard(this.engine);
 
-			if (gameEnd)
-				this.end();
+    this.addToGame([score]);
+    this.addPaddles();
 
-			const players = gameState.getPlayers();
-			if (!players[1].connected || !players[2].connected)
-				showDisconnectScreen();
-			else
-				hideDisconnectScreen();
+    this.engine.on("preupdate", () => {
+      const { gameEnd } = gameState.getGame();
 
-			this.ballReset();
-		});
+      if (gameEnd) this.end();
 
-		window.addEventListener('keydown', (e) => {
-			if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
-				e.preventDefault();
-			}
-		});
-	}
+      const players = gameState.getPlayers();
+      if (!players[1].connected || !players[2].connected)
+        showDisconnectScreen(this.container);
+      else hideDisconnectScreen();
 
-	private ballReset() {
-		const {exist} = gameState.getBall();
-		
-		if (!exist) {
-			if (this.ball) {
-				this.engine.remove(this.ball);
-				this.ball = null;
-				// console.log("Ball removed from the game");
-			}
-			return;
-		}
+      this.ballReset();
+    });
 
-		if (!this.ball) {
-			this.ball = new Ball(this.engine.drawWidth / 2, this.engine.drawHeight / 2);
-			this.addToGame([this.ball]);
-			// console.log("Ball added to the game");
-		}
-	}
-	private addPaddles() {
-		this.paddles = [
-			new Paddle(50, this.engine.drawHeight / 2, 1),
-			new Paddle(this.engine.drawWidth - 50, this.engine.drawHeight / 2, 2),
-		];
+    window.addEventListener("keydown", (e) => {
+      if (["ArrowUp", "ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+      }
+    });
+  }
 
+  private ballReset() {
+    const { exist } = gameState.getBall();
 
-		this.addToGame(this.paddles);
-	}
+    if (!exist) {
+      if (this.ball) {
+        this.engine.remove(this.ball);
+        this.ball = null;
+        // console.log("Ball removed from the game");
+      }
+      return;
+    }
 
-	private addToGame(data: ex.Actor[]) {
-		data.forEach((actor) => {
-			this.engine.add(actor);
-		});
-	}
+    if (!this.ball) {
+      this.ball = new Ball(
+        this.engine.drawWidth / 2,
+        this.engine.drawHeight / 2
+      );
+      this.addToGame([this.ball]);
+      // console.log("Ball added to the game");
+    }
+  }
+  private addPaddles() {
+    this.paddles = [
+      new Paddle(50, this.engine.drawHeight / 2, 1),
+      new Paddle(this.engine.drawWidth - 50, this.engine.drawHeight / 2, 2),
+    ];
 
-	async start(): Promise<void> {
+    this.addToGame(this.paddles);
+  }
 
-		if (!this.endPromisse) {
-			this.endPromisse = new Promise<void>((resolve) => {
-				this.endResolve = resolve;
-			})
-		}
+  private addToGame(data: ex.Actor[]) {
+    data.forEach((actor) => {
+      this.engine.add(actor);
+    });
+  }
 
-		await this.engine.start();
+  async start(): Promise<void> {
+    if (!this.endPromisse) {
+      this.endPromisse = new Promise<void>((resolve) => {
+        this.endResolve = resolve;
+      });
+    }
 
-		return this.endPromisse;
-	}
+    await this.engine.start();
 
-	end() {
-		if (this.ended) return;
+    return this.endPromisse;
+  }
 
-		this.ended = true;
-		this.engine.stop();
-		if (this.endResolve)
-			this.endResolve();
-	}
+  end() {
+    if (this.ended) return;
+
+    this.ended = true;
+    this.engine.stop();
+    if (this.endResolve) this.endResolve();
+  }
 }
