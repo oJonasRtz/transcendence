@@ -26,7 +26,7 @@ export default function MatchProvider({user, children}: {user: User, children: R
         name: user.nickname || user.username,
       });
     }
-  }, [router, user]);
+  }, [router]);
   
   return <>{children}</>;
 }

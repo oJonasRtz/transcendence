@@ -13,11 +13,11 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="bg-black">
+      <MatchProvider user={user} >
       <body className={`${inter.className} antialiased bg-black`}>
-        <MatchProvider user={user} >
           {children}  
-        </MatchProvider>
       </body>
+      </MatchProvider>
     </html>
   );
 }

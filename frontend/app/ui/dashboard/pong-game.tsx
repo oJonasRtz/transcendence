@@ -29,7 +29,6 @@ export default function PongGame({ user }: PongGameProps) {
 
   return (
     <div className="space-y-6">
-      <MatchProvider user={user} />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

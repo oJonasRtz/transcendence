@@ -22,7 +22,6 @@ export default async function DashboardPage() {
   const user = getUser();
 
   return (
-    <MatchProvider user={authUser} >
     <main className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Web socket to match-service*/}
 
@@ -49,6 +48,5 @@ export default async function DashboardPage() {
         </div>
       </div>
     </main>
-    </MatchProvider>
   );
 }
