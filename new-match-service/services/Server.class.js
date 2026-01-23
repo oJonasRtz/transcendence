@@ -191,6 +191,8 @@ export class Server {
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			this.#invitesOwners.add(client);
 
+			console.log("Server.#invite: Invite created by client:", client.name);
+
 			return reply.status(200).send({type: 'INVITE_CREATED', link, code: 200});
 		} catch (error) {
 			console.error('Server.#invite: Error handling invite:', error.message);
@@ -204,7 +206,7 @@ export class Server {
 			const {token} = req.params;
 			const {id, game_type} = req.body;
 
-			if (!token || !id)
+			if (!id)
 				throw new Error('INVALID_FORMAT');
 
 			const client = this.#clients.get(id);
@@ -213,12 +215,14 @@ export class Server {
 
 			if (!token) {
 				const party = this.createSoloParty({id: client.id, game_type});
+				console.log('Server.#joinParty: Client joining solo party:', client.name);
 				return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 			}
 
 			const invite = this.#invites.get(token);
 			if (!invite) {
 				const party = this.createSoloParty({id: client.id, game_type});
+				console.log('Server.#joinParty: Client joining solo party (invalid invite):', client.name);
 				return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 			}
 			if (this.#checkInvite(invite, token))

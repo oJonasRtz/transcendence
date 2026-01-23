@@ -2,20 +2,31 @@
 
 import { Match } from "@/app/api/match-service/match.class";
 import { User } from "@/app/lib/auth";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export const match: Match = new Match();
 
-export default function MatchProvider({user}: {user: User}) {
+export default function MatchProvider({user, children}: {user: User, children: React.ReactNode}) {
+  const router = useRouter();
+
   useEffect(() => {
-    if (match.isConnected || !user) return;
+    match.onMatch = (match_id) => {
+      router.push(`/dashboard/play/pong`);
+    };
 
-    match.connect({
-      id: user.user_id,
-      email: user.email,
-      name: user.nickname || user.username,
-    });
-  }, []);
+    match.onResults = () => {
+      router.push(`/dashboard/play/statsPage`);
+    }
 
-  return null;
+    if (!match.isConnected && user) {
+      match.connect({
+        id: user.user_id,
+        email: user.email,
+        name: user.nickname || user.username,
+      });
+    }
+  }, [router, user]);
+  
+  return <>{children}</>;
 }

@@ -207,13 +207,13 @@ export class Client {
 		this.#game.lobby_id = null;
 		this.#game.party = null;
 		
-		const	diff = this.#info.rank - actualRank;
+		// const	diff = this.#info.rank - actualRank;
 
-		this.send({
-			type: 'MATCH_ENDED',
-			pts: diff,
-			rank: this.#info.rank,
-		});
+		// this.send({
+		// 	type: 'MATCH_ENDED',
+		// 	pts: diff,
+		// 	rank: this.#info.rank,
+		// });
 
 		this.#changeState('IDLE', {});
 	}

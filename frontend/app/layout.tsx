@@ -1,15 +1,23 @@
 import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { lusitana } from '@/app/ui/fonts';
+import { getUser } from './lib/auth';
+import MatchProvider from './ui/dashboard/MatchProvider';
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getUser();
+
   return (
     <html lang="en" className="bg-black">
-      <body className={`${inter.className} antialiased bg-black`}>{children}</body>
+      <body className={`${inter.className} antialiased bg-black`}>
+        <MatchProvider user={user} >
+          {children}  
+        </MatchProvider>
+      </body>
     </html>
   );
 }

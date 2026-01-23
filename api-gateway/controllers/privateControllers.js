@@ -68,9 +68,10 @@ const privateControllers = {
 
       const res = await axios.post('https://match-service:3010/join_party/' + token, {id, game_type});
 
+      console.log("JOIN PARTY RESPONSE:", res.data);
       return reply.code(200).send(res.data);
     } catch (error) {
-      console.error("JOIN PARTY ERROR:", error.message);
+      console.error("JOIN PARTY ERROR:", error.response.data || error.message);
       return reply.code(500).send("Error: " + error.message);
     }
   },
@@ -80,29 +81,30 @@ const privateControllers = {
 
       const res = await axios.post('https://match-service:3010/leave_party', {id: user_id});
 
+      console.log("LEAVE PARTY RESPONSE:", res.data);
       return reply.code(200).send(res.data);
     } catch (error) {
-      console.error("LEAVE PARTY ERROR:", error.message);
+      console.error("LEAVE PARTY ERROR:", error.response.data || error.message);
       return reply.code(500).send("Error: " + error.message);
     }
   },
   partyInfo: async function partyInfo(req, reply) {
     try {
-      const {user_id} = req.user;
-
-      const res = await axios.get('https://match-service:3010/getParty',{
-        params: {
-          id: user_id
-        }
+      const { id } = req.params;
+      if (!id) return reply.code(400).send({ error: 'User ID is required' });
+  
+      const res = await axios.get('https://match-service:3010/party', {
+        params: { id }
       });
-
-      return reply.code(200).send(res.data);
+  
+      console.log("PARTY INFO RESPONSE:", res.data);
+      return reply.code(200).send(res.data); 
     } catch (error) {
-      console.error("PARTY INFO ERROR:", error.message);
+      console.error("PARTY INFO ERROR:", error.response?.data || error.message);
       return reply.code(500).send("Error: " + error.message);
     }
   },
-
+  
   // match: async function match(req, reply) {
   //   const {token} = req.params;
   //   console.log("id: " + req.user.user_id);

@@ -1,8 +1,3 @@
-// import WebSocket from 'ws';
-// import axios from 'axios';
-
-import { partyInfo } from "./route";
-
 type InfoType = {
 	name: string | null;
 	email: string | null;
@@ -16,6 +11,36 @@ type PartyType = {
 	isLeader: boolean;
 };
 
+type PlayerStatsType = {
+	id: string;
+	name: string;
+	score: number;
+	winner: boolean;
+	tier: string;
+	rank_points: number;
+};
+
+type MatchTimeType = {
+	duration: string;
+	startedAt: string;
+}
+
+type StatsType = {
+	match_id: number;
+	result: 'WIN' | 'LOSS';
+	pts: number;
+	tier: string;
+	rank_points: number;
+	level: number;
+	experience_points: number;
+	experienceGained: number;
+	stats: {
+		game_type: string;
+		players: Record<number, PlayerStatsType>;
+		time: MatchTimeType;
+	}
+};
+
 export class Match {
 	private ws: WebSocket | null = null;
 	private _game_type : 'RANKED' | 'TOURNAMENT' = 'RANKED';
@@ -24,10 +49,14 @@ export class Match {
 		email: null,
 		id: null,
 	};
+	private interval: any = null;
 	private _isConnected: boolean = false;
 	private _state: string = 'OFFLINE';
+	private onMatchFound: ((match_id: number) => void) | null = null;
+	private onMatchResults: ((stats: StatsType) => void) | null = null;
 	private _match_id: number = 0;
 	private party_users: PartyType[] = [];
+	private lastGameStats: StatsType | null = null;
 	private handlers: Record<string, Function> = {
 		'STATE_CHANGE': async ({state}: {state: string}) => {
 			this._state = state;
@@ -37,37 +66,51 @@ export class Match {
 			this._match_id = match_id;
 			// window.location.href = '/dashboard/play/pong';
 			console.log('Match found! Match ID:', match_id);
+
+			if (this.onMatchFound) {
+				this.onMatchFound(match_id);
+			}
 		},
 		'PARTY_UPDATED': async () => {
 			try {
-				if (!this.info.id) return;
-
-				const res = await fetch('/api/match-service/partyInfo?user_id=' + this.info.id, {
-					method: 'GET',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json',
-					},
-					credentials: 'include',
-				});
-
-				if (!res.ok) 
-					throw new Error(`Failed to fetch party info: ${res.statusText}`);
-
-				const data = await res.json();
-
-				this.party_users = data.party?.clients || [];
-
+				await this.getPartyInfo();;
 				console.log('Party info updated:', this.party_users);
-
 			} catch (error) {
 				console.error('Error updating party info:', error);
 			}
 		},
+		'MATCH_RESULT': (data: any) => {
+			const {type, ...rest} = data;
+
+			this.lastGameStats = rest as StatsType;
+
+			console.log('Match results received:', this.lastGameStats);
+
+			if (this.onMatchResults && this.lastGameStats) {
+				this.onMatchResults(this.lastGameStats);
+			}
+		},
 	};
+
+	get stats(): StatsType | null {
+		return this.lastGameStats;
+	}
+
+	resetStats() {
+		this.lastGameStats = null;
+		this._match_id = 0;
+	}
 
 	get party(): PartyType[] {
 		return this.party_users;
+	}
+
+	set onMatch(callback: (match_id: number) => void) {
+		this.onMatchFound = callback;
+	}
+
+	set onResults(callback: (stats: StatsType) => void) {
+		this.onMatchResults = callback;
 	}
 
 	get matchInfo() {
@@ -109,7 +152,6 @@ export class Match {
 				id: this.info.id,
 			});
 			this._isConnected = true;
-			console.log("conexao estabelecida");
 		};
 		this.ws.onmessage = (message: any) => {
 			try {
@@ -118,7 +160,7 @@ export class Match {
 
 				console.log("mensagem recebida:", JSON.stringify(data));
 
-				if (!type || !(type in this.handlers)) 
+				if (!type || !(type in this.handlers))
 					throw new Error(`__TYPE_ERROR__`);
 
 				this.handlers[type](data);
@@ -185,7 +227,11 @@ export class Match {
 	 * @return boolean - Returns true if the enqueue request was sent successfully, false otherwise.
 	*/
 	public enqueue(type: 'RANKED' | 'TOURNAMENT' = 'RANKED'): boolean {
+
+		console.log("Current state:", this.state);
 		if (this.state !== 'IDLE') return false;
+
+		console.log("I tried to enqueue for type:", type);
 
 		return this.send({
 			type: 'ENQUEUE',
@@ -199,7 +245,10 @@ export class Match {
 	 * @return boolean - Returns true if the dequeue request was sent successfully, false otherwise.
 	*/
 	public dequeue(): boolean {
+		console.log("Current state:", this.state);
 		if (this.state !== 'IN_QUEUE') return false;
+
+		console.log("I tried to dequeue");
 		return this.send({
 			type: 'DEQUEUE',
 			id: this.info.id,
@@ -211,6 +260,69 @@ export class Match {
 		this.ws.send(JSON.stringify(data));
 		return true;
 	}
+
+	public async joinParty(game_type: 'RANKED' | 'TOURNAMENT', token: string | null = null): Promise<void> {
+		await new Promise<void>((resolve, reject) => {
+			const interval = setInterval(() => {
+				if (this.isConnected) {
+					clearInterval(interval);
+					resolve();
+				}
+			}, 50);
+		});
+		
+		await fetch('/api/match', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+			  action: 'joinParty',
+			  id: this.info.id,
+			  game_type,
+			  token: token || null,
+			}),
+			credentials: 'include',
+		  });
+
+		  console.log("I tried to join the party");
+
+		  this.getPartyInfo();
+	}
+
+	public async leaveParty(): Promise<void> {
+		await new Promise<void>((resolve, reject) => {
+			const interval = setInterval(() => {
+				if (this.isConnected) {
+					clearInterval(interval);
+					resolve();
+				}
+			}, 50);
+		});
+
+		await fetch('/api/match', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+			  action: 'leaveParty',
+			  id: this.info.id,
+			}),
+			credentials: 'include',
+		  });
+
+		  console.log("I tried to leave the party");
+	}
+
+	private async getPartyInfo(): Promise<void> {
+		const res = await fetch(`/api/match?user_id=${this.info.id}`, {
+		  method: 'GET',
+		  credentials: 'include',
+		});
+	  
+		if (!res.ok) throw new Error(`Failed to fetch party info: ${res.statusText}`);
+	  
+		const data = await res.json();
+		this.party_users = data.party?.clients || [];
+	}
+	  
 
 	// private async updateState(): Promise<void> {
 	// 	await axios.post('https://users-service:3003/setUserState', {

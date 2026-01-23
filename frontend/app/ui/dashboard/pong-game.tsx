@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import type { User } from '@/app/lib/auth';
 import { Pong } from '@/app/games/Pong';
 import MatchProvider, { match } from './MatchProvider';
+import { useEffect } from 'react';
 
 interface PongGameProps {
   user: User;
@@ -14,6 +15,17 @@ export default function PongGame({ user }: PongGameProps) {
 
   if (!match)
     router.push('/dashboard/play');
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (match.stats) {
+  //       clearInterval(interval);
+  //       router.push(`/dashboard/play/statsPage`);
+  //     }
+  //   }, 500);
+
+  //   return () => clearInterval(interval);
+  // }, [router]);
 
   return (
     <div className="space-y-6">

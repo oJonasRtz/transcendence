@@ -116,6 +116,15 @@ export class Lobby extends EventEmitter {
           score1: p[1].score,
           score2: p[2].score,
         });
+
+        for (const key in p) {
+          const {tier, rank_points} = await data.sendRequest("/getRank", { user_id: p[key].id });
+
+          p[key].tier = tier;
+          p[key].rank_points = rank_points;
+        }
+        stats.game_type = this.type;
+
         for (const c of this.#clients) {
           let rank = c.rank;
           const isWinner = c.id === winner;
@@ -132,12 +141,18 @@ export class Lobby extends EventEmitter {
             experience: xpPts,
           });
 
+          const {tier, rank_points} = await data.sendRequest("/getRank", { user_id: c.id });
+          const {level, experience_points} = await data.sendRequest('getUserInformation', { user_id: c.id });
+
           c.send({
             type: 'MATCH_RESULT',
             match_id,
             result: isWinner ? 'WIN' : 'LOSS',
             pts,
-            newRank: rank,
+            rank_points,
+            tier,
+            level,
+            experience_points,
             experienceGained: xpPts,
             stats
           })

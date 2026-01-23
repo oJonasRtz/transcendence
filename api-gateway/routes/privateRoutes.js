@@ -53,7 +53,7 @@ const routes = [
 
 	{ method: 'POST', url: '/joinParty/:token', handler: privateControllers.joinParty },
 	{ method: 'POST', url: '/leaveParty', handler: privateControllers.leaveParty },
-	{ method: 'GET', url: '/partyInfo', handler: privateControllers.partyInfo },
+	{ method: 'GET', url: '/partyInfo/:id', handler: privateControllers.partyInfo },
 ];
 
 export default async function privateRoutes(fastify, options) {
