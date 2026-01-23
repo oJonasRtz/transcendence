@@ -1,5 +1,6 @@
 "use client";
 
+import { match } from "app/ui/dashboard/MatchProvider";
 import {useEffect} from "react";
 
 /**
@@ -10,28 +11,35 @@ import {useEffect} from "react";
  * 
  * This must be tested after integrating with the match-service.
 */
-export function Pong({match_id, name, user_id}: {match_id: number, name: string, user_id: string}) {
+export function Pong() {
 
 	useEffect(() => {
+		console.log("Starting Pong with match info:", match.matchInfo);
+		console.log('Match ID:', match.match_id);
+		const info = match.matchInfo;
 		const init = async () => {
 			const container = document.getElementById('pong');
 			const {startPong} = await import('./pong/main');
 			await startPong({
-				matchId: match_id,
-				name: name,
-				playerId: user_id,
+				matchId: info.match_id,
+				name: info.name,
+				playerId: info.user_id,
 				},
 				container!
 			);
 		};
+
 		init();
-	}, [match_id, name, user_id]);
+	}, [match.match_id]);
 
 	return (
 		<div
 			id="pong"
-			className="w-full h-full aspect-video rounded-lg"
-			style={{ minHeight: 600 }}
+			className="rounded-lg mx-auto"
+			style={{
+				width: 800,
+				height: 600
+			 }}
 		/>
 	);
 }

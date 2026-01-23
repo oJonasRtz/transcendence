@@ -17,7 +17,7 @@ import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
 import http from 'http';
 import https from 'https';
-import { MatchClient } from './utils/MatchClient.class.js';
+// import { MatchClient } from './utils/MatchClient.class.js';
 
 dotenv.config();
 
@@ -25,7 +25,7 @@ if (!process.env.JWT_SECRET) {
 	throw new Error("JWT_SECRET is required for api-gateway");
 }
 
-export const matchClient = new Map(); // <token, MatchClient>
+// export const matchClient = new Map(); // <token, MatchClient>
 // It is a temporary configuration
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 

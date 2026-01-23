@@ -131,6 +131,16 @@ export class Lobby extends EventEmitter {
             user_id: c.id,
             experience: xpPts,
           });
+
+          c.send({
+            type: 'MATCH_RESULT',
+            match_id,
+            result: isWinner ? 'WIN' : 'LOSS',
+            pts,
+            newRank: rank,
+            experienceGained: xpPts,
+            stats
+          })
         }
         await data.sendRequest("/addHistory", { stats });
         this.emit("END_GAME");

@@ -155,6 +155,8 @@ export class Server {
 				})),
 			};
 
+			console.log('Server.#getParty: Party info retrieved for client:', client.name);
+
 			return reply.status(200).send({type: 'PARTY_INFO', party: partyInfo, code: 200});
 		} catch (error) {
 			console.error('Server.#getParty: Error getting party info:', error.message);
@@ -183,7 +185,7 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const address = `https://localhost/matchMaking/`;
+			const address = `https://localhost/dashboard/play/waiting-lobby/`;
 			const link = address + token;
 
 			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
@@ -200,7 +202,7 @@ export class Server {
 	#joinParty(req, reply) {
 		try {
 			const {token} = req.params;
-			const {id} = req.body;
+			const {id, game_type} = req.body;
 
 			if (!token || !id)
 				throw new Error('INVALID_FORMAT');
@@ -209,14 +211,22 @@ export class Server {
 			if (!client)
 				throw new Error('NOT_CONNECTED');
 
-			const invite = this.#invites.get(token);
-			if (!invite)
-				throw new Error('INVALID_INVITE');
+			if (!token) {
+				const party = this.createSoloParty({id: client.id, game_type});
+				return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
+			}
 
+			const invite = this.#invites.get(token);
+			if (!invite) {
+				const party = this.createSoloParty({id: client.id, game_type});
+				return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
+			}
 			if (this.#checkInvite(invite, token))
 				throw new Error('INVITE_EXPIRED');
 
 			const party = invite.party;
+
+			console.log('Server.#joinParty: Client joining party via invite:', client.name);
 
 			party.addClient(client);
 			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
@@ -240,6 +250,9 @@ export class Server {
 			const party = client.party;
 			if (!party)
 				throw new Error('NOT_IN_PARTY');
+
+
+			console.log('Server.#leaveParty: Client leaving party:', client.name);
 
 			party.removeClient(client);
 			return reply.status(200).send({type: 'LEFT_PARTY', code: 200});
@@ -371,7 +384,7 @@ export class Server {
 				throw new Error('ALREADY_CONNECTED');
 
 			let c = this.#clients.get(id);
-			if (c && c.isConnected())
+			if (c && c.isConnected)
 				throw new Error('ALREADY_CONNECTED');
 
 			if (c) {

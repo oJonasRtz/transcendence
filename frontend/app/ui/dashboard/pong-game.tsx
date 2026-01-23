@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import type { User } from '@/app/lib/auth';
 import { Pong } from '@/app/games/Pong';
+import MatchProvider, { match } from './MatchProvider';
 
 interface PongGameProps {
   user: User;
@@ -11,8 +12,48 @@ interface PongGameProps {
 export default function PongGame({ user }: PongGameProps) {
   const router = useRouter();
 
+  if (!match)
+    router.push('/dashboard/play');
+
   return (
     <div className="space-y-6">
+      <MatchProvider user={user} />
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Pong</h1>
+          <p className="text-slate-400">
+            Hit the ball past your opponent! First to the score limit wins.
+          </p>
+        </div>
+
+        {/* Back Button */}
+        <button
+          onClick={() => router.push('/dashboard/play')}
+          className="px-6 py-3 rounded-lg
+                     bg-white/5 hover:bg-white/10
+                     border border-white/10 hover:border-white/30
+                     text-white
+                     transition-all duration-300
+                     flex items-center gap-2"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back to Games
+        </button>
+      </div>
+
       {/* Game Container */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
         {/* Ambient glow */}
@@ -20,11 +61,7 @@ export default function PongGame({ user }: PongGameProps) {
         <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full" />
 
         <div className="relative">
-          <Pong
-            match_id={user.match_id}
-            name={user.username}
-            user_id={user.user_id}
-          />
+          <Pong />
         </div>
       </div>
 
@@ -45,21 +82,6 @@ export default function PongGame({ user }: PongGameProps) {
             <span>The first player to reach the score limit wins</span>
           </li>
         </ul>
-      </div>
-
-      {/* Back Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => router.push('/dashboard/play')}
-          className="px-6 py-3 rounded-lg
-                     bg-white/5 hover:bg-white/10
-                     border border-white/10 hover:border-white/30
-                     text-white
-                     transition-all duration-300
-                     flex items-center gap-2"
-        >
-          ← Back to Games
-        </button>
       </div>
     </div>
   );

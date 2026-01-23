@@ -9,6 +9,7 @@ import {
   CardShell,
   EmptyState,
 } from "@/app/ui/chat/chat-card-primitives";
+import MatchProvider from "../ui/dashboard/MatchProvider";
 
 interface User {
   name: string;
@@ -159,6 +160,7 @@ export default function ChatPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+      <MatchProvider />
       <div className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-blue-500/10 blur-[140px]" />
       <div className="pointer-events-none absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-indigo-500/10 blur-[160px]" />
 

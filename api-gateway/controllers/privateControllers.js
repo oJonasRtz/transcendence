@@ -11,8 +11,8 @@ import { pipeline } from "stream/promises";
 import { checkImageSafety } from "../utils/apiCheckImages.js";
 import { fileTypeFromFile } from "file-type";
 import sharp from "sharp";
-import { MatchClient } from "../utils/MatchClient.class.js";
-import { matchClient } from "../app.js";
+// import { MatchClient } from "../utils/MatchClient.class.js";
+// import { matchClient } from "../app.js";
 import { waitForDebugger } from "inspector";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -61,75 +61,117 @@ const privateControllers = {
     return reply.sendFile("pong/index.html");
   },
 
-  match: async function match(req, reply) {
-    const {token} = req.params;
-    console.log("id: " + req.user.user_id);
-
-    if (token) {
-      console.log("temos um token: " + token);
-      try {
-        const url = 'https://match-service:3010/join_party/' + token;
-        await axios.post(url, {id: req.user.user_id});
-      } catch (error) {
-        console.error("MATCH PAGE ERROR:", error.message);    
-      }
-    }
-
-    const match = matchClient.get(req.jwt);
-    const state = match ? match.state : 'OFFLINE';
-    return reply.view("matchMaking", {state});
-  },
-
-  joinQueue: async function joinQueue(req, reply) {
+  joinParty: async function joinParty(req, reply) {
     try {
-      console.log('JOIN QUEUE REQUEST');
+      const {token} = req.params;
+      const {id, game_type} = req.body;
 
-      const token = req.jwt;
-      if (!token) throw new Error("No token provided");
+      const res = await axios.post('https://match-service:3010/join_party/' + token, {id, game_type});
 
-      const match = matchClient.get(token);
-      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
-
-      match.enqueue();
-      return reply.code(204).send();
+      return reply.code(200).send(res.data);
     } catch (error) {
-      console.error("JOIN QUEUE ERROR:", error.message);
+      console.error("JOIN PARTY ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
+  },
+  leaveParty: async function leaveParty(req, reply) {
+    try {
+      const {user_id} = req.user;
+
+      const res = await axios.post('https://match-service:3010/leave_party', {id: user_id});
+
+      return reply.code(200).send(res.data);
+    } catch (error) {
+      console.error("LEAVE PARTY ERROR:", error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
+  },
+  partyInfo: async function partyInfo(req, reply) {
+    try {
+      const {user_id} = req.user;
+
+      const res = await axios.get('https://match-service:3010/getParty',{
+        params: {
+          id: user_id
+        }
+      });
+
+      return reply.code(200).send(res.data);
+    } catch (error) {
+      console.error("PARTY INFO ERROR:", error.message);
       return reply.code(500).send("Error: " + error.message);
     }
   },
 
-  leaveQueue: async function leaveQueue(req, reply) {
-    try {
-      console.log('LEAVE QUEUE REQUEST');
+  // match: async function match(req, reply) {
+  //   const {token} = req.params;
+  //   console.log("id: " + req.user.user_id);
 
-      const token = req.jwt;
-      if (!token) throw new Error("No token provided");
+  //   if (token) {
+  //     console.log("temos um token: " + token);
+  //     try {
+  //       const url = 'https://match-service:3010/join_party/' + token;
+  //       await axios.post(url, {id: req.user.user_id});
+  //     } catch (error) {
+  //       console.error("MATCH PAGE ERROR:", error.message);    
+  //     }
+  //   }
 
-      const match = matchClient.get(token);
-      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+  //   const match = matchClient.get(req.jwt);
+  //   const state = match ? match.state : 'OFFLINE';
+  //   return reply.view("matchMaking", {state});
+  // },
 
-      match.dequeue();
-      return reply.code(204).send();
-    } catch (error) {
-      console.error("LEAVE QUEUE ERROR:", error.message);
-      return reply.code(500).send("Error: " + error.message);
-    }
-  },
+  // joinQueue: async function joinQueue(req, reply) {
+  //   try {
+  //     console.log('JOIN QUEUE REQUEST');
 
-  matchFound: async function matchFound(req, reply) {
-    try {
-      const token = req.jwt;
-      if (!token) throw new Error("No token provided");
+  //     const token = req.jwt;
+  //     if (!token) throw new Error("No token provided");
 
-      const match = matchClient.get(token);
-      if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+  //     const match = matchClient.get(token);
+  //     if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
 
-      reply.redirect('/pong');
-    } catch (error) {
-      console.error("MATCH FOUND ERROR:", error.message);
-      return reply.code(500).send("Error: " + error.message);
-    }
-  },
+  //     match.enqueue();
+  //     return reply.code(204).send();
+  //   } catch (error) {
+  //     console.error("JOIN QUEUE ERROR:", error.message);
+  //     return reply.code(500).send("Error: " + error.message);
+  //   }
+  // },
+
+  // leaveQueue: async function leaveQueue(req, reply) {
+  //   try {
+  //     console.log('LEAVE QUEUE REQUEST');
+
+  //     const token = req.jwt;
+  //     if (!token) throw new Error("No token provided");
+
+  //     const match = matchClient.get(token);
+  //     if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+  //     match.dequeue();
+  //     return reply.code(204).send();
+  //   } catch (error) {
+  //     console.error("LEAVE QUEUE ERROR:", error.message);
+  //     return reply.code(500).send("Error: " + error.message);
+  //   }
+  // },
+
+  // matchFound: async function matchFound(req, reply) {
+  //   try {
+  //     const token = req.jwt;
+  //     if (!token) throw new Error("No token provided");
+
+  //     const match = matchClient.get(token);
+  //     if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
+
+  //     reply.redirect('/pong');
+  //   } catch (error) {
+  //     console.error("MATCH FOUND ERROR:", error.message);
+  //     return reply.code(500).send("Error: " + error.message);
+  //   }
+  // },
 
   helloDb: async function testPrivateRoute(req, reply) {
     try {

@@ -8,6 +8,7 @@ import ActivityFeed from '@/app/ui/dashboard/activity-feed';
 import { getUser } from '@/app/lib/auth';
 import { getDashboardData } from '@/app/lib/dashboard-data';
 import { redirect } from 'next/navigation';
+import MatchProvider from '@/app/ui/dashboard/MatchProvider';
 
 export default async function DashboardPage() {
   // Get authenticated user from JWT
@@ -18,9 +19,12 @@ export default async function DashboardPage() {
   }
 
   const dashboardData = await getDashboardData(authUser);
+  const user = getUser();
 
   return (
     <main className="p-4 md:p-6 lg:p-8 space-y-6">
+      {/* Web socket to match-service*/}
+
       <DashboardHero profile={dashboardData.profile} />
 
       <DashboardStats stats={dashboardData.stats} />

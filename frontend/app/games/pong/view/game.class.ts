@@ -29,7 +29,7 @@ export class Game {
       width: stats?.game?.width ?? 800,
       height: stats?.game?.height ?? 600,
       backgroundColor: new ex.Color(10, 20, 45, 1),
-      displayMode: ex.DisplayMode.FitScreen,
+      displayMode: ex.DisplayMode.Fixed,
     });
 
     const score = new ScoreBoard(this.engine);

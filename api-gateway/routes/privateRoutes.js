@@ -21,14 +21,14 @@ const routes = [
 	{ method: 'POST', url: '/setAuthPassword', handler: privateControllers.setAuthPassword },
 	{ method: 'GET', url: '/changeDescription', handler: privateControllers.changeDescription },
 	{ method: 'POST', url: '/setUserDescription', handler: privateControllers.setUserDescription },
-	{ method: 'GET', url: '/matchMaking', handler: privateControllers.match },
-	{ method: 'GET', url: '/matchMaking/:token', handler: privateControllers.match },
+	// { method: 'GET', url: '/matchMaking', handler: privateControllers.match },
+	// { method: 'GET', url: '/matchMaking/:token', handler: privateControllers.match },
 	{ method: 'GET', url: '/seeAllUsers', handler: privateControllers.seeAllUsers },
 	{ method: 'GET', url: '/seeProfile', handler: privateControllers.seeProfile },
 	{ method: 'GET', url: '/chatAllUsers', handler: privateControllers.chatAllUsers },
-	{ method: 'POST', url: '/joinQueue', handler: privateControllers.joinQueue },
-	{ method: 'POST', url: '/leaveQueue', handler: privateControllers.leaveQueue },
-	{ method: 'GET', url: '/matchFound', handler: privateControllers.matchFound },
+	// { method: 'POST', url: '/joinQueue', handler: privateControllers.joinQueue },
+	// { method: 'POST', url: '/leaveQueue', handler: privateControllers.leaveQueue },
+	// { method: 'GET', url: '/matchFound', handler: privateControllers.matchFound },
 	{ method: 'GET', url: '/deleteUserAccount', handler: privateControllers.deleteUserAccount },
 	{ method: 'POST', url: '/blockTheUser', handler: privateControllers.blockTheUser },
 	{ method: 'POST', url: '/friendInvite', handler: privateControllers.friendInvite },
@@ -50,6 +50,10 @@ const routes = [
 	{ method: 'POST', url: '/api/email/send-verification', handler: privateControllers.sendVerificationEmailJson },
 	{ method: 'POST', url: '/api/email/verify-code', handler: privateControllers.verifyEmailCodeJson },
 	{ method: 'GET', url: '/getVerificationStatus', handler: privateControllers.getVerificationStatus },
+
+	{ method: 'POST', url: '/joinParty/:token', handler: privateControllers.joinParty },
+	{ method: 'POST', url: '/leaveParty', handler: privateControllers.leaveParty },
+	{ method: 'GET', url: '/partyInfo', handler: privateControllers.partyInfo },
 ];
 
 export default async function privateRoutes(fastify, options) {
