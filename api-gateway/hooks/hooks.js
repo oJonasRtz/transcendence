@@ -34,7 +34,14 @@ const list = fs
   .map((w) => w.trim())
   .filter(Boolean); // check invalid values, ignoring them
 
-filter.addWords(...list);
+const whiteList = fs
+  .readFileSync("./config/.whitelist.txt", "utf8")
+  .split("\n")
+  .map((w) => w.trim())
+  .filter(Boolean);
+
+filter.addWords(...list.map(word => word.toLowerCase())); // comparing with lowercase
+filter.removeWords(...whiteList.map(word => word.toLowerCase()));
 
 export async function validatorHook(req, reply) {
   if (!req.body) return;
@@ -136,18 +143,25 @@ export async function validatorHook(req, reply) {
     if (item.condition) error.push(item.message);
   });
 
-  if (req.body.username) {
+  if (req.body.username && (!whiteList.includes(req.body.username.toLowerCase()))) {
     const response = await checkNameSecurity(req.body.username);
-    if (response.nsfw || filter.isProfane(req.body.username))
+    if (response.nsfw || list.includes(req.body.username.toLowerCase()) || filter.isProfane(req.body.username.toLowerCase()))
       error.push("Innapropriate username");
   }
 
-  if (req.body.nickname) {
+  if (req.body.nickname && (!whiteList.includes(req.body.nickname.toLowerCase()))) {
     const response = await checkNameSecurity(req.body.nickname);
-    if (response.nsfw || filter.isProfane(req.body.nickname)) {
+    if (response.nsfw || list.includes(req.body.nickname.toLowerCase()) || filter.isProfane(req.body.nickname.toLowerCase())) {
       error.push("Innapropriate nickname");
     }
   }
+
+  if (req.body.description) {
+    const response = await checkNameSecurity(req.body.description);
+    if (response.nsfw || filter.isProfane(req.body.description.toLowerCase())) {
+      error.push("Innapropriate description");
+    }
+}
 
   if (!error.length) return;
 

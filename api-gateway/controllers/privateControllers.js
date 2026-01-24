@@ -240,7 +240,7 @@ const privateControllers = {
         { user_id: req.user.user_id }
       );
 
-      if (!matchClient.has(token)) {
+      /*if (!matchClient.has(token)) {
         const mc = new MatchClient();
         mc.connect({
           name: req.user.username,
@@ -249,9 +249,9 @@ const privateControllers = {
           token: token,
         });
         matchClient.set(token, mc);
-      }
+      }*/
 
-      const match = matchClient.get(token);
+      //const match = matchClient.get(token);
       const data = myData?.data;
 
       const history = await axios.post(
@@ -283,7 +283,7 @@ const privateControllers = {
       // data.win_rate = h.stats.win_rate;
 
       console.log("history: " + JSON.stringify(h));
-      data.state = getState({isOnline: req.user.isOnline, state: match.state});
+      //data.state = getState({isOnline: req.user.isOnline, state: match.state});
       // const rank = await getRank(req.user);
       // data.rank = rank;
 // 
@@ -311,9 +311,9 @@ const privateControllers = {
       reply.clearCookie("jwt");
       reply.clearCookie("session");
 
-      const match = matchClient.get(token);
+      /*const match = matchClient.get(token);
       if (match && match.isConnected)
-         await match.disconnect();
+         await match.disconnect();*/
 
       await axios.post("https://auth-service:3001/set2FAValidate", {
         email: decoded.email,
