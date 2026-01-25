@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { joinQueue, leaveQueue } from '@/app/actions/game';
 import type { User } from '@/app/lib/auth';
+import {useRouter} from 'next/navigation';
 
 type QueueStatus = 'idle' | 'searching' | 'matched' | 'playing';
 type GameType = 'pong' | 'flappy-bird';
@@ -16,6 +17,8 @@ export default function GameLobby({ user }: GameLobbyProps) {
   const [error, setError] = useState<string | null>(null);
   const [searchTime, setSearchTime] = useState(0);
   const [selectedGame, setSelectedGame] = useState<GameType>('flappy-bird');
+
+  const router = useRouter();
 
   // Timer for showing how long user has been searching
   useEffect(() => {
@@ -143,10 +146,9 @@ export default function GameLobby({ user }: GameLobbyProps) {
               <button
                 onClick={() => {
                   if (selectedGame === 'flappy-bird') {
-                    window.location.href = '/dashboard/play/flappy-bird';
+                    router.push('/dashboard/play/flappy-bird');
                   } else {
-                    // handleJoinQueue();
-                    window.location.href = '/dashboard/play/waiting-lobby';
+                    router.push('/dashboard/play/waiting-lobby');
                   }
                 }}
                 // disabled={selectedGame === 'pong'}

@@ -81,6 +81,10 @@ export class Client {
 		this.#info.rank = res.rank;
 	}
 
+	set match_id(id) {
+		this.#game.match_id = id;
+	}
+	
 	get rank() {
 		return this.#info.rank;
 	}
@@ -269,10 +273,11 @@ export class Client {
 			//if not change state to IDLE
 
 
-			// this.send({
-			// 	type: 'RECONNECTED_TO_GAME',
-			// 	match_id: this.#game.match_id,
-			// });
+			this.send({
+				type: 'MATCH_FOUND',
+				match_id: this.#game.match_id,
+				skip: true,
+			});
 			//this.#game.lobby.reconnectClient(this);
 
 			//this.changeState('IDLE', {});

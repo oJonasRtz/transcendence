@@ -10,15 +10,18 @@ export class Birb extends ex.Actor{
 		ex.Keys.Space,
 		ex.Keys.Up
 	];
+	private sprite: ex.ImageSource | null = null;
 
-	constructor(x: number, y: number, drawHeight: number) {
+	constructor(x: number, y: number, drawHeight: number, sprite: ex.ImageSource) {
 		super({
 			x: x,
 			y: y,
 			width: 32,
 			height: 32,
-			color: ex.Color.Yellow
+			// color: ex.Color.Yellow
 		});
+
+		this.sprite = sprite;
 		this.SCALE = drawHeight / GAME_HEIGHT;
 
 		this.jumpForce *= this.SCALE;
@@ -36,6 +39,10 @@ export class Birb extends ex.Actor{
 	}
 
 	onInitialize(engine: ex.Engine): void {
+		const sprite = this.sprite?.toSprite();
+		sprite!.scale = ex.vec(this.SCALE, this.SCALE);
+		this.graphics.use(sprite!);
+
 		engine.input.keyboard.on('press', (evt) => {
 			if (this.keyBindings.includes(evt.key))
 				this.jump();
@@ -68,6 +75,18 @@ export class Birb extends ex.Actor{
 			if (check.condition)
 				check.handler();
 		});
+
+		// === Rotate bird based on velocity ===
+		const maxDownAngle = Math.PI; // 180 degrees
+		const maxUpAndle = -Math.PI / 4; // -45 degrees
+		const velFactor = 0.003; // sensivity
+		let angle = this.body.vel.y * velFactor;
+		
+		//rotation limits
+		if (angle > maxDownAngle) angle = maxDownAngle;
+		if (angle < maxUpAndle) angle = maxUpAndle;
+
+		this.rotation = angle;
 	}
 
 }

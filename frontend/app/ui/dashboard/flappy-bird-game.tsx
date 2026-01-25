@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { User } from '@/app/lib/auth';
 import FlappyBird from '@/app/games/FlappyBird';
 
@@ -11,26 +11,36 @@ interface FlappyBirdGameProps {
 
 export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   const router = useRouter();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [gameKey, setGameKey] = useState(0);
-  const gameUrl = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'https://localhost:3000'}/flappy-bird`;
   const [restartSignal, setRestartSignal] = useState(0);
 
   const handleRestart = () => {
-    // Force iframe reload by changing the key
     setRestartSignal(prev => prev + 1);
   };
 
+  useEffect(() => {
+    const keyHandleDown = (e: KeyboardEvent) => {
+      if (['r'].includes(e.key.toLowerCase()))
+        handleRestart();
+    }
+
+    window.addEventListener('keydown', keyHandleDown);
+
+    return () => {
+      window.removeEventListener('keydown', keyHandleDown);
+    }
+  }, []);
+
   return (
-    <div className="space-y-6">
-      {/* Header with Buttons */}
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen flex flex-col items-center justify-start gap-10 px-6 py-10">
+      {/* Header */}
+      <div className="w-full max-w-6xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Flappy Bird</h1>
           <p className="text-slate-400">
             Tap to flap! How far can you go?
           </p>
         </div>
+
         <div className="flex items-center gap-3">
           {/* Restart Button */}
           <button
@@ -86,52 +96,49 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
         </div>
       </div>
 
-      {/* Game Container */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
-        {/* Ambient glow effect */}
-        <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full" />
-        <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full" />
+      {/* Game + How To Play */}
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row items-start justify-center gap-10">
+        {/* Game Container */}
+        <div className="relative inline-block overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
+          {/* Ambient glow */}
+          <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
 
-        <div className="relative">
-          {/* Game iframe */}
-          {/* <iframe
-            key={gameKey}
-            ref={iframeRef}
-            src={gameUrl}
-            className="w-full aspect-video rounded-lg"
-            style={{ minHeight: '600px' }}
-            title="Flappy Bird Game"
-            allow="accelerometer; gyroscope"
-          /> */}
-          <FlappyBird restartSignal={restartSignal} />
+          <div className="relative">
+            <FlappyBird restartSignal={restartSignal} />
+          </div>
         </div>
-      </div>
 
-      {/* Controls Info */}
-      <div className="rounded-lg border border-white/10 bg-white/5 p-6">
-        <h3 className="text-lg font-bold text-white mb-4">How to Play</h3>
-        <ul className="space-y-2 text-slate-400 text-sm">
-          <li className="flex items-start gap-2">
-            <span className="text-green-400 mt-0.5">▸</span>
-            <span>Click, tap, press ↑ or Space to flap</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-400 mt-0.5">▸</span>
-            <span>Avoid the pipes</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-400 mt-0.5">▸</span>
-            <span>Try to beat your high score!</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-400 mt-0.5">▸</span>
-            <span>When you die, click the <strong className="text-green-300">"Restart Game"</strong> button above to play again</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-green-400 mt-0.5">▸</span>
-            <span>Or click inside the game area if that works too</span>
-          </li>
-        </ul>
+        {/* Controls Info */}
+        <div className="w-full max-w-sm rounded-lg border border-white/10 bg-white/5 p-6 self-stretch">
+          <h3 className="text-lg font-bold text-white mb-4">How to Play</h3>
+          <ul className="space-y-2 text-slate-400 text-sm">
+            <li className="flex items-start gap-2">
+              <span className="text-green-400 mt-0.5">▸</span>
+              <span>Click, tap, press ↑ or Space to flap</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-400 mt-0.5">▸</span>
+              <span>Avoid the pipes</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-400 mt-0.5">▸</span>
+              <span>Try to beat your high score!</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-400 mt-0.5">▸</span>
+              <span>
+                When you die, click the{' '}
+                <strong className="text-green-300">"Restart Game"</strong> button above or press{' '}
+                <strong className="text-green-400">R</strong> to play again
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-green-400 mt-0.5">▸</span>
+              <span>Or click inside the game area if that works too</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

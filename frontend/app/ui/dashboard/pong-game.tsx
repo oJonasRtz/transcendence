@@ -3,18 +3,37 @@
 import { useRouter } from 'next/navigation';
 import type { User } from '@/app/lib/auth';
 import { Pong } from '@/app/games/Pong';
-import MatchProvider, { match } from './MatchProvider';
-import { useEffect } from 'react';
+import { __TIME_TO_WAIT__, match } from './MatchProvider';
+import { useEffect, useState } from 'react';
+import { set } from 'zod';
+import MatchNotify from './match-notifty';
 
 interface PongGameProps {
   user: User;
 }
 
 export default function PongGame({ user }: PongGameProps) {
+  const [showNotify, setShowNotify] = useState(false);
+  const [title, setTitle] = useState('Victory');
+
   const router = useRouter();
 
   if (!match)
     router.push('/dashboard/play');
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (match.stats) {
+        const temp = match.stats.result === 'WIN' ? 'Victory' : 'Defeat';
+        setTitle(temp);
+        setShowNotify(true);
+        clearInterval(interval);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [showNotify]);
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -64,6 +83,8 @@ export default function PongGame({ user }: PongGameProps) {
           Back to Games
         </button>
       </div>
+
+      {showNotify && <MatchNotify title={title} time={__TIME_TO_WAIT__.MIN_TIME} />}
 
       {/* Game Container */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">

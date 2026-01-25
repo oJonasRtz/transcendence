@@ -4,14 +4,15 @@ import { Pipe } from './Pipe.class';
 export class PipePair extends ex.Actor {
 	private pipes: Pipe[] = [];
 	private scored: boolean = false;
-	private playerPosX: number = 0; ;
+	private playerPosX: number = 0;
+	private sprite: ex.ImageSource | null = null;
 
-	constructor(drawHeight: number, drawWidth:number, playerX:number, addToGame: (data: ex.Actor[]) => void) {
+	constructor(drawHeight: number, drawWidth:number, playerX:number, addToGame: (data: ex.Actor[]) => void, sprite: ex.ImageSource | null = null) {
 		super({});
 
 		this.playerPosX = playerX;
+		this.sprite = sprite;
 		this.pipes = this.getPipePos(75, drawHeight, drawWidth);
-
 		addToGame(this.pipes);
 		this.pipes.forEach(pipe => {
 			pipe.on('scored', () => {
@@ -30,7 +31,7 @@ export class PipePair extends ex.Actor {
 	}
 
 	private getPipePos(width: number, drawHeight: number, drawWidth: number): Pipe[] {
-		const gap: number = drawHeight * .20; //Gap between pipes
+		const gap: number = drawHeight * .25; //Gap between pipes
 		const pipeX: number = drawWidth + gap; //Spawn off screen
 		// Pipes hight calculations
 		const smallHeight: number = gap;
@@ -55,8 +56,8 @@ export class PipePair extends ex.Actor {
 		const {up, down} = map[i as keyof typeof map];
 
 		return [
-			new Pipe(up.x, up.y, up.width, up.height, this.playerPosX),
-			new Pipe(down.x, down.y, down.width, down.height, this.playerPosX),
+			new Pipe(up.x, up.y, up.width, up.height, this.playerPosX, true, this.sprite),
+			new Pipe(down.x, down.y, down.width, down.height, this.playerPosX, false, this.sprite),
 		];
 	}
 }

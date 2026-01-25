@@ -23,6 +23,13 @@ export class Lobby extends EventEmitter {
     TOURNAMENT: 4,
   };
   #end_game = false;
+  #tournament = {
+    round: 1,
+    games: [],
+    players: [], // {client, wins, losses}
+    activeMatches: new Map(),
+    timer: null,
+  }
 
   constructor({ type, clients = [], id }) {
     super();
@@ -53,6 +60,68 @@ export class Lobby extends EventEmitter {
     return match_id;
   }
 
+  #createGamesFromPlayers(players) {
+    const games = [];
+
+    for (let i = 0; i < players.length; i += 2) {
+      games.push({
+        players: [players[i], players[i + 1]],
+        match_id: null,
+        finished: false,
+      });
+    }
+
+    return games;
+  }
+
+  #serializeGames(games) {}
+
+  async #startTournamentRound() {
+    const games = this.#tournament.games;
+
+    for (const game of games) {
+      const players = {
+        1: { name: game.players[0].client.name, id: game.players[0].client.id },
+        2: { name: game.players[1].client.name, id: game.players[1].client.id },
+      };
+
+      const match_id = await this.#newMatch({ players });
+      game.match_id = match_id;
+      this.#tournament.activeMatches.set(match_id, game);
+
+      game.players.forEach((c) => c.client.match_id = match_id);
+      game.players.forEach((c) => c.client.send({
+        type: "MATCH_FOUND",
+        match_id,
+        skip: false
+      }));
+    }
+  }
+
+  async #setUpTournament() {
+    const timeout = 2; // minutes
+    
+    this.#tournament.players = this.#clients.map((c) => ({
+      client: c,
+      wins: 0,
+      losses: 0
+    }));
+
+    this.#tournament.round = 1;
+    this.#tournament.games = this.#createGamesFromPlayers(this.#tournament.players);
+
+    this.#broadcast({
+      type: 'TOURNAMENT_BRACKETS',
+      round: this.#tournament.round,
+      games: this.#serializeGames(this.#tournament.games),
+      timeout_in_minutes: timeout
+    });
+
+    this.#tournament.timer = setTimeout(async () => {
+      await this.#startTournamentRound();
+    }, timeout * 60 * 1000);
+  }
+
   async #manageMatch() {
     if (!gameServer) throw new Error("NO_GAME_SERVER_AVAILABLE");
 
@@ -65,15 +134,11 @@ export class Lobby extends EventEmitter {
           }
         });
         const match_id = await this.#newMatch({ players });
-        this.#broadcast({ type: "MATCH_FOUND", match_id });
+        this.#clients.forEach((c) => c.match_id = match_id);
+        this.#broadcast({ type: "MATCH_FOUND", match_id, skip: false });
         break;
       case "TOURNAMENT":
-        while (!this.#end_game) {
-          const gamesCount = 0;
-          const howManyGames = this.#clients.length;
-
-          if (gamesCount >= howManyGames) break;
-        }
+        await this.#setUpTournament();
         break;
     }
   }
@@ -157,10 +222,11 @@ export class Lobby extends EventEmitter {
             stats
           })
         }
-        await data.sendRequest("/addHistory", { stats });
         this.emit("END_GAME");
         break;
     }
+
+    await data.sendRequest("/addHistory", { stats });
   }
 
   #broadcast(message) {

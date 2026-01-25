@@ -3,8 +3,10 @@ import * as ex from 'excalibur';
 export class Pipe extends ex.Actor {
 	private playerPos: number = 0;
 	private scored: boolean = false;
+	private sprite: ex.ImageSource | null = null;
+	private isTop: boolean = false;
 
-	constructor(x: number, y: number, width: number, height: number, playerX: number) {
+	constructor(x: number, y: number, width: number, height: number, playerX: number, isTop: boolean, sprite: ex.ImageSource | null = null) {
 		super({
 			x: x,
 			y: y,
@@ -14,7 +16,7 @@ export class Pipe extends ex.Actor {
 		});
 
 		this.pos.y += height / 2; // Adjust position to top-center origin
-
+		this.sprite = sprite;
 		this.addTag('pipe');
 		this.playerPos = playerX;
 
@@ -22,6 +24,24 @@ export class Pipe extends ex.Actor {
 
 		this.collider.set(ex.Shape.Box(this.width, this.height));
 		this.body.vel.x = -200; // Move left
+		this.isTop = isTop;
+	}
+
+	onInitialize(engine: ex.Engine): void {
+		if (!this.sprite) return;
+
+		const sprite = new ex.Sprite({
+			image: this.sprite,
+			sourceView: new ex.Rectangle(0, 0, this.sprite.width, this.sprite.height),
+			destSize: {
+				width: this.width,
+				height: this.height
+			}
+		});
+
+		sprite.flipVertical = this.isTop;
+
+		this.graphics.use(sprite);
 	}
 
 	onPreUpdate(): void {

@@ -203,42 +203,44 @@ export class Server {
 	//get req.user.user_id from req(API-Gateway)
 	#joinParty(req, reply) {
 		try {
-			const {token} = req.params;
-			const {id, game_type} = req.body;
-
-			if (!id)
-				throw new Error('INVALID_FORMAT');
-
-			const client = this.#clients.get(id);
-			if (!client)
-				throw new Error('NOT_CONNECTED');
-
-			if (!token) {
-				const party = this.createSoloParty({id: client.id, game_type});
-				console.log('Server.#joinParty: Client joining solo party:', client.name);
-				return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
-			}
-
-			const invite = this.#invites.get(token);
-			if (!invite) {
-				const party = this.createSoloParty({id: client.id, game_type});
-				console.log('Server.#joinParty: Client joining solo party (invalid invite):', client.name);
-				return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
-			}
-			if (this.#checkInvite(invite, token))
-				throw new Error('INVITE_EXPIRED');
-
-			const party = invite.party;
-
-			console.log('Server.#joinParty: Client joining party via invite:', client.name);
-
-			party.addClient(client);
+		  const {token} = req.params;
+		  const {id, game_type} = req.body;
+	  
+		  if (!id)
+			throw new Error('INVALID_FORMAT');
+	  
+		  const client = this.#clients.get(id);
+		  if (!client)
+			throw new Error('NOT_CONNECTED');
+	  
+		  if (!token) {
+			const party = this.createSoloParty({id: client.id, game_type});
+			console.log('Server.#joinParty: Client joining solo party:', client.name);
 			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
+		  }
+	  
+		  const invite = this.#invites.get(token);
+		  if (!invite) {
+			const party = this.createSoloParty({id: client.id, game_type});
+			console.log('Server.#joinParty: Client joining solo party:', client.name);
+			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
+		  }
+	  
+		  if (this.#checkInvite(invite, token))
+			throw new Error('INVITE_EXPIRED');
+	  
+		  const party = invite.party;
+	  
+		  console.log('Server.#joinParty: Client joining party via invite:', client.name);
+	  
+		  party.addClient(client);
+		  return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 		} catch (error) {
-			console.error('Server.#handleInviteLink: Error handling invite link:', error.message);
-			return reply.status(400).send({type: 'ERROR', reason: error.message, code: 400});
+		  console.error('Server.#joinParty: Error handling invite link:', error.message);
+		  return reply.status(400).send({type: 'ERROR', reason: error.message, code: 400});
 		}
-	}
+	  }
+	  
 
 	#leaveParty(req, reply) {
 		try {

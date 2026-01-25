@@ -25,6 +25,7 @@ export default function StatusPage({ user }: StatusPageProps) {
 
   const handleBack = (url: string) => {
     match.resetStats();
+    match.leaveParty();
     router.push(url);
   }
 
@@ -66,7 +67,7 @@ export default function StatusPage({ user }: StatusPageProps) {
         <div className="absolute -top-24 -right-24 h-48 w-48 bg-blue-500/20 blur-3xl rounded-full" />
         <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full" />
           <p className='text-slate-400'>
-            {stats.stats.game_type}
+            //{stats.stats.game_type}
           </p>
         {/* Match Summary */}
         <div className="relative grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -83,14 +84,14 @@ export default function StatusPage({ user }: StatusPageProps) {
               +{stats.experienceGained} XP
             </p>
             <p className="text-xl font-bold text-white">
-              {stats.pts > 0 ? '+' : ''}{stats.pts} PDL
+              {stats.pts > 0 ? '+' : ''}{stats.pts} RP
             </p>
           </div>
 
           <div className="rounded-lg border border-white/10 bg-white/5 p-4">
             <p className="text-slate-400 text-sm">//New Rank</p>
             <p className="text-xl font-bold text-white">{stats.tier}</p>
-            <p className="text-sm text-slate-400">{stats.rank_points} pdl</p>
+            <p className="text-sm text-slate-400">{stats.rank_points} RP</p>
           </div>
 
           <div className="rounded-lg border border-white/10 bg-white/5 p-4">
@@ -149,6 +150,17 @@ export default function StatusPage({ user }: StatusPageProps) {
             })}
           </div>
         </div>
+
+        {/* Useful infos */}
+        <div className="rounded-lg border border-white/10 bg-white/5 p-6">
+        <h3 className="text-lg font-bold text-white mb-4">Useful info</h3>
+        <ul className="space-y-2 text-slate-400 text-sm">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-400 mt-0.5">▸</span>
+            <span>RP - Rank Points</span>
+          </li>
+        </ul>
+      </div>
       </div>
     </div>
   );

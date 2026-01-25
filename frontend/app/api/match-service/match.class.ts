@@ -51,8 +51,8 @@ export class Match {
 	};
 	private interval: any = null;
 	private _isConnected: boolean = false;
-	private _state: string = 'OFFLINE';
-	private onMatchFound: ((match_id: number) => void) | null = null;
+	private _state: string = 'IDLE';
+	private onMatchFound: ((match_id: number, skip: boolean) => void) | null = null;
 	private onMatchResults: ((stats: StatsType) => void) | null = null;
 	private _match_id: number = 0;
 	private party_users: PartyType[] = [];
@@ -62,13 +62,13 @@ export class Match {
 			this._state = state;
 			// await this.updateState();
 		},
-		'MATCH_FOUND': ({match_id}: {match_id: number}) => {
+		'MATCH_FOUND': ({match_id, skip}: {match_id: number, skip: boolean}) => {
 			this._match_id = match_id;
 			// window.location.href = '/dashboard/play/pong';
-			console.log('Match found! Match ID:', match_id);
+			console.log('Match found! Match ID: ' + match_id + " skip: " + skip);
 
 			if (this.onMatchFound) {
-				this.onMatchFound(match_id);
+				this.onMatchFound(match_id, skip);
 			}
 		},
 		'PARTY_UPDATED': async () => {
@@ -99,13 +99,14 @@ export class Match {
 	resetStats() {
 		this.lastGameStats = null;
 		this._match_id = 0;
+		this.leaveParty();
 	}
 
 	get party(): PartyType[] {
 		return this.party_users;
 	}
 
-	set onMatch(callback: (match_id: number) => void) {
+	set onMatch(callback: (match_id: number, skip: boolean) => void) {
 		this.onMatchFound = callback;
 	}
 
