@@ -15,6 +15,34 @@ const databaseModels = {
     return object;
   },
 
+  setFlappyHighScore: async function setFlappyBirdHighScore(fastify, data) {
+    const res = await this.getFlappyHighScore(fastify, data.user_id);
+
+    console.log('CURRENT HIGH SCORE:', res, 'NEW SCORE:', data.score);
+
+    if (res && data.score <= res.high_score) return true;
+
+    console.log("Updating flappy bird high score to:", data.score);
+
+    await fastify.db.run(
+      "UPDATE users SET flappy_bird_high_score = ? WHERE user_id = ?",
+      [data.score, data.user_id]
+    );
+    return true;
+  },
+
+  getFlappyHighScore: async function getFlappyBirdHighScore(fastify, user_id) {
+    const object = await fastify.db.get(
+      "SELECT flappy_bird_high_score FROM users WHERE user_id = ?",
+      [user_id]
+    );
+    if (!object) return null;
+
+    console.log("FLAPPY BIRD HIGH SCORE:", object);
+
+    return {high_score: object.flappy_bird_high_score ?? 0};
+  },
+
   addHistory: async function addHistory(fastify, data) {
     const {matchId, players, time} = data;
 

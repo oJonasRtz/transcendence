@@ -6,7 +6,15 @@ import { useEffect, useRef, useState } from "react";
  * Run the Flappy Bird game on the client side.
  * @param restartSignal A signal to restart the game.
 */
-export default function FlappyBird({restartSignal}: {restartSignal: number}) {
+export default function FlappyBird({
+	restartSignal,
+	setScore,
+	saveHighScore}:{
+		restartSignal: number,
+		setScore: (score: number) => void,
+		saveHighScore: (score: number) => Promise<void>
+
+}) {
 	const gameRef = useRef<any>(null);
 	const [start, setStart] = useState(false);
 
@@ -19,7 +27,7 @@ export default function FlappyBird({restartSignal}: {restartSignal: number}) {
 			const {startFlappyBird} = await import('./flappy-bird/main');
 			
 			if (!mounted) return;
-			gameRef.current = await startFlappyBird();
+			gameRef.current = await startFlappyBird(setScore, saveHighScore);
 		};
 
 		init();

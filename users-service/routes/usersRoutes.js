@@ -27,6 +27,9 @@ const routes = [
 
 	{ method: 'POST', url: '/addHistory', handler: usersControllers.addHistory },
 	{ method: 'POST', url: '/getHistory', handler: usersControllers.getHistory },
+
+	{method: 'POST', url: '/setFlappyHighScore', handler: usersControllers.setFlappyHighScore },
+	{method: 'POST', url: '/getFlappyHighScore', handler: usersControllers.getFlappyHighScore },
 ];
 
 export default async function usersRoutes(fastify, options) {

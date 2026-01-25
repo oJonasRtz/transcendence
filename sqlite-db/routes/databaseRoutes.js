@@ -55,6 +55,9 @@ const routes = [
 
 	{ method: 'POST', url: '/addHistory', handler: databaseControllers.addHistory },
 	{ method: 'POST', url: '/getHistory', handler: databaseControllers.getHistory },
+
+	{method: 'POST', url: '/setFlappyHighScore', handler: databaseControllers.setFlappyHighScore },
+	{method: 'POST', url: '/getFlappyHighScore', handler: databaseControllers.getFlappyHighScore },
 ];
 
 export default async function databaseRoutes(fastify, options) {

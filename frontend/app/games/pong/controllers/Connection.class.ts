@@ -110,6 +110,8 @@ export class Connection {
       // console.log("[updateState] Ball data:", ball);
       gameState.setBall({ exist: ball.exists, vector: ball.position });
 
+      console.log('players data: ', players);
+
       for (const [key, val] of Object.entries(players as Record<string, PlayerState>)) {
         const i: number = Number(key);
         if (i !== 1 && i !== 2) continue;

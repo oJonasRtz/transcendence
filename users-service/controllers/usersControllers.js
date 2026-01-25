@@ -17,6 +17,41 @@ const usersControllers = {
     }
   },
 
+  getFlappyHighScore: async function getFlappyHighScore(req, reply) {
+    try {
+      if (!req.body || !req.body.user_id)
+        return reply.code(400).send("You need to inform user id here");
+      const highScore = await axios.post(
+        "https://sqlite-db:3002/getFlappyHighScore",
+        req.body
+      );
+
+      console.log("highScore data:", highScore?.data);
+      return reply.code(200).send(highScore?.data ?? {});
+    } catch (err) {
+      console.error(
+        "Users-Service getFlappyHighScore",
+        err?.response?.data || err.message
+      );
+      return reply.code(500).send("Internal Server Error");
+    }
+  },
+  setFlappyHighScore: async function setFlappyHighScore(req, reply) {
+    try {
+      const {user_id, score} = req.body;
+      if (user_id === undefined || score === undefined)
+        throw new error("INVALID_FORMAT");
+
+      console.log(`ill send ${req.body} to sqlite`);
+
+      await axios.post("https://sqlite-db:3002/setFlappyHighScore", req.body);
+      return reply.code(200).send("Success");
+    } catch (error) {
+      console.error("USERS-SERVICE setFlappyHighScore", error.message);
+      return reply.code(500).send("An error happened");
+    }
+  },
+
   addHistory: async function addHistory(req, reply) {
     try {
       const {stats} = req.body;

@@ -54,6 +54,9 @@ const routes = [
 	{ method: 'POST', url: '/joinParty/:token', handler: privateControllers.joinParty },
 	{ method: 'POST', url: '/leaveParty', handler: privateControllers.leaveParty },
 	{ method: 'GET', url: '/partyInfo/:id', handler: privateControllers.partyInfo },
+
+	{ method: 'POST', url: '/setFlappyHighScore', handler: privateControllers.setFlappyHighScore },
+	{ method: 'POST', url: '/getFlappyHighScore', handler: privateControllers.getFlappyHighScore },
 ];
 
 export default async function privateRoutes(fastify, options) {

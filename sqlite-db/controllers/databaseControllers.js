@@ -19,6 +19,31 @@ const databaseControllers = {
 		}
 	},
 
+	getFlappyHighScore: async function getFlappyHighScore(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform your user_id here");
+
+			const highScore = await databaseModels.getFlappyHighScore(fastify, req.body.user_id);
+			return reply.code(200).send(highScore ?? { high_score: 0 });
+		} catch (error) {
+			console.error("getFlappyHighScore SQLITE-DB error:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+	setFlappyHighScore: async function setFlappyHighScore(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id || req.body.score === undefined)
+				return reply.code(400).send("You need to inform your user_id and high_score here");
+
+			await databaseModels.setFlappyHighScore(fastify, req.body);
+			return reply.code(200).send("High score updated successfully");
+		} catch (error) {
+			console.error("setFlappyHighScore SQLITE-DB error:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	getHistory: async function getHistory(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.user_id)

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { User } from '@/app/lib/auth';
 import FlappyBird from '@/app/games/FlappyBird';
 
@@ -12,22 +12,65 @@ interface FlappyBirdGameProps {
 export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   const router = useRouter();
   const [restartSignal, setRestartSignal] = useState(0);
+  const [highScore, setHighScore] = useState(123); // Can be updated via API
+  const [score, setScore] = useState(0); // Current player score
 
   const handleRestart = () => {
     setRestartSignal(prev => prev + 1);
+    setScore(0); // Reset score on restart
+  };
+
+  const saveHighScore = async (score: number) => {
+    try {
+      console.log('Saving high score:', score);
+      await fetch('/api/flappy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'setFlappyHighScore',
+          user_id: user.user_id,
+          score,
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to save high score:', error);
+    }
   };
 
   useEffect(() => {
-    const keyHandleDown = (e: KeyboardEvent) => {
-      if (['r'].includes(e.key.toLowerCase()))
-        handleRestart();
+    const fetchScore = async () => {
+      try {
+        const res = await fetch('/api/flappy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'getFlappyHighScore',
+            user_id: user.user_id,
+          }),
+        });
+        const data = await res.json();
+        console.log('Fetched high score data:', data);
+        if (res.ok && data.high_score !== undefined)
+          setHighScore(data.high_score);
+      } catch (error) {
+        console.error('Failed to fetch high score:', error);
+      }
     }
+
+    fetchScore();
+  }, [user.user_id, restartSignal]);
+
+  useEffect(() => {
+    const keyHandleDown = (e: KeyboardEvent) => {
+      if (['r'].includes(e.key.toLowerCase())) handleRestart();
+    };
 
     window.addEventListener('keydown', keyHandleDown);
-
-    return () => {
-      window.removeEventListener('keydown', keyHandleDown);
-    }
+    return () => window.removeEventListener('keydown', keyHandleDown);
   }, []);
 
   return (
@@ -96,23 +139,38 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
         </div>
       </div>
 
-      {/* Game + How To Play */}
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row items-start justify-center gap-10">
-        {/* Game Container */}
-        <div className="relative inline-block overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
-          {/* Ambient glow */}
-          <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
-
-          <div className="relative">
-            <FlappyBird restartSignal={restartSignal} />
+      {/* Game + Scores */}
+      <div className="w-full max-w-6xl flex flex-col items-center gap-6 relative">
+        {/* Scores side by side */}
+        <div className="flex w-full gap-4 mb-4">
+          <div className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.5)] text-white font-bold text-lg backdrop-blur-sm text-center">
+            Score: {score}
+          </div>
+          <div className="flex-1 px-4 py-2 rounded-lg bg-orange-500/70 border border-orange-400 shadow-[0_0_15px_rgba(255,165,0,0.7)] backdrop-blur-sm text-white font-bold text-lg text-center">
+            High Score: {highScore}
           </div>
         </div>
 
-        {/* Controls Info */}
-        <div className="w-full max-w-sm rounded-lg border border-white/10 bg-white/5 p-6 self-stretch">
+        {/* Game container */}
+        <div className="relative w-full flex flex-col items-center">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl w-full h-96 lg:h-[450px]">
+            {/* Ambient glow */}
+            <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
+
+            <div className="relative w-full h-full">
+              <FlappyBird
+                restartSignal={restartSignal}
+                setScore={setScore}
+                saveHighScore={saveHighScore}
+              />
+            </div>
+          </div>
+
+         {/* How to Play below the game, width matches game container */}
+        <div className="mt-6 w-full rounded-lg border border-white/10 bg-white/5 p-6 text-slate-400 text-sm">
           <h3 className="text-lg font-bold text-white mb-4">How to Play</h3>
-          <ul className="space-y-2 text-slate-400 text-sm">
+          <ul className="space-y-2">
             <li className="flex items-start gap-2">
               <span className="text-green-400 mt-0.5">▸</span>
               <span>Click, tap, press ↑ or Space to flap</span>
@@ -128,9 +186,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
             <li className="flex items-start gap-2">
               <span className="text-green-400 mt-0.5">▸</span>
               <span>
-                When you die, click the{' '}
-                <strong className="text-green-300">"Restart Game"</strong> button above or press{' '}
-                <strong className="text-green-400">R</strong> to play again
+                When you die, click the <strong className="text-green-300">"Restart Game"</strong> button above or press <strong className="text-green-400">R</strong> to play again
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -138,6 +194,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
               <span>Or click inside the game area if that works too</span>
             </li>
           </ul>
+        </div>
         </div>
       </div>
     </div>

@@ -42,6 +42,7 @@ export default async function initDatabase() {
 				description TEXT DEFAULT NULL,
 				isEmailConfirmed BOOLEAN DEFAULT FALSE,
 				friends INTEGER DEFAULT 0,
+				flappy_bird_high_score INTEGER DEFAULT 0,
 				created_at DATETIME DEFAULT (datetime('now')),
 				updated_at DATETIME DEFAULT (datetime('now'))
 			);

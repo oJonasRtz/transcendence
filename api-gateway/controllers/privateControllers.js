@@ -61,6 +61,38 @@ const privateControllers = {
     return reply.sendFile("pong/index.html");
   },
 
+  getFlappyHighScore: async function getFlappyHighScore(req, reply) {
+    try {
+      const { user_id } = req.body;
+
+      const res = await axios.post('https://users-service:3003/getFlappyHighScore', { user_id });
+
+      const highScore = res?.data || 0;
+      console.log(`[${user_id}]GET FLAPPY HIGH SCORE RESPONSE:`, highScore);
+      return reply.code(200).send(highScore);
+    } catch (error) {
+      console.error("GET FLAPPY HIGH SCORE ERROR:", error.response?.data || error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
+  },
+  setFlappyHighScore: async function setFlappyHighScore(req, reply) {
+    try {
+      const { score, user_id } = req.body;
+
+      if (typeof score !== 'number' || score < 0) {
+        return reply.code(400).send("Error: Invalid high score");
+      }
+
+      console.log(`[${user_id}]SETTING FLAPPY HIGH SCORE WITH: ` + score);
+      const res = await axios.post('https://users-service:3003/setFlappyHighScore', req.body);
+
+      return reply.code(200).send(res.data);
+    } catch (error) {
+      console.error("SET FLAPPY HIGH SCORE ERROR:", error.response?.data || error.message);
+      return reply.code(500).send("Error: " + error.message);
+    }
+  },
+
   joinParty: async function joinParty(req, reply) {
     try {
       const {token} = req.params;

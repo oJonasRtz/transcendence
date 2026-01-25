@@ -38,6 +38,10 @@ export class State {
 	public isGamePaused(): boolean {
 		return this.isPaused;
 	}
+	public getHighScore(): number {
+		return this.highScore;
+	}
+
 	public getScore(): number {
 		return this.score;
 	}

@@ -15,15 +15,16 @@ export class Game {
 	private pipes: PipePair[] | null = null;
 	private pipeSpawnInterval = 1500; // milliseconds
 	private state: State = new State();
-	private scoreLabel: ex.Label | null = null;
 	private pointsPerPipe: number = 1;
 	private playerPosX: number = 100;
+	private setScore: ((score: number) => void) | null = null;
+	private saveHighScore: ((score: number) => void) | null = null;
 	private sprites: SpritesType = {
 		bird: new ex.ImageSource('/sprites/Flappy/birb.png'),
 		pipe: new ex.ImageSource('/sprites/Flappy/pipe.png'),
 	}
 
-	constructor(container: HTMLElement) {
+	constructor(container: HTMLElement, setScore: (score: number) => void, saveHighScore: (score: number) => void) {
 		this.engine = new ex.Engine({
 			width: GAME_WIDTH,
 			height: GAME_HEIGHT,
@@ -34,13 +35,14 @@ export class Game {
 
 		container.innerHTML = '';
 		container.appendChild(this.engine.canvas);
+		this.setScore = setScore;
+		this.saveHighScore = saveHighScore;
 
 		this.player = new Birb(this.playerPosX, this.engine.drawHeight / 2, this.engine.drawHeight, this.sprites.bird);
 
 		this.addToGame([this.player]);
 
 		this.updateState();
-		this.addScoreLabel();
 
 		this.engine.on('postupdate', () => {
 			if (!this.pipes) {
@@ -49,7 +51,6 @@ export class Game {
 					this.addPipes();
 				}, this.pipeSpawnInterval);
 			}
-			this.updateScore();
 			this.endGame();
 		});
 
@@ -58,33 +59,6 @@ export class Game {
 				e.preventDefault();
 			}
 		});
-	}
-
-	private updateScore() {
-		if (this.scoreLabel)
-			this.scoreLabel.text = `Score: ${this.state.getScore()}`;
-	}
-
-	private addScoreLabel() {
-		this.scoreLabel = new ex.Label({
-			text: 'Score: 0',
-			x: 20,
-			y: 20,
-			z: 100,
-			color: ex.Color.White,
-			font: new ex.Font({
-				family: 'Arial',
-				size: 24,
-				unit: ex.FontUnit.Px,
-				shadow: {
-					color: ex.Color.Black,
-					offset: ex.vec(2, 2),
-					blur: 0,
-				}
-			}),
-		});
-
-		this.engine.add(this.scoreLabel);
 	}
 
 	private addToGame(data: ex.Actor[]) {
@@ -104,6 +78,7 @@ export class Game {
 
 		pipePair.on('scored', () => {
 			this.state.incrementScore(this.pointsPerPipe);
+			this?.setScore?.(this.state.getScore());
 		});
 
 		pipePair.on('kill', () => {
@@ -128,7 +103,9 @@ export class Game {
 	private endGame() {
 		if (!this.state.isGameEnded()) return;
 
-		console.log("[GameEnd] e isso eh tudo pessoal");
+		// console.log("[GameEnd] e isso eh tudo pessoal");
+		console.log("[GameEnd] Game Over! Final Score:", this.state.getScore());
+		this?.saveHighScore?.(this.state.getScore());
 		this.stop();
 	}
 
