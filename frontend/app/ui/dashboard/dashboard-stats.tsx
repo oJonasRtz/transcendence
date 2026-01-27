@@ -21,7 +21,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
   const cards: StatCard[] = [
     {
       title: 'Ranking',
-      value: stats.ranking.toString(),
+      value: `${stats.tier} (${stats.rankingPoints})`,
       icon: TrophyIcon,
       color: 'blue',
     },

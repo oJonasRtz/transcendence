@@ -19,7 +19,8 @@ export interface DashboardProfile {
 }
 
 export interface DashboardStats {
-  ranking: number;
+  rankingPoints: number;
+  tier: string;
   level: number;
   wins: number;
   winStreak: number;
@@ -123,7 +124,8 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
   const wins = profileData?.wins ?? 0;
   const xp = profileData?.experience_points ?? 0;
   const level = profileData?.level ?? Math.floor(xp / 500) + 1;
-  const ranking = profileData?.rank ?? 0;
+  const rankingPoints = profileData?.rank_points ?? 0;
+  const tier = profileData?.tier ?? 'UNRANKED';
 
   // Compute win streak from recent history
   let winStreak = 0;
@@ -136,7 +138,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     }
   }
 
-  const stats: DashboardStats = { ranking, level, wins, winStreak };
+  const stats: DashboardStats = { rankingPoints, tier, level, wins, winStreak };
 
   // --- Recent Matches ---
   const matches: DashboardMatch[] = historyList.slice(0, 10).map(
