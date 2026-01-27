@@ -77,145 +77,153 @@ export interface DashboardData {
   userRank: number;
 }
 
-// TODO: Replace mock data with real API sources.
+async function fetchGateway(path: string, jwtValue: string) {
+  const response = await fetch(`${API_GATEWAY_URL}${path}`, {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Cookie: `jwt=${jwtValue}`,
+    },
+    cache: 'no-store',
+  });
+  if (!response.ok) return null;
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) return null;
+  return response.json();
+}
+
 export async function getDashboardData(user: User): Promise<DashboardData> {
-  const now = new Date();
-  let avatar: string | null = null;
-  let isOnline = true;
+  const cookieStore = await cookies();
+  const jwt = cookieStore.get('jwt');
+  const jwtValue = jwt?.value ?? '';
 
-  try {
-    const cookieStore = await cookies();
-    const jwt = cookieStore.get('jwt');
+  // Fetch all data in parallel
+  const [profileData, historyData, allUsers, friendsData] =
+    await Promise.all([
+      fetchGateway(
+        `/api/profile?public_id=${encodeURIComponent(user.public_id)}`,
+        jwtValue
+      ).catch(() => null),
+      fetchGateway('/api/history?limit=10', jwtValue).catch(() => null),
+      fetchGateway('/api/users', jwtValue).catch(() => null),
+      fetchGateway('/api/friends', jwtValue).catch(() => null),
+    ]);
 
-    if (jwt && user.public_id) {
-      const response = await fetch(
-        `${API_GATEWAY_URL}/api/profile?public_id=${encodeURIComponent(
-          user.public_id
-        )}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            Cookie: `jwt=${jwt.value}`,
-          },
-          cache: 'no-store',
-        }
-      );
+  // --- Profile ---
+  const profile: DashboardProfile = {
+    userId: user.user_id,
+    publicId: user.public_id,
+    username: user.username,
+    nickname: user.nickname ?? user.username ?? null,
+    avatar: profileData?.avatar ?? null,
+    isOnline: Boolean(profileData?.isOnline ?? true),
+  };
 
-      if (response.ok) {
-        const contentType = response.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await response.json();
-          avatar = data?.avatar ?? null;
-          isOnline = Boolean(data?.isOnline ?? true);
-        }
-      }
+  // --- Stats ---
+  const wins = profileData?.wins ?? 0;
+  const xp = profileData?.experience_points ?? 0;
+  const level = profileData?.level ?? Math.floor(xp / 500) + 1;
+  const ranking = profileData?.rank ?? 0;
+
+  // Compute win streak from recent history
+  let winStreak = 0;
+  const historyList: any[] = historyData?.history ?? (Array.isArray(historyData) ? historyData : []);
+  for (const match of historyList) {
+    if (match.isVictory) {
+      winStreak++;
+    } else {
+      break;
     }
-  } catch {
-    avatar = null;
   }
 
+  const stats: DashboardStats = { ranking, level, wins, winStreak };
+
+  // --- Recent Matches ---
+  const matches: DashboardMatch[] = historyList.slice(0, 10).map(
+    (match: any, index: number) => {
+      const opponent = match.players?.find(
+        (p: any) => p.user_id !== user.user_id
+      );
+      const self = match.players?.find(
+        (p: any) => p.user_id === user.user_id
+      );
+      const selfScore = self?.score ?? 0;
+      const oppScore = opponent?.score ?? 0;
+
+      let result: 'win' | 'loss' | 'draw' = 'draw';
+      if (match.isVictory) result = 'win';
+      else if (match.isVictory === false) result = 'loss';
+
+      return {
+        id: index + 1,
+        opponentName: opponent?.name ?? 'Unknown',
+        opponentAvatar: opponent?.avatar ?? '/images/default-avatar.png',
+        result,
+        score: `${selfScore} - ${oppScore}`,
+        playedAt: match.created_at ?? new Date().toISOString(),
+      };
+    }
+  );
+
+  // --- Activity (synthesized from matches) ---
+  const activity: DashboardActivity[] = historyList.slice(0, 5).map(
+    (match: any, index: number) => {
+      const opponent = match.players?.find(
+        (p: any) => p.user_id !== user.user_id
+      );
+      return {
+        id: `activity-match-${index}`,
+        type: 'match' as const,
+        text: `Played against ${opponent?.name ?? 'Unknown'}`,
+        date: match.created_at ?? new Date().toISOString(),
+      };
+    }
+  );
+
+  // --- Leaderboard ---
+  const usersArray: any[] = Array.isArray(allUsers) ? allUsers : [];
+  const sorted = [...usersArray].sort(
+    (a, b) => (b.rank ?? 0) - (a.rank ?? 0)
+  );
+  const leaderboard: DashboardLeaderboardEntry[] = sorted
+    .slice(0, 10)
+    .map((u: any, index: number) => ({
+      id: index + 1,
+      username: u.nickname ?? u.username ?? 'Unknown',
+      avatar: u.avatar ?? '/images/default-avatar.png',
+      ranking: u.rank ?? 0,
+      isOnline: Boolean(u.isOnline),
+    }));
+
+  const userRank =
+    sorted.findIndex(
+      (u: any) => u.user_id === user.user_id || u.public_id === user.public_id
+    ) + 1 || 0;
+
+  // --- Friends ---
+  const friendsList: any[] = friendsData?.friends ?? [];
+  const friends: DashboardFriend[] = friendsList.map(
+    (f: any, index: number) => ({
+      id: f.id ?? index + 1,
+      username: f.username ?? 'Unknown',
+      avatar: f.avatar ?? '/images/default-avatar.png',
+      isOnline: Boolean(f.isOnline),
+    })
+  );
+
+  // --- Messages (no dedicated endpoint yet) ---
+  const messages: DashboardMessage[] = [];
+  const unreadCount = 0;
+
   return {
-    profile: {
-      userId: user.user_id,
-      publicId: user.public_id,
-      username: user.username,
-      nickname: user.nickname ?? user.username ?? null,
-      avatar,
-      isOnline,
-    },
-    stats: {
-      ranking: 1240,
-      level: 7,
-      wins: 12,
-      winStreak: 3,
-    },
-    matches: [
-      {
-        id: 1,
-        opponentName: 'Nebula',
-        opponentAvatar: '/images/avatar4.png',
-        result: 'win',
-        score: '11 - 7',
-        playedAt: now.toISOString(),
-      },
-      {
-        id: 2,
-        opponentName: 'Photon',
-        opponentAvatar: '/images/avatar5.png',
-        result: 'loss',
-        score: '11 - 9',
-        playedAt: new Date(now.getTime() - 86400000).toISOString(),
-      },
-    ],
-    activity: [
-      {
-        id: 'activity-match-1',
-        type: 'match',
-        text: 'Played against Nebula',
-        date: now.toISOString(),
-      },
-      {
-        id: 'activity-achievement-1',
-        type: 'achievement',
-        text: 'Unlocked First Win',
-        date: new Date(now.getTime() - 3600000).toISOString(),
-      },
-      {
-        id: 'activity-friend-1',
-        type: 'friendship',
-        text: 'New friend: Ion',
-        date: new Date(now.getTime() - 7200000).toISOString(),
-      },
-    ],
-    leaderboard: [
-      {
-        id: 101,
-        username: 'Nova',
-        avatar: '/images/avatar1.png',
-        ranking: 1890,
-        isOnline: true,
-      },
-      {
-        id: 102,
-        username: 'Quark',
-        avatar: '/images/avatar2.png',
-        ranking: 1760,
-        isOnline: false,
-      },
-      {
-        id: 103,
-        username: 'Pulse',
-        avatar: '/images/avatar3.png',
-        ranking: 1655,
-        isOnline: true,
-      },
-    ],
-    friends: [
-      {
-        id: 301,
-        username: 'Ion',
-        avatar: '/images/avatar2.png',
-        isOnline: true,
-      },
-      {
-        id: 302,
-        username: 'Drift',
-        avatar: '/images/avatar3.png',
-        isOnline: true,
-      },
-    ],
-    messages: [
-      {
-        id: 401,
-        username: 'Orbit',
-        avatar: '/images/avatar4.png',
-        preview: 'Queueing for a match?',
-        createdAt: now.toISOString(),
-        isOnline: true,
-      },
-    ],
-    unreadCount: 1,
-    userRank: 42,
+    profile,
+    stats,
+    matches,
+    activity,
+    leaderboard,
+    friends,
+    messages,
+    unreadCount,
+    userRank,
   };
 }

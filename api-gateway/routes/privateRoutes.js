@@ -50,6 +50,9 @@ const routes = [
 	{ method: 'POST', url: '/api/email/send-verification', handler: privateControllers.sendVerificationEmailJson },
 	{ method: 'POST', url: '/api/email/verify-code', handler: privateControllers.verifyEmailCodeJson },
 	{ method: 'GET', url: '/getVerificationStatus', handler: privateControllers.getVerificationStatus },
+	{ method: 'GET', url: '/api/history', handler: privateControllers.apiGetHistory },
+	{ method: 'GET', url: '/api/users', handler: privateControllers.apiGetAllUsers },
+	{ method: 'GET', url: '/api/friends', handler: privateControllers.apiGetFriends },
 
 	{ method: 'POST', url: '/joinParty/:token', handler: privateControllers.joinParty },
 	{ method: 'POST', url: '/leaveParty', handler: privateControllers.leaveParty },
