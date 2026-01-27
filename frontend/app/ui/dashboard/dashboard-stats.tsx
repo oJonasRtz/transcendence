@@ -9,6 +9,7 @@ import { DashboardStats as DashboardStatsType } from '@/app/lib/dashboard-data';
 type StatCard = {
   title: string;
   value: string;
+  subtitle?: string;
   icon: React.ComponentType<{ className?: string }>;
   color: 'blue' | 'purple' | 'green' | 'orange';
 };
@@ -21,7 +22,8 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
   const cards: StatCard[] = [
     {
       title: 'Ranking',
-      value: `${stats.tier} (${stats.rankingPoints})`,
+      value: stats.tier,
+      subtitle: `${stats.rankingPoints} RP`,
       icon: TrophyIcon,
       color: 'blue',
     },
@@ -57,6 +59,7 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
 function StatCard({
   title,
   value,
+  subtitle,
   icon: Icon,
   color,
 }: StatCard) {
@@ -84,6 +87,7 @@ function StatCard({
             <span className={iconClasses[color].split(' ')[2]}>//</span> {title}
           </p>
           <p className="text-4xl font-black text-white drop-shadow-lg">{value}</p>
+          {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
         </div>
         <div className={`rounded-lg p-3 border ${iconClasses[color]}`}>
           <Icon className="h-8 w-8" />
