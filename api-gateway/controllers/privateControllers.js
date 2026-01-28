@@ -1611,6 +1611,52 @@ const privateControllers = {
       return reply.status(500).send({ success: false, message: "Error blocking/unblocking user" });
     }
   },
+
+  apiGetHistory: async function apiGetHistory(req, reply) {
+    try {
+      const userId = req.user.user_id;
+      const limit = parseInt(req.query.limit) || 10;
+      const res = await axios.post(
+        "https://users-service:3003/getHistory",
+        { user_id: userId, limit }
+      );
+      return reply.send(res?.data ?? { stats: {}, history: [] });
+    } catch (err) {
+      console.error("API-GATEWAY apiGetHistory Error:", err.message);
+      return reply.status(500).send({ error: "Error fetching match history" });
+    }
+  },
+
+  apiGetAllUsers: async function apiGetAllUsers(req, reply) {
+    try {
+      const response = await axios.get(
+        "https://users-service:3003/getAllUsersInformation"
+      );
+      const users = response?.data ?? [];
+      for (const user of users) user.state = getState(user);
+      return reply.send(users);
+    } catch (err) {
+      console.error("API-GATEWAY apiGetAllUsers Error:", err.message);
+      return reply.status(500).send({ error: "Error fetching users" });
+    }
+  },
+
+  apiGetFriends: async function apiGetFriends(req, reply) {
+    try {
+      const userId = req.user.user_id;
+      const [friendsRes, pendingRes] = await Promise.all([
+        axios.post("https://users-service:3003/getAllFriends", { user_id: userId }),
+        axios.post("https://users-service:3003/getAllPendencies", { user_id: userId }),
+      ]);
+      return reply.send({
+        friends: friendsRes?.data ?? [],
+        pendings: pendingRes?.data ?? [],
+      });
+    } catch (err) {
+      console.error("API-GATEWAY apiGetFriends Error:", err.message);
+      return reply.status(500).send({ error: "Error fetching friends" });
+    }
+  },
 };
 
 export default privateControllers;

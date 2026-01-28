@@ -4,11 +4,18 @@ import {
   CheckCircleIcon,
   FireIcon,
 } from '@heroicons/react/24/outline';
+import { cookies } from 'next/headers';
 import { DashboardStats as DashboardStatsType } from '@/app/lib/dashboard-data';
+
+const API_GATEWAY_URL =
+  process.env.API_GATEWAY_URL ||
+  process.env.NEXT_PUBLIC_API_GATEWAY_URL ||
+  'https://api-gateway:3000';
 
 type StatCard = {
   title: string;
   value: string;
+  subtitle?: string;
   icon: React.ComponentType<{ className?: string }>;
   color: 'blue' | 'purple' | 'green' | 'orange';
 };
@@ -17,11 +24,31 @@ type DashboardStatsProps = {
   stats: DashboardStatsType;
 };
 
-export default function DashboardStats({ stats }: DashboardStatsProps) {
+export async function getMatchHistory(): Promise<any> {
+  const cookieStore = await cookies();
+  const jwt = cookieStore.get('jwt')?.value;
+  if (!jwt) return { stats: {}, history: [] };
+
+  const res = await fetch(`${API_GATEWAY_URL}/api/history`, {
+    method: 'GET',
+    headers: {
+      Cookie: `jwt=${jwt}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) return { stats: {}, history: [] };
+  return res.json();
+}
+
+export default async function DashboardStats({ stats }: DashboardStatsProps) {
+  const historyData = await getMatchHistory();
+  console.log('DashboardStats - historyData:', historyData);
   const cards: StatCard[] = [
     {
       title: 'Ranking',
-      value: stats.ranking.toString(),
+      value: stats.tier,
+      subtitle: `${stats.rankingPoints} RP`,
       icon: TrophyIcon,
       color: 'blue',
     },
@@ -33,13 +60,13 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
     },
     {
       title: 'Wins',
-      value: stats.wins.toString(),
+      value: historyData?.stats?.wins?.toString() ?? '0',
       icon: CheckCircleIcon,
       color: 'green',
     },
     {
-      title: 'Win Streak',
-      value: stats.winStreak.toString(),
+      title: 'Win Rate',
+      value: `${historyData?.stats?.win_rate?.toString() ?? '0'}%`,
       icon: FireIcon,
       color: 'orange',
     },
@@ -54,9 +81,10 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
   );
 }
 
-function StatCard({
+async function StatCard({
   title,
   value,
+  subtitle,
   icon: Icon,
   color,
 }: StatCard) {
@@ -84,6 +112,7 @@ function StatCard({
             <span className={iconClasses[color].split(' ')[2]}>//</span> {title}
           </p>
           <p className="text-4xl font-black text-white drop-shadow-lg">{value}</p>
+          {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
         </div>
         <div className={`rounded-lg p-3 border ${iconClasses[color]}`}>
           <Icon className="h-8 w-8" />
