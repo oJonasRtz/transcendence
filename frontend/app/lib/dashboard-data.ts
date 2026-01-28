@@ -24,6 +24,8 @@ export interface DashboardStats {
   level: number;
   wins: number;
   winStreak: number;
+  experience_points?: number;
+  experience_to_next_level?: number;
 }
 
 export interface DashboardMatch {

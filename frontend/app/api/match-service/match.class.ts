@@ -256,6 +256,19 @@ export class Match {
 		});
 	}
 
+  /**
+   * Fetch match history for the user.
+   * @return Promise<any> - Returns a promise that resolves to the match history data.
+  */
+  public async aaa(): Promise<any> {
+    const res = await fetch(`/api/history?userid=${this.info.id}`, {
+      method: 'GET',
+			credentials: 'include',
+		  });
+
+      return (await res.json());
+  }
+
 	private send(data: any): boolean {
 		if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return false;
 		this.ws.send(JSON.stringify(data));
