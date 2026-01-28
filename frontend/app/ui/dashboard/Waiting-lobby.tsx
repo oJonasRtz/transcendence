@@ -2,7 +2,7 @@
 import { match } from './MatchProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { User } from '@/app/lib/auth';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import MatchNotify from './match-notifty';
 import { __TIME_TO_WAIT__ } from './MatchProvider';
 
@@ -107,7 +107,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     const s = (seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
   };
-
 
   return (
     <div className="space-y-6">
