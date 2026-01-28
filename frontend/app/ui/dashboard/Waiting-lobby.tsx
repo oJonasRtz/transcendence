@@ -108,11 +108,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     return `${m}:${s}`;
   };
 
-  useEffect(() => {
-    (async () => {
-      await match.aaa();
-    })();
-  }, []);
 
   return (
     <div className="space-y-6">
