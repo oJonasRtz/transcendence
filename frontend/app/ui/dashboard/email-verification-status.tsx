@@ -63,9 +63,11 @@ export default function EmailVerificationStatus({isCollapsed}: {isCollapsed?: bo
     return (
       <div className="flex h-[48px] w-full items-center justify-center gap-2 rounded-lg p-3 text-sm font-semibold md:justify-start md:p-2 md:px-3 border bg-white/5 text-slate-600 border-white/10">
         <CheckBadgeIcon className="w-6" />
-        <p className="hidden md:block uppercase tracking-wider font-mono text-xs">
-          Status Unknown
-        </p>
+        {!isCollapsed && (
+          <p className="hidden md:block uppercase tracking-wider font-mono text-xs">
+            Status Unknown
+          </p>
+        )}
       </div>
     );
   }

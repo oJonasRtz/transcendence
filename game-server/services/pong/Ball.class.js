@@ -8,9 +8,9 @@ export class Ball {
 	height: stats?.ball?.height ?? 20,
   }
   #speed = {
-    moveSpeed: 5,
-    speedIncrement: 1,
-    maxSpeed: 10,
+    moveSpeed: 300,
+    speedIncrement: 30,
+    maxSpeed: 600,
   };
   #lastBounce = null;
   #DELAY = 100;
@@ -32,7 +32,7 @@ export class Ball {
 
     setTimeout(() => {
       this.#start = true;
-      console.log("Ball started moving");
+      // console.log("Ball started moving");
     }, startTime);
   }
   get direction() {
@@ -59,9 +59,11 @@ export class Ball {
     return Math.random() < 0.5 ? -1 : 1;
   }
 
-  #updatePosition() {
-    this.#position.x += this.#direction.x * this.#speed.moveSpeed;
-    this.#position.y += this.#direction.y * this.#speed.moveSpeed;
+  #updatePosition(delta) {
+    const distance = this.#speed.moveSpeed * delta;
+
+    this.#position.x += this.#direction.x * distance;
+    this.#position.y += this.#direction.y * distance;
 
     const hitLeft = this.#position.x <= this.#margin;
     const hitRight = this.#position.x >= stats?.map?.width - this.#margin;
@@ -77,29 +79,46 @@ export class Ball {
 
   start(onScore, onCollision) {
     if (this.#interval) return;
-	const col = {
-		1: 'y',
-		'-1': 'x',
-		0: null,
-	}
-
-    this.#interval = setInterval(() => {
-      if (!this.#start) return;
-      const scorer = this.#updatePosition();
-
-
-	  const colWall = this.#position.y <= this.#margin || this.#position.y >= stats?.map?.height - this.#margin
-      const colPaddle = onCollision();
-	  const axis = colWall - colPaddle;
-
-	  this.bounce(col[axis]);
-
+  
+    let lastTime = Date.now();
+  
+    const loop = () => {
+      if (!this.#start) {
+        this.#interval = setTimeout(loop, this.#networkBuffer);
+        return;
+      }
+  
+      const now = Date.now();
+      const rawDelta = (now - lastTime) / 1000;
+      const deltaTime = Math.min(rawDelta, 0.05); // trava delta
+      lastTime = now;
+  
+      const scorer = this.#updatePosition(deltaTime);
+  
+      const hitTop = this.#position.y <= this.#margin;
+      const hitBottom = this.#position.y >= stats.map.height - this.#margin;
+  
+      if (hitTop || hitBottom) {
+        this.#position.y = hitTop
+          ? this.#margin
+          : stats.map.height - this.#margin;
+        this.bounce("y");
+      }
+  
+      if (onCollision()) {
+        this.bounce("x");
+      }
+  
       if (scorer) {
-        clearInterval(this.#interval);
         this.#interval = null;
         onScore(scorer);
+        return;
       }
-    }, this.#networkBuffer);
+  
+      this.#interval = setTimeout(loop, this.#networkBuffer);
+    };
+  
+    loop();
   }
 
   stop() {
@@ -135,6 +154,6 @@ export class Ball {
     if (!(axis in axisMap)) throw new Error(types.error.TYPE_ERROR);
 
     axisMap[axis]();
-    console.log(`Ball bounced on ${axis}-axis`);
+    // console.log(`Ball bounced on ${axis}-axis`);
   }
 }

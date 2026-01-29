@@ -1,8 +1,8 @@
 import { checkVerticalCollision } from "../../controllers/checkVerticalCollision.js";
-import { FRAME_TIME, stats, types } from "../../server.shared.js";
+import { FPS, FRAME_TIME, stats, types } from "../../server.shared.js";
 
 export class Paddle {
-	#speed = 10;
+	#speed = 600 / FPS;
 	#borderMargin = stats?.margin ?? 10;
 	#spawnMargin = 50;
 	#position = {x: 0, y: 0};

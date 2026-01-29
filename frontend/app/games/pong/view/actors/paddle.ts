@@ -12,8 +12,9 @@ export class Paddle extends ex.Actor {
 		1: ex.Color.Blue,
 		2: ex.Color.Red
 	};
+	private sprite?: ex.ImageSource;
 
-	constructor(x: number, y: number, player: 1 | 2 = 1) {
+	constructor(x: number, y: number, player: 1 | 2 = 1, sprite?: ex.ImageSource) {
 		const players = gameState.getPlayers();
 		const p = players[player];
 		super({
@@ -25,18 +26,15 @@ export class Paddle extends ex.Actor {
 		});
 
 		this.number = player;
+		this.sprite = sprite;
 	}
 
 	onInitialize(): void {
-		const colour = this.colour[this.number];
+		const spr = this.sprite!.toSprite();
 
-		const body = new ex.Rectangle({
-			width: this.width,
-			height: this.height,
-			color: colour,
-		});
+		spr.flipHorizontal = this.number === 2;
 
-		this.graphics.add(body);
+		this.graphics.add(spr);
 	}
 	
 	onPreUpdate(): void {

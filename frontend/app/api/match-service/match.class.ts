@@ -168,6 +168,8 @@ export class Match {
 				id: this.info.id,
 			});
 			this._isConnected = true;
+
+			console.log('minha party: ' + this.party_token);
 		};
 		this.ws.onmessage = (message: any) => {
 			try {

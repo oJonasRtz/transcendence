@@ -44,36 +44,44 @@ export async function getMatchHistory(): Promise<any> {
 export default async function DashboardStats({ stats }: DashboardStatsProps) {
   const historyData = await getMatchHistory();
   console.log('DashboardStats - historyData:', historyData);
+  const totalXP = stats.experience_points + stats.experience_to_next_level;
+  const xpPercent = Math.min(
+    Math.round((stats.experience_points / totalXP) * 100),
+    100
+  );
+
   const cards: StatCard[] = [
     {
       title: 'Ranking',
       value: stats.tier,
-      subtitle: `${stats.rankingPoints} RP`,
+      subtitle: `${stats.rankingPoints}${stats.tier === 'MASTER' ? ' RP' : `/100 RP`}`,
       icon: TrophyIcon,
       color: 'blue',
     },
     {
       title: 'Level',
       value: stats.level.toString(),
+      subtitle: `${stats.experience_points}/${totalXP} XP | ${xpPercent}%`,
       icon: StarIcon,
       color: 'purple',
     },
-    {
-      title: 'Wins',
-      value: historyData?.stats?.wins?.toString() ?? '0',
-      icon: CheckCircleIcon,
-      color: 'green',
-    },
+    // {
+    //   title: 'Wins',
+    //   value: historyData?.stats?.wins?.toString() ?? '0',
+    //   icon: CheckCircleIcon,
+    //   color: 'green',
+    // },
     {
       title: 'Win Rate',
       value: `${historyData?.stats?.win_rate?.toString() ?? '0'}%`,
+      subtitle: `Wins: ${historyData?.stats?.wins ?? 0} | Losses: ${historyData?.stats?.losses}`,
       icon: FireIcon,
       color: 'orange',
     },
   ];
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => (
         <StatCard key={card.title} {...card} />
       ))}
@@ -106,7 +114,7 @@ async function StatCard({
     <div
       className={`rounded-lg bg-gradient-to-br ${colorClasses[color]} border backdrop-blur-sm p-6 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-[1.02]`}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm font-mono uppercase tracking-wider text-slate-400 mb-2">
             <span className={iconClasses[color].split(' ')[2]}>//</span> {title}
@@ -114,7 +122,7 @@ async function StatCard({
           <p className="text-4xl font-black text-white drop-shadow-lg">{value}</p>
           {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
         </div>
-        <div className={`rounded-lg p-3 border ${iconClasses[color]}`}>
+        <div className={`flex-shrink-0 max-w-full max-h-full rounded-lg p-3 border ${iconClasses[color]}`}>
           <Icon className="h-8 w-8" />
         </div>
       </div>

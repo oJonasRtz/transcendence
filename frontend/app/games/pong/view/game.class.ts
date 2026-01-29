@@ -14,6 +14,18 @@ export class Game {
   private endResolve!: () => void;
   private ended: boolean = false;
 
+  private sprites: {
+    redPaddle?: ex.ImageSource;
+    bluePaddle?: ex.ImageSource;
+    arenaBackground?: ex.ImageSource;
+  } = {
+    redPaddle: new ex.ImageSource("/sprites/Pong/Paddles/red_paddle.png"),
+    bluePaddle: new ex.ImageSource("/sprites/Pong/Paddles/blue_paddle.png"),
+    arenaBackground: new ex.ImageSource(
+      "/sprites/Pong/arena.png"
+    ),
+  };
+
   private container: HTMLElement;
 
   constructor(container: HTMLElement) {
@@ -34,6 +46,7 @@ export class Game {
 
     const score = new ScoreBoard(this.engine);
 
+    this.addBackground();
     this.addToGame([score]);
     this.addPaddles();
 
@@ -55,6 +68,26 @@ export class Game {
         e.preventDefault();
       }
     });
+  }
+
+  private addBackground() {
+    const bgSprite = this.sprites.arenaBackground!.toSprite();
+
+    const background = new ex.Actor({
+      x: this.engine.drawWidth / 2,
+      y: this.engine.drawHeight / 2,
+      width: this.engine.drawWidth,
+      height: this.engine.drawHeight,
+      z: -100,
+    });
+
+    background.graphics.use(bgSprite);
+
+    const scaleX = this.engine.drawWidth / bgSprite.width;
+    const scaleY = this.engine.drawHeight / bgSprite.height;
+    background.scale = new ex.Vector(scaleX, scaleY);
+
+    this.engine.add(background);
   }
 
   private ballReset() {
@@ -80,8 +113,8 @@ export class Game {
   }
   private addPaddles() {
     this.paddles = [
-      new Paddle(50, this.engine.drawHeight / 2, 1),
-      new Paddle(this.engine.drawWidth - 50, this.engine.drawHeight / 2, 2),
+      new Paddle(50, this.engine.drawHeight / 2, 1, this.sprites.bluePaddle),
+      new Paddle(this.engine.drawWidth - 50, this.engine.drawHeight / 2, 2, this.sprites.redPaddle),
     ];
 
     this.addToGame(this.paddles);
@@ -101,6 +134,10 @@ export class Game {
     }
 
     await this.engine.start();
+
+    this.sprites.arenaBackground!.load();
+    this.sprites.redPaddle!.load();
+    this.sprites.bluePaddle!.load();
 
     return this.endPromisse;
   }
