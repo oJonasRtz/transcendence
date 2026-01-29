@@ -420,9 +420,10 @@ export async function changeAvatar(_state: { error?: string; success?: string } 
 
     const data = await response.json();
 
-    // Check for errors
-    if (data?.error && data.error.length > 0) {
-      return { error: data.error[0] };
+    // Check for errors (backend may return `error` as string or string[])
+    const backendError = Array.isArray(data?.error) ? data.error[0] : data?.error;
+    if (backendError) {
+      return { error: backendError };
     }
 
     // Revalidate paths

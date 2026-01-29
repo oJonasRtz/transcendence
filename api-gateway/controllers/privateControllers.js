@@ -790,16 +790,16 @@ const privateControllers = {
       // api check starts here and erase the temporary file if fails
       const response = await checkImageSafety(filePath);
 
-      // Innapropriate image
+      // Inappropriate image
       if (response.nsfw) {
         await unlink(filePath); // destroy the innapropriate file
         if (wantsJson) {
           return reply.code(422).send({
-            error: "Innapropriate image detected! Be careful choosing images!",
+            error: "Inappropriate image detected! Be careful choosing images!",
           });
         }
         req.session.error = [
-          "Innapropriate image detected! Be careful choosing images!",
+          "Inappropriate image detected! Be careful choosing images!",
         ];
         return reply.redirect("/home");
       }

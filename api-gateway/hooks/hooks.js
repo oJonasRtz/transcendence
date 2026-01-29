@@ -146,20 +146,20 @@ export async function validatorHook(req, reply) {
   if (req.body.username && (!whiteList.includes(req.body.username.toLowerCase()))) {
     const response = await checkNameSecurity(req.body.username);
     if (response.nsfw || list.includes(req.body.username.toLowerCase()) || filter.isProfane(req.body.username.toLowerCase()))
-      error.push("Innapropriate username");
+      error.push("Inappropriate username");
   }
 
   if (req.body.nickname && (!whiteList.includes(req.body.nickname.toLowerCase()))) {
     const response = await checkNameSecurity(req.body.nickname);
     if (response.nsfw || list.includes(req.body.nickname.toLowerCase()) || filter.isProfane(req.body.nickname.toLowerCase())) {
-      error.push("Innapropriate nickname");
+      error.push("Inappropriate nickname");
     }
   }
 
   if (req.body.description) {
     const response = await checkNameSecurity(req.body.description);
     if (response.nsfw || filter.isProfane(req.body.description.toLowerCase())) {
-      error.push("Innapropriate description");
+      error.push("Inappropriate description");
     }
 }
 
