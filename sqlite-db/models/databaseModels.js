@@ -64,7 +64,6 @@ const databaseModels = {
       await insertPlayers.run([
         history_id,
         player.id,
-        i + 1,
         player.score,
         player.winner,
       ]);

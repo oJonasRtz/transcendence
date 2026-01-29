@@ -53,8 +53,6 @@ services:
       - JWT_SECRET=${JWT_SECRET}
     volumes:
       - api-gateway:/app/public
-      - flappy-bird-dist:/app/public/flappy-bird
-      - pong-dist:/app/public/pong
       - ./shared/ssl:/app/ssl:ro
 
   auth-service:
@@ -127,18 +125,6 @@ services:
       - ./shared/ssl:/app/ssl
       - ./shared/game-stats.json:/app/game-stats.json
 
-  game-pong:
-    build: ./game-pong
-    image: game-pong:1.0.0
-    container_name: game-pong
-    depends_on:
-      - game-server
-    networks:
-      - "game"
-    volumes:
-      - ./shared/game-stats.json:/app/public/game-stats.json:ro
-      - pong-dist:/usr/share/nginx/html
-
   match-service:
     build: ./new-match-service
     image: match-service:1.0.0
@@ -154,15 +140,6 @@ services:
       - ./new-match-service/.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-
-  game-flappy-bird:
-    build: ./game-flappy-bird
-    image: game-flappy-bird:1.0.0
-    container_name: game-flappy-bird
-    networks:
-      - "game"
-    volumes:
-      - flappy-bird-dist:/usr/share/nginx/html
 
   # MONITORING STACK
   
@@ -285,8 +262,6 @@ volumes:
   sqlite-db:
   users-service:
   api-gateway:
-  flappy-bird-dist:
-  pong-dist:
   frontend_node_modules:
   prometheus-data:
   grafana-data:

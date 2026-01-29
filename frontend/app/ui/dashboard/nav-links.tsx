@@ -35,7 +35,7 @@ const links = [
   { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon },
 ];
 
-export default function NavLinks() {
+export default function NavLinks({isCollapsed} : {isCollapsed?: boolean}) {
   const pathname = usePathname();
 
   return (
@@ -57,7 +57,9 @@ export default function NavLinks() {
             )}
           >
             <LinkIcon className="w-6" />
-            <p className="hidden md:block uppercase tracking-wider font-mono text-xs">{link.name}</p>
+            {!isCollapsed && (
+              <p className="hidden md:block uppercase tracking-wider font-mono text-xs">{link.name}</p>
+            )}
             
             {/* Hover glow effect */}
             {!isActive && (

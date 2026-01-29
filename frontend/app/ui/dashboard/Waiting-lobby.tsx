@@ -1,10 +1,11 @@
 "use client";
 import { match } from './MatchProvider';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import type { User } from '@/app/lib/auth';
 import { useEffect, useState } from 'react';
 import MatchNotify from './match-notifty';
 import { __TIME_TO_WAIT__ } from './MatchProvider';
+import {api} from "@/app/lib/api";
 
 interface WaitingLobbyProps {
   user: User;
@@ -29,8 +30,11 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
   const [gameType, setGameType] = useState<GameType>('RANKED');
   const [showMatchFound, setShowMatchFound] = useState(false);
+  const [isLeader, setIsLeader] = useState(true);
 
-  const token = searchParams.get('token');
+  const params = useParams();
+
+  // console.log('WaitingLobby token:', token);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -44,6 +48,18 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
 
   // Connect and join party on mount
   useEffect(() => {
+    let token: string | null = params.token as string || null;
+    const leave = async () => {
+      await match.leaveParty();
+    }
+
+    if (token) {
+      if (match.partyToken)
+        leave();
+    } else { 
+      token = match.partyToken;
+    }
+
     const joinLobby = async () => {
       try {
         if (!match.isConnected) {
@@ -68,7 +84,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
       match.dequeue();
       setInQueue(false);
     };
-  }, [user, token, gameType]);
+  }, [user, gameType]);
 
   // Sync players from match.party periodically
   useEffect(() => {
@@ -83,7 +99,10 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
           isHost: p.isLeader,
         }))
       );
-    };
+      setIsLeader(
+        match.party.find((p) => p.id === user.user_id)?.isLeader || false
+      );
+    }
 
     updatePlayers();
     const interval = setInterval(updatePlayers, 1000);
@@ -132,9 +151,8 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
           </button>
           <button
             onClick={() => !inQueue && setGameType('TOURNAMENT')}
-            className={`px-6 py-3 rounded-xl font-bold transition-all duration-300
-              ${gameType === 'TOURNAMENT' ? 'bg-purple-500 text-white' : 'bg-white/10 text-slate-300'}
-              ${inQueue ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-600'}`}
+            disabled={true}
+            className={'px-6 py-3 rounded-xl font-bold transition-all text-white bg-purple-500 opacity-50 cursor-not-allowed'}
           >
             Tournament
           </button>
@@ -148,7 +166,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
         <div className="absolute -top-24 -right-24 h-48 w-48 bg-blue-500/20 blur-3xl rounded-full" />
         <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full" />
 
-        <div className="relative flex flex-col items-center gap-8">
+        <div className="relative flex flex-col items-center justify-center gap-8">
           {/* Players Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {players.map((player) => (
@@ -181,15 +199,22 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
 
           {/* Action Buttons */}
           <div className="flex gap-4 w-full max-w-md">
-            <button
+          <button
               onClick={() => {
+                if (!isLeader) return;
                 setInQueue(match.enqueue(gameType));
               }}
-              disabled={inQueue}
+              disabled={inQueue || !isLeader}
               className={`flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300
-                ${inQueue ? 'bg-green-500/20 text-green-300 border border-green-500/40 cursor-not-allowed' : 'bg-green-500/30 hover:bg-green-500/40 text-green-300 border border-green-500/50 shadow-lg shadow-green-500/20'}`}
+                ${
+                  inQueue
+                    ? 'bg-green-500/20 text-green-300 border border-green-500/40 cursor-not-allowed'
+                    : !isLeader
+                      ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30 cursor-not-allowed'
+                      : 'bg-green-500/30 hover:bg-green-500/40 text-green-300 border border-green-500/50 shadow-lg shadow-green-500/20'
+                }`}
             >
-              Find Match
+              {isLeader ? 'Find Match' : 'Only leader can start'}
             </button>
             <button
               onClick={() => {

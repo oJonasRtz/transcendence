@@ -4,7 +4,7 @@ import { CheckBadgeIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 
-export default function EmailVerificationStatus() {
+export default function EmailVerificationStatus({isCollapsed}: {isCollapsed?: boolean}) {
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -81,9 +81,12 @@ export default function EmailVerificationStatus() {
       )}
     >
       <CheckBadgeIcon className="w-6" />
-      <p className="hidden md:block uppercase tracking-wider font-mono text-xs">
-        {isVerified ? 'Verified' : 'Not Verified'}
-      </p>
+      {!isCollapsed && (
+        <p className="hidden md:block uppercase tracking-wider font-mono text-xs">
+          {isVerified ? 'Verified' : 'Not Verified'}
+        </p>
+      )}
+      
     </div>
   );
 }

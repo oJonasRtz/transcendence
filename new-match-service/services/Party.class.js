@@ -111,6 +111,9 @@ export class Party {
 		if (this.#clients.has(client))
 			throw new Error('CLIENT_ALREADY_IN_PARTY');
 
+		if (this.#state !== 'IDLE')
+			throw new Error('PARTY_NOT_IDLE');
+
 		this.#clients.add(client);
 		client.setParty(this);
 		if (isLeader || this.#leader === null)
@@ -147,6 +150,9 @@ export class Party {
 	enqueue(caller) {
 		if (this.#state === 'IN_QUEUE')
 			return;
+
+		//
+		console.log("Caller is leader: " + (caller === this.#leader));
 
 		if (!caller
 			|| !(caller instanceof Client)

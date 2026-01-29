@@ -61,20 +61,18 @@ export class Match {
     return this.#gameEnded;
   }
   // --- Match Timer Methods ---
-  #getTime(timestamp, flag = false) {
+  #getTime(timestamp) {
     const date = new Date(timestamp);
-
-    const hour = String(date.getHours()).padStart(2, "0");
-    const minute = String(date.getMinutes()).padStart(2, "0");
-    const second = String(date.getSeconds()).padStart(2, "0");
-
-    //Flag just returns time components without date
-    if (flag) return { hour, minute, second };
-
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-
+    const dateBR = new Date(date.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  
+    const day = String(dateBR.getDate()).padStart(2, "0");
+    const month = String(dateBR.getMonth() + 1).padStart(2, "0");
+    const year = dateBR.getFullYear();
+  
+    const hour = String(dateBR.getHours()).padStart(2, "0");
+    const minute = String(dateBR.getMinutes()).padStart(2, "0");
+    const second = String(dateBR.getSeconds()).padStart(2, "0");
+  
     return { day, month, year, hour, minute, second };
   }
   #startTimer() {
@@ -83,7 +81,7 @@ export class Match {
     this.#timer = setInterval(() => {
       this.#matchDuration = Date.now() - this.#matchStarted;
 
-      const { minute, second } = this.#getTime(this.#matchDuration, true);
+      const { minute, second } = this.#getTime(this.#matchDuration);
       const formatted = `${minute}:${second.toString().padStart(2, "0")}`;
 
       this.#timeFormated = formatted;

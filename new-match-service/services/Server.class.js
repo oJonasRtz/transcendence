@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { Party } from "./Party.class.js";
 import fs from "fs";
 import { data } from "../app.js";
+import { type } from "os";
 
 export class Server {
 	#app = fastify({
@@ -125,6 +126,15 @@ export class Server {
 			const token = crypto.randomBytes(16).toString('hex');
 			const party = new Party({token, game_type});
 			party.addClient(client, true);
+
+			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
+			this.#invitesOwners.add(client);
+
+			client.send({
+				type: 'PARTY_CREATED',
+				token,
+			})
+
 			return party;
 		} catch (error) {}
 	}
@@ -188,8 +198,11 @@ export class Server {
 			const address = `https://localhost/dashboard/play/waiting-lobby/`;
 			const link = address + token;
 
-			this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
-			this.#invitesOwners.add(client);
+			//show token registred in orange
+			console.log('\x1b[33m%s\x1b[0m', `Server.#invite: Generated invite token: ${token} | Client: ${client.name}`);
+
+			// this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
+			// this.#invitesOwners.add(client);
 
 			console.log("Server.#invite: Invite created by client:", client.name);
 
@@ -215,14 +228,18 @@ export class Server {
 	  
 		  if (!token) {
 			const party = this.createSoloParty({id: client.id, game_type});
-			console.log('Server.#joinParty: Client joining solo party:', client.name);
+			console.log('Server.#joinParty: (!token) Client joining solo party:', client.name);
 			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 		  }
-	  
+
+
+		  //Mostra o token em laranja para destacar no terminal
+		  console.log('\x1b[33m%s\x1b[0m', `Server.#joinParty: Client attempting to join party with token: ${token} | Client: ${client.name}`);
 		  const invite = this.#invites.get(token);
+		  console.log('\x1b[33m%s\x1b[0m', `Server.#joinParty: Recieved: ${invite} | Client: ${client.name}`);
 		  if (!invite) {
 			const party = this.createSoloParty({id: client.id, game_type});
-			console.log('Server.#joinParty: Client joining solo party:', client.name);
+			console.log('Server.#joinParty: (!invite) Client joining solo party:', client.name);
 			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 		  }
 	  
@@ -284,37 +301,37 @@ export class Server {
 	 * @param {string} token - The unique token of the invite
 	 * @returns {boolean} - True if the invite was invalidated, false otherwise
 	 */
-	#checkInvite({owner, createdAt}, token) {
+	#checkInvite({owner}, token) {
 		if (!owner || !owner.party) {
-			this.#invites.delete(token);
-			this.#invitesOwners.delete(owner);
-			return true;
+		  this.#invites.delete(token);
+		  this.#invitesOwners.delete(owner);
+		  return true;
 		}
-
-		if ((owner && owner.party.state === 'IDLE')
-			|| Date.now() - createdAt <= this.#invitesValidityTime)
-			return false;
-
-		this.#invites.delete(token);
-		this.#invitesOwners.delete(owner);
-		owner.send({
+	  
+		if (owner.party.state !== 'IDLE') {
+		  this.#invites.delete(token);
+		  this.#invitesOwners.delete(owner);
+		  owner.send({
 			type: 'INVITE_EXPIRED',
 			code: 200,
-		});
-		return true;
-	}
+		  });
+		  return true;
+		}
+
+		return false;
+	  }
 
 	#checkInvitesValidity() {
 		setInterval(() => {
-			if (this.#invites.size === 0 && this.#invitesOwners.size === 0)
-				return;
-
-			this.#invites.forEach(({owner, createdAt}, token) => {
-				this.#checkInvite({owner, createdAt}, token);
+			if (this.#invites.size === 0)
+			return;
+		
+			this.#invites.forEach(({owner}, token) => {
+			this.#checkInvite({owner}, token);
 			});
-		}, 60000);
+		}, 10000);
 	}
-	//#endregion
+//#endregion
 
 	// #setTournament(req, reply) {
 		
@@ -365,9 +382,9 @@ export class Server {
 			if (!client)
 				throw new Error('PERMISION_DENIED');
 
-			const client2 = this.#wsToClient.get(ws);
-			if (client !== client2)
-				throw new Error('PERMISION_DENIED');
+			// const client2 = this.#wsToClient.get(ws);
+			// if (client !== client2)
+			// 	throw new Error('PERMISION_DENIED');
 
 			this.#handlers[type](data, client);
 		} catch (error) {

@@ -98,6 +98,9 @@ const privateControllers = {
       const {token} = req.params;
       const {id, game_type} = req.body;
 
+      //Token em laranja para deebug
+      console.log("JOIN PARTY TOKEN: \x1b[33m" + token + "\x1b[0m with id: " + id + " and game_type: " + game_type);
+
       const res = await axios.post('https://match-service:3010/join_party/' + token, {id, game_type});
 
       console.log("JOIN PARTY RESPONSE:", res.data);
@@ -1574,6 +1577,7 @@ const privateControllers = {
       }
       req.body.user_id = req.user.user_id;
       await axios.post("https://users-service:3003/friendInvite", req.body);
+
       return reply.send({ success: true, message: "Friend invitation sent" });
     } catch (err) {
       if (err?.response?.status === 403 || err?.response?.data?.message === "SAME_USER") {

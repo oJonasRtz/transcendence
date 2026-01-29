@@ -56,7 +56,9 @@ export class Match {
 	private onMatchResults: ((stats: StatsType) => void) | null = null;
 	private _match_id: number = 0;
 	private party_users: PartyType[] = [];
+	private party_token: string | null = null;
 	private lastGameStats: StatsType | null = null;
+	private onPartyUpdate: (() => void) | null = null;
 	private handlers: Record<string, Function> = {
 		'STATE_CHANGE': async ({state}: {state: string}) => {
 			this._state = state;
@@ -75,6 +77,7 @@ export class Match {
 			try {
 				await this.getPartyInfo();;
 				console.log('Party info updated:', this.party_users);
+				if (this.onPartyUpdate) this.onPartyUpdate();
 			} catch (error) {
 				console.error('Error updating party info:', error);
 			}
@@ -90,16 +93,28 @@ export class Match {
 				this.onMatchResults(this.lastGameStats);
 			}
 		},
+		'PARTY_CREATED': ({token}: {token: string}) => {
+			this.party_token = token;
+			console.log('Party invite created. Token:', token);
+		}
 	};
 
 	get stats(): StatsType | null {
 		return this.lastGameStats;
 	}
 
+	get partyToken(): string | null {
+		return this.party_token;
+	}
+
 	resetStats() {
 		this.lastGameStats = null;
 		this._match_id = 0;
 		this.leaveParty();
+	}
+
+	set onParty(callback: (() => void) | null) {
+		this.onPartyUpdate = callback;
 	}
 
 	get party(): PartyType[] {
@@ -123,7 +138,7 @@ export class Match {
 	}
 	
 	get isConnected(): boolean {
-		return this.ws && this.ws.readyState === WebSocket.OPEN;
+		return Boolean(this.ws) && this.ws?.readyState === WebSocket.OPEN;
 	}
 
 	get state(): string {
@@ -310,6 +325,9 @@ export class Match {
 		  });
 
 		  console.log("I tried to leave the party");
+
+		  this.party_users = [];
+		  this.party_token = null;
 	}
 
 	private async getPartyInfo(): Promise<void> {

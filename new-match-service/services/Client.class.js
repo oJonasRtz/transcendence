@@ -75,7 +75,7 @@ export class Client {
 
 		if (!res || res.rank === undefined) {
 			this.#info.rank = 0;
-			console.log("nao achei o rank");
+			// console.log("nao achei o rank");
 			return;
 		}
 		this.#info.rank = res.rank;
@@ -302,32 +302,32 @@ export class Client {
 		this.#ws.send(JSON.stringify(data));
 	}
 
-	#disconnect() {
+	#disconnect(force = false) {
 		if (!this.#ws)
 			return;
 		
-		const res = this.#disconnections[this.#state]();
 		this.#ws.close();
 		this.#ws = null;
 
-		if (res === "REMOVE")
+		this.#disconnections[this.#state]();
+		
+
+		if (force)
 			server.removeClient(this.#info.id);
 	}
 
 	#inIdleDisconnect() {
 		this.#sendBuffer = [];
-		return ("REMOVE");
 	}
 
 	#inQueueDisconnect() {
 		// matchmaking.dequeue({client: this, type: this.#game_type});
 		this.#sendBuffer = [];
 		this.#changeState('IDLE', {});
-		return ("REMOVE");
 	}
 
 	#inGameDisconnect() {
 		//this.#game.lobby.notifyDisconnect(this);
-		return ("KEEP");
+		// return ("KEEP");
 	}
 }

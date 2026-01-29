@@ -139,8 +139,8 @@ export default function ChatPage() {
       return (
         <a
           href={msg.content}
-          target="_blank"
-          rel="noopener noreferrer"
+          // target="_blank"
+          // rel="noopener noreferrer"
           className="text-blue-400 hover:underline"
         >
           Pong Invitation
