@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
-export default function Captcha() {
+export default function Captcha({ refreshKey = 0 }: { refreshKey?: number }) {
   const [captchaImage, setCaptchaImage] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchCaptcha = async () => {
+  const fetchCaptcha = useCallback(async () => {
     setLoading(true);
     setError('');
 
@@ -30,11 +30,11 @@ export default function Captcha() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCaptcha();
-  }, []);
+  }, [fetchCaptcha, refreshKey]);
 
   return (
     <div className="mt-4">
@@ -76,6 +76,7 @@ export default function Captcha() {
       {/* CAPTCHA Input */}
       <div className="relative">
         <input
+          key={refreshKey}
           className="peer block w-full rounded-md border border-white/10 bg-white/5 py-[9px] px-3 text-sm text-white outline-2 placeholder:text-slate-500 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
           id="captcha"
           type="text"

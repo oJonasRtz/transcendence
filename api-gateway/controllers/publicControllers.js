@@ -126,6 +126,7 @@ const publicControllers = {
         return reply.code(400).send({ error: "CAPTCHA expired" });
       }
       if (captchaInput.toLowerCase() !== captchaRecord.code.toLowerCase()) {
+        publicControllers.captchaStore.delete(captchaId);
         return reply.code(400).send({ error: "Invalid code" });
       }
 
@@ -197,6 +198,7 @@ const publicControllers = {
         return reply.code(400).send({ error: "CAPTCHA expired" });
       }
       if (captchaInput.toLowerCase() !== captchaRecord.code.toLowerCase()) {
+        publicControllers.captchaStore.delete(captchaId);
         return reply.code(400).send({ error: "Invalid code" });
       }
       publicControllers.captchaStore.delete(captchaId);

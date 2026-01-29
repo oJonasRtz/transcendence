@@ -16,6 +16,7 @@ import Link from 'next/link';
 export default function LoginForm() {
   const [error, setError] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const [captchaRefreshKey, setCaptchaRefreshKey] = useState(0);
   const router = useRouter();
 
   async function handleSubmit(formData: FormData) {
@@ -39,6 +40,7 @@ export default function LoginForm() {
 
     if (result?.error) {
       setError(result.error);
+      if (result.resetCaptcha) setCaptchaRefreshKey((k) => k + 1);
       setIsPending(false);
     }
   }
@@ -117,7 +119,7 @@ export default function LoginForm() {
               <span className="text-blue-400">03</span> // Verification
             </span>
           </div>
-          <Captcha />
+          <Captcha refreshKey={captchaRefreshKey} />
         </div>
       </div>
 

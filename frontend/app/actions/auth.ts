@@ -34,7 +34,7 @@ export async function login(formData: FormData) {
   }
 
   if (!captchaId) {
-    return { error: 'CAPTCHA expired. Please refresh and try again.' };
+    return { error: 'CAPTCHA expired. Please refresh and try again.', resetCaptcha: true };
   }
 
   try {
@@ -68,7 +68,9 @@ export async function login(formData: FormData) {
         backendError === 'Invalid code'
           ? 'CAPTCHA code is incorrect. Please try again.'
           : backendError;
-      return { error: normalizedError || 'Invalid credentials' };
+      const shouldResetCaptcha = backendError === 'Invalid code' || backendError === 'CAPTCHA expired';
+      if (shouldResetCaptcha) cookieStore.delete('captcha_id');
+      return { error: normalizedError || 'Invalid credentials', resetCaptcha: shouldResetCaptcha };
     }
 
     // Check if 2FA is required
@@ -159,7 +161,7 @@ export async function signup(formData: FormData) {
   const cookieStore = await cookies();
   const captchaId = cookieStore.get('captcha_id');
   if (!captchaId) {
-    return { error: 'CAPTCHA expired. Please refresh and try again.' };
+    return { error: 'CAPTCHA expired. Please refresh and try again.', resetCaptcha: true };
   }
 
   // Generate a UUID for the new user
@@ -193,7 +195,9 @@ export async function signup(formData: FormData) {
       const backendError = Array.isArray(data?.error)
         ? data.error[0]
         : data?.error;
-      return { error: backendError || 'Registration failed. Please try again.' };
+      const shouldResetCaptcha = backendError === 'Invalid code' || backendError === 'CAPTCHA expired';
+      if (shouldResetCaptcha) cookieStore.delete('captcha_id');
+      return { error: backendError || 'Registration failed. Please try again.', resetCaptcha: shouldResetCaptcha };
     }
 
     if (data?.requires2FA && data?.tempToken) {

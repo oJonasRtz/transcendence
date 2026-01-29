@@ -15,6 +15,7 @@ import { useState } from 'react';
 export default function SignupForm() {
   const [error, setError] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const [captchaRefreshKey, setCaptchaRefreshKey] = useState(0);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +31,7 @@ export default function SignupForm() {
 
     if (result?.error) {
       setError(result.error);
+      if (result.resetCaptcha) setCaptchaRefreshKey((k) => k + 1);
       setIsPending(false);
     }
   }
@@ -188,7 +190,7 @@ export default function SignupForm() {
               <span className="text-blue-400">06</span> // Verification
             </span>
           </div>
-          <Captcha />
+          <Captcha refreshKey={captchaRefreshKey} />
         </div>
 
         {/* Terms Acceptance */}
