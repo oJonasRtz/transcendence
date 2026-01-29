@@ -31,7 +31,10 @@ export async function getUser(): Promise<User | null> {
 
     return payload as unknown as User;
   } catch (error) {
-    console.error('JWT verification failed:', error);
+    console.warn(
+      'JWT verification failed:',
+      error instanceof Error ? error.message : String(error)
+    );
     return null;
   }
 }

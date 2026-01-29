@@ -102,7 +102,7 @@ export async function login(formData: FormData) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict', // SECURITY: Match backend's strict setting
         path: '/',
-        maxAge: 60 * 60 * 1000, // 1 hour in milliseconds (matching backend)
+        maxAge: 60 * 60, // 1 hour (seconds; Next expects seconds)
       });
 
       // Clear CAPTCHA id cookie after successful login
@@ -221,7 +221,7 @@ export async function signup(formData: FormData) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
-        maxAge: 60 * 60 * 1000,
+        maxAge: 60 * 60, // 1 hour (seconds; Next expects seconds)
       });
       redirect('/dashboard');
     }

@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
-        maxAge: 60 * 60 * 1000, // 1 hour
+        maxAge: 60 * 60, // 1 hour (seconds; Next expects seconds)
       });
 
       // Clear the pending token

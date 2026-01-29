@@ -28,13 +28,18 @@ export async function middleware(request: NextRequest) {
 
   // Verify token if it exists
   let isAuthenticated = false;
+  let shouldClearJwtCookie = false;
   if (token) {
     try {
       const secret = new TextEncoder().encode(JWT_SECRET);
       await jwtVerify(token.value, secret);
       isAuthenticated = true;
     } catch (error) {
-      console.error('JWT verification failed in middleware:', error);
+      console.warn(
+        'JWT verification failed in middleware:',
+        error instanceof Error ? error.message : String(error)
+      );
+      shouldClearJwtCookie = true;
       isAuthenticated = false;
     }
   }
@@ -43,16 +48,22 @@ export async function middleware(request: NextRequest) {
   if (isProtectedRoute && !isAuthenticated) {
     const url = new URL('/login', request.url);
     url.searchParams.set('from', pathname);
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    if (shouldClearJwtCookie) response.cookies.delete('jwt');
+    return response;
   }
 
   // Redirect to dashboard only for GET requests on auth routes.
   // Server actions use POST and must not be redirected.
   if (isAuthRoute && isAuthenticated && request.method === 'GET') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    const response = NextResponse.redirect(new URL('/dashboard', request.url));
+    if (shouldClearJwtCookie) response.cookies.delete('jwt');
+    return response;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  if (shouldClearJwtCookie) response.cookies.delete('jwt');
+  return response;
 }
 
 // Configure which routes the middleware should run on
