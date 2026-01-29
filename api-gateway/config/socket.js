@@ -120,14 +120,14 @@ export default async function registerServer(io) {
     // connection
 
 		socket.on("joinPrivate", async ({ target_id }) => {
-			await axios.post("https://chat-service:3005/setTargetId", {
+				await axios.post("https://chat-service:3005/setTargetId", {
         user_id: socket.user_id, 
         public_id: target_id
       });
-			notifications.length = 0;
-			// Kick any existing socket with the same username (stale connection)
-			if (!socket.privateUserLock) {
-				socket.privateUserLock = true;
+				notifications.length = 0;
+				// Kick any existing socket with the same username (stale connection)
+				if (!socket.privateUserLock) {
+					socket.privateUserLock = true;
 				const toDelete = [];
 				for (const [socketId, user] of privateUsers.entries()) {
 					if (user.name === socket.username) {
@@ -139,30 +139,38 @@ export default async function registerServer(io) {
 					io.to(socketId).emit("kicked", "Connected from another location");
 					io.sockets.sockets.get(socketId)?.disconnect(true);
 				}
-				privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
-				socket.privateUserLock = false;
-			}
+					privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
+					socket.privateUserLock = false;
+				}
 
-      for (const [socketId, user] of privateUsers.entries()) {
-        if (user.public_id === target_id) {
-          official.set(socketId, {
-            name: user.name,
-            public_id: user.public_id,
-            avatar: `avatar_${user.user_id}`,
-          });
-          io.to(socketId).emit(
-            "updatePrivateUsers",
-            Array.from(official.values())
-          );
-          break;
-        }
-      }
+        const official = new Map();
 
-      socket.emit("updateNotifications", notifications);
-      io.to(socket.id).emit(
-        "updatePrivateUsers",
-        Array.from(official.values())
-      );
+        official.set(socket.id, {
+          name: socket.username,
+          public_id: socket.public_id,
+          avatar: `avatar_${socket.user_id}`,
+        });
+
+	      for (const [socketId, user] of privateUsers.entries()) {
+	        if (user.public_id === target_id) {
+	          official.set(socketId, {
+	            name: user.name,
+	            public_id: user.public_id,
+	            avatar: `avatar_${user.user_id}`,
+	          });
+	          io.to(socketId).emit(
+	            "updatePrivateUsers",
+	            Array.from(official.values())
+	          );
+	          break;
+	        }
+	      }
+
+	      socket.emit("updateNotifications", notifications);
+	      io.to(socket.id).emit(
+	        "updatePrivateUsers",
+	        Array.from(official.values())
+	      );
 
       let msg = null;
       try {

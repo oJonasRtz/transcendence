@@ -9,7 +9,6 @@ import {
   CardShell,
   EmptyState,
 } from "@/app/ui/chat/chat-card-primitives";
-import MatchProvider from "../ui/dashboard/MatchProvider";
 
 interface User {
   name: string;
@@ -39,7 +38,7 @@ export default function ChatPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [hideSystemMessages, setHideSystemMessages] = useState(false);
-  const [mobilePanel, setMobilePanel] = useState<"chat" | "users">("chat");
+  const [isUsersSidebarOpen, setIsUsersSidebarOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // Temporary: use API gateway host so sockets work in dev on port 3042.
@@ -118,6 +117,15 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages.length]);
 
+  useEffect(() => {
+    if (!isUsersSidebarOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsUsersSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isUsersSidebarOpen]);
+
   const handleSendMessage = (e: FormEvent) => {
     e.preventDefault();
     const msg = inputValue.trim();
@@ -181,32 +189,21 @@ export default function ChatPage() {
           </Link>
         </div>
 
-        <div className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/5 p-1 text-xs font-mono uppercase tracking-wider text-slate-400 lg:hidden">
-          {[
-            { id: "chat", label: "Chat" },
-            { id: "users", label: "Users" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setMobilePanel(tab.id as "chat" | "users")}
-              className={clsx(
-                "flex-1 rounded-md px-3 py-2 text-center transition",
-                mobilePanel === tab.id
-                  ? "bg-blue-500/20 text-blue-300"
-                  : "text-slate-400 hover:text-slate-200"
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-3 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsUsersSidebarOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-mono uppercase tracking-wider text-slate-300 transition hover:border-emerald-400/40 hover:text-white"
+            aria-label="Open users sidebar"
+          >
+            Users ({users.length})
+          </button>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
           <CardShell
             className={clsx(
-              "h-[520px] flex-col lg:flex",
-              mobilePanel === "users" ? "flex" : "hidden"
+              "hidden h-[520px] flex-col lg:flex"
             )}
           >
             <CardHeader
@@ -222,20 +219,33 @@ export default function ChatPage() {
                 />
               ) : (
                 users.map((user) => (
-                  <Link
+                  <div
                     key={user.public_id}
-                    href={`/profile/${user.public_id}`}
                     className="flex items-center gap-3 p-4 transition hover:bg-white/5"
                   >
-                    <img
-                      src={`/public/uploads/${user.avatar}.png`}
-                      alt={user.name}
-                      className="h-10 w-10 rounded-full border border-white/10 object-cover"
-                    />
-                    <span className="truncate text-sm font-semibold text-slate-200">
-                      {user.name}
+                    <Link
+                      href={`/profile/${user.public_id}`}
+                      className="flex min-w-0 flex-1 items-center gap-3"
+                    >
+                      <img
+                        src={`/public/uploads/${user.avatar}.png`}
+                        alt={user.name}
+                        className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                      />
+                      <span className="truncate text-sm font-semibold text-slate-200">
+                        {user.name}
+                      </span>
+                    </Link>
+                    <span className="ml-auto flex items-center gap-2">
+                      <Link
+                        href={`/direct/${user.public_id}`}
+                        className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-300 transition hover:border-blue-500/40 hover:text-white"
+                        aria-label={`Direct message ${user.name}`}
+                      >
+                        DM
+                      </Link>
                     </span>
-                  </Link>
+                  </div>
                 ))
               )}
             </div>
@@ -243,8 +253,7 @@ export default function ChatPage() {
 
           <CardShell
             className={clsx(
-              "h-[70vh] min-h-[420px] flex-col lg:h-[520px] lg:flex",
-              mobilePanel === "chat" ? "flex" : "hidden"
+              "h-[70vh] min-h-[420px] flex-col lg:h-[520px] lg:flex"
             )}
           >
             <CardHeader
@@ -341,6 +350,76 @@ export default function ChatPage() {
 
         </div>
       </div>
+
+      {isUsersSidebarOpen ? (
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          aria-hidden={!isUsersSidebarOpen}
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setIsUsersSidebarOpen(false)}
+            aria-label="Close users sidebar"
+          />
+          <div className="absolute left-0 top-0 h-full w-[min(92vw,360px)] p-4">
+            <CardShell className="flex h-full flex-col">
+              <CardHeader
+                title="Users Online"
+                subtitle={`${users.length} active`}
+                accentClassName="text-green-400"
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setIsUsersSidebarOpen(false)}
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-mono uppercase tracking-wider text-slate-300 transition hover:border-red-400/60 hover:text-white"
+                  >
+                    Close
+                  </button>
+                }
+              />
+              <div className="flex-1 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
+                {users.length === 0 ? (
+                  <EmptyState
+                    title="No one here"
+                    message="Invite friends to join the channel."
+                  />
+                ) : (
+                  users.map((user) => (
+                    <div
+                      key={user.public_id}
+                      className="flex items-center gap-3 p-4 transition hover:bg-white/5"
+                    >
+                      <Link
+                        href={`/profile/${user.public_id}`}
+                        className="flex min-w-0 flex-1 items-center gap-3"
+                        onClick={() => setIsUsersSidebarOpen(false)}
+                      >
+                        <img
+                          src={`/public/uploads/${user.avatar}.png`}
+                          alt={user.name}
+                          className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                        />
+                        <span className="truncate text-sm font-semibold text-slate-200">
+                          {user.name}
+                        </span>
+                      </Link>
+                      <Link
+                        href={`/direct/${user.public_id}`}
+                        className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-300 transition hover:border-blue-500/40 hover:text-white"
+                        aria-label={`Direct message ${user.name}`}
+                        onClick={() => setIsUsersSidebarOpen(false)}
+                      >
+                        DM
+                      </Link>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardShell>
+          </div>
+        </div>
+      ) : null}
 
       {notifications.length > 0 ? (
         <div className="pointer-events-none fixed left-1/2 top-8 z-50 flex w-[min(360px,90vw)] -translate-x-1/2 flex-col gap-3">
