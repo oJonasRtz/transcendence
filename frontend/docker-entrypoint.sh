@@ -32,10 +32,11 @@ fi
 
 if [ ! -d node_modules ] || [ "$CURRENT_HASH" != "$STORED_HASH" ]; then
   echo "docker-entrypoint: installing frontend deps (lock/package changed)" >&2
-  pnpm install --frozen-lockfile
+  # Remove stale node_modules ourselves to avoid pnpm TTY prompt in non-interactive containers.
+  rm -rf node_modules
+  CI=${CI:-true} pnpm install --frozen-lockfile
   mkdir -p node_modules
   echo "$CURRENT_HASH" > "$HASH_FILE"
 fi
 
 exec "$@"
-
