@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import MatchNotify from "./match-notifty";
 import FloatingRoomWidget from "./FloatingRoomWidget";
+import { usePathname } from "next/navigation";
 
 export const match: Match = new Match();
 
@@ -20,6 +21,13 @@ export default function MatchProvider({ user, children }: { user: User; children
   const reconnecIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [matchFound, setMatchFound] = useState(false);
+
+  const pathname = usePathname();
+  const hiddenFloat = [
+    '/dashboard/play/pong',
+    '/dashboard/play/statsPage',
+    '/dashboard/play/waiting-lobby',
+  ]
 
   // 🔹 Conecta ao match e define callbacks
   useEffect(() => {
@@ -73,7 +81,7 @@ export default function MatchProvider({ user, children }: { user: User; children
   return (
     <>
       {children}
-      {(match.party || match.partyToken) && <FloatingRoomWidget />}
+      {((match.party || match.partyToken) && !hiddenFloat.some((path) => pathname.startsWith(path))) && <FloatingRoomWidget />}
 
       {matchFound && (
         <MatchNotify

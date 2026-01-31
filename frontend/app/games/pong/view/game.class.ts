@@ -143,11 +143,17 @@ export class Game {
       });
     }
 
-    this.sprites.arenaBackground!.load();
-    this.sprites.redPaddle!.load();
-    this.sprites.bluePaddle!.load();
+    const loader = new ex.Loader([
+      this.sprites.arenaBackground!,
+      this.sprites.redPaddle!,
+      this.sprites.bluePaddle!,
+    ])
 
-    await this.engine.start();
+    // this.sprites.arenaBackground!.load();
+    // this.sprites.redPaddle!.load();
+    // this.sprites.bluePaddle!.load();
+
+    await this.engine.start(loader);
 
     return this.endPromisse;
   }
