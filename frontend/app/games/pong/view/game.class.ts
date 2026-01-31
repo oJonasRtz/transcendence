@@ -44,9 +44,7 @@ export class Game {
   } = {
     redPaddle: new ex.ImageSource("/sprites/Pong/Paddles/red_paddle.png"),
     bluePaddle: new ex.ImageSource("/sprites/Pong/Paddles/blue_paddle.png"),
-    arenaBackground: new ex.ImageSource(
-      "/sprites/Pong/arena.png"
-    ),
+    arenaBackground: new ex.ImageSource("/sprites/Pong/arena.png"),
   };
 
   private container: HTMLElement;

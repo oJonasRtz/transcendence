@@ -197,7 +197,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     (a, b) => (b.rank ?? 0) - (a.rank ?? 0)
   );
 
-  console.log('allUsers: ' + JSON.stringify(allUsers));
+  // console.log('allUsers: ' + JSON.stringify(allUsers));
   const leaderboard: DashboardLeaderboardEntry[] = sorted
     .slice(0, 10)
     .map((u: any, index: number) => ({

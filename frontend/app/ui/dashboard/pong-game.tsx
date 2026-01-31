@@ -31,8 +31,21 @@ export default function PongGame({ user }: PongGameProps) {
 
   const router = useRouter();
 
-  if (!match || !match.match_id)
-    router.push('/dashboard/');
+  if (!match || !match.match_id) {
+    const timeout = setTimeout(() => {
+      router.push('/dashboard/');
+    }, __TIME_TO_WAIT__.MIN_TIME * 1000);
+
+
+    return (
+      <>
+        <MatchNotify
+          title='Room disbanded'
+          time={__TIME_TO_WAIT__.MIN_TIME}
+        />
+      </>
+    );
+  }
 
 
   useEffect(() => {

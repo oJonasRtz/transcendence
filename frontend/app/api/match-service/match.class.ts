@@ -55,7 +55,6 @@ export class Match {
 	private onMatchFound: ((match_id: number, skip: boolean) => void) | null = null;
 	private onMatchResults: ((stats: StatsType) => void) | null = null;
 	private _match_id: number = 0;
-	private onTime: (stat: boolean) => void;
 	private party_users: PartyType[] = [];
 	private party_token: string | null = null;
 	private lastGameStats: StatsType | null = null;
@@ -68,8 +67,7 @@ export class Match {
 		'MATCH_FOUND': ({match_id, skip}: {match_id: number, skip: boolean}) => {
 			this._match_id = match_id;
 			// window.location.href = '/dashboard/play/pong';
-			console.log('Match found! Match ID: ' + match_id + " skip: " + skip);
-
+			// console.log('Match found! Match ID: ' + match_id + " skip: " + skip);
 			if (this.onMatchFound) {
 				this.onMatchFound(match_id, skip);
 			}
@@ -77,7 +75,7 @@ export class Match {
 		'PARTY_UPDATED': async () => {
 			try {
 				await this.getPartyInfo();;
-				console.log('Party info updated:', this.party_users);
+				// console.log('Party info updated:', this.party_users);
 				if (this.onPartyUpdate) this.onPartyUpdate();
 			} catch (error) {
 				console.error('Error updating party info:', error);
@@ -88,7 +86,7 @@ export class Match {
 
 			this.lastGameStats = rest as StatsType;
 
-			console.log('Match results received:', this.lastGameStats);
+			// console.log('Match results received:', this.lastGameStats);
 
 			if (this.onMatchResults && this.lastGameStats) {
 				this.onMatchResults(this.lastGameStats);
@@ -96,9 +94,11 @@ export class Match {
 		},
 		'PARTY_CREATED': ({token}: {token: string}) => {
 			this.party_token = token;
-			console.log('Party invite created. Token:', token);
+			// console.log('Party invite created. Token:', token);
 		},
-		// 'TIMEOUT': ()
+		'MATCH_TIMEOUT': () => {
+			this._match_id = 0;
+		}
 	};
 
 	get stats(): StatsType | null {
@@ -121,10 +121,6 @@ export class Match {
 
 	set onParty(callback: (() => void) | null) {
 		this.onPartyUpdate = callback;
-	}
-
-	set onTimeout(callback: (stat: boolean) => void) {
-		this.onTime = callback;
 	}
 
 	get party(): PartyType[] {
@@ -179,7 +175,6 @@ export class Match {
 			});
 			this._isConnected = true;
 
-			console.log('minha party: ' + this.party_token);
 		};
 		this.ws.onmessage = (message: any) => {
 			try {
@@ -256,10 +251,10 @@ export class Match {
 	*/
 	public enqueue(type: 'RANKED' | 'TOURNAMENT' = 'RANKED'): boolean {
 
-		console.log("Current state:", this.state);
+		// console.log("Current state:", this.state);
 		if (this.state !== 'IDLE') return false;
 
-		console.log("I tried to enqueue for type:", type);
+		// console.log("I tried to enqueue for type:", type);
 
 		return this.send({
 			type: 'ENQUEUE',
@@ -273,10 +268,10 @@ export class Match {
 	 * @return boolean - Returns true if the dequeue request was sent successfully, false otherwise.
 	*/
 	public dequeue(): boolean {
-		console.log("Current state:", this.state);
+		// console.log("Current state:", this.state);
 		if (this.state !== 'IN_QUEUE') return false;
 
-		console.log("I tried to dequeue");
+		// console.log("I tried to dequeue");
 		return this.send({
 			type: 'DEQUEUE',
 			id: this.info.id,
@@ -311,7 +306,7 @@ export class Match {
 			credentials: 'include',
 		  });
 
-		  console.log("I tried to join the party");
+		//   console.log("I tried to join the party");
 
 		  this.getPartyInfo();
 	}
@@ -336,7 +331,7 @@ export class Match {
 			credentials: 'include',
 		  });
 
-		  console.log("I tried to leave the party");
+		//   console.log("I tried to leave the party");
 
 		  this.party_users = [];
 		  this.party_token = null;

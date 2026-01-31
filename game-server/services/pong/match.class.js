@@ -136,16 +136,15 @@ export class Match {
     }
     if (!connected) throw new Error(types.error.NOT_FOUND);
 
-    // Clear inactivity timeout
-    if (this.#timeout) {
-      clearTimeout(this.#timeout);
-      this.#timeout = null;
-    }
-
     // Check if all players are connected to start the game
     if (Object.values(this.#players).every((p) => p.connected)) {
       this.#allConnected = true;
 
+      // Clear inactivity timeout
+      if (this.#timeout) {
+        clearTimeout(this.#timeout);
+        this.#timeout = null;
+      }
       console.log(
         `All players connected for match ${this.#id}. Starting game...`
       );
@@ -175,7 +174,7 @@ export class Match {
       !this.#gameEnded &&
       Object.values(this.#players).every((p) => !p.connected)
     )
-      this.#inactivityDisconnect(5);
+      this.#inactivityDisconnect(2);
   }
 
   // --- Ping ---
