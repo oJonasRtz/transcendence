@@ -5,7 +5,7 @@ import type { User } from '@/app/lib/auth';
 import { useEffect, useState } from 'react';
 import MatchNotify from './match-notifty';
 import { __TIME_TO_WAIT__ } from './MatchProvider';
-import {api} from "@/app/lib/api";
+import WaitingLobbySkeleton from './waiting-lobby-skeleton';
 
 interface WaitingLobbyProps {
   user: User;
@@ -131,6 +131,11 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     return `${m}:${s}`;
   };
 
+
+  const isLoadding = !match.isConnected || players.length === 0;
+  if (isLoadding)
+    return <WaitingLobbySkeleton/>
+
   return (
     <div className="space-y-6">
       {/* {!match.isConnected && <MatchProvider user={user} />} */}
@@ -207,7 +212,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
               onClick={() => {
                 if (!isLeader) return;
                 match.enqueue(gameType);
-                // setInQueue(true);
               }}
               disabled={inQueue || !isLeader}
               className={`flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300
@@ -224,7 +228,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             <button
               onClick={() => {
                 match.dequeue();
-                // setInQueue(false);
               }}
               className="flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300 bg-red-500/30 hover:bg-red-500/40 text-red-300 border border-red-500/50 shadow-lg shadow-red-500/20"
             >
@@ -239,7 +242,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
         <button
           onClick={() => {
             match.leaveParty().catch(console.error);
-            setInQueue(match.dequeue());
+            match.dequeue();
             router.push('/dashboard/play');
           }}
           className="px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 text-white transition-all duration-300 flex items-center gap-2"
