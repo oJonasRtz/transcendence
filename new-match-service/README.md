@@ -1,164 +1,314 @@
-# MatchMaking
+Matchmaking & Party Service
 
-# How to use
-    - Connection
-      - Its a websocket communication
-      - how to connect:
-        const socket = new WebSocket('ws://address:port');
+This service implements a complete system for matchmaking, parties, invites, lobbies, and real-time communication via WebSocket for a game (e.g., Pong), supporting both RANKED and TOURNAMENT modes.
 
-        socket.onopen = () => {
-          socket.send(JSON.stringfy({
-            type: "CONNECT",
-            id: string,
-            email: string,
-            name: string,
-          }))
-        }
-        - All messages sent gotta be JSONs so use JSON.stringfy() before send anything to convertion, websockets only send strings
-        - after send CONNECT you will recieve a confirmation via (socket.onmessage)
+It is mainly composed of:
 
+Server – HTTP + WebSocket API
 
-    - Messages
-      - Every message needs identification so (type & id) is needed in every message {
-        type: what this request wants the system to do
-        id: who's ordering that action (user_id)
-      } 
-      - NOTE: every error will return this format:
-      {
-        type: 'ERROR',
-        reason: string,
-        code: 400,
-      }
+Client – Represents a connected player
 
+Party – Group of players
 
-      - types:
-      - CONNECT
-        - Register client on match-service
-        - body: {
-          type: "CONNECT",
-          id: number | string,
-          email: string,
-          name: string,
-        }
-        - return: 
-          SUCCESS: {
-            type: 'CONNECTED',
-            code: 200
-          }
+MatchMaking – Pairing system
 
-      - ENQUEUE 
-        - body: {
-          type: "ENQUEUE",
-          id: number| string,
-          game_type: "RANKED" | "TOURNAMENT"
-        }
-        - return:
-          SUCCESS:{
-            type: 'STATE_CHANGE',
-            state: 'IN_QUEUE'
-          }
-          FAIL: {
-            type: 'ERROR',
-            reason: 'MATCHMAKING_FAILED',
-            code: 400,
-          }
+Lobby – Manages matches and tournaments
 
-        - on fail the client state will return to idle state
+Connection – Communication with the game server
 
-      - DEQUEUE
-        - body: {
-          type: "DEQUEUE",
-          id: number | string
-        }
-        - just return to idle state
-        - return: {
-          type: 'STATE_CHANGE',
-          state: 'IDLE',
-        }
+📦 Technologies
+
+Node.js
+
+Fastify (HTTP)
+
+@fastify/websocket
+
+WebSocket (ws)
+
+Crypto (tokens)
+
+Events (EventEmitter)
+
+🚀 Initialization
+import { Server } from './Server.class.js';
+
+const server = new Server();
+server.listen(3020);
 
 
-      - EXIT
-        - body: {
-          type: "EXIT",
-          id: number | string
-        }
-        - disconnects user to match-service
-        - NOTE: Depending on Client state its instance will not be destroyed.
-          On IN_GAME state it'll be preserver for reconnections, otherwise it'll be destroyed
-        - return: no return (void)
-    - Routes
-      - /invite
-      - /match/invite:token
-      - /get_tournaments
-      - /create_tournament
-    - Errors
+The server runs with HTTPS (certificates in ./ssl/server.key and ./ssl/server.cert).
 
-    - Flow
-      - Connect via Websocket
-      - Sign up sending type: CONNECT
-      - 
+🌐 HTTP Endpoints
+🔹 POST /invite
 
-# Planing
+Creates a party invite.
 
-Planning of how it is going to work:
-- Client
-  - FSM (Finite State Machine)
-    - Every state will trigger a behavior
-    - States: IDLE, IN_QUEUE, IN_GAME
-    - IDLE:
-      - Only connected to the system
-      - Can create invites
-      - Can change to IN_QUEUE state via ENQUEUE
-    - IN_QUEUE:
-      - Join the MatchMaking system
-      - Await to find a match
-      - Can change to IDLE state via DEQUEUE
-    - IN_GAME:
-      - A match has been found
-      - Client is in a Lobby now
-      - Can't change to any other state
-- MatchMaking
-  - Queues: RANKED, TOURNAMENT
-  - RANKED:
-    - Will match 2 Clients in IN_QUEUE state
-  - TOURNAMENT:
-    - Will match 4 Clients in IN_QUEUE state
-  - Once all Clients are found for a match:
-    - Move them to a Lobby
-    - All Clients change to IN_GAME state
-- Lobby
-  - Create a match on the game-server
-  - Manages the matches while they're running
-  - Update the database at the end:
-    - Points
-    - History
-    - Disconnect all players
-  - RANKED:
-    - GAMES: 1
-    - POINTS: Based on score difference in the game
-      - 11x0: Max points
-        - Winner: +30 pts
-        - Loser: -25 pts
-      - Ranges:
-        - Win: 25–30 pts
-        - Lose: 20–25 pts
-  - TOURNAMENT:
-    - Builds the brackets
-    - GAMES: 2 (every player will play 2 games)
-    - Brackets:
-      - Round 1 - Opening:
-        - Match 1: P1 vs. P2
-        - Match 2: P3 vs. P4
-      - Round 2 - Final:
-        - Winners’ Final: Winner of Match 1 vs. Winner of Match 2
-        - Losers’ Final: Loser of Match 1 vs. Loser of Match 2
-    - Points:
-      - Points by position:
-        - 1st: +50 pts
-        - 2nd: +25 pts
-        - 3rd: -20 pts
-        - 4th: -40 pts
-- Server:
-  - Place where all clients are connected by default
-  - Manages the messages
-  - Calls the routes
+Body:
+
+{
+  "id": "user_id",
+  "game_type": "RANKED" | "TOURNAMENT"
+}
+
+
+Response:
+
+{
+  "type": "INVITE_CREATED",
+  "link": "/dashboard/play/waiting-lobby/<token>",
+  "code": 200
+}
+
+🔹 POST /join_party/:token
+
+Joins a party using an invite.
+
+Params:
+
+token – invite token
+
+Body:
+
+{
+  "id": "user_id",
+  "game_type": "RANKED" | "TOURNAMENT"
+}
+
+
+Response:
+
+{
+  "type": "JOINED_PARTY",
+  "code": 200
+}
+
+
+If the token is invalid or expired, the user joins a solo party.
+
+🔹 POST /leave_party
+
+Leaves the current party.
+
+Body:
+
+{
+  "id": "user_id"
+}
+
+
+Response:
+
+{
+  "type": "LEFT_PARTY",
+  "code": 200
+}
+
+🔹 GET /party
+
+Gets information about the user’s current party.
+
+Query:
+
+?id=user_id
+
+
+Response:
+
+{
+  "type": "PARTY_INFO",
+  "party": {
+    "game_type": "RANKED",
+    "clients": [
+      { "id": "1", "name": "Alice", "rank": 120, "isLeader": true },
+      { "id": "2", "name": "Bob", "rank": 115, "isLeader": false }
+    ]
+  },
+  "code": 200
+}
+
+🔌 WebSocket API
+
+Connection at:
+
+wss://<host>:<port>/
+
+
+All messages follow the format:
+
+{ "type": "ACTION_TYPE", ...payload }
+
+🔹 Client → Server Messages
+Type	Payload	Description
+CONNECT	{ id, name, email }	Registers the client
+ENQUEUE	{ id, game_type }	Enters the matchmaking queue
+DEQUEUE	{ id }	Leaves the queue
+INVITE	{ id }	Requests permission to create invite
+EXIT	{ id }	Disconnects
+🔹 Server → Client Messages
+Type	Description
+CONNECTED	Successfully connected
+STATE_CHANGE	State changed (IDLE, IN_QUEUE, IN_GAME)
+PARTY_UPDATED	Party updated
+MATCH_FOUND	Match found
+MATCH_RESULT	Match result
+INVITE_EXPIRED	Invite expired
+ERROR	An error occurred
+🧠 Client States
+IDLE → IN_QUEUE → IN_GAME → IDLE
+
+
+Allowed transitions:
+
+IDLE → IN_QUEUE
+
+IN_QUEUE → IN_GAME
+
+IN_GAME → IDLE
+
+👥 Party
+
+Represents a group of players.
+
+Main properties:
+
+token
+
+leader
+
+clients
+
+game_type (RANKED | TOURNAMENT)
+
+state (IDLE | IN_QUEUE)
+
+Main methods:
+
+addClient(client, isLeader)
+
+removeClient(client)
+
+enqueue(caller)
+
+dequeue()
+
+🎯 Matchmaking
+
+A system that attempts to form matches every 200ms.
+
+Criteria:
+
+Same game_type
+
+Maximum rank difference: 100
+
+Exact number of players:
+
+RANKED: 2
+
+TOURNAMENT: 4
+
+When a match is formed:
+
+A Lobby is created
+
+Party promises are resolved
+
+🏟️ Lobby
+
+Manages the execution of a match or tournament.
+
+Modes:
+🎮 RANKED
+
+Creates a single match
+
+At the end:
+
+Calculates rank
+
+Updates XP
+
+Sends MATCH_RESULT
+
+🏆 TOURNAMENT
+
+Creates brackets
+
+Runs rounds
+
+Manages multiple matches
+
+🔄 Connection (Game Server)
+
+Responsible for communication with the game server via WebSocket.
+
+Sends:
+
+CONNECT_LOBBY
+
+NEW_MATCH
+
+REMOVE_MATCH
+
+Receives:
+
+MATCH_CREATED
+
+END_GAME
+
+TIMEOUT_REMOVE
+
+🔐 Invites
+
+Valid while the party is in IDLE
+
+Automatically expire if:
+
+The leader enters the queue
+
+The party is destroyed
+
+Invites are relative URLs:
+
+/dashboard/play/waiting-lobby/<token>
+
+
+The frontend should complete them using:
+
+`${window.location.origin}${link}`
+
+❌ Common Errors
+Error	Reason
+INVALID_FORMAT	Invalid parameters
+NOT_CONNECTED	Client not connected
+PARTY_FULL	Party is full
+INVITE_EXPIRED	Invalid invite
+PERMISSION_DENIED	Action not allowed
+
+
+✅ Best Practices
+
+Always send id in WebSocket messages
+
+Backend returns relative URLs
+
+Frontend builds the full URL
+
+Do not use global variables
+
+📄 Example Flow
+
+Client connects via WebSocket
+
+Client creates an invite via POST /invite
+
+Another player accesses /join_party/:token
+
+Leader calls ENQUEUE
+
+Matchmaking creates a lobby
+
+Lobby runs the match
+
+Result is sent to players
