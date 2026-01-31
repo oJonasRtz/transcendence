@@ -63,6 +63,7 @@ export default function MatchProvider({user, children}: {user: User, children: R
   useEffect(() => {
     const time = setTimeout(() => {
       setTime(false);
+      router.push(`/dashboard/play`);
     }, __TIME_TO_WAIT__.MIN_TIME * 1000);
 
     return () => clearTimeout(time);

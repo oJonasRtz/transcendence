@@ -37,6 +37,10 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
   // console.log('WaitingLobby token:', token);
 
   useEffect(() => {
+    setInQueue(match.inQueue);
+  }, [match.inQueue]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if (match.match_id && !showMatchFound){
         setShowMatchFound(true);
@@ -137,10 +141,10 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
           Waiting Room
         </h1>
         <p className="text-lg font-mono uppercase tracking-widest text-purple-400">
-          // {gameType}
+          //{gameType}
         </p>
 
-        <div className="flex gap-4 justify-center mt-4">
+        {/* <div className="flex gap-4 justify-center mt-4">
           <button
             onClick={() => !inQueue && setGameType('RANKED')}
             className={`px-6 py-3 rounded-xl font-bold transition-all duration-300
@@ -156,7 +160,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
           >
             Tournament
           </button>
-        </div>
+        </div> */}
       </div>
 
       {showMatchFound && <MatchNotify title={'Match Found'} time={__TIME_TO_WAIT__.MAX_TIME} />}
@@ -202,7 +206,8 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
           <button
               onClick={() => {
                 if (!isLeader) return;
-                setInQueue(match.enqueue(gameType));
+                match.enqueue(gameType);
+                // setInQueue(true);
               }}
               disabled={inQueue || !isLeader}
               className={`flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300
@@ -218,7 +223,8 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             </button>
             <button
               onClick={() => {
-                setInQueue(match.dequeue());
+                match.dequeue();
+                // setInQueue(false);
               }}
               className="flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300 bg-red-500/30 hover:bg-red-500/40 text-red-300 border border-red-500/50 shadow-lg shadow-red-500/20"
             >

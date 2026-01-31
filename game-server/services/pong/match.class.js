@@ -281,7 +281,14 @@ export class Match {
     }
   }
   #newBall() {
-	if (this.#gameEnded) return;
+	  if (this.#gameEnded) return;
+    if (!this.#allConnected)
+      return this.#inactivityDisconnect(1);
+
+    if (this.#timeout) {
+      clearTimeout(this.#timeout);
+      this.#timeout = null;
+    }
 
     this.#ball = new Ball(this.#lastScorer);
     console.log(

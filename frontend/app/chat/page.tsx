@@ -138,7 +138,7 @@ export default function ChatPage() {
     if (msg.isLink) {
       return (
         <a
-          href={msg.content}
+          href={window.location.origin + msg.content}
           // target="_blank"
           // rel="noopener noreferrer"
           className="text-blue-400 hover:underline"

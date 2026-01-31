@@ -109,6 +109,10 @@ export class Match {
 		return this.party_token;
 	}
 
+	get inQueue(): boolean {
+		return this._state === 'IN_QUEUE';
+	}
+
 	resetStats() {
 		this.lastGameStats = null;
 		this._match_id = 0;

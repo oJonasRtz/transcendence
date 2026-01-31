@@ -195,7 +195,7 @@ export class Server {
 			}
 			party.createdByInvite = true;
 			const token = party.token;
-			const address = `https://localhost/dashboard/play/waiting-lobby/`;
+			const address = `/dashboard/play/waiting-lobby/`;
 			const link = address + token;
 
 			//show token registred in orange
