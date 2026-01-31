@@ -50,6 +50,7 @@ export default function DashboardHero({
             <h1 className="text-3xl lg:text-4xl font-black text-white drop-shadow">
               {displayName}
             </h1>
+            <p className='text-slate-400 font-mono text-sm'>{profile?.title}</p>
             {showHandle ? (
               <p className="mt-1 text-sm font-mono text-slate-400">
                 @{showHandle}

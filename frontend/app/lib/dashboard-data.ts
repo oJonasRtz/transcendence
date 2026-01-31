@@ -16,6 +16,7 @@ export interface DashboardProfile {
   nickname?: string | null;
   avatar?: string | null;
   isOnline: boolean;
+  title?: string;
 }
 
 export interface DashboardStats {
@@ -122,6 +123,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     nickname: user.nickname ?? user.username ?? null,
     avatar: profileData?.avatar ?? null,
     isOnline: Boolean(profileData?.isOnline ?? true),
+    title: profileData?.title ?? undefined,
   };
 
   // --- Stats ---

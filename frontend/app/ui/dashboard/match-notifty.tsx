@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 export default function MatchNotify({
   title,
   time,
+  onComplete, // ← novo prop
 }: {
   title: string;
   time: number;
+  onComplete?: () => void;
 }) {
   const [progress, setProgress] = useState(100);
   const [animate, setAnimate] = useState(false);
@@ -24,11 +26,14 @@ export default function MatchNotify({
       const percentage = (remaining / duration) * 100;
       setProgress(percentage);
 
-      if (remaining <= 0) clearInterval(interval);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        onComplete?.(); // ← chama callback quando termina
+      }
     }, 50);
 
     return () => clearInterval(interval);
-  }, [time]);
+  }, [time, onComplete]);
 
   const formattedTitle = title.split(" ").join("\n");
   const key = title.toLowerCase();
@@ -61,18 +66,15 @@ export default function MatchNotify({
           ${animate ? "scale-100 opacity-100" : "scale-90 opacity-0"}
         `}
       >
-        {/* Glow background */}
         <div
           className={`absolute -inset-2 bg-gradient-to-r ${theme.glow} rounded-2xl blur-lg opacity-40 group-hover:opacity-70 transition duration-300`}
         />
 
-        {/* Card */}
         <div
           className={`relative w-72 h-72 rounded-2xl border ${theme.ring}
             bg-slate-900/60 backdrop-blur-xl shadow-xl
             flex flex-col items-center justify-center gap-4 p-6 text-center`}
         >
-          {/* Title */}
           <h1
             className={`text-3xl font-black text-white leading-tight whitespace-pre-line ${theme.textGlow}`}
             style={{ lineHeight: "1.15" }}
@@ -80,10 +82,8 @@ export default function MatchNotify({
             {formattedTitle}
           </h1>
 
-          {/* Divider */}
           <div className="w-12 h-1 rounded-full bg-white/20" />
 
-          {/* Progress Bar */}
           <div className="mt-2 w-44 h-2 rounded-full bg-white/10 overflow-hidden border border-white/20">
             <div
               className="h-full bg-orange-500 transition-all duration-100 ease-linear shadow-[0_0_12px_rgba(249,115,22,0.9)]"
@@ -91,7 +91,6 @@ export default function MatchNotify({
             />
           </div>
 
-          {/* Subtext */}
           <span className="mt-2 text-xs font-mono uppercase tracking-widest text-slate-400">
             Redirecting...
           </span>

@@ -31,8 +31,8 @@ export default function PongGame({ user }: PongGameProps) {
 
   const router = useRouter();
 
-  if (!match)
-    router.push('/dashboard/play');
+  if (!match || !match.match_id)
+    router.push('/dashboard/');
 
 
   useEffect(() => {

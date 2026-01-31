@@ -8,41 +8,24 @@ import MatchNotify from "./match-notifty";
 import FloatingRoomWidget from "./FloatingRoomWidget";
 
 export const match: Match = new Match();
-/**
- * Time to wait before take an action (in seconds)
- * MAX_TIME: Maximum time to wait
- * MIN_TIME: Minimum time to wait
- * RECONNECT_INTERVAL: Time interval to attempt reconnection
-*/
+
 export const __TIME_TO_WAIT__ = {
   MAX_TIME: 5,
-  MIN_TIME: 3, 
+  MIN_TIME: 3,
   RECONNECT_INTERVAL: 5,
 };
 
-export default function MatchProvider({user, children}: {user: User, children: React.ReactNode}) {
+export default function MatchProvider({ user, children }: { user: User; children: React.ReactNode }) {
   const router = useRouter();
-  const [timeout, setTime] = useState<boolean>(false);
   const reconnecIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [matchFound, setMatchFound] = useState(false);
 
+  // 🔹 Conecta ao match e define callbacks
   useEffect(() => {
-    match.onTimeout = setTime;
- 
-    match.onMatch = (match_id, skip) => {
-      const go = () => router.push(`/dashboard/play/pong`);
-      
-      if (skip)
-        return go();
+    if (!user) return;
 
-      setTimeout(go, __TIME_TO_WAIT__.MAX_TIME * 1000);
-    };
-
-    match.onResults = () => {
-      setTimeout(() => {
-        router.push(`/dashboard/play/statsPage`);
-      }, __TIME_TO_WAIT__.MIN_TIME * 1000);
-    };
-
+    // Função de conexão
     const tryConnect = () => {
       if (!match.isConnected && user) {
         match.connect({
@@ -55,33 +38,53 @@ export default function MatchProvider({user, children}: {user: User, children: R
 
     tryConnect();
 
-    reconnecIntervalRef.current = setInterval(() => {
-      tryConnect();
-    }, __TIME_TO_WAIT__.RECONNECT_INTERVAL * 1000);
+    // Intervalo de reconexão
+    reconnecIntervalRef.current = setInterval(tryConnect, __TIME_TO_WAIT__.RECONNECT_INTERVAL * 1000);
 
+    // Callback quando um match é encontrado
+    match.onMatch = (match_id, skip) => {
+      setMatchFound(true);
+      const go = () => router.push(`/dashboard/play/pong`);
+
+      // Limpa qualquer timeout antigo antes de criar um novo
+      if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
+
+      if (skip) {
+        go();
+        return;
+      }
+
+      redirectTimeoutRef.current = setTimeout(go, __TIME_TO_WAIT__.MAX_TIME * 1000);
+    };
+
+    // Callback quando resultados aparecem
+    match.onResults = () => {
+      setTimeout(() => {
+        router.push(`/dashboard/play/statsPage`);
+      }, __TIME_TO_WAIT__.MIN_TIME * 1000);
+    };
+
+    return () => {
+      if (reconnecIntervalRef.current) clearInterval(reconnecIntervalRef.current);
+      if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
+    };
   }, [router, user]);
-  
-  // useEffect(() => {
-  //   const time = setTimeout(() => {
-  //     setTime(false);
-  //     router.push(`/dashboard/play`);
-  //   }, __TIME_TO_WAIT__.MIN_TIME * 1000);
-
-  //   return () => clearTimeout(time);
-  // }, [timeout]);
 
   return (
     <>
       {children}
-      {(match.party && match.state === 'IDLE') && (
-        <FloatingRoomWidget />
-      )}
-      {/* {timeout && (
+      {(match.party || match.partyToken) && <FloatingRoomWidget />}
+
+      {matchFound && (
         <MatchNotify
-          title="Room disbanded"
-          time={__TIME_TO_WAIT__.MIN_TIME}
+          title="Match Found!"
+          time={__TIME_TO_WAIT__.MAX_TIME}
+          onComplete={() => {
+            setMatchFound(false); // remove o MatchNotify
+            router.push("/dashboard/play/pong"); // redireciona
+          }}
         />
-      )} */}
+      )}
     </>
   );
 }

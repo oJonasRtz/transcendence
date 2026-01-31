@@ -29,7 +29,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
   const [queueTime, setQueueTime] = useState(0);
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
   const [gameType, setGameType] = useState<GameType>('RANKED');
-  const [showMatchFound, setShowMatchFound] = useState(false);
+  // const [showMatchFound, setShowMatchFound] = useState(false);
   const [isLeader, setIsLeader] = useState(true);
   const [animatedPlayers, setAnimatedPlayers] = useState<string[]>([])
 
@@ -41,15 +41,15 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     setInQueue(match.inQueue);
   }, [match.inQueue]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (match.match_id && !showMatchFound){
-        setShowMatchFound(true);
-      }
-    }, 500);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (match.match_id && !showMatchFound){
+  //       setShowMatchFound(true);
+  //     }
+  //   }, 500);
 
-    return () => clearInterval(interval);
-  }, [showMatchFound]);
+  //   return () => clearInterval(interval);
+  // }, [showMatchFound]);
 
   // Connect and join party on mount
   useEffect(() => {
@@ -171,7 +171,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
         </div> */}
       </div>
 
-      {showMatchFound && <MatchNotify title={'Match Found'} time={__TIME_TO_WAIT__.MAX_TIME} />}
+      {/* {showMatchFound && <MatchNotify title={'Match Found'} time={__TIME_TO_WAIT__.MAX_TIME} />} */}
 
       {/* Lobby Container */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-8">

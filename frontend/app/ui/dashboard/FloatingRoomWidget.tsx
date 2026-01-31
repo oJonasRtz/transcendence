@@ -37,7 +37,7 @@ export default function FloatingRoomWidget() {
 
     return () => {
       clearInterval(interval);
-      match.onParty = null;
+    //   match.onParty = null;
     };
   }, []);
 
