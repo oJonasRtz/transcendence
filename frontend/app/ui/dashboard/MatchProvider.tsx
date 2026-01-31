@@ -2,8 +2,9 @@
 
 import { Match } from "@/app/api/match-service/match.class";
 import { User } from "@/app/lib/auth";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import MatchNotify from "./match-notifty";
 
 export const match: Match = new Match();
 /**
@@ -20,9 +21,12 @@ export const __TIME_TO_WAIT__ = {
 
 export default function MatchProvider({user, children}: {user: User, children: React.ReactNode}) {
   const router = useRouter();
+  const [timeout, setTime] = useState<boolean>(false);
   const reconnecIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    match.onTimeout = setTime;
+ 
     match.onMatch = (match_id, skip) => {
       const go = () => router.push(`/dashboard/play/pong`);
       
@@ -56,5 +60,23 @@ export default function MatchProvider({user, children}: {user: User, children: R
 
   }, [router, user]);
   
-  return <>{children}</>;
+  useEffect(() => {
+    const time = setTimeout(() => {
+      setTime(false);
+    }, __TIME_TO_WAIT__.MIN_TIME * 1000);
+
+    return () => clearTimeout(time);
+  }, [timeout]);
+
+  return (
+    <>
+      {children}
+      {timeout && (
+        <MatchNotify
+          title="Room disbanded"
+          time={__TIME_TO_WAIT__.MIN_TIME}
+        />
+      )}
+    </>
+  );
 }

@@ -38,7 +38,6 @@ export default async function DashboardPage() {
         <div className="space-y-6">
           <Leaderboard
             leaderboard={dashboardData.leaderboard}
-            userRank={dashboardData.userRank}
           />
           <FriendsList friends={dashboardData.friends} />
           <RecentMessages

@@ -2,6 +2,12 @@
 
 import { match } from "app/ui/dashboard/MatchProvider";
 import {useEffect} from "react";
+import { inter } from "../ui/fonts";
+import { ScoreType } from "../ui/dashboard/pong-game";
+
+interface PongProps {
+	setScore: (score: ScoreType) => void;
+}
 
 /**
  * Run the Pong game on the client side.
@@ -11,7 +17,7 @@ import {useEffect} from "react";
  * 
  * This must be tested after integrating with the match-service.
 */
-export function Pong() {
+export function Pong({setScore}: PongProps) {
 
 	useEffect(() => {
 		console.log("Starting Pong with match info:", match.matchInfo);
@@ -25,7 +31,8 @@ export function Pong() {
 				name: info.name,
 				playerId: info.user_id,
 				},
-				container!
+				container!,
+				setScore
 			);
 		};
 

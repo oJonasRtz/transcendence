@@ -1,6 +1,7 @@
 import { Game } from "./view/game.class";
 import { connection, gameState } from "./globals";
 import type { StartType } from "./types";
+import { ScoreType } from "@/app/ui/dashboard/pong-game";
 
 // const temp = {
 //   1: {
@@ -37,9 +38,10 @@ export function waitGameStart(): Promise<void> {
  * @param container - The HTML container where the game will be rendered.
  * @returns Wait a promisse till the game ends.
 */
-export async function startPong(data: StartType, container: HTMLElement): Promise<void> {
+export async function startPong(data: StartType, container: HTMLElement, setScore: (score: ScoreType) => void): Promise<void> {
   showDisconnectScreen(container);
   gameState.setIdentity(data);
+  gameState.setSetScore(setScore);
   await waitGameStart();
   hideDisconnectScreen();
 

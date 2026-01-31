@@ -7,14 +7,27 @@ import { __TIME_TO_WAIT__, match } from './MatchProvider';
 import { useEffect, useState } from 'react';
 import { set } from 'zod';
 import MatchNotify from './match-notifty';
+import PongScoreBoard from './PongScoreBoard';
 
 interface PongGameProps {
   user: User;
 }
 
+type PlayerType = {
+  name: string;
+  id: string;
+  score: number;
+}
+
+export type ScoreType = {
+  timer: string;
+  players: PlayerType[];
+}
+
 export default function PongGame({ user }: PongGameProps) {
   const [showNotify, setShowNotify] = useState(false);
   const [title, setTitle] = useState('Victory');
+  const [scoreBoard, setScore] = useState<ScoreType | null>(null);
 
   const router = useRouter();
 
@@ -86,6 +99,9 @@ export default function PongGame({ user }: PongGameProps) {
 
       {showNotify && <MatchNotify title={title} time={__TIME_TO_WAIT__.MIN_TIME} />}
 
+      <PongScoreBoard scoreBoard={scoreBoard} />
+
+
       {/* Game Container */}
       <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl">
         {/* Ambient glow */}
@@ -93,7 +109,9 @@ export default function PongGame({ user }: PongGameProps) {
         <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full" />
 
         <div className="relative">
-          <Pong />
+          <Pong
+            setScore={setScore}
+          />
         </div>
       </div>
 

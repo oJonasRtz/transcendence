@@ -64,8 +64,8 @@ export default async function Leaderboard({
                 </div>
 
                 <div className="text-right">
-                  <p className="font-black text-blue-400 text-lg">{entry.ranking}</p>
-                  <p className="text-xs font-mono uppercase text-slate-500">ELO</p>
+                  <p className="font-black text-blue-400 text-lg">{entry.tier}</p>
+                  <p className="text-xs font-mono uppercase text-slate-500">{entry.rankPoints}</p>
                 </div>
               </div>
             );

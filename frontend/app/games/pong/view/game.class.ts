@@ -5,6 +5,29 @@ import { Ball } from "./actors/ball";
 import { ScoreBoard } from "./ScoreBoard.class";
 import { hideDisconnectScreen, showDisconnectScreen } from "../main";
 
+class Background extends ex.Actor {
+  private image: ex.ImageSource;
+
+  constructor(engine: ex.Engine, sprite: ex.ImageSource) {
+    super({
+      x: engine.drawWidth / 2,
+      y: engine.drawHeight / 2,
+      z: -100,
+    });
+    this.image = sprite;
+  }
+
+  onInitialize(engine: ex.Engine): void {
+    const sprite = this.image.toSprite();
+
+    const scaleX = engine.drawWidth / sprite.width;
+    const scaleY = engine.drawHeight / sprite.height;
+    this.scale = new ex.Vector(scaleX, scaleY);
+
+    this.graphics.add(sprite);
+  }
+}
+
 export class Game {
   private engine: ex.Engine;
   private paddles: ex.Actor[] | null = null;
@@ -40,14 +63,14 @@ export class Game {
       canvasElement: canvas,
       width: stats?.game?.width ?? 800,
       height: stats?.game?.height ?? 600,
-      backgroundColor: new ex.Color(10, 20, 45, 1),
+      // backgroundColor: new ex.Color(10, 20, 45, 1),
       displayMode: ex.DisplayMode.Fixed,
     });
 
-    const score = new ScoreBoard(this.engine);
+    // const score = new ScoreBoard(this.engine);
 
     this.addBackground();
-    this.addToGame([score]);
+    // this.addToGame([score]);
     this.addPaddles();
 
     this.engine.on("preupdate", () => {
@@ -71,23 +94,12 @@ export class Game {
   }
 
   private addBackground() {
-    const bgSprite = this.sprites.arenaBackground!.toSprite();
+    const arena = new Background(
+      this.engine,
+      this.sprites.arenaBackground!
+    )
 
-    const background = new ex.Actor({
-      x: this.engine.drawWidth / 2,
-      y: this.engine.drawHeight / 2,
-      width: this.engine.drawWidth,
-      height: this.engine.drawHeight,
-      z: -100,
-    });
-
-    background.graphics.use(bgSprite);
-
-    const scaleX = this.engine.drawWidth / bgSprite.width;
-    const scaleY = this.engine.drawHeight / bgSprite.height;
-    background.scale = new ex.Vector(scaleX, scaleY);
-
-    this.engine.add(background);
+    this.addToGame([arena]);
   }
 
   private ballReset() {
@@ -133,11 +145,11 @@ export class Game {
       });
     }
 
-    await this.engine.start();
-
     this.sprites.arenaBackground!.load();
     this.sprites.redPaddle!.load();
     this.sprites.bluePaddle!.load();
+
+    await this.engine.start();
 
     return this.endPromisse;
   }

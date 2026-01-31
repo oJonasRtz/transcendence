@@ -1,3 +1,4 @@
+import { ScoreType } from "@/app/ui/dashboard/pong-game";
 import { INTERVAL, types } from "../globals";
 import type { InputType, StartType } from "../types";
 import { Identity } from "./Identity.class";
@@ -7,16 +8,18 @@ const DOWNKEYS = ["ArrowDown", "s", "S"];
 
 export class State {
 	private identity = new Identity();
+	private setScore: ((score: ScoreType) => void) | null = null;
 	private ball = {vector: {x: 0, y: 0}, exist: false};
 	private players: Record<1 | 2, {
+		id: string;
 		name: string;
 		score: number;
 		pos: {x: number; y: number;};
 		size: {width: number; height: number;};
 		connected: boolean
 	}> = {
-		1: {name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
-		2: {name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
+		1: {id: '', name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
+		2: {id: '', name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
 	};
 	private latency = {
 		ping: 0,
@@ -54,14 +57,19 @@ export class State {
 		this.identity.setId(id);
 	}
 
+	public setSetScore(callback: (score: ScoreType) => void) {
+		this.setScore = callback;
+	}
+
 	public setConnection(me:boolean) {
 		const id: 1 | 2 | 0 = this.identity.getInfo().id;
 
 		if (id)
 			this.players[id].connected = me;
 	}
-	public setPlayer({id, name, score, pos, size, connected}: {
+	public setPlayer({id, user_id, name, score, pos, size, connected}: {
 		id: 1 | 2;
+		user_id: string;
 		name: string;
 		score: number;
 		pos: {x: number; y: number;};
@@ -69,11 +77,30 @@ export class State {
 		connected: boolean;
 	}) {
 		this.players[id] = {
+			id: user_id,
 			name,
 			score,
 			pos,
 			size,
 			connected,
+		}
+
+		if (this.setScore) {
+			this.setScore({
+				timer: this.game.timer,
+				players: [
+					{
+						name: this.players[1].name,
+						id: this.players[1].id,
+						score: this.players[1].score,
+					},
+					{
+						name: this.players[2].name,
+						id: this.players[2].id,
+						score: this.players[2].score,
+					},
+				],
+			});
 		}
 	}
 	public getPlayers() {

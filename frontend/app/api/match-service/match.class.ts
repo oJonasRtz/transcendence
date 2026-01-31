@@ -55,6 +55,7 @@ export class Match {
 	private onMatchFound: ((match_id: number, skip: boolean) => void) | null = null;
 	private onMatchResults: ((stats: StatsType) => void) | null = null;
 	private _match_id: number = 0;
+	private onTime: (stat: boolean) => void;
 	private party_users: PartyType[] = [];
 	private party_token: string | null = null;
 	private lastGameStats: StatsType | null = null;
@@ -96,7 +97,8 @@ export class Match {
 		'PARTY_CREATED': ({token}: {token: string}) => {
 			this.party_token = token;
 			console.log('Party invite created. Token:', token);
-		}
+		},
+		// 'TIMEOUT': ()
 	};
 
 	get stats(): StatsType | null {
@@ -115,6 +117,10 @@ export class Match {
 
 	set onParty(callback: (() => void) | null) {
 		this.onPartyUpdate = callback;
+	}
+
+	set onTimeout(callback: (stat: boolean) => void) {
+		this.onTime = callback;
 	}
 
 	get party(): PartyType[] {

@@ -541,13 +541,45 @@ const databaseModels = {
     return true;
   },
 
+  // getAllUsersInformation: async function getAllUsersInformation(fastify) {
+  //   // We are using JOIN here to combine using a common element here the user_id from auth and also from users table
+  //   const users = await fastify.db.all(
+  //     "SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id"
+  //   );
+  //   return users ?? null;
+  // },
+
   getAllUsersInformation: async function getAllUsersInformation(fastify) {
-    // We are using JOIN here to combine using a common element here the user_id from auth and also from users table
     const users = await fastify.db.all(
-      "SELECT users.*, auth.username FROM users JOIN auth ON auth.user_id = users.user_id"
+      "SELECT users.user_id FROM users"
     );
-    return users ?? null;
+  
+    if (!users) return [];
+  
+    const enrichedUsers = [];
+  
+    for (const u of users) {
+      const base = await this.getUserInformationRaw(fastify, { user_id: u.user_id });
+      if (!base) continue;
+  
+      const rankData = await this.getRank(fastify, u.user_id);
+      const xpData = await this.getUserExperience(fastify, u.user_id);
+  
+      enrichedUsers.push({
+        ...base,
+        tier: rankData.tier,
+        rank: rankData.rank,
+        rank_points: rankData.rank_points,
+        level: xpData.level,
+        experience_points: xpData.experience_points,
+        title: xpData.title,
+        experience_to_next_level: xpData.experience_to_next_level,
+      });
+    }
+  
+    return enrichedUsers;
   },
+  
 
   // getDataByPublicId: async function getAllUsersInformation(fastify, body) {
   //   const user_id = await fastify.db.get(

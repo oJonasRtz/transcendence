@@ -2,6 +2,7 @@ import { gameState, RECONNECTION__DELAY, types } from "../globals";
 
 type Handler = (data: any) => void;
 type PlayerState = {
+  id: string;
   name: string;
   score: number;
   position: { x: number; y: number };
@@ -40,7 +41,7 @@ export class Connection {
       console.log("tentando conexao na partida: " + matchId);
 
       this.send({ type: types.CONNECT, matchId, name, id, playerId });
-      gameState.getLatency((msg) => this.send(msg));
+      // gameState.getLatency((msg) => this.send(msg));
       
       gameState.setConnection(true);
     };
@@ -77,7 +78,7 @@ export class Connection {
   public disconnect(reason: string): void {
     if (!this.socket) return;
 
-    gameState.stopGettingLatency();
+    // gameState.stopGettingLatency();
     console.log(`[disconnectPlayer] Disconnecting from server: ${reason}`);
     this.socket.close(1000, reason);
     this.socket = null;
@@ -118,6 +119,7 @@ export class Connection {
 
         gameState.setPlayer({
           id: i,
+          user_id: val.id,
           name: val.name,
           score: val.score,
           pos: {x: val.position.x, y: val.position.y},

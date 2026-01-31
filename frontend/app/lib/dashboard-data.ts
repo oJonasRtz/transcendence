@@ -48,7 +48,9 @@ export interface DashboardLeaderboardEntry {
   id: EntityId;
   username: string;
   avatar: string;
-  ranking: number;
+  tier: string;
+  rank: number;
+  rankPoints: number;
   isOnline: boolean;
 }
 
@@ -192,13 +194,17 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
   const sorted = [...usersArray].sort(
     (a, b) => (b.rank ?? 0) - (a.rank ?? 0)
   );
+
+  console.log('allUsers: ' + JSON.stringify(allUsers));
   const leaderboard: DashboardLeaderboardEntry[] = sorted
     .slice(0, 10)
     .map((u: any, index: number) => ({
       id: index + 1,
+      rank: u.rank ?? 0,
       username: u.nickname ?? u.username ?? 'Unknown',
       avatar: u.avatar ?? '/images/default-avatar.png',
-      ranking: u.rank ?? 0,
+      tier: u.tier ?? 'UNDEFINED',
+      rankPoints: u.rank_points ?? 0,
       isOnline: Boolean(u.isOnline),
     }));
 

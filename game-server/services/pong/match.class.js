@@ -42,7 +42,7 @@ export class Match {
         this.#players[index] = new Player(p, { index, matchId: this.#id });
       });
 
-      this.#inactivityDisconnect(5);
+      this.#inactivityDisconnect(3);
     } catch (error) {
       if (error.name === "TypeError") throw new Error(types.error.TYPE_ERROR);
 
