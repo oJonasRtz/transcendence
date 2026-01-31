@@ -7,7 +7,6 @@ import crypto from "crypto";
 import { Party } from "./Party.class.js";
 import fs from "fs";
 import { data } from "../app.js";
-import { type } from "os";
 
 export class Server {
 	#app = fastify({
@@ -185,8 +184,8 @@ export class Server {
 			if (!client)
 				throw new Error('NOT_CONNECTED');
 
-			if (this.#invitesOwners.has(client))
-				throw new Error('CANNOT_INVITE_YET');
+			// if (this.#invitesOwners.has(client))
+			// 	throw new Error('CANNOT_INVITE_YET');
 
 			await client.handleActions({type: 'INVITE'});
 			let party = client.party;

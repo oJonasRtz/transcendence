@@ -105,11 +105,11 @@ export class Party {
 		if (!client || !(client instanceof Client))
 			throw new Error('INVALID_CLIENT');
 
+		if (this.#clients.has(client))
+			return;
+
 		if (this.size === this.#max[this.#game_type])
 			throw new Error('PARTY_FULL');
-
-		if (this.#clients.has(client))
-			throw new Error('CLIENT_ALREADY_IN_PARTY');
 
 		if (this.#state !== 'IDLE')
 			throw new Error('PARTY_NOT_IDLE');

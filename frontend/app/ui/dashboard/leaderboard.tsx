@@ -73,7 +73,7 @@ export default async function Leaderboard({
         )}
       </div>
 
-      <div className="border-t border-white/10 p-4 bg-white/5">
+      {/* <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
           href="/dashboard/leaderboard"
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
@@ -81,7 +81,7 @@ export default async function Leaderboard({
           View full leaderboard
           <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
         </Link>
-      </div>
+      </div> */}
     </CardShell>
   );
 }

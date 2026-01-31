@@ -31,6 +31,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
   const [gameType, setGameType] = useState<GameType>('RANKED');
   const [showMatchFound, setShowMatchFound] = useState(false);
   const [isLeader, setIsLeader] = useState(true);
+  const [animatedPlayers, setAnimatedPlayers] = useState<string[]>([])
 
   const params = useParams();
 
@@ -53,17 +54,7 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
   // Connect and join party on mount
   useEffect(() => {
     let token: string | null = params.token as string || null;
-    const leave = async () => {
-      await match.leaveParty();
-    }
-
-    if (token) {
-      if (match.partyToken)
-        leave();
-    } else { 
-      token = match.partyToken;
-    }
-
+  
     const joinLobby = async () => {
       try {
         if (!match.isConnected) {
@@ -73,40 +64,52 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             id: user.public_id,
           });
         }
-
+  
+        if (match.party.length > 0) {
+          console.log('Already in a party, skipping join.');
+          return;
+        }
+  
         await match.joinParty(gameType, token || null);
       } catch (err) {
         console.error('Failed to join lobby:', err);
       }
     };
-
+  
     joinLobby();
-
+  
     // Leave party on unmount
-    return () => {
-      match.leaveParty().catch(console.error);
-      match.dequeue();
-      setInQueue(false);
-    };
+    return () => {};
   }, [user, gameType]);
+  
 
   // Sync players from match.party periodically
   useEffect(() => {
     const updatePlayers = () => {
-      setPlayers(
-        match.party.map((p) => ({
-          public_id: p.id,
-          username: p.name,
-          nickname: p.name,
-          avatar: `/public/uploads/avatar_${p.id}.png`,
-          isOnline: true,
-          isHost: p.isLeader,
-        }))
-      );
+      const newPlayers = match.party.map((p) => ({
+        public_id: p.id,
+        username: p.name,
+        nickname: p.name,
+        avatar: `/public/uploads/avatar_${p.id}.png`,
+        isOnline: true,
+        isHost: p.isLeader,
+      }));
+    
+      setPlayers(newPlayers);
+    
+      // Marca jogadores novos para animar
+      setAnimatedPlayers((prev) => {
+        const existingIds = prev;
+        const newIds = newPlayers
+          .map(p => p.public_id)
+          .filter(id => !existingIds.includes(id));
+        return [...existingIds, ...newIds];
+      });
+    
       setIsLeader(
         match.party.find((p) => p.id === user.user_id)?.isLeader || false
       );
-    }
+    };
 
     updatePlayers();
     const interval = setInterval(updatePlayers, 1000);
@@ -176,10 +179,19 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
         <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full" />
 
         <div className="relative flex flex-col items-center justify-center gap-8">
-          {/* Players Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {players.map((player) => (
-              <div key={player.public_id} className="relative group">
+        
+        {/* Players Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {players.map((player) => {
+            const isAnimated = animatedPlayers.includes(player.public_id);
+
+            return (
+              <div
+                key={player.public_id}
+                className={`relative group transform transition-all duration-500 ease-out
+                  ${isAnimated ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'}
+                `}
+              >
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl blur-lg opacity-40 group-hover:opacity-70 transition duration-300" />
                 <div className="relative rounded-xl border border-white/10 bg-slate-900/60 p-6 flex flex-col items-center gap-4 w-56">
                   <img
@@ -196,8 +208,10 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
                   </span>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
+
 
           {/* Queue Timer */}
           {inQueue && (

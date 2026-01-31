@@ -73,7 +73,7 @@ export default function DashboardHero({
             <span className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Link>
 
-          <Link
+          {/* <Link
             href={secondaryActionHref}
             className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3
                        border border-white/15 text-slate-200 font-semibold text-sm uppercase tracking-wider
@@ -81,7 +81,7 @@ export default function DashboardHero({
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
           >
             View Matches
-          </Link>
+          </Link> */}
         </div>
       </div>
     </CardShell>

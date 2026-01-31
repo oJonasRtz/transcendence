@@ -5,6 +5,7 @@ import { User } from "@/app/lib/auth";
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import MatchNotify from "./match-notifty";
+import FloatingRoomWidget from "./FloatingRoomWidget";
 
 export const match: Match = new Match();
 /**
@@ -60,24 +61,27 @@ export default function MatchProvider({user, children}: {user: User, children: R
 
   }, [router, user]);
   
-  useEffect(() => {
-    const time = setTimeout(() => {
-      setTime(false);
-      router.push(`/dashboard/play`);
-    }, __TIME_TO_WAIT__.MIN_TIME * 1000);
+  // useEffect(() => {
+  //   const time = setTimeout(() => {
+  //     setTime(false);
+  //     router.push(`/dashboard/play`);
+  //   }, __TIME_TO_WAIT__.MIN_TIME * 1000);
 
-    return () => clearTimeout(time);
-  }, [timeout]);
+  //   return () => clearTimeout(time);
+  // }, [timeout]);
 
   return (
     <>
       {children}
-      {timeout && (
+      {(match.party && match.state === 'IDLE') && (
+        <FloatingRoomWidget />
+      )}
+      {/* {timeout && (
         <MatchNotify
           title="Room disbanded"
           time={__TIME_TO_WAIT__.MIN_TIME}
         />
-      )}
+      )} */}
     </>
   );
 }
