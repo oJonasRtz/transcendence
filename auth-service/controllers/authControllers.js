@@ -35,7 +35,7 @@ const authControllers = {
       const payload = { username, user_id, email, public_id };
 
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+        expiresIn: process.env.JWT_EXPIRES_IN || "24h",
       });
 
       return reply.code(200).send({ success, error, token });
@@ -72,7 +72,7 @@ const authControllers = {
       if (!public_id) throw new Error("NO_PUBLIC_ID");
       const payload = { username, email, user_id, public_id };
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRESIN || "24h",
+        expiresIn: process.env.JWT_EXPIRES_IN || "24h",
       });
       return reply.code(200).send({ token });
     } catch (err) {
