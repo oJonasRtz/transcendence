@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef, FormEvent, use } from "react";
+import { useEffect, useState, useRef, FormEvent } from "react";
 import { io, Socket } from "socket.io-client";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import clsx from "clsx";
 import {
   CardHeader,
@@ -32,12 +33,10 @@ interface Notification {
   isLimit?: boolean;
 }
 
-interface PageProps {
-  params: Promise<{ userId: string }>;
-}
-
-export default function DirectMessagePage({ params }: PageProps) {
-  const { userId: targetId } = use(params);
+export default function DirectMessagePage() {
+  const params = useParams<{ userId?: string | string[] }>();
+  const rawTargetId = params?.userId;
+  const targetId = Array.isArray(rawTargetId) ? rawTargetId[0] : rawTargetId;
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -124,11 +123,25 @@ export default function DirectMessagePage({ params }: PageProps) {
     e.preventDefault();
     const msg = inputValue.trim();
     if (!msg || !socketRef.current) return;
+    if (!targetId) {
+      setNotifications((prev) => [
+        { content: "Missing target user for direct message.", isSystem: true },
+        ...prev,
+      ]);
+      return;
+    }
     socketRef.current.emit("sendPrivateMessage", msg, targetId);
     setInputValue("");
   };
 
   const handleSendInvite = () => {
+    if (!targetId) {
+      setNotifications((prev) => [
+        { content: "Missing target user for invite.", isSystem: true },
+        ...prev,
+      ]);
+      return;
+    }
     socketRef.current?.emit("sendPrivateInvite", targetId);
   };
 
