@@ -45,21 +45,41 @@ export default function DirectMessagePage() {
   const [mobilePanel, setMobilePanel] = useState<"chat" | "users">("chat");
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // Temporary: use API gateway host so sockets work in dev on port 3042.
-  const socketBaseUrl =
-    process.env.NEXT_PUBLIC_API_GATEWAY_URL || window.location.origin;
+  const socketBaseUrl = (() => {
+    const origin = window.location.origin;
+    const env =
+      process.env.NEXT_PUBLIC_SOCKET_URL ||
+      process.env.NEXT_PUBLIC_API_GATEWAY_URL;
+    if (!env) return origin;
+    try {
+      const envUrl = new URL(env);
+      const originUrl = new URL(origin);
+      // If same hostname, prefer same-origin (nginx proxy) to avoid CORS issues.
+      if (envUrl.hostname === originUrl.hostname) return origin;
+      return env;
+    } catch {
+      return origin;
+    }
+  })();
 
   useEffect(() => {
     if (!targetId) return;
 
     const socket = io(socketBaseUrl, {
-      transports: ["websocket"],
+      transports: ["websocket", "polling"],
       withCredentials: true,
     });
     socketRef.current = socket;
 
     socket.on("connect", () => {
       socket.emit("joinPrivate", { target_id: targetId });
+    });
+
+    socket.on("connect_error", (err) => {
+      setNotifications((prev) => [
+        { content: `Socket error: ${err.message}`, isSystem: true },
+        ...prev,
+      ]);
     });
 
     socket.on("updatePrivateUsers", (users: User[]) => {
@@ -93,6 +113,7 @@ export default function DirectMessagePage() {
       socket.off("updateNotifications");
       socket.off("disconnect");
       socket.off("kicked");
+      socket.off("connect_error");
       socket.disconnect();
     };
   }, [targetId]);
