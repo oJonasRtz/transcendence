@@ -48,12 +48,15 @@ export default async function FriendsList({ friends }: FriendsListProps) {
                 <p className="text-xs font-mono text-green-400 uppercase">Online</p>
               </div>
 
-              <button
-                className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300"
-                aria-label={`Message ${friend.username}`}
-              >
-                <ChatBubbleLeftIcon className="h-5 w-5" />
-              </button>
+              {friend.publicId ? (
+                <Link
+                  href={`/direct/${friend.publicId}`}
+                  className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300"
+                  aria-label={`Message ${friend.username}`}
+                >
+                  <ChatBubbleLeftIcon className="h-5 w-5" />
+                </Link>
+              ) : null}
             </div>
           ))
         )}

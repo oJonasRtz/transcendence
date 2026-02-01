@@ -60,6 +60,7 @@ export interface DashboardFriend {
   username: string;
   avatar: string;
   isOnline: boolean;
+  publicId: UserId;
 }
 
 export interface DashboardMessage {
@@ -225,6 +226,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
       username: f.username ?? 'Unknown',
       avatar: f.avatar ?? '/images/default-avatar.png',
       isOnline: Boolean(f.isOnline),
+      publicId: f.public_id ?? '',
     })
   );
 
