@@ -143,6 +143,13 @@ export default async function registerServer(io) {
 				socket.privateUserLock = false;
 			}
 
+      let official = new Map();
+      official.set(socket.id, {
+        name: socket.username,
+        public_id: socket.public_id,
+        avatar: `avatar_${socket.user_id}`,
+      });
+
       for (const [socketId, user] of privateUsers.entries()) {
         if (user.public_id === target_id) {
           official.set(socketId, {
@@ -164,10 +171,9 @@ export default async function registerServer(io) {
         Array.from(official.values())
       );
 
-      let msg = null;
       try {
         await sendPrivateMessageServer(
-          msg,
+          null,
           socket.user_id,
           socket.username,
           target_id
