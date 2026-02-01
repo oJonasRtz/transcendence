@@ -86,7 +86,6 @@ Browser (HTTPS:443)
 
 ### Databases
 
-- **PostgreSQL**: Used by frontend via Prisma ORM
 - **SQLite**: Used by api-gateway, auth-service, users-service, chat-service
 
 ## Tech Stack
@@ -96,7 +95,6 @@ Browser (HTTPS:443)
 - React 19
 - TypeScript 5.7
 - Tailwind CSS 3.4
-- Prisma 7.2 ORM
 - Socket.io-client
 
 ### Backend
@@ -329,10 +327,6 @@ cd frontend
 pnpm install
 pnpm dev          # Dev server with Turbopack
 
-# Database
-npx prisma generate     # Generate Prisma client
-npx prisma migrate dev  # Run migrations
-npx prisma studio       # Database GUI
 ```
 
 ### API Gateway Development
@@ -360,7 +354,6 @@ ft_trans/
 │   │   ├── chat/        # Chat page
 │   │   └── ui/          # React components
 │   ├── lib/             # Utilities and actions
-│   └── prisma/          # Database schema
 ├── auth-service/        # Authentication service
 ├── users-service/       # User management service
 ├── chat-service/        # Real-time chat service
