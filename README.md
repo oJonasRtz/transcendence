@@ -313,6 +313,11 @@ The project includes a complete monitoring stack:
 | **cAdvisor** | 8080 | Docker container metrics |
 | **Blackbox Exporter** | 9115 | Endpoint health checks |
 
+Create `monitoring/.grafana-password.txt` (see `monitoring/.grafana-password.txt.example`) with:
+```bash
+GRAFANA_ADMIN_PASSWORD=your-password-here
+```
+
 Access Grafana at `https://localhost/grafana/` after starting the services.
 
 ## Development

@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { Party } from "./Party.class.js";
 import fs from "fs";
 import { data } from "../app.js";
+import { registerFastifyMetrics } from "../metrics/prometheus.js";
 
 export class Server {
 	#app = fastify({
@@ -38,6 +39,8 @@ export class Server {
 	}
 
 	constructor() {
+		registerFastifyMetrics(this.#app, { serviceName: "match-service" });
+
 		this.#app.register(formbody);
 		this.#app.register(cookie, {
 			secret: process.env.COOKIE_SECRET || 'purpleVoidSatoroGojopurpleVoidSatoroGojo',

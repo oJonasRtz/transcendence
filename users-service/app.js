@@ -7,6 +7,7 @@ import formbody from '@fastify/formbody';
 import cookie from '@fastify/cookie';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import { registerFastifyMetrics } from "./metrics/prometheus.js";
 
 dotenv.config();
 
@@ -18,6 +19,8 @@ const app = fastify({
 		cert: fs.readFileSync('./ssl/server.cert')
 	}
 });
+
+registerFastifyMetrics(app, { serviceName: "users-service" });
 
 app.register(cookie, {
         secret: process.env.COOKIE_SECRET || "purpleVoid",

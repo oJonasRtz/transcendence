@@ -37,7 +37,6 @@ scrape_configs:
     static_configs:
       - targets:
         - http://nginx:80
-        - http://api-gateway:3000
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -54,6 +53,7 @@ scrape_configs:
     static_configs:
       - targets:
         - https://nginx:443
+        - https://api-gateway:3000
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -65,3 +65,52 @@ scrape_configs:
   - job_name: 'blackbox-exporter'
     static_configs:
       - targets: ['blackbox-exporter:9115']
+
+  # Application / service metrics (Prometheus format on /metrics)
+  - job_name: 'api-gateway'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['api-gateway:3000']
+
+  - job_name: 'auth-service'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['auth-service:3001']
+
+  - job_name: 'users-service'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['users-service:3003']
+
+  - job_name: 'chat-service'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['chat-service:3005']
+
+  - job_name: 'match-service'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['match-service:3010']
+
+  - job_name: 'game-server'
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ['game-server:8443']

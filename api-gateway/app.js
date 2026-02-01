@@ -17,6 +17,7 @@ import { errorHandler, notFoundHandler } from './handlers/handlers.js';
 import multipart from '@fastify/multipart';
 import http from 'http';
 import https from 'https';
+import { registerFastifyMetrics } from "./metrics/prometheus.js";
 // import { MatchClient } from './utils/MatchClient.class.js';
 
 dotenv.config();
@@ -52,6 +53,8 @@ const app = fastify({
 		return server;
 	}
 });
+
+registerFastifyMetrics(app, { serviceName: "api-gateway" });
 
 // To allow uploads with the limit of 2MB filesize
 

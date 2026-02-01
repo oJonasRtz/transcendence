@@ -57,7 +57,7 @@ groups:
 
       # High container memory
       - alert: ContainerHighMemory
-        expr: (container_memory_usage_bytes{name=~".+"} / container_spec_memory_limit_bytes{name=~".+"}) * 100 > 90
+        expr: ((container_memory_usage_bytes{name=~".+"} / container_spec_memory_limit_bytes{name=~".+"}) * 100 > 90) and on(name) (container_spec_memory_limit_bytes{name=~".+"} > 0)
         for: 5m
         labels:
           severity: warning
@@ -75,8 +75,8 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "Critical container {{ $labels.name }} is down"
-          description: "Container {{ $labels.name }} has been down for more than 1 minute."
+          summary: "Critical container is down"
+          description: "One of nginx/api-gateway/auth-service/sqlite-db is missing from cAdvisor metrics for more than 1 minute."
 
       # Container CPU throttling
       - alert: ContainerCPUThrottling
@@ -100,7 +100,7 @@ groups:
 
       # Container filesystem usage
       - alert: ContainerFilesystemFull
-        expr: (container_fs_usage_bytes{name=~".+"} / container_fs_limit_bytes{name=~".+"}) * 100 > 85
+        expr: ((container_fs_usage_bytes{name=~".+"} / container_fs_limit_bytes{name=~".+"}) * 100 > 85) and on(name) (container_fs_limit_bytes{name=~".+"} > 0)
         for: 5m
         labels:
           severity: warning
@@ -123,7 +123,7 @@ groups:
 
       # Slow response time
       - alert: EndpointSlowResponse
-        expr: probe_http_duration_seconds > 3
+        expr: probe_duration_seconds > 3
         for: 5m
         labels:
           severity: warning

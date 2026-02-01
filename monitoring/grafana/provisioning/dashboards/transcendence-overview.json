@@ -909,7 +909,7 @@
             "type": "prometheus",
             "uid": "prometheus-transcendence"
           },
-          "expr": "probe_http_duration_seconds",
+          "expr": "probe_duration_seconds",
           "legendFormat": "{{instance}}",
           "refId": "A"
         }

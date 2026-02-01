@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { ddosDetect, removeConnection } from './controllers/ddosDetector.js';
 import fs from 'fs';
 import https from 'https';
+import { createGameServerMetrics } from "./metrics/prometheus.js";
 
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -17,6 +18,17 @@ const tls = {
 }
 const server = https.createServer(tls);
 
+const metrics = createGameServerMetrics({ serviceName: "game-server" });
+server.on("request", (req, res) => {
+	if (req.method === "GET" && req.url && req.url.startsWith("/metrics")) {
+		res.writeHead(200, { "content-type": metrics.contentType });
+		res.end(metrics.render());
+		return;
+	}
+	res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+	res.end("not found\n");
+});
+
 const wss = new WebSocketServer({ server});
 
 server.listen(PORT, HOST, () => {
@@ -24,6 +36,7 @@ server.listen(PORT, HOST, () => {
 });
 
 wss.on("connection", (ws) => {
+	metrics.wsConnections.inc(metrics.defaultLabels, 1);
 	ws.player = null;
 	const ip = ws._socket.remoteAddress;
 	if (ddosDetect(ip)) {
@@ -31,6 +44,7 @@ wss.on("connection", (ws) => {
 		return;
 	}
 	ws.on("message", (message) => {
+		metrics.wsMessagesReceivedTotal.inc(metrics.defaultLabels, 1);
 		const data = JSON.parse(message);
 
 		handleTypes(ws, data);
@@ -41,6 +55,7 @@ wss.on("connection", (ws) => {
 	});
 
 	ws.on("close", () => {
+		metrics.wsConnections.dec(metrics.defaultLabels, 1);
 		const ip = ws._socket.remoteAddress;
 		removeConnection(ip);
 
