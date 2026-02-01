@@ -1661,6 +1661,29 @@ const privateControllers = {
       return reply.status(500).send({ error: "Error fetching friends" });
     }
   },
+
+  apiGetMessages: async function apiGetMessages(req, reply) {
+    try {
+      const userId = req.user.user_id;
+      const limit = Number(req.query.limit);
+      const payload = {
+        user_id: userId,
+        ...(Number.isFinite(limit) ? { limit } : {}),
+      };
+      const res = await axios.post(
+        "https://chat-service:3005/getPrivateInbox",
+        payload
+      );
+      const messages = Array.isArray(res?.data) ? res.data : [];
+      return reply.send({
+        messages,
+        unreadCount: 0,
+      });
+    } catch (err) {
+      console.error("API-GATEWAY apiGetMessages Error:", err.message);
+      return reply.status(500).send({ error: "Error fetching messages" });
+    }
+  },
 };
 
 export default privateControllers;

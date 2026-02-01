@@ -46,6 +46,7 @@ const routes = [
 	{ method: 'POST', url: '/deleteAFriend', handler: databaseControllers.deleteAFriend },
 	{ method: 'GET', url: '/getAllBlacklist', handler: databaseControllers.getAllBlacklist },
 	{ method: 'POST', url: '/getAllPrivateMessages', handler: databaseControllers.getAllPrivateMessages },
+	{ method: 'POST', url: '/getPrivateInbox', handler: databaseControllers.getPrivateInbox },
 	{ method: 'POST', url: '/storePrivateMessage', handler: databaseControllers.storePrivateMessage },
 	{ method: 'POST', url: '/set2FAOnOff', handler: databaseControllers.set2FAOnOff },
 	{ method: 'POST', url: '/setTargetId', handler: databaseControllers.setTargetId },

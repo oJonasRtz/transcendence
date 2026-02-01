@@ -822,6 +822,56 @@ const databaseModels = {
     return privateMessages ?? [];
   },
 
+  getPrivateInbox: async function getPrivateInbox(fastify, data) {
+    const user_id = data.user_id;
+    const limitRaw = Number(data.limit);
+    const limit =
+      Number.isFinite(limitRaw) && limitRaw > 0
+        ? Math.min(Math.floor(limitRaw), 50)
+        : 20;
+
+    if (!user_id) return [];
+
+    const inbox = await fastify.db.all(
+      `
+        WITH conversations AS (
+          SELECT
+            other_user_id,
+            MAX(id) AS last_message_id
+          FROM (
+            SELECT
+              CASE
+                WHEN sender_id = ? THEN receiver_id
+                ELSE sender_id
+              END AS other_user_id,
+              id
+            FROM privateMessages
+            WHERE sender_id = ? OR receiver_id = ?
+          )
+          GROUP BY other_user_id
+        )
+        SELECT
+          pm.id AS id,
+          other.public_id AS public_id,
+          auth.username AS username,
+          other.avatar AS avatar,
+          other.isOnline AS isOnline,
+          pm.content AS preview,
+          pm.isLink AS isLink,
+          pm.created_at AS createdAt
+        FROM conversations
+        JOIN privateMessages pm ON pm.id = conversations.last_message_id
+        JOIN users other ON other.user_id = conversations.other_user_id
+        JOIN auth ON auth.user_id = conversations.other_user_id
+        ORDER BY pm.id DESC
+        LIMIT ?
+      `,
+      [user_id, user_id, user_id, limit]
+    );
+
+    return inbox ?? [];
+  },
+
   storePrivateMessage: async function storePrivateMessage(fastify, data) {
     const sender_id = data.user_id;
     const getTwo = await fastify.db.get(

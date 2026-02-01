@@ -699,6 +699,18 @@ const databaseControllers = {
 		}
 	},
 
+	getPrivateInbox: async function getPrivateInbox(fastify, req, reply) {
+		try {
+			if (!req.body || !req.body.user_id)
+				return reply.code(400).send("You need to inform user_id here");
+			const inbox = await databaseModels.getPrivateInbox(fastify, req.body);
+			return reply.code(200).send(inbox ?? []);
+		} catch (err) {
+			console.log("SQLITE-DB getPrivateInbox ERROR:", err?.response?.data || err.message);
+			return reply.code(500).send("An error happened");
+		}
+	},
+
 	storePrivateMessage: async function storePrivateMessage(fastify, req, reply) {
 		try {
 			if (!req.body || !req.body.user_id || !req.body.public_id)

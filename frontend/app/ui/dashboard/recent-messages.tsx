@@ -39,7 +39,7 @@ export default async function RecentMessages({
           recentConversations.map((conv) => (
             <Link
               key={conv.id}
-              href="/chat"
+              href={`/direct/${conv.publicId}`}
               className="block p-4 hover:bg-white/5 transition-all duration-300 group"
             >
               <div className="flex items-start space-x-3">
@@ -74,7 +74,7 @@ export default async function RecentMessages({
 
       <div className="border-t border-white/10 p-4 bg-white/5">
         <Link
-          href="/chat"
+          href="/dashboard/messages"
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
           View all messages

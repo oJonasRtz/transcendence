@@ -8,6 +8,8 @@ export default async function chatRoutes(fastify, options) {
 
 	fastify.post("/getAllPrivateMessages", chatControllers.getAllPrivateMessages);
 
+	fastify.post("/getPrivateInbox", chatControllers.getPrivateInbox);
+
 	fastify.post("/storePrivateMessage", chatControllers.storePrivateMessage);
 
 	fastify.post("/setTargetId", chatControllers.setTargetId);

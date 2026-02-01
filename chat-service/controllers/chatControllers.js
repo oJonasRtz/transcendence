@@ -49,6 +49,24 @@ const chatControllers = {
     }
   },
 
+  getPrivateInbox: async function getPrivateInbox(req, reply) {
+    try {
+      if (!req.body || !req.body.user_id)
+        return reply.code(400).send("You need to inform user_id here");
+      const response = await axios.post(
+        "https://sqlite-db:3002/getPrivateInbox",
+        req.body
+      );
+      return reply.code(200).send(response?.data ?? []);
+    } catch (err) {
+      console.error(
+        "CHAT-SERVICE getPrivateInbox ERROR:",
+        err?.response?.data || err.message
+      );
+      return reply.code(500).send("An error happened");
+    }
+  },
+
   storePrivateMessage: async function storePrivateMessage(req, reply) {
     try {
       if (

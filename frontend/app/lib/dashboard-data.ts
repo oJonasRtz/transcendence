@@ -64,6 +64,7 @@ export interface DashboardFriend {
 
 export interface DashboardMessage {
   id: EntityId;
+  publicId: UserId;
   username: string;
   avatar: string;
   preview: string;
@@ -104,7 +105,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
   const jwtValue = jwt?.value ?? '';
 
   // Fetch all data in parallel
-  const [profileData, historyData, allUsers, friendsData] =
+  const [profileData, historyData, allUsers, friendsData, messagesData] =
     await Promise.all([
       fetchGateway(
         `/api/profile?public_id=${encodeURIComponent(user.public_id)}`,
@@ -113,6 +114,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
       fetchGateway('/api/history?limit=10', jwtValue).catch(() => null),
       fetchGateway('/api/users', jwtValue).catch(() => null),
       fetchGateway('/api/friends', jwtValue).catch(() => null),
+      fetchGateway('/api/messages?limit=20', jwtValue).catch(() => null),
     ]);
 
   // --- Profile ---
@@ -226,9 +228,29 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     })
   );
 
-  // --- Messages (no dedicated endpoint yet) ---
-  const messages: DashboardMessage[] = [];
-  const unreadCount = 0;
+  // --- Messages ---
+  const inboxList: any[] = Array.isArray(messagesData?.messages)
+    ? messagesData.messages
+    : [];
+  const messages: DashboardMessage[] = inboxList.map((row: any, index: number) => {
+    const rawAvatar = row?.avatar;
+    const avatar =
+      typeof rawAvatar === 'string' && rawAvatar.length > 0 && rawAvatar !== '/public/images/default.jpg'
+        ? rawAvatar
+        : '/images/default_avatar.png';
+
+    return {
+      id: row?.id ?? index + 1,
+      publicId: row?.public_id ?? '',
+      username: row?.username ?? 'Unknown',
+      avatar,
+      preview: row?.isLink ? 'Pong Invitation' : (row?.preview ?? ''),
+      createdAt: row?.createdAt ?? row?.created_at ?? new Date().toISOString(),
+      isOnline: Boolean(row?.isOnline),
+    };
+  }).filter((msg) => Boolean(msg.publicId));
+
+  const unreadCount = Number(messagesData?.unreadCount) || 0;
 
   return {
     profile,

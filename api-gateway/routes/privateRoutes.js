@@ -53,6 +53,7 @@ const routes = [
 	{ method: 'GET', url: '/api/history', handler: privateControllers.apiGetHistory },
 	{ method: 'GET', url: '/api/users', handler: privateControllers.apiGetAllUsers },
 	{ method: 'GET', url: '/api/friends', handler: privateControllers.apiGetFriends },
+	{ method: 'GET', url: '/api/messages', handler: privateControllers.apiGetMessages },
 
 	{ method: 'POST', url: '/joinParty/:token', handler: privateControllers.joinParty },
 	{ method: 'POST', url: '/leaveParty', handler: privateControllers.leaveParty },

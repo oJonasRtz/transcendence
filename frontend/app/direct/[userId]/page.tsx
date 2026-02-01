@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, FormEvent } from "react";
+import { useEffect, useState, useRef, FormEvent, use } from "react";
 import { io, Socket } from "socket.io-client";
 import Link from "next/link";
 import clsx from "clsx";
@@ -33,11 +33,11 @@ interface Notification {
 }
 
 interface PageProps {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }
 
 export default function DirectMessagePage({ params }: PageProps) {
-  const { userId: targetId } = params;
+  const { userId: targetId } = use(params);
   const [users, setUsers] = useState<User[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
