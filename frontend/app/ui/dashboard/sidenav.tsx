@@ -27,7 +27,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import NavLinks from "@/app/ui/dashboard/nav-links";
 import AcmeLogo from "@/app/ui/pong-logo";
@@ -47,15 +47,13 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [setIsCollapsed]);
 
   return (
     <div
       ref={navRef}
       onClick={() => setIsCollapsed(false)}
-      className={`flex h-full flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-r border-white/10 transition-all duration-300 ease-in-out cursor-pointer ${
-        isCollapsed ? "w-20" : "w-72"
-      }`}
+      className="flex w-full flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-b border-white/10 md:border-b-0 md:border-r transition-all duration-300 ease-in-out cursor-pointer"
     >
       {/* Header / Logo */}
       <Link

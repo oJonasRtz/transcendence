@@ -9,7 +9,6 @@ import {
   CardShell,
   EmptyState,
 } from "@/app/ui/chat/chat-card-primitives";
-import MatchProvider from "../ui/dashboard/MatchProvider";
 
 interface User {
   name: string;
