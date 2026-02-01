@@ -183,6 +183,8 @@ Expected: log lines like `received N alerts` and the alert names/status.
 - Visit `http://localhost:8025/` (Mailpit)
 - Expected: a new email appears for each alert (including resolved notifications).
 
+Security note: Mailpit is a development-only inbox UI and is bound to `127.0.0.1:8025` in `docker-compose.yml` (not exposed to your LAN). If you ever need remote access, put it behind nginx HTTPS (similar to `/grafana/`) and remove the direct port publishing.
+
 Restart the service:
 
 ```bash
