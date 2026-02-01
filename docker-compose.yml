@@ -258,6 +258,13 @@ services:
       - prometheus
     restart: unless-stopped
 
+  alert-receiver:
+    build: ./monitoring/alert-receiver
+    container_name: alert-receiver
+    networks:
+      - "transcendence"
+    restart: unless-stopped
+
 volumes:
   sqlite-db:
   users-service:

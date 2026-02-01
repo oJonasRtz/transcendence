@@ -2,11 +2,15 @@ global:
   resolve_timeout: 5m
 
 route:
-  receiver: devnull
+  receiver: webhook
   group_by: ['alertname', 'job']
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 2h
 
 receivers:
+  - name: webhook
+    webhook_configs:
+      - url: http://alert-receiver:8080/alerts
+        send_resolved: true
   - name: devnull
