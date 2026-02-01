@@ -1576,9 +1576,14 @@ const privateControllers = {
         return reply.status(400).send({ success: false, message: "public_id is required" });
       }
       req.body.user_id = req.user.user_id;
-      await axios.post("https://users-service:3003/friendInvite", req.body);
+      const response = await axios.post("https://users-service:3003/friendInvite", req.body);
+      const status = response?.status ?? 200;
+      const message =
+        status === 201
+          ? "Friend request sent"
+          : "Friend request already pending (or already friends)";
 
-      return reply.send({ success: true, message: "Friend invitation sent" });
+      return reply.send({ success: true, message });
     } catch (err) {
       if (err?.response?.status === 403 || err?.response?.data?.message === "SAME_USER") {
         return reply.status(403).send({ success: false, message: "You cannot add yourself as a friend" });
@@ -1659,6 +1664,41 @@ const privateControllers = {
     } catch (err) {
       console.error("API-GATEWAY apiGetFriends Error:", err.message);
       return reply.status(500).send({ error: "Error fetching friends" });
+    }
+  },
+
+  apiAcceptFriend: async function apiAcceptFriend(req, reply) {
+    try {
+      if (!req.body || !req.body.public_id) {
+        return reply.status(400).send({ success: false, message: "public_id is required" });
+      }
+      req.body.user_id = req.user.user_id;
+      req.body.accept = true;
+      await axios.post("https://users-service:3003/setAcceptFriend", req.body);
+      return reply.send({ success: true, message: "Friend request accepted" });
+    } catch (err) {
+      if (err?.response?.status === 403 || err?.response?.data === "SAME_USER") {
+        return reply.status(403).send({ success: false, message: "You cannot add yourself as a friend" });
+      }
+      console.error("API-GATEWAY apiAcceptFriend Error:", err.message);
+      return reply.status(500).send({ success: false, message: "Error accepting friend request" });
+    }
+  },
+
+  apiRemoveFriend: async function apiRemoveFriend(req, reply) {
+    try {
+      if (!req.body || !req.body.public_id) {
+        return reply.status(400).send({ success: false, message: "public_id is required" });
+      }
+      req.body.user_id = req.user.user_id;
+      await axios.post("https://users-service:3003/deleteAFriend", req.body);
+      return reply.send({ success: true, message: "Friend removed" });
+    } catch (err) {
+      if (err?.response?.status === 403 || err?.response?.data === "SAME_USER") {
+        return reply.status(403).send({ success: false, message: "Invalid operation" });
+      }
+      console.error("API-GATEWAY apiRemoveFriend Error:", err.message);
+      return reply.status(500).send({ success: false, message: "Error removing friend" });
     }
   },
 

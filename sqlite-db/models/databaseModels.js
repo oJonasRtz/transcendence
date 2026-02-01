@@ -704,16 +704,69 @@ const databaseModels = {
     if (!friend_id || !friend_id.user_id)
       throw new Error("USER_DOES_NOT_EXIST");
     if (friend_id.user_id === data.user_id) throw new Error("SAME_USER");
-    const object = await fastify.db.get(
-      "SELECT * FROM friends WHERE (owner_id = ? AND friend_id = ?) OR (owner_id = ? AND friend_id = ?)",
-      [friend_id.user_id, data.user_id, data.user_id, friend_id.user_id]
+
+    const outgoing = await fastify.db.get(
+      "SELECT accepted FROM friends WHERE owner_id = ? AND friend_id = ?",
+      [data.user_id, friend_id.user_id]
     );
-    if (object) return "Already exists";
+    const incoming = await fastify.db.get(
+      "SELECT accepted FROM friends WHERE owner_id = ? AND friend_id = ?",
+      [friend_id.user_id, data.user_id]
+    );
+
+    const alreadyFriends = Boolean(outgoing?.accepted) && Boolean(incoming?.accepted);
+    if (alreadyFriends) return "ALREADY_FRIENDS";
+
+    // If there is already a pending request from the other user, accept it and make the relation mutual.
+    if (incoming && !incoming.accepted) {
+      const wasFriends = alreadyFriends;
+
+      await fastify.db.run(
+        "UPDATE friends SET accepted = TRUE WHERE owner_id = ? AND friend_id = ?",
+        [friend_id.user_id, data.user_id]
+      );
+
+      if (outgoing) {
+        await fastify.db.run(
+          "UPDATE friends SET accepted = TRUE WHERE owner_id = ? AND friend_id = ?",
+          [data.user_id, friend_id.user_id]
+        );
+      } else {
+        await fastify.db.run(
+          "INSERT INTO friends (owner_id, friend_id, accepted) VALUES (?, ?, TRUE)",
+          [data.user_id, friend_id.user_id]
+        );
+      }
+
+      if (!wasFriends) {
+        const match = await fastify.db.get(
+          "SELECT 1 FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = TRUE",
+          [friend_id.user_id, data.user_id]
+        );
+        const match2 = await fastify.db.get(
+          "SELECT 1 FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = TRUE",
+          [data.user_id, friend_id.user_id]
+        );
+        if (match && match2) {
+          await fastify.db.run(
+            "UPDATE users SET friends = friends + 1 WHERE (user_id = ?) OR (user_id = ?)",
+            [friend_id.user_id, data.user_id]
+          );
+        }
+      }
+
+      return "ACCEPTED";
+    }
+
+    if (outgoing && !outgoing.accepted) return "ALREADY_PENDING";
+
+    // Create a single pending request (requester -> receiver). Receiver accepts later.
     await fastify.db.run(
-      "INSERT INTO friends (owner_id, friend_id) VALUES (?, ?), (?, ?)",
-      [data.user_id, friend_id.user_id, friend_id.user_id, data.user_id]
+      "INSERT INTO friends (owner_id, friend_id, accepted) VALUES (?, ?, FALSE)",
+      [data.user_id, friend_id.user_id]
     );
-    return "invited";
+
+    return "INVITED";
   },
 
   getAllFriends: async function getAllFriends(fastify, data) {
@@ -740,24 +793,57 @@ const databaseModels = {
     if (!friend_id || !friend_id.user_id)
       throw new Error("USER_DOES_NOT_EXIST");
     if (friend_id.user_id === data.user_id) throw new Error("SAME_USER");
-    await fastify.db.run(
-      "UPDATE friends SET accepted = ? WHERE friend_id = ? AND owner_id = ?",
-      [data.accept, data.user_id, friend_id.user_id]
-    );
-    const match = await fastify.db.get(
-      "SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true",
-      [friend_id.user_id, data.user_id]
-    );
-    const match2 = await fastify.db.get(
-      "SELECT * FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = true",
+
+    const alreadyFriends = await fastify.db.get(
+      "SELECT 1 FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = TRUE",
       [data.user_id, friend_id.user_id]
     );
-    if (match && match2) {
+    const alreadyFriends2 = await fastify.db.get(
+      "SELECT 1 FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = TRUE",
+      [friend_id.user_id, data.user_id]
+    );
+    const wasFriends = Boolean(alreadyFriends) && Boolean(alreadyFriends2);
+
+    // Accept the incoming request (requester -> receiver).
+    await fastify.db.run(
+      "UPDATE friends SET accepted = TRUE WHERE owner_id = ? AND friend_id = ?",
+      [friend_id.user_id, data.user_id]
+    );
+
+    // Ensure reciprocal row exists (receiver -> requester) and is accepted.
+    const reciprocal = await fastify.db.get(
+      "SELECT accepted FROM friends WHERE owner_id = ? AND friend_id = ?",
+      [data.user_id, friend_id.user_id]
+    );
+    if (reciprocal) {
       await fastify.db.run(
-        "UPDATE users SET friends = friends + 1 WHERE (user_id = ?) OR (user_id = ?)",
-        [friend_id.user_id, data.user_id]
+        "UPDATE friends SET accepted = TRUE WHERE owner_id = ? AND friend_id = ?",
+        [data.user_id, friend_id.user_id]
+      );
+    } else {
+      await fastify.db.run(
+        "INSERT INTO friends (owner_id, friend_id, accepted) VALUES (?, ?, TRUE)",
+        [data.user_id, friend_id.user_id]
       );
     }
+
+    if (!wasFriends) {
+      const match = await fastify.db.get(
+        "SELECT 1 FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = TRUE",
+        [friend_id.user_id, data.user_id]
+      );
+      const match2 = await fastify.db.get(
+        "SELECT 1 FROM friends WHERE owner_id = ? AND friend_id = ? AND accepted = TRUE",
+        [data.user_id, friend_id.user_id]
+      );
+      if (match && match2) {
+        await fastify.db.run(
+          "UPDATE users SET friends = friends + 1 WHERE (user_id = ?) OR (user_id = ?)",
+          [friend_id.user_id, data.user_id]
+        );
+      }
+    }
+
     return true;
   },
 
