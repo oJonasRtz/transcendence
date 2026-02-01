@@ -265,6 +265,15 @@ services:
       - "transcendence"
     restart: unless-stopped
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "127.0.0.1:8025:8025"
+    networks:
+      - "transcendence"
+    restart: unless-stopped
+
 volumes:
   sqlite-db:
   users-service:

@@ -178,6 +178,11 @@ docker compose logs -f alert-receiver
 
 Expected: log lines like `received N alerts` and the alert names/status.
 
+6) Confirm email delivery (local inbox UI):
+
+- Visit `http://localhost:8025/` (Mailpit)
+- Expected: a new email appears for each alert (including resolved notifications).
+
 Restart the service:
 
 ```bash
