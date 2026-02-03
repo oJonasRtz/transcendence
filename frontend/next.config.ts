@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+
+  images: {
+    localPatterns: [
+      {
+        pathname: '/public/**',
+      },
+    ],
+  },
+
   async rewrites() {
     const apiGateway = 'https://api-gateway:3000';
 

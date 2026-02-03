@@ -60,13 +60,14 @@ export default async function Leaderboard({
                   className='flex items-center gap-4 flex-1'
                 >
                   <div className="relative">
-                    <Image
-                      src={entry.avatar}
-                      alt={entry.username}
-                      width={40}
-                      height={40}
-                      className="rounded-full border-2 border-white/10"
-                    />
+		  <img
+		     src={`/public/uploads/avatar_${entry.user_id}.png?v=${entry.avatarUpdatedAt ?? entry.user_id}`}
+  		     alt={entry.username}
+	             width="40"
+	             height="40"
+  		     className="rounded-full border-2 border-white/10"
+		  />
+
                     {entry.isOnline && (
                       <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
                     )}

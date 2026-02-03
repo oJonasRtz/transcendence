@@ -33,7 +33,7 @@ export default async function FriendsList({ friends }: FriendsListProps) {
               className="flex cursor-pointer items-center space-x-3 p-4 hover:bg-white/5 transition-all duration-300 group"
             >
               <div className="relative">
-                <Image
+                <img
                   src={friend.avatar}
                   alt={friend.username}
                   width={40}

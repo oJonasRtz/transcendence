@@ -44,7 +44,7 @@ export default async function RecentMessages({
             >
               <div className="flex items-start space-x-3">
                 <div className="relative flex-shrink-0">
-                  <Image
+                  <img
                     src={conv.avatar}
                     alt={conv.username}
                     width={48}
