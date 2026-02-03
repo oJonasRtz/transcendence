@@ -21,6 +21,8 @@ export default async function Leaderboard({
     return name.length > 6 ? name.slice(0, 6) + "…" : name;
   };
 
+  console.log('leaderboard: ' + JSON.stringify(leaderboard));
+
   return (
     <CardShell>
       <CardHeader

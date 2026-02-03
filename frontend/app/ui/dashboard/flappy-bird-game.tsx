@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { User } from '@/app/lib/auth';
 import FlappyBird from '@/app/games/FlappyBird';
+import FlappyLeaderboard from './flappyLeaderboard';
 
 interface FlappyBirdGameProps {
   user: User;
@@ -14,6 +15,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   const [restartSignal, setRestartSignal] = useState(0);
   const [highScore, setHighScore] = useState(123); // Can be updated via API
   const [score, setScore] = useState(0); // Current player score
+
 
   const handleRestart = () => {
     setRestartSignal(prev => prev + 1);
@@ -166,6 +168,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
               />
             </div>
           </div>
+
 
          {/* How to Play below the game, width matches game container */}
         <div className="mt-6 w-full rounded-lg border border-white/10 bg-white/5 p-6 text-slate-400 text-sm">

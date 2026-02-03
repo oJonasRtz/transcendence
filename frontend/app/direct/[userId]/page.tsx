@@ -15,6 +15,7 @@ interface User {
   name: string;
   avatar: string;
   public_id: string;
+  user_id: string;
 }
 
 interface Message {

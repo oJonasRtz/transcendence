@@ -74,6 +74,16 @@ export interface DashboardMessage {
   isOnline: boolean;
 }
 
+export interface FlappyUser {
+  user_id: string;
+  public_id: string;
+  username: string;
+  nickname?: string | null;
+  avatar: string;
+  isOnline: boolean;
+  high_score: number;
+} 
+
 export interface DashboardData {
   profile: DashboardProfile;
   stats: DashboardStats;
@@ -84,6 +94,7 @@ export interface DashboardData {
   messages: DashboardMessage[];
   unreadCount: number;
   userRank: number;
+  flappyLeaderboard: FlappyUser[];
 }
 
 async function fetchGateway(path: string, jwtValue: string) {
@@ -119,6 +130,8 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
       fetchGateway('/api/messages?limit=20', jwtValue).catch(() => null),
     ]);
 
+
+    console.log('all users: ' + JSON.stringify(allUsers));
   // --- Profile ---
   const profile: DashboardProfile = {
     userId: user.user_id,
@@ -215,6 +228,20 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
       isOnline: Boolean(u.isOnline),
     }));
 
+  const fSorted: any[] = [...usersArray].sort(
+    (a, b) => (b.flappy_bird_high_score ?? 0) - (a.flappy_bird_high_score ?? 0)
+  );
+  const flappyLeaderboard: FlappyUser[] = fSorted
+    .slice(0, 10)
+    .map((u: any) => ({
+      user_id: u.user_id,
+      public_id: u.public_id,
+      username: u.nickname ?? u.username ?? 'Unknown',
+      avatar: u.avatar ?? '/images/default-avatar.png',
+      isOnline: Boolean(u.isOnline),
+      high_score: u.flappy_bird_high_score ?? 0,
+    }));
+
   const userRank =
     sorted.findIndex(
       (u: any) => u.user_id === user.user_id || u.public_id === user.public_id
@@ -266,5 +293,6 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     messages,
     unreadCount,
     userRank,
+    flappyLeaderboard,
   };
 }
