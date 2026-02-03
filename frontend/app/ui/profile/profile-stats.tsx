@@ -131,7 +131,7 @@ export default function ProfileStats({ user, history, stats }: ProfileStatsProps
       {/* HISTORY TAB */}
       {tab === 'history' && (
         <div
-          className="overflow-y-auto max-h-96"
+          className="overflow-y-auto max-h-40"
         >
           <MatchHistoryList
             userId={user.user_id}
