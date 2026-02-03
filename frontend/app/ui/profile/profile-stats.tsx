@@ -130,10 +130,14 @@ export default function ProfileStats({ user, history, stats }: ProfileStatsProps
 
       {/* HISTORY TAB */}
       {tab === 'history' && (
-        <MatchHistoryList
-          userId={user.user_id}
-          history={history}
-        />
+        <div
+          className="overflow-y-auto max-h-96"
+        >
+          <MatchHistoryList
+            userId={user.user_id}
+            history={history}
+          />
+        </div>
       )}
     </div>
   );
