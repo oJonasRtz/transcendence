@@ -181,8 +181,6 @@ export class Match {
 				const data = JSON.parse(message.data);
 				const {type} = data;
 
-				console.log("mensagem recebida:", JSON.stringify(data));
-
 				if (!type || !(type in this.handlers))
 					throw new Error(`__TYPE_ERROR__`);
 

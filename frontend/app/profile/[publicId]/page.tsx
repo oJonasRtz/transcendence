@@ -131,16 +131,12 @@ export async function getPublicIdFromJwt(): Promise<string | null> {
     if (!jwt) return null;
 
 
-    console.log('my jwt: ' + jwt);
     const payload = jwt.split('.')[1];
     if (!payload) return null;
 
     const decoded = Buffer.from(payload, 'base64').toString('utf-8');
     const user = JSON.parse(decoded);
 
-    console.log('my decoded: ' + decoded);
-
-    console.log('user: ' + JSON.stringify(user));
 
     return user.public_id ?? null;
   } catch (error) {
@@ -195,10 +191,8 @@ export default async function ProfilePage({
     }
 
     profile = mapBackendToProfileData(backendUser);
-    console.log('backend user:', backendUser);
 
     historyData = await getMatchHistory(backendUser.user_id);
-    console.log('history data:', historyData);
   } catch (err) {
     console.error('[ProfilePage] Failed to load profile:', err);
 

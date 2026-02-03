@@ -65,7 +65,6 @@ export async function getMatchHistory(userId?: string): Promise<any> {
 
 export default async function DashboardStats({ stats }: DashboardStatsProps) {
   const historyData = await getMatchHistory();
-  console.log('DashboardStats - historyData:', historyData);
   const totalXP = stats.experience_points + stats.experience_to_next_level;
   const xpPercent = Math.min(
     Math.round((stats.experience_points / totalXP) * 100),
