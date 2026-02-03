@@ -123,6 +123,32 @@ function mapBackendToProfileData(user: BackendUser): ProfileData {
   };
 }
 
+export async function getPublicIdFromJwt(): Promise<string | null> {
+  try {
+    const cookiesStore = await cookies();
+    const jwt = cookiesStore.get('jwt')?.value;
+
+    if (!jwt) return null;
+
+
+    console.log('my jwt: ' + jwt);
+    const payload = jwt.split('.')[1];
+    if (!payload) return null;
+
+    const decoded = Buffer.from(payload, 'base64').toString('utf-8');
+    const user = JSON.parse(decoded);
+
+    console.log('my decoded: ' + decoded);
+
+    console.log('user: ' + JSON.stringify(user));
+
+    return user.public_id ?? null;
+  } catch (error) {
+    console.error('[getPublicIdFromJwt] Error decoding JWT:', error);
+    return null;
+  }
+}
+
 /* =======================
    PAGE
 ======================= */
@@ -133,6 +159,7 @@ export default async function ProfilePage({
   params: Promise<{ publicId: string }>;
 }) {
   const { publicId } = await params;
+  const isMine: boolean = publicId === (await getPublicIdFromJwt());
 
   if (!publicId) {
     return (
@@ -209,7 +236,9 @@ export default async function ProfilePage({
         />
         <div className="p-6">
           <ProfileHeader profile={profile} />
-          <ProfileActions publicId={profile.public_id} />
+          {!isMine && (
+            <ProfileActions publicId={profile.public_id} />
+          )}
           <ProfileStats user={backendUser} history={historyData?.history ?? []} stats={historyData?.stats ?? {}} />
         </div>
       </CardShell>
