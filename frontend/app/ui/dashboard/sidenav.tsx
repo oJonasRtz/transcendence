@@ -56,12 +56,15 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
       className="flex w-full h-screen flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-b border-white/10 md:border-b-0 md:border-r transition-all duration-300 ease-in-out cursor-pointer"
     >
       {/* Header / Logo */}
-      <Link
+      {/* <Link
         className={`mb-2 flex justify-start rounded-lg bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 p-4 hover:border-blue-500/30 transition-all duration-300 group ${
           isCollapsed ? "h-auto items-center" : "h-20 md:h-40 items-end"
         }`}
         href="/"
-      >
+      > */}
+      <div className={`mb-2 flex justify-start rounded-lg bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 p-4 hover:border-blue-500/30 transition-all duration-300 group ${
+          isCollapsed ? "h-auto items-center" : "h-20 md:h-40 items-end"
+        }`}>
         <div
           className={`text-white transition-all duration-300 group-hover:scale-105 ${
             isCollapsed ? "w-10" : "w-32 md:w-40"
@@ -69,7 +72,8 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
         >
           <AcmeLogo isCollapsed={isCollapsed} />
         </div>
-      </Link>
+        </div>
+      {/* </Link> */}
 
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <NavLinks isCollapsed={isCollapsed} />

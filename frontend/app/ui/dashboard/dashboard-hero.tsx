@@ -23,24 +23,30 @@ export default function DashboardHero({
   return (
     <CardShell className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10" />
-      <div className="relative p-6 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center gap-6">
+      <div className="relative p-4 lg:p-8 flex flex-col lg:flex-row items-start lg:items-center gap-6">
         <div className="flex items-center gap-5">
           <div className="relative">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 blur-lg opacity-50" />
-            <img
-              src={avatarSrc}
-              alt={`${displayName} avatar`}
-              width={96}
-              height={96}
-              className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full border-2 border-white/20 shadow-xl object-cover"
+           
+            <Link
+              href={`/profile/${profile.publicId}`}
+              // className="relative z-10"
+            >
+              <img
+                src={avatarSrc}
+                alt={`${displayName} avatar`}
+                width={96}
+                height={96}
+                className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full border-2 border-white/20 shadow-xl object-cover"
+              />
+              <span
+                className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-slate-900 ${
+                  profile.isOnline ? 'bg-green-400 animate-pulse' : 'bg-slate-500'
+                }`}
+                aria-label={profile.isOnline ? 'Online' : 'Offline'}
+                title={profile.isOnline ? 'Online' : 'Offline'}
             />
-            <span
-              className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-slate-900 ${
-                profile.isOnline ? 'bg-green-400 animate-pulse' : 'bg-slate-500'
-              }`}
-              aria-label={profile.isOnline ? 'Online' : 'Offline'}
-              title={profile.isOnline ? 'Online' : 'Offline'}
-            />
+            </Link>
           </div>
 
           <div>

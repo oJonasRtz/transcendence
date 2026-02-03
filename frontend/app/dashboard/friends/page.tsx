@@ -124,19 +124,22 @@ export default function FriendsPage() {
                       className="flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-white/5 p-3"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <Image
-                          src={u.avatar || '/images/default_avatar.png'}
-                          alt={u.username}
-                          width={40}
-                          height={40}
-                          className="h-10 w-10 rounded-full border border-white/10 object-cover"
-                        />
-                        <Link
-                          href={`/profile/${u.public_id}`}
-                          className="truncate text-sm font-semibold text-white hover:text-blue-300"
-                        >
-                          {u.username}
-                        </Link>
+                      <Link
+                        href={`/profile/${u.public_id}`}
+                        className="flex items-center gap-2 truncate hover:text-blue-300"
+                      >
+                        <div className="flex-shrink-0">
+                          <Image
+                            src={u.avatar || '/images/default_avatar.png'}
+                            alt={u.username}
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-full border border-white/10 object-cover"
+                          />
+                        </div>
+                        <span className="truncate font-semibold text-white text-sm">{u.username}</span>
+                      </Link>
+
                       </div>
                       <div className="flex gap-2">
                         <button
