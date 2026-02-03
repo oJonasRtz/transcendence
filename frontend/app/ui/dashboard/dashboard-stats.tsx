@@ -98,7 +98,7 @@ export default async function DashboardStats({ stats }: DashboardStatsProps) {
       value: `${historyData?.stats?.win_rate?.toString() ?? '0'}%`,
       subtitle: `Wins: ${historyData?.stats?.wins ?? 0} | Losses: ${historyData?.stats?.losses}`,
       icon: FireIcon,
-      color: 'orange',
+      color: historyData?.stats?.win_rate >= 50 ? 'green' : 'orange',
     },
   ];
 
