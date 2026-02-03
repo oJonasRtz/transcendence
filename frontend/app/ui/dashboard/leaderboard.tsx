@@ -33,6 +33,8 @@ export default async function Leaderboard({
           leaderboard.map((entry, index) => {
             const rankColors = ['text-yellow-400', 'text-slate-300', 'text-orange-500'];
 
+	const avatar = `/public/uploads/avatar_${entry.user_id}.png` || "/images/default.png";
+	console.log("O user" + entry.username + " O avatar " + entry.avatar + " o avatar certo: " + avatar);
             return (
               <div
                 key={entry.id}
@@ -48,7 +50,7 @@ export default async function Leaderboard({
 
                 <div className="relative">
                   <Image
-                    src={entry.avatar}
+		    src={avatar}
                     alt={entry.username}
                     width={40}
                     height={40}
