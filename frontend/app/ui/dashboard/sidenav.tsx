@@ -73,7 +73,6 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
 
         <div className="hidden h-auto w-full grow rounded-lg bg-gradient-to-br from-slate-900/50 to-black/50 border border-white/5 md:block backdrop-blur-sm" />
 
-        {/* Força a altura igual aos botões */}
         <div className="h-[48px]">
           <EmailVerificationStatus isCollapsed={isCollapsed} />
         </div>

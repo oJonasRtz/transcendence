@@ -26,13 +26,11 @@ interface MatchHistoryListProps {
 }
 
 export default function MatchHistoryList({ userId, history }: MatchHistoryListProps) {
-  // Trunca nomes longos
   const truncateName = (name: string) => {
     if (!name) return "Unknown";
     return name.length > 6 ? name.slice(0, 6) + "…" : name;
   };
 
-  // Formata score com 2 dígitos
   const formatScore = (score: string) => {
     if (!score) return "";
     const [a, b] = score.split("-").map(Number);
