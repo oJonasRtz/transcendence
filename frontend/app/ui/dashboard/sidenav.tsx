@@ -53,7 +53,7 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
     <div
       ref={navRef}
       onClick={() => setIsCollapsed(false)}
-      className="flex w-full flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-b border-white/10 md:border-b-0 md:border-r transition-all duration-300 ease-in-out cursor-pointer"
+      className="flex w-full h-screen flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-b border-white/10 md:border-b-0 md:border-r transition-all duration-300 ease-in-out cursor-pointer"
     >
       {/* Header / Logo */}
       <Link

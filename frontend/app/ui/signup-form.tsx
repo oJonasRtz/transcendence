@@ -11,6 +11,7 @@ import { ButtonGlimmer } from './button-glimmer';
 import { signup } from '@/app/actions/auth';
 import Captcha from './captcha';
 import { useState } from 'react';
+import PasswordField from './passwordField';
 
 export default function SignupForm() {
   const [error, setError] = useState('');
@@ -112,13 +113,20 @@ export default function SignupForm() {
             <span className="text-blue-400">03</span> // Secure Key
           </label>
           <div className="relative group">
-            <input
+            {/* <input
               className="peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               id="password"
               type="password"
               name="password"
               placeholder="••••••••••••"
               required
+              minLength={8}
+              disabled={isPending}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            /> */}
+            <PasswordField
+              className='peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed'
               minLength={8}
               disabled={isPending}
               value={password}
@@ -139,7 +147,7 @@ export default function SignupForm() {
             <span className="text-blue-400">04</span> // Confirm Key
           </label>
           <div className="relative group">
-            <input
+            {/* <input
               className="peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               id="confirmPassword"
               type="password"
@@ -147,6 +155,15 @@ export default function SignupForm() {
               placeholder="••••••••••••"
               required
               minLength={8}
+              disabled={isPending}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            /> */}
+            <PasswordField
+              className='peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed'
+              minLength={8}
+              id="confirmPassword"
+              name="confirmPassword"
               disabled={isPending}
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}

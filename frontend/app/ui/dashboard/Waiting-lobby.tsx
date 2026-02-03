@@ -220,15 +220,17 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-4 w-full max-w-md">
-          <button
+         {/* Action Buttons */}
+        <div className="flex w-full max-w-md justify-center">
+          <div className="relative w-full">
+            {/* Enqueue Button */}
+            <button
               onClick={() => {
-                if (!isLeader) return;
+                if (!isLeader || inQueue) return;
                 match.enqueue(gameType);
               }}
-              disabled={inQueue || !isLeader}
-              className={`flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300
+              disabled={!isLeader || inQueue}
+              className={`w-full py-4 rounded-xl text-lg font-bold transition-all duration-300 flex items-center justify-center gap-4
                 ${
                   inQueue
                     ? 'bg-green-500/20 text-green-300 border border-green-500/40 cursor-not-allowed'
@@ -237,18 +239,22 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
                       : 'bg-green-500/30 hover:bg-green-500/40 text-green-300 border border-green-500/50 shadow-lg shadow-green-500/20'
                 }`}
             >
-              {isLeader ? 'Find Match' : 'Only leader can start'}
+              {inQueue ? 'In Queue' : isLeader ? 'Find Match' : 'Only leader can start'}
             </button>
-            <button
-              onClick={() => {
-                match.dequeue();
-              }}
-              className="flex-1 py-4 rounded-xl text-lg font-bold transition-all duration-300 bg-red-500/30 hover:bg-red-500/40 text-red-300 border border-red-500/50 shadow-lg shadow-red-500/20"
-            >
-              Leave Queue
-            </button>
+
+            {/* Dequeue Button (X) */}
+            {inQueue && (
+              <button
+                onClick={() => match.dequeue()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-red-500/30 hover:bg-red-500/50 border border-red-500/50 text-red-300 flex items-center justify-center font-black text-lg transition-all shadow-lg shadow-red-500/20"
+                aria-label="Leave Queue"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
+      </div>
       </div>
 
       {/* Back Button */}

@@ -7,6 +7,7 @@ import {
   TrophyIcon,
   UserGroupIcon,
   ChartBarIcon,
+  PuzzlePieceIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -30,6 +31,11 @@ const links = [
     name: 'Friends',
     href: '/dashboard/friends',
     icon: UserGroupIcon,
+  },
+  {
+    name: 'Games',
+    href: '/dashboard/play',
+    icon: PuzzlePieceIcon
   },
   { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon },
   { name: 'Settings', href: '/dashboard/settings', icon: SettingsIcon },

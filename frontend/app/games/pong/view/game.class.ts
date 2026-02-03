@@ -143,17 +143,17 @@ export class Game {
       });
     }
 
-    const loader = new ex.Loader([
-      this.sprites.arenaBackground!,
-      this.sprites.redPaddle!,
-      this.sprites.bluePaddle!,
-    ])
+    // const loader = new ex.Loader([
+    //   this.sprites.arenaBackground!,
+    //   this.sprites.redPaddle!,
+    //   this.sprites.bluePaddle!,
+    // ])
 
-    // this.sprites.arenaBackground!.load();
-    // this.sprites.redPaddle!.load();
-    // this.sprites.bluePaddle!.load();
+    await this.sprites.arenaBackground!.load();
+    await this.sprites.redPaddle!.load();
+    await this.sprites.bluePaddle!.load();
 
-    await this.engine.start(loader);
+    await this.engine.start();
 
     return this.endPromisse;
   }

@@ -12,12 +12,15 @@ import LoginMessages from './login-messages';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import PasswordField from './passwordField';
 
 export default function LoginForm() {
   const [error, setError] = useState('');
   const [isPending, setIsPending] = useState(false);
   const [captchaRefreshKey, setCaptchaRefreshKey] = useState(0);
   const router = useRouter();
+
+
 
   async function handleSubmit(formData: FormData) {
     setIsPending(true);
@@ -95,17 +98,23 @@ export default function LoginForm() {
             <span className="text-blue-400">02</span> // Secure Key
           </label>
           <div className="relative group">
-            <input
+            {/* <input
               className="peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               id="password"
-              type="password"
+              type={passType}
               name="password"
               placeholder="••••••••••••"
               required
               minLength={8}
               disabled={isPending}
+            /> */}
+            <PasswordField
+              className="peer block w-full rounded-lg border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none backdrop-blur-md transition-all focus:border-blue-500/50 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              minLength={8}
+              disabled={isPending}
             />
             <KeyIcon className="pointer-events-none absolute left-3.5 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-slate-500 transition-colors peer-focus:text-blue-400" />
+            
             {/* Cyber grid effect on focus */}
             <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-blue-500/0 opacity-0 transition-opacity peer-focus:opacity-100 pointer-events-none" />
           </div>

@@ -52,6 +52,10 @@ export default async function RecentMatches() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
+                    <Link
+                      href={`/profile/${opponent?.public_id || ''}`}
+                      className="flex items-center space-x-3"
+                    >
                     <div className="relative">
                       <Image
                         src={opponent?.avatar || '/default-avatar.png'}
@@ -61,6 +65,7 @@ export default async function RecentMatches() {
                         className="rounded-full border-2 border-white/10 group-hover:border-purple-400/50 transition-colors"
                       />
                     </div>
+                    </Link>
                     <div>
                       <p className="font-semibold text-white">{opponent?.name || 'Unknown'}</p>
                       <p className="text-sm font-mono text-slate-400">

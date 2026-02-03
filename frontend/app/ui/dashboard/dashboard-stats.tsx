@@ -24,12 +24,33 @@ type DashboardStatsProps = {
   stats: DashboardStatsType;
 };
 
-export async function getMatchHistory(): Promise<any> {
+// export async function getMatchHistory(): Promise<any> {
+//   const cookieStore = await cookies();
+//   const jwt = cookieStore.get('jwt')?.value;
+//   if (!jwt) return { stats: {}, history: [] };
+
+//   const res = await fetch(`${API_GATEWAY_URL}/api/history`, {
+//     method: 'GET',
+//     headers: {
+//       Cookie: `jwt=${jwt}`,
+//     },
+//     cache: 'no-store',
+//   });
+
+//   if (!res.ok) return { stats: {}, history: [] };
+//   return res.json();
+// }
+
+export async function getMatchHistory(userId?: string): Promise<any> {
   const cookieStore = await cookies();
   const jwt = cookieStore.get('jwt')?.value;
   if (!jwt) return { stats: {}, history: [] };
 
-  const res = await fetch(`${API_GATEWAY_URL}/api/history`, {
+  const url = userId
+    ? `${API_GATEWAY_URL}/api/history?user_id=${userId}`
+    : `${API_GATEWAY_URL}/api/history`;
+
+  const res = await fetch(url, {
     method: 'GET',
     headers: {
       Cookie: `jwt=${jwt}`,
@@ -40,6 +61,7 @@ export async function getMatchHistory(): Promise<any> {
   if (!res.ok) return { stats: {}, history: [] };
   return res.json();
 }
+
 
 export default async function DashboardStats({ stats }: DashboardStatsProps) {
   const historyData = await getMatchHistory();

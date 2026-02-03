@@ -88,8 +88,7 @@ export default function MatchProvider({ user, children }: { user: User; children
           title="Match Found!"
           time={__TIME_TO_WAIT__.MAX_TIME}
           onComplete={() => {
-            setMatchFound(false); // remove o MatchNotify
-            router.push("/dashboard/play/pong"); // redireciona
+            setMatchFound(false);
           }}
         />
       )}

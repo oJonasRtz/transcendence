@@ -45,25 +45,30 @@ export default async function Leaderboard({
                 >
                   #{index + 1}
                 </span>
+                
+                <Link
+                  key={entry.id}
+                  href={`/profile/${entry.public_id}`}
+                  className='flex items-center gap-4 flex-1'
+                >
+                  <div className="relative">
+                    <Image
+                      src={entry.avatar}
+                      alt={entry.username}
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-white/10"
+                    />
+                    {entry.isOnline && (
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-white">{entry.username}</p>
+                  </div>
+                </Link>
 
-                <div className="relative">
-                  <Image
-                    src={entry.avatar}
-                    alt={entry.username}
-                    width={40}
-                    height={40}
-                    className="rounded-full border-2 border-white/10"
-                  />
-                  {entry.isOnline && (
-                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
-                  )}
-                </div>
-
-                <div className="flex-1">
-                  <p className="font-semibold text-white">{entry.username}</p>
-                </div>
-
-                <div className="text-right">
+                <div className="text-right flex flex-col justify-end">
                   <p className="font-black text-blue-400 text-lg">{entry.tier}</p>
                   <p className="text-xs font-mono uppercase text-slate-500">{entry.rankPoints}</p>
                 </div>

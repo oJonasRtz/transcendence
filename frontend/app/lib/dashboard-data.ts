@@ -47,6 +47,7 @@ export interface DashboardActivity {
 
 export interface DashboardLeaderboardEntry {
   id: EntityId;
+  public_id: string;
   username: string;
   avatar: string;
   tier: string;
@@ -206,6 +207,7 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     .map((u: any, index: number) => ({
       id: index + 1,
       rank: u.rank ?? 0,
+      public_id: u.public_id ?? '',
       username: u.nickname ?? u.username ?? 'Unknown',
       avatar: u.avatar ?? '/images/default-avatar.png',
       tier: u.tier ?? 'UNDEFINED',

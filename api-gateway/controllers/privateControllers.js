@@ -1623,7 +1623,7 @@ const privateControllers = {
 
   apiGetHistory: async function apiGetHistory(req, reply) {
     try {
-      const userId = req.user.user_id;
+      const userId = req.query.user_id || req.user.user_id;
       const limit = parseInt(req.query.limit) || 10;
       const res = await axios.post(
         "https://users-service:3003/getHistory",
