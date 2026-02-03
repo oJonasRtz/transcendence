@@ -53,15 +53,9 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
     <div
       ref={navRef}
       onClick={() => setIsCollapsed(false)}
-      className="flex w-full h-screen flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-b border-white/10 md:border-b-0 md:border-r transition-all duration-300 ease-in-out cursor-pointer"
+      className="flex w-full h-auto md:h-screen flex-col px-3 py-4 md:px-2 bg-slate-950/50 backdrop-blur-md border-b border-white/10 md:border-b-0 md:border-r transition-all duration-300 ease-in-out cursor-pointer"
     >
       {/* Header / Logo */}
-      {/* <Link
-        className={`mb-2 flex justify-start rounded-lg bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 p-4 hover:border-blue-500/30 transition-all duration-300 group ${
-          isCollapsed ? "h-auto items-center" : "h-20 md:h-40 items-end"
-        }`}
-        href="/"
-      > */}
       <div className={`mb-2 flex justify-start rounded-lg bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 p-4 hover:border-blue-500/30 transition-all duration-300 group ${
           isCollapsed ? "h-auto items-center" : "h-20 md:h-40 items-end"
         }`}>
@@ -72,16 +66,19 @@ export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boo
         >
           <AcmeLogo isCollapsed={isCollapsed} />
         </div>
-        </div>
-      {/* </Link> */}
+      </div>
 
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
         <NavLinks isCollapsed={isCollapsed} />
 
         <div className="hidden h-auto w-full grow rounded-lg bg-gradient-to-br from-slate-900/50 to-black/50 border border-white/5 md:block backdrop-blur-sm" />
 
-        <EmailVerificationStatus isCollapsed={isCollapsed} />
-        <LogoutButton isCollapsed={isCollapsed} />
+        {/* Força a altura igual aos botões */}
+        <div className="h-[48px]">
+          <EmailVerificationStatus isCollapsed={isCollapsed} />
+        </div>
+
+          <LogoutButton isCollapsed={isCollapsed} />
       </div>
     </div>
   );

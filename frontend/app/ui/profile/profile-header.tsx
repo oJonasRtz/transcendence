@@ -1,6 +1,7 @@
 interface ProfileData {
   username: string;
   avatar: string;
+  nickname?: string;
   title: string;
   description: string;
   state: {
@@ -32,6 +33,9 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
 
       {/* Username */}
       <h2 className="text-2xl font-bold text-white mb-2">{profile.username}</h2>
+      {profile?.nickname && (
+        <p className="text-gray-400 italic mb-2">"{profile.nickname}"</p>
+      )}
 
       {/* Online Status */}
       <p className={`font-semibold mb-2 ${stateColorClass[profile.state.colour] || 'text-gray-400'}`}>

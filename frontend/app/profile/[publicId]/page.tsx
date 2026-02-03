@@ -46,6 +46,7 @@ interface BackendUser {
 interface ProfileData {
   public_id: string;
   username: string;
+  nickname: string;
   avatar: string;
   isOnline: boolean;
   title: string;
@@ -219,6 +220,9 @@ export default async function ProfilePage({
   if (!profile || !backendUser) {
     return <ProfileSkeleton />;
   }
+
+  console.log('backend: ' + JSON.stringify(backendUser));
+  profile.nickname = backendUser.nickname;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center">

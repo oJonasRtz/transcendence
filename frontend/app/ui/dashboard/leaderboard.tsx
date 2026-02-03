@@ -15,6 +15,12 @@ export default async function Leaderboard({
   leaderboard,
   userRank,
 }: LeaderboardProps) {
+
+  const truncateName = (name: string) => {
+    if (!name) return "Unknown";
+    return name.length > 6 ? name.slice(0, 6) + "…" : name;
+  };
+
   return (
     <CardShell>
       <CardHeader
@@ -64,7 +70,7 @@ export default async function Leaderboard({
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-white">{entry.username}</p>
+                    <p className="font-semibold text-white">{truncateName(entry.username)}</p>
                   </div>
                 </Link>
 
