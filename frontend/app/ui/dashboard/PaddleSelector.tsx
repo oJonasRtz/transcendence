@@ -51,7 +51,7 @@ export default function PaddleSelectorPanel({
                   key={skin}
                   onClick={() => {
 					onRedSelect(skin);
-					match.savedSkins = { red: skin, blue: blueSkin };
+					match.setSkins(skin,blueSkin);
 				}}
                   className={`relative rounded-lg border p-2 bg-white/5 hover:bg-white/10 transition-all ${
                     redSkin === skin
@@ -82,7 +82,7 @@ export default function PaddleSelectorPanel({
                   key={skin}
                   onClick={() => {
 					onBlueSelect(skin);
-					match.savedSkins = { red: redSkin, blue: skin };
+					match.setSkins(redSkin, skin);
 				}}
                   className={`relative rounded-lg border p-2 bg-white/5 hover:bg-white/10 transition-all ${
                     blueSkin === skin

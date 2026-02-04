@@ -32,7 +32,12 @@ export class Pipe extends ex.Actor {
 
 		const sprite = new ex.Sprite({
 			image: this.sprite,
-			sourceView: new ex.Rectangle(0, 0, this.sprite.width, this.sprite.height),
+			sourceView: {
+				x: 0,
+				y: 0,
+				width: this.sprite.width,
+				height: this.sprite.height
+			},
 			destSize: {
 				width: this.width,
 				height: this.height

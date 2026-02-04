@@ -23,7 +23,7 @@ type PlayerStatsType = {
 type MatchTimeType = {
 	duration: string;
 	startedAt: string;
-}
+};
 
 type StatsType = {
 	match_id: number;
@@ -58,6 +58,16 @@ export class Match {
 	private party_users: PartyType[] = [];
 	private party_token: string | null = null;
 	private lastGameStats: StatsType | null = null;
+	private savedSkins: {
+		red: string;
+		blue: string;
+	} | null = null;
+	public setSkins(red: string, blue: string) {
+		this.savedSkins = { red, blue };
+	}
+	public getSkins() {
+		return this.savedSkins;
+	}
 	private onPartyUpdate: (() => void) | null = null;
 	private handlers: Record<string, Function> = {
 		'STATE_CHANGE': async ({state}: {state: string}) => {

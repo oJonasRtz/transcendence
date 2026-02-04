@@ -1,7 +1,7 @@
 interface ProfileData {
   username: string;
   avatar: string;
-  nickname?: string;
+  nickname?: string | null;
   title: string;
   description: string;
   state: {

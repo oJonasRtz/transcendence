@@ -3,8 +3,14 @@ import { jwtVerify } from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET is required for frontend auth');
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error('JWT_SECRET is required for frontend auth');
+  }
+
+  return new TextEncoder().encode(secret);
 }
 
 export interface User {
@@ -26,7 +32,7 @@ export async function getUser(): Promise<User | null> {
   }
 
   try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
+    const secret = getJwtSecret(); 
     const { payload } = await jwtVerify(token.value, secret);
 
     return payload as unknown as User;

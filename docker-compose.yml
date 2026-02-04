@@ -17,7 +17,10 @@ services:
       - NODE_EXTRA_CA_CERTS=/etc/nginx/ssl/server.cert
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        JWT_SECRET: ${JWT_SECRET}
     image: frontend:1.0.0
     container_name: frontend
     networks:
@@ -31,8 +34,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
     volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
+      #- ./frontend:/app
+      #- frontend_node_modules:/app/node_modules
       - ./shared/ssl:/app/ssl:ro
 
   api-gateway:

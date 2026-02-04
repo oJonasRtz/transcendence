@@ -46,7 +46,7 @@ interface BackendUser {
 interface ProfileData {
   public_id: string;
   username: string;
-  nickname: string;
+  nickname?: string | null;
   avatar: string;
   isOnline: boolean;
   title: string;
@@ -105,6 +105,7 @@ function mapBackendToProfileData(user: BackendUser): ProfileData {
 
   return {
     public_id: user.public_id,
+    nickname: user.nickname,
     username: user.username,
     avatar: user.avatar,
     isOnline: online,
