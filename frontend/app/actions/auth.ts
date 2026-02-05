@@ -192,6 +192,7 @@ export async function signup(formData: FormData) {
     }
 
     if (!response.ok) {
+      const cookieStore = await cookies();
       const backendError = Array.isArray(data?.error)
         ? data.error[0]
         : data?.error;

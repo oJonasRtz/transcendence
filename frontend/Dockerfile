@@ -20,7 +20,9 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the application
 COPY . .
 
+RUN pnpm exec next build
+
 EXPOSE 3000
 
 # Run Next.js on 3000 so nginx can proxy to the frontend container
-CMD ["pnpm", "exec", "next", "dev", "--webpack", "-p", "3000"]
+CMD ["pnpm", "exec", "next", "start", "-p", "3000"]

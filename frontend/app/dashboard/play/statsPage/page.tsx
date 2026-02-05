@@ -1,6 +1,6 @@
 import { getUser } from "@/app/lib/auth";
 import StatusPage from "@/app/ui/dashboard/statusPage";
-import { redirect } from "next/dist/server/api-utils";
+import { redirect } from "next/navigation";
 
 
 export default async function StatsPage() {

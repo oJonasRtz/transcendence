@@ -1,3 +1,15 @@
+interface ProfileData {
+  username: string;
+  avatar: string;
+  nickname?: string | null;
+  title: string;
+  description: string;
+  state: {
+    colour: string;
+    text: string;
+  };
+}
+
 interface ProfileHeaderProps {
   profile: ProfileData;
   actions?: React.ReactNode;

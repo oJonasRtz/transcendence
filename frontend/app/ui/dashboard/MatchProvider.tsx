@@ -16,7 +16,7 @@ export const __TIME_TO_WAIT__ = {
   RECONNECT_INTERVAL: 5,
 };
 
-export default function MatchProvider({ user, children }: { user: User; children: React.ReactNode }) {
+export default function MatchProvider({ user, children }: { user: User | null; children: React.ReactNode }) {
   const router = useRouter();
   const reconnecIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);

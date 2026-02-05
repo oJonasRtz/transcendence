@@ -8,7 +8,7 @@ export type MatchPlayer = {
   name: string;
   score: number;
   avatar: string;
-  public_id: string;
+  public_id?: string | null;
 };
 
 export type MatchHistoryItem = {

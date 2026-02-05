@@ -61,10 +61,10 @@ export default async function Leaderboard({
                 >
                   <div className="relative">
 		  <img
-		     src={`/public/uploads/avatar_${entry.user_id}.png?v=${entry.avatarUpdatedAt ?? entry.user_id}`}
+		     src={entry.avatar}
   		     alt={entry.username}
-	             width="40"
-	             height="40"
+	             width={40}
+	             height={40}
   		     className="rounded-full border-2 border-white/10"
 		  />
 
