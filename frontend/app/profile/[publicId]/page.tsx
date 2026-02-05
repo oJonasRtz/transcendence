@@ -225,21 +225,31 @@ export default async function ProfilePage({
   profile.nickname = backendUser.nickname;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center">
-      <CardShell className="max-w-2xl">
+    <main className="flex min-w-2xl h-screen flex-col items-center justify-center overflow-y-auto">
+      <CardShell className="max-w-2xl min-h-[450px] w-full flex flex-col">
         <CardHeader
           title="Profile"
           accentClassName="text-blue-400"
           subtitle="Public profile"
         />
-        <div className="p-6">
-          <ProfileHeader profile={profile} />
-          {!isMine && (
-            <ProfileActions publicId={profile.public_id} />
-          )}
-          <ProfileStats user={backendUser} history={historyData?.history ?? []} stats={historyData?.stats ?? {}} />
+        <div className="p-6 flex-1 overflow-y-auto">
+          <ProfileHeader
+            profile={profile}
+            actions={
+              <ProfileActions
+                publicId={profile.public_id}
+                isMine={isMine}
+              />
+            }
+          />
+          <ProfileStats
+            user={backendUser}
+            history={historyData?.history ?? []}
+            stats={historyData?.stats ?? {}}
+          />
         </div>
       </CardShell>
     </main>
   );
+  
 }
