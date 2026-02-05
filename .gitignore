@@ -12,7 +12,13 @@ blacklist.txt
 
 # Grafana secure password
 monitoring/.grafana-password.txt
+.grafana-password.txt
 a/
+
+# Docker Secrets (NEVER commit!)
+secrets/
+*.secret
+team-secrets.txt
 
 # AI code assistant files
 CLAUDE.md
