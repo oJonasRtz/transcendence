@@ -26,6 +26,7 @@ interface MatchHistoryListProps {
 }
 
 export default function MatchHistoryList({ userId, history }: MatchHistoryListProps) {
+
   const truncateName = (name: string) => {
     if (!name) return "Unknown";
     return name.length > 6 ? name.slice(0, 6) + "…" : name;

@@ -249,6 +249,7 @@ export class Match {
 		this.ws = null;
 		this._isConnected = false;
 		this._state = 'OFFLINE';
+		this.resetStats();
 		// await this.updateState();
 	}
 

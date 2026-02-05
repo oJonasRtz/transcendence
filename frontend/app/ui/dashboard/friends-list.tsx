@@ -32,6 +32,11 @@ export default async function FriendsList({ friends }: FriendsListProps) {
               key={friend.id}
               className="flex cursor-pointer items-center space-x-3 p-4 hover:bg-white/5 transition-all duration-300 group"
             >
+              <Link
+                href={`/profile/${friend.publicId}`}
+                className="absolute inset-0 z-0"
+                aria-label={`View ${friend.username}'s profile`}
+              >
               <div className="relative">
                 <img
                   src={friend.avatar}
@@ -47,7 +52,7 @@ export default async function FriendsList({ friends }: FriendsListProps) {
                 <p className="font-semibold text-white">{friend.username}</p>
                 <p className="text-xs font-mono text-green-400 uppercase">Online</p>
               </div>
-
+              </Link>
               {friend.publicId ? (
                 <Link
                   href={`/direct/${friend.publicId}`}

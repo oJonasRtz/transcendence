@@ -95,10 +95,17 @@ const databaseModels = {
       WHERE h.id IN (
         SELECT history_id FROM history_players WHERE user_id = ?
       )
-      ORDER BY h.created_at DESC
     `, [user_id]
     );
-
+    rows.sort((a, b) => {
+      const parse = (str) => {
+        const [date, time] = str.split(" | ");
+        const [day, month, year] = date.split("/");
+        return new Date(`${year}-${month}-${day}T${time}`);
+      };
+      return parse(b.created_at) - parse(a.created_at);
+    });
+    
     const historyMap = new Map();
     let   total = 0;
     let   wins = 0;

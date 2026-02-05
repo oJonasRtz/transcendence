@@ -3,12 +3,14 @@
 import { ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline';
 import { logout } from '@/app/actions/auth';
 import { useTransition } from 'react';
+import { match } from './MatchProvider';
 
 export default function LogoutButton({isCollapsed} : {isCollapsed?: boolean}) {
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
     startTransition(async () => {
+      match.disconnect();
       await logout();
     });
   };

@@ -31,7 +31,7 @@ export default async function Leaderboard({
         subtitle={userRank ? `Your Rank: #${userRank}` : undefined}
       />
 
-      <div className="divide-y divide-white/5">
+      <div className="divide-y divide-white/5 overflow-hidden">
         {leaderboard.length === 0 ? (
           <EmptyState
             title="No leaderboard data"
@@ -79,7 +79,7 @@ export default async function Leaderboard({
 
                 <div className="text-right flex flex-col justify-end">
                   <p className="font-black text-blue-400 text-lg">{entry.tier}</p>
-                  <p className="text-xs font-mono uppercase text-slate-500">{entry.rankPoints}</p>
+                  <p className="text-xs font-mono uppercase text-slate-500">{entry.rankPoints} RP</p>
                 </div>
               </div>
             );
