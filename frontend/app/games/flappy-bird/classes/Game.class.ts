@@ -28,7 +28,7 @@ export class Game {
 		this.engine = new ex.Engine({
 			width: GAME_WIDTH,
 			height: GAME_HEIGHT,
-			backgroundColor: ex.Color.Blue,
+			backgroundColor: new ex.Color(0.53, 0.81, 0.92, .7),
 			displayMode: ex.DisplayMode.Fixed,
 			canvasElement: document.createElement('canvas'),
 		});

@@ -155,7 +155,8 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
 
         {/* Game container */}
         <div className="relative w-full flex flex-col items-center">
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl w-full h-96 lg:h-[450px]">
+          <div className="relative w-full flex flex-col items-center">
+          <div className="relative overflow-hidden rounded-2xl border border-white/20 w-full h-96 lg:h-[450px]">
             {/* Ambient glow */}
             <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
@@ -168,6 +169,8 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
               />
             </div>
           </div>
+        </div>
+
 
 
          {/* How to Play below the game, width matches game container */}
