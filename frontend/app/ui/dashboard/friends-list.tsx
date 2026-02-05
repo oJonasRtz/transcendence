@@ -21,50 +21,45 @@ export default async function FriendsList({ friends }: FriendsListProps) {
       />
 
       <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
-        {onlineFriends.length === 0 ? (
-          <EmptyState
-            title="No friends online"
-            message="Invite friends or check back later."
-          />
-        ) : (
-          onlineFriends.map((friend) => (
-            <div
-              key={friend.id}
-              className="flex cursor-pointer items-center space-x-3 p-4 hover:bg-white/5 transition-all duration-300 group"
-            >
-              <Link
-                href={`/profile/${friend.publicId}`}
-                className="absolute inset-0 z-0"
-                aria-label={`View ${friend.username}'s profile`}
-              >
-              <div className="relative">
-                <img
-                  src={friend.avatar}
-                  alt={friend.username}
-                  width={40}
-                  height={40}
-                  className="rounded-full border-2 border-white/10 group-hover:border-green-400/50 transition-colors"
-                />
-                <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
-              </div>
+      {onlineFriends.map((friend) => (
+      <div
+        key={friend.id}
+        className="flex items-center space-x-3 p-4 hover:bg-white/5 transition-all duration-300 group"
+      >
+        <Link
+          href={`/profile/${friend.publicId}`}
+          aria-label={`View ${friend.username}'s profile`}
+          className="flex flex-1 items-center space-x-3 cursor-pointer"
+        >
+          <div className="relative">
+            <img
+              src={friend.avatar}
+              alt={friend.username}
+              width={40}
+              height={40}
+              className="rounded-full border-2 border-white/10 group-hover:border-green-400/50 transition-colors"
+            />
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-400 animate-pulse"></span>
+          </div>
 
-              <div className="flex-1">
-                <p className="font-semibold text-white">{friend.username}</p>
-                <p className="text-xs font-mono text-green-400 uppercase">Online</p>
-              </div>
-              </Link>
-              {friend.publicId ? (
-                <Link
-                  href={`/direct/${friend.publicId}`}
-                  className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300"
-                  aria-label={`Message ${friend.username}`}
-                >
-                  <ChatBubbleLeftIcon className="h-5 w-5" />
-                </Link>
-              ) : null}
-            </div>
-          ))
+          <div className="flex-1">
+            <p className="font-semibold text-white">{friend.username}</p>
+            <p className="text-xs font-mono text-green-400 uppercase">Online</p>
+          </div>
+        </Link>
+
+        {friend.publicId && (
+          <Link
+            href={`/direct/${friend.publicId}`}
+            className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300"
+            aria-label={`Message ${friend.username}`}
+          >
+            <ChatBubbleLeftIcon className="h-5 w-5" />
+          </Link>
         )}
+      </div>
+    ))}
+
       </div>
 
       <div className="border-t border-white/10 p-4 bg-white/5">
