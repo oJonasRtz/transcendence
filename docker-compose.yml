@@ -25,6 +25,10 @@ services:
       - "transcendence"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - NEXT_PUBLIC_API_GATEWAY_URL=https://localhost:3000
+      - NEXT_PUBLIC_SOCKET_URL=http://localhost
+      - NEXT_PUBLIC_MATCH_SERVICE_WS=ws://localhost:3020
+      - BACKEND_URL=https://localhost:3000
       - API_GATEWAY_URL=https://api-gateway:3000
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -50,6 +54,8 @@ services:
       - "game"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - PORT=3000
+      - JWT_EXPIRES_IN=1h
     volumes:
       - api-gateway:/app/public
       - ./shared/ssl:/app/ssl:ro
@@ -73,6 +79,8 @@ services:
       - "db_connection"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - PORT=3001
+      - JWT_EXPIRES_IN=1h
     volumes:
       - ./shared/ssl:/app/ssl:ro
     secrets:
@@ -105,6 +113,7 @@ services:
       - "db_connection"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - PORT=3002
     volumes:
       - sqlite-db:/app/database
       - ./shared/ssl:/app/ssl:ro
@@ -118,6 +127,7 @@ services:
       - "db_connection"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - PORT=3005
     volumes:
       - ./shared/ssl:/app/ssl:ro
     secrets:
@@ -129,12 +139,17 @@ services:
     container_name: game-server
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - PORT=8443
+      - HOST=localhost
     networks:
       - "game"
       - "transcendence"
     volumes:
       - ./shared/ssl:/app/ssl
       - ./shared/game-stats.json:/app/game-stats.json
+    secrets:
+      - lobby_id
+      - lobby_pass
 
   match-service:
     build: ./new-match-service
@@ -149,9 +164,13 @@ services:
       - ./shared/ssl:/app/ssl:ro
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - PORT=3004
+      - PORT_LOBBY=8443
+      - IP_LOBBY=localhost
     secrets:
       - lobby_id
       - lobby_pass
+      - cookie_secret
 
   # MONITORING STACK
   

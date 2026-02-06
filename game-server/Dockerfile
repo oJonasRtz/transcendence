@@ -11,7 +11,14 @@ RUN apt-get update -y && apt-get upgrade -y && \
 
 RUN npm install
 COPY . .
+
+# Copy and set entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 #generate ssl certificates
 # RUN cd ssl/ && bash ./mkcert.sh
 EXPOSE 3007
+
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["node", "server.js"]
