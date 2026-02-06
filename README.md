@@ -117,11 +117,23 @@ Browser (HTTPS:443)
 
 ## Getting Started
 
+### For Evaluators 🎓
+
+**See [EVALUATION.md](EVALUATION.md) for complete evaluation instructions.**
+
+Quick start:
+```bash
+git clone <repository-url>
+cd transcendence
+make up
+# Access at https://localhost
+```
+
 ### Prerequisites
 
-- Docker and Docker Compose
+- Docker and Docker Compose v2
 - Make
-- Node.js 20+ (for local development)
+- Node.js 20+ (for development)
 - pnpm (for frontend)
 
 ### Quick Start
@@ -129,7 +141,7 @@ Browser (HTTPS:443)
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd ft_trans
+cd transcendence
 
 # Start all services (generates TLS certs, builds, runs)
 make up
