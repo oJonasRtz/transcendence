@@ -22,7 +22,7 @@ export class State {
 		2: {id: '', name: "", score: 0, pos: {x: 0, y: 0}, size: {width: 20, height: 100}, connected: false},
 	};
 	private latency = {
-		ping: 0,
+		ping: null as ReturnType<typeof setInterval> | null,
 		lastPingTimestamp: 0,
 		delay: INTERVAL,
 		ms: 0,
@@ -162,7 +162,7 @@ export class State {
 	public stopGettingLatency() {
 		if (this.latency.ping) {
 			clearInterval(this.latency.ping);
-			this.latency.ping = 0;
+			this.latency.ping = null;
 		}
 	}
 

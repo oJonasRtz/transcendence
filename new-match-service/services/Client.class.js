@@ -237,9 +237,17 @@ export class Client {
 
 	async #changeState(to, payload = {}) {
 		const allowed = this.#transitions[this.#state];
-		if (!allowed.includes(to))
-			throw new Error('INVALID_STATE_TRANSITION');
+		if (!allowed.includes(to)) {
+			const reason = 'INVALID_STATE_TRANSITION';
 
+			this.send({
+				type: 'ERROR',
+				reason,
+				code: 400,
+			})
+
+			throw new Error(reason);
+		}
 		this.#state = to;
 		await this.#FSM[this.#state](payload);
 	}
@@ -266,21 +274,23 @@ export class Client {
 	}
 
 	reconnect(ws) {
+		if (this.isConnected)
+			return;
+
 		this.#ws = ws;
 		
-		if (this.#state === 'IN_GAME') {
-			//Check if lobby still exists before sending reconnection message
-			//if not change state to IDLE
 
+		this.send({
+			type: 'MATCH_FOUND',
+			match_id: this.#game.match_id,
+			skip: true,
+		});
 
+		if (this.#game.party) {
 			this.send({
-				type: 'MATCH_FOUND',
-				match_id: this.#game.match_id,
-				skip: true,
-			});
-			//this.#game.lobby.reconnectClient(this);
-
-			//this.changeState('IDLE', {});
+				type: 'PARTY_CREATED',
+				token: this.#game.party.token,
+			})
 		}
 
 		this.#listeners();

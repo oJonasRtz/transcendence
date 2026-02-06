@@ -23,7 +23,7 @@ type PlayerStatsType = {
 type MatchTimeType = {
 	duration: string;
 	startedAt: string;
-}
+};
 
 type StatsType = {
 	match_id: number;
@@ -58,6 +58,16 @@ export class Match {
 	private party_users: PartyType[] = [];
 	private party_token: string | null = null;
 	private lastGameStats: StatsType | null = null;
+	private savedSkins: {
+		red: string;
+		blue: string;
+	} | null = null;
+	public setSkins(red: string, blue: string) {
+		this.savedSkins = { red, blue };
+	}
+	public getSkins() {
+		return this.savedSkins;
+	}
 	private onPartyUpdate: (() => void) | null = null;
 	private handlers: Record<string, Function> = {
 		'STATE_CHANGE': async ({state}: {state: string}) => {
@@ -220,6 +230,8 @@ export class Match {
 	public connect({name, email, id}: {name: string, email: string, id: string}): void {
 		this.info = {name, email, id};
 
+		// console.log('Im connecting with ' + JSON.stringify(this.info));
+
 		if (this._isConnected && this.ws?.readyState === WebSocket.OPEN) return;
 
 		const wsUrl: string = this.getUrl();
@@ -239,6 +251,7 @@ export class Match {
 		this.ws = null;
 		this._isConnected = false;
 		this._state = 'OFFLINE';
+		this.resetStats();
 		// await this.updateState();
 	}
 

@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export type MatchPlayer = {
   user_id: string;
   name: string;
   score: number;
   avatar: string;
-  public_id: string;
+  public_id?: string | null;
 };
 
 export type MatchHistoryItem = {
@@ -26,6 +26,8 @@ interface MatchHistoryListProps {
 }
 
 export default function MatchHistoryList({ userId, history }: MatchHistoryListProps) {
+  const router = useRouter();
+
   const truncateName = (name: string) => {
     if (!name) return "Unknown";
     return name.length > 6 ? name.slice(0, 6) + "…" : name;
@@ -59,29 +61,31 @@ export default function MatchHistoryList({ userId, history }: MatchHistoryListPr
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               {/* Opponent */}
-              <Link
-                href={`/profile/${opponent?.public_id || ""}`}
-                className="flex items-center gap-3 flex-1 min-w-0"
+              <button
+                onClick={() => router.push(`/profile/${opponent?.public_id || ""}`)}
+                className="flex justify-start items-start gap-3 flex-1 min-w-0"
               >
-                <div className="relative flex-shrink-0">
+                <div className="relative flex-shrink-0 rounded-2xl p-[2px] border border-blue-600 shadow-2xl group-hover:border-purple-500 transition-colors">
                   <Image
                     src={opponent?.avatar || "/default-avatar.png"}
                     alt={opponent?.name || "Opponent"}
                     width={48}
                     height={48}
-                    className="rounded-full border-2 border-white/10 group-hover:border-blue-400/50 transition-colors"
+                    className="rounded-full object-cover"
                   />
                 </div>
 
-                <div className="truncate min-w-0">
-                  <p className="font-semibold text-white truncate">
-                    {truncateName(opponent?.name || "Unknown")}
+
+                <div className="flex flex-col justify-start flex-1 min-w-0">
+                  <p className="font-semibold flex justify-start text-white truncate">
+                    {opponent?.name || "Unknown"}
                   </p>
-                  <p className="text-sm font-mono text-slate-400 truncate">
+                  <p className="text-sm font-mono flex justify-start text-slate-400 truncate">
                     {match.created_at}
                   </p>
                 </div>
-              </Link>
+              </button>
+
 
               {/* Stats */}
               <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">

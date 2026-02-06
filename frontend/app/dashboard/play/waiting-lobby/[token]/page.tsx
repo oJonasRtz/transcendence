@@ -1,7 +1,7 @@
 import { getUser } from '@/app/lib/auth';
 import { redirect } from 'next/navigation';
 import WaitingLobby from '@/app/ui/dashboard/Waiting-lobby';
-import { onInvite } from '../page';
+//import { onInvite } from '../page';
 
 export default async function WaitingLobbyPage({
   params,

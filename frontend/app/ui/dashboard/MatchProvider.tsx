@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import MatchNotify from "./match-notifty";
 import FloatingRoomWidget from "./FloatingRoomWidget";
 import { usePathname } from "next/navigation";
+import { DashboardProfile } from "@/app/lib/dashboard-data";
 
 export const match: Match = new Match();
 
@@ -16,45 +17,49 @@ export const __TIME_TO_WAIT__ = {
   RECONNECT_INTERVAL: 5,
 };
 
-export default function MatchProvider({ user, children }: { user: User; children: React.ReactNode }) {
+export default function MatchProvider({ user, profile, children }:
+  { user: User | null;
+    children: React.ReactNode;
+    profile?: DashboardProfile;
+  }) {
   const router = useRouter();
   const reconnecIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [matchFound, setMatchFound] = useState(false);
+  const [showFloating, setShowFloating] = useState(false);
 
   const pathname = usePathname();
   const hiddenFloat = [
     '/dashboard/play/pong',
     '/dashboard/play/statsPage',
     '/dashboard/play/waiting-lobby',
+    '/login',
   ]
 
-  // 🔹 Conecta ao match e define callbacks
   useEffect(() => {
     if (!user) return;
 
-    // Função de conexão
     const tryConnect = () => {
       if (!match.isConnected && user) {
         match.connect({
           id: user.user_id,
           email: user.email,
-          name: user.nickname || user.username,
+          name: profile?.nickname || user.username,
         });
       }
     };
 
     tryConnect();
 
-    // Intervalo de reconexão
     reconnecIntervalRef.current = setInterval(tryConnect, __TIME_TO_WAIT__.RECONNECT_INTERVAL * 1000);
 
-    // Callback quando um match é encontrado
     match.onMatch = (match_id, skip) => {
+      if (!match_id)
+        return;
+      
       setMatchFound(true);
       const go = () => router.push(`/dashboard/play/pong`);
 
-      // Limpa qualquer timeout antigo antes de criar um novo
       if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
 
       if (skip) {
@@ -65,7 +70,10 @@ export default function MatchProvider({ user, children }: { user: User; children
       redirectTimeoutRef.current = setTimeout(go, __TIME_TO_WAIT__.MAX_TIME * 1000);
     };
 
-    // Callback quando resultados aparecem
+    match.onParty = () => {
+      setShowFloating(true);
+    }
+
     match.onResults = () => {
       setTimeout(() => {
         router.push(`/dashboard/play/statsPage`);
@@ -81,7 +89,7 @@ export default function MatchProvider({ user, children }: { user: User; children
   return (
     <>
       {children}
-      {((match.party || match.partyToken) && !hiddenFloat.some((path) => pathname.startsWith(path))) && <FloatingRoomWidget />}
+      {(showFloating && !hiddenFloat.some((path) => pathname.startsWith(path))) && <FloatingRoomWidget />}
 
       {matchFound && (
         <MatchNotify

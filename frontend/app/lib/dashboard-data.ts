@@ -14,6 +14,7 @@ export interface DashboardProfile {
   publicId: UserId;
   username: string;
   nickname?: string | null;
+  description?: string | null;
   avatar?: string | null;
   isOnline: boolean;
   title?: string;
@@ -132,13 +133,20 @@ export async function getDashboardData(user: User): Promise<DashboardData> {
     ]);
 
 
-    console.log('all users: ' + JSON.stringify(allUsers));
+    // console.log('all users: ' + JSON.stringify(allUsers));
+  const me = Array.isArray(allUsers)
+    ? allUsers.find(
+        (u: any) =>
+          u.user_id === user.user_id || u.public_id === user.public_id
+      )
+    : null;
   // --- Profile ---
   const profile: DashboardProfile = {
     userId: user.user_id,
     publicId: user.public_id,
     username: user.username,
-    nickname: user.nickname ?? user.username ?? null,
+    nickname: me.nickname ?? null,
+    description: me.description ?? null,
     avatar: profileData?.avatar ?? null,
     isOnline: Boolean(profileData?.isOnline ?? true),
     title: profileData?.title ?? undefined,

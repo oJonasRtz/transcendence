@@ -16,6 +16,11 @@ export default function StatusPage({ user }: StatusPageProps) {
   useEffect(() => {
     if (!match.stats) router.push('/dashboard/play');
     setStats(match.stats);
+
+    return () => {
+      match.resetStats();
+      match.leaveParty();
+    }
   }, []);
 
   if (!stats) return null;

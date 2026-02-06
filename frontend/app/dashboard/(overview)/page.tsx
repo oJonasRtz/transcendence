@@ -8,7 +8,7 @@ import ActivityFeed from '@/app/ui/dashboard/activity-feed';
 import { getUser } from '@/app/lib/auth';
 import { getDashboardData } from '@/app/lib/dashboard-data';
 import { redirect } from 'next/navigation';
-import MatchProvider from '@/app/ui/dashboard/MatchProvider';
+//import MatchProvider from '@/app/ui/dashboard/MatchProvider';
 
 export default async function DashboardPage() {
   // Get authenticated user from JWT
@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   }
 
   const dashboardData = await getDashboardData(authUser);
-  const user = getUser();
+  //const user = getUser();
 
   return (
     <main className="p-4 md:p-6 lg:p-8 space-y-6">
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <RecentMatches matches={dashboardData.matches} />
+          <RecentMatches />
           <ActivityFeed activity={dashboardData.activity} />
         </div>
 
