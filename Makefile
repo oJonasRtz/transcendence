@@ -1,5 +1,17 @@
+# Generate secrets (.env file)
+secrets:
+	@echo "Generating secrets..."
+	@if [ -f .env ]; then \
+		echo "⚠️  .env already exists. Skipping generation."; \
+		echo "To regenerate, run: rm .env && make secrets"; \
+	else \
+		echo "JWT_SECRET=$$(openssl rand -base64 64 | tr -d '\n')" > .env; \
+		echo "GRAFANA_ADMIN_PASSWORD=$$(openssl rand -base64 32 | tr -d '\n')" >> .env; \
+		echo "✓ Secrets generated in .env"; \
+	fi
+
 # Start all services
-up: tls build
+up: secrets tls build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 
@@ -122,7 +134,7 @@ aws-cert-renew:
 	@echo "✓ Certificates renewed!"
 
 # Deploy on AWS VM with Let's Encrypt (use this after aws-cert-init)
-aws: aws-tls build
+aws: secrets aws-tls build
 	@echo "Deploying on AWS with Let's Encrypt certificates..."
 	@docker compose down || true
 	@rm -rf ./shared/ssl
@@ -130,4 +142,4 @@ aws: aws-tls build
 	@docker compose up -d
 	@echo "✓ Deployed! Access at https://$(DOMAIN)"
 
-.PHONY: up down build clean fclean re remake tls game-logs aws-cert-init aws-cert-renew aws-tls aws
+.PHONY: up down build clean fclean re remake tls secrets game-logs aws-cert-init aws-cert-renew aws-tls aws
