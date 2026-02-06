@@ -19,14 +19,10 @@ services:
   frontend:
     build: 
       context: ./frontend
-      args:
-        JWT_SECRET: ${JWT_SECRET}
     image: frontend:1.0.0
     container_name: frontend
     networks:
       - "transcendence"
-    env_file:
-      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
       - API_GATEWAY_URL=https://api-gateway:3000
@@ -52,8 +48,6 @@ services:
     networks:
       - "transcendence"
       - "game"
-    env_file:
-      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     volumes:
@@ -77,8 +71,6 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
-    env_file:
-      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     volumes:
@@ -155,8 +147,6 @@ services:
       - "transcendence"
     volumes:
       - ./shared/ssl:/app/ssl:ro
-    env_file:
-      - ./new-match-service/.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
     secrets:
@@ -189,8 +179,6 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
-    env_file:
-    - ./monitoring/.grafana-password.txt
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana_admin_password
