@@ -107,7 +107,7 @@ export default async function Leaderboard({
 
 
 
-                <div className="text-right flex flex-col justify-end">
+                <div className="text-right flex flex-col justify-end flex-shrink-0 truncate">
                   <p className="font-black text-blue-400 text-lg">{entry.tier}</p>
                   <p className="text-xs font-mono uppercase text-slate-500">{entry.rankPoints} RP</p>
                 </div>

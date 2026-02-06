@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   UserPlusIcon,
@@ -24,6 +24,15 @@ export default function ProfileActions({
     text: string;
   } | null>(null);
 
+  // ⏱️ Auto-hide after 3 seconds
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [message]);
+
   async function handleFriendInvite() {
     if (isMine) return;
     setLoading("friend");
@@ -36,11 +45,10 @@ export default function ProfileActions({
         body: JSON.stringify({ public_id: publicId }),
       });
       const data = await res.json();
-      if (data.success) {
-        setMessage({ type: "success", text: data.message });
-      } else {
-        setMessage({ type: "error", text: data.message });
-      }
+      setMessage({
+        type: data.success ? "success" : "error",
+        text: data.message,
+      });
     } catch {
       setMessage({ type: "error", text: "Failed to send friend request" });
     } finally {
@@ -60,11 +68,10 @@ export default function ProfileActions({
         body: JSON.stringify({ public_id: publicId }),
       });
       const data = await res.json();
-      if (data.success) {
-        setMessage({ type: "success", text: data.message });
-      } else {
-        setMessage({ type: "error", text: data.message });
-      }
+      setMessage({
+        type: data.success ? "success" : "error",
+        text: data.message,
+      });
     } catch {
       setMessage({ type: "error", text: "Failed to block/unblock user" });
     } finally {
@@ -78,54 +85,29 @@ export default function ProfileActions({
 
   const disabledClass = "cursor-not-allowed border-gray-500 opacity-50";
   const iconDisabledClass = "text-gray-500";
-  const enabledScaleClass = "transition-transform hover:scale-110";
-  const enabledBorderHover = "hover:border-green-400";
-  const enabledRedHover = "hover:border-red-400";
-
-  const bgSize: number = 8;
-  const iconSize: number = bgSize / 2;
 
   return (
-    <div className="mb-6">
-      {/* Message feedback */}
-      {message && (
-        <div
-          className={`mb-4 p-3 rounded-lg text-center ${
-            message.type === "success"
-              ? "bg-green-500/20 text-green-400"
-              : "bg-red-500/20 text-red-400"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
-
+    <div className="mb-6 flex flex-col justify-start items-center relative">
       {/* Action icons */}
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-start gap-2">
         {/* Add Friend */}
         <div className="relative group">
           <button
             onClick={handleFriendInvite}
             disabled={isMine || loading === "friend"}
-            className={`h-${bgSize} w-${bgSize} rounded-full border flex items-center justify-center ${
+            className={`h-8 w-8 rounded-full border flex items-center justify-center ${
               isMine
                 ? disabledClass
-                : "border-green-500 " + enabledScaleClass + " " + enabledBorderHover
+                : "border-green-500 transition-transform hover:scale-110 hover:border-green-400"
             }`}
             aria-label="Add friend"
           >
             <UserPlusIcon
-              className={`h-${iconSize} w-${iconSize} ${
+              className={`h-4 w-4 ${
                 isMine ? iconDisabledClass : "text-green-500 group-hover:text-green-400"
               }`}
             />
           </button>
-
-          {!isMine && (
-            <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/80 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
-              Add friend
-            </span>
-          )}
         </div>
 
         {/* Block */}
@@ -133,41 +115,49 @@ export default function ProfileActions({
           <button
             onClick={handleBlock}
             disabled={isMine || loading === "block"}
-            className={`h-${bgSize} w-${bgSize} rounded-full border flex items-center justify-center ${
+            className={`h-8 w-8 rounded-full border flex items-center justify-center ${
               isMine
                 ? disabledClass
-                : "border-red-500 " + enabledScaleClass + " " + enabledRedHover
+                : "border-red-500 transition-transform hover:scale-110 hover:border-red-400"
             }`}
             aria-label="Block user"
           >
             <NoSymbolIcon
-              className={`h-${iconSize} w-${iconSize} ${
+              className={`h-4 w-4 ${
                 isMine ? iconDisabledClass : "text-red-500 group-hover:text-red-400"
               }`}
             />
           </button>
-
-          {!isMine && (
-            <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/80 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
-              Block / Unblock
-            </span>
-          )}
         </div>
 
         {/* Chat */}
         <div className="relative group">
           <button
             onClick={handleChat}
-            className={`h-${bgSize} w-${bgSize} rounded-full border border-blue-500 flex items-center justify-center transition-transform hover:scale-110 hover:border-blue-400`}
+            className="h-8 w-8 rounded-full border border-blue-500 flex items-center justify-center transition-transform hover:scale-110 hover:border-blue-400"
             aria-label="Chat"
           >
-            <ChatBubbleLeftRightIcon className={`h-${iconSize} w-${iconSize} text-blue-500 group-hover:text-blue-400 transition-colors`} />
+            <ChatBubbleLeftRightIcon className="h-4 w-4 text-blue-500 group-hover:text-blue-400 transition-colors" />
           </button>
-          <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/80 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity">
-            Chat
-          </span>
         </div>
       </div>
+
+      {/* Message feedback */}
+      {message && (
+        <div
+          className={`absolute top-full left-0 mt-3 px-4 py-2 rounded-lg text-center
+          transform transition-all duration-300 ease-out
+          opacity-100 translate-y-0
+          w-[320px] max-w-[90vw]
+          ${
+            message.type === "success"
+              ? "bg-green-500/50 text-green-400"
+              : "bg-red-500/50 text-red-400"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
     </div>
   );
 }

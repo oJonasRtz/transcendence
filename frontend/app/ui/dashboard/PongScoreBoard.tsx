@@ -35,7 +35,7 @@ export default function PongScoreBoard({ scoreBoard }: { scoreBoard: ScoreType |
                     {left.name || 'Player'}
                   </p>
                   <span className="text-xs uppercase tracking-widest text-slate-400">
-                    PLAYER 1
+                    //PLAYER 1
                   </span>
                 </div>
               </div>
