@@ -1,0 +1,17 @@
+.next
+node_modules
+
+.env
+.env.*
+
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.DS_Store
+
+ssl
+*.pem
+*.key
+*.cert

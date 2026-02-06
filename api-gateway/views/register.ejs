@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="timeDoBalacoBaco">
+		<link rel="stylesheet" href="/public/css/styles.css">
+		<title>Sign Up</title>
+	</head>
+	<body class="bg-cover bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]" style="animation: bgPulse 6s ease-in-out infinite;">
+	<div class="relative z-10 bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
+		<main>
+			<header>
+				<a href="/login">Sign In</a>
+			</header>
+			<section>
+				<h2>Sign Up</h2>
+			</section>
+			<section>
+				<% if (success && success.length > 0) { %>
+					<% success.forEach(suc => { %>
+						<p style="color: green"> <%= suc %></p>
+					<% }) %>
+				<% } %>
+				<% if (error && error.length > 0) { %>
+					<% error.forEach(err => { %>
+						<p style="color: red"> <%= err %></p>
+					<% }) %>
+				<% } %>
+				<form action="/checkRegister" method="POST">
+					<label>Username:</label><br>
+					<input type="text" name="username" placeholder="Type your username here" required><br><br>
+					<label>Nickname:</label><br>
+					<input type="text" name="nickname" placeholder="Type your nickname here" required><br><br>
+					<label>Email:</label><br>
+					<input type="email" name="email" placeholder="Type your e-mail here" required><br><br>
+					<label>Password:</label><br>
+					<input type="password" name="password" placeholder="Type your password here" required><br><br>
+					<label>Confirm Password:</label><br>
+					<input type="password" name="confirmPassword" placeholder="Confirm your password" required><br><br>
+					<img src="<%= captcha %>" alt="captcha"><br>
+                                        <input type="text" name="captchaInput" placeholder="Type the code here" required><br><br>
+					<label>
+						<input type="checkBox" name="is2faEnable" value="true">
+						Do you want two factor authentication?
+					</label><br><br>
+					<button class="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white font-semibold" type="submit">Submit</button>
+				</form>
+			</section>
+			<footer>
+				<h6>TimeDoBalacoBaco</h6>
+			</footer>
+		</main>
+		</div>
+	</body>
+</html>

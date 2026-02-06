@@ -1,0 +1,26 @@
+{
+  "name": "sqlite-db",
+  "version": "1.0.0",
+  "description": "That container needs to handle with our database",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Time do balacobako",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/formbody": "^8.0.2",
+    "axios": "^1.13.2",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.1",
+    "nanoid": "^5.1.6",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

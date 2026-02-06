@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/public/css/styles.css">
+		<title>2FA Page</title>
+	</head>
+	<body class="bg-cover bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]" style="animation: bgPulse 6s ease-in-out infinite;">
+                <div class="z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
+
+		<% if (qrCodeDataURL) { %>
+			<img src="<%= qrCodeDataURL %>"><br>
+		<% } else if (image) { %>
+			<img src="<%= image %>" width="350" height="350"<br>
+		<% } %>
+		<section>
+			<h2>2FA Code Page</h2>
+		</section>
+		<section>
+			<% if (error && error.length > 0) { %>
+			<% error.forEach(err => { %>
+				<p style="color: red"> <%= err %> </p>
+			<% }) %>
+			<% } %>
+			<form action="/validate2FAQrCode" method="POST">
+				<label>
+					Code:
+					<input type="text" name="code" placeholder="Type the code here" required>
+					<button type="submit">Submit</button>
+				</label>
+			</form>
+		</section>
+		<footer>
+			<h6>Time do balacobaco</h6>
+		</footer>
+		</div>
+	</body>
+</html>
