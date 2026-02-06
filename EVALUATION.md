@@ -53,6 +53,53 @@ When you run `make up`, the system automatically:
 
 ---
 
+## AWS VM Deployment (Optional)
+
+If you have access to the AWS VM or want to test the production deployment:
+
+### First Time Setup
+
+```bash
+# SSH into the VM
+ssh -i <ssh-key> ubuntu@13.59.195.11
+
+# Clone the repository
+git clone <repository-url>
+cd transcendence
+
+# Generate Let's Encrypt certificates (first time only)
+make aws-cert-init EMAIL=your-email@example.com
+
+# Deploy with Let's Encrypt
+make aws
+
+# Access at https://transcendence42.xyz
+```
+
+### Subsequent Deployments
+
+```bash
+# SSH into the VM
+ssh -i <ssh-key> ubuntu@13.59.195.11
+cd transcendence
+
+# Pull latest changes
+git pull
+
+# Deploy
+make aws
+```
+
+### Certificate Renewal
+
+Let's Encrypt certificates expire every 90 days. To renew:
+
+```bash
+make aws-cert-renew
+```
+
+---
+
 ## Prerequisites
 
 - **Docker** and **Docker Compose v2**

@@ -9,6 +9,9 @@ blacklist.txt
 *.cert
 *.key
 *.ip
+shared/letsencrypt/
+shared/letsencrypt-lib/
+shared/ssl-public/
 
 # Grafana secure password
 monitoring/.grafana-password.txt
