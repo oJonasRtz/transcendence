@@ -409,7 +409,7 @@ const databaseModels = {
   getUserExperience: async function getUserExperience(fastify, user_id) {
     const TITLES = [
       'Rookie',
-      'Fresh Blood',
+      'Novice',
       'Trainee',
       'Fighter',
       'Duelist',
