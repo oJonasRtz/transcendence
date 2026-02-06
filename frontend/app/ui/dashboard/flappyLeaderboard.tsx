@@ -42,7 +42,7 @@ interface FlappyLeaderboardProps {
 				</span>
   
 				<Link href={`/profile/${entry.public_id}`} className="flex items-center gap-4 flex-1">
-				  <div className="relative">
+				  <div className="relative rounded-full rounded-2xl p-[2px] border border-blue-600 shadow-2xl group-hover:border-purple-500 transition-colors">
 					<Image
 						src={entry.avatar}
 						alt={entry.username}

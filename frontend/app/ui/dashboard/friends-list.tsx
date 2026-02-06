@@ -1,9 +1,10 @@
 // app/ui/dashboard/friends-list.tsx
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
+
 import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { DashboardFriend } from '@/app/lib/dashboard-data';
 import { CardHeader, CardShell, EmptyState } from '@/app/ui/dashboard/card-primitives';
+import { useRouter } from 'next/navigation';
 
 type FriendsListProps = {
   friends: DashboardFriend[];
@@ -11,6 +12,7 @@ type FriendsListProps = {
 
 export default async function FriendsList({ friends }: FriendsListProps) {
   const onlineFriends = friends.filter((friend) => friend.isOnline);
+  const router = useRouter();
 
   return (
     <CardShell>
@@ -24,14 +26,14 @@ export default async function FriendsList({ friends }: FriendsListProps) {
       {onlineFriends.map((friend) => (
       <div
         key={friend.id}
-        className="flex items-center space-x-3 p-4 hover:bg-white/5 transition-all duration-300 group"
+        className="flex items-center space-x-3 p-4 group"
       >
-        <Link
-          href={`/profile/${friend.publicId}`}
+        <button
+          onClick={() => router.push(`/profile/${friend.publicId}`)}
           aria-label={`View ${friend.username}'s profile`}
           className="flex flex-1 items-center space-x-3 cursor-pointer"
         >
-          <div className="relative">
+          <div className="relative rounded-2xl p-[2px] border border-blue-600 shadow-2xl group-hover:border-purple-500 transition-colors">
             <img
               src={friend.avatar}
               alt={friend.username}
@@ -43,19 +45,19 @@ export default async function FriendsList({ friends }: FriendsListProps) {
           </div>
 
           <div className="flex-1">
-            <p className="font-semibold text-white">{friend.username}</p>
-            <p className="text-xs font-mono text-green-400 uppercase">Online</p>
+            <p className="font-semibold text-white flex justify-start">{friend.username}</p>
+            <p className="text-xs font-mono text-green-400 uppercase flex justify-start">Online</p>
           </div>
-        </Link>
+        </button>
 
         {friend.publicId && (
-          <Link
-            href={`/direct/${friend.publicId}`}
+          <button
+            onClick={() => router.push(`/direct/${friend.publicId}`)}
             className="text-blue-400 hover:text-blue-300 transition-colors hover:scale-110 duration-300"
             aria-label={`Message ${friend.username}`}
           >
             <ChatBubbleLeftIcon className="h-5 w-5" />
-          </Link>
+          </button>
         )}
       </div>
     ))}
@@ -63,13 +65,13 @@ export default async function FriendsList({ friends }: FriendsListProps) {
       </div>
 
       <div className="border-t border-white/10 p-4 bg-white/5">
-        <Link
-          href="/dashboard/friends"
+        <button
+          onClick={() => router.push("/dashboard/friends")}
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
           View all friends
           <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
-        </Link>
+        </button>
       </div>
     </CardShell>
   );

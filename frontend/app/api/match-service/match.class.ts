@@ -230,6 +230,8 @@ export class Match {
 	public connect({name, email, id}: {name: string, email: string, id: string}): void {
 		this.info = {name, email, id};
 
+		// console.log('Im connecting with ' + JSON.stringify(this.info));
+
 		if (this._isConnected && this.ws?.readyState === WebSocket.OPEN) return;
 
 		const wsUrl: string = this.getUrl();

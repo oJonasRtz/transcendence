@@ -135,6 +135,7 @@ export class Lobby extends EventEmitter {
         });
         const match_id = await this.#newMatch({ players });
         this.#clients.forEach((c) => c.match_id = match_id);
+        console.log(`match ${match_id} created for clients ${this.#clients.map(c => c.name).join(", ")}`);
         this.#broadcast({ type: "MATCH_FOUND", match_id, skip: false });
         break;
       case "TOURNAMENT":

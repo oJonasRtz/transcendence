@@ -1,8 +1,10 @@
 // app/ui/dashboard/recent-messages.tsx
-import Image from 'next/image';
+"use client";
+
 import Link from 'next/link';
 import { DashboardMessage } from '@/app/lib/dashboard-data';
 import { CardHeader, CardShell, EmptyState } from '@/app/ui/dashboard/card-primitives';
+import { useRouter } from 'next/navigation';
 
 type RecentMessagesProps = {
   messages: DashboardMessage[];
@@ -14,6 +16,7 @@ export default async function RecentMessages({
   unreadCount,
 }: RecentMessagesProps) {
   const recentConversations = messages.slice(0, 5);
+  const router = useRouter();
 
   return (
     <CardShell>
@@ -29,7 +32,7 @@ export default async function RecentMessages({
         }
       />
 
-      <div className="max-h-96 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
+      <div className="max-h-96 flex-1 divide-y divide-white/5 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700/60 scrollbar-track-transparent">
         {recentConversations.length === 0 ? (
           <EmptyState
             title="No messages yet"
@@ -37,13 +40,13 @@ export default async function RecentMessages({
           />
         ) : (
           recentConversations.map((conv) => (
-            <Link
+            <button
               key={conv.id}
-              href={`/direct/${conv.publicId}`}
-              className="block p-4 hover:bg-white/5 transition-all duration-300 group"
+              onClick={() => router.push(`/direct/${conv.publicId}`)}
+              className="block p-4 w-full flex-1 group"
             >
-              <div className="flex items-start space-x-3">
-                <div className="relative flex-shrink-0">
+              <div className="flex w-full justify-start items-start space-x-3">
+                <div className="relative flex-shrink-0 rounded-2xl p-[2px] border border-blue-600 shadow-2xl group-hover:border-purple-500 transition-colors">
                   <img
                     src={conv.avatar}
                     alt={conv.username}
@@ -57,29 +60,29 @@ export default async function RecentMessages({
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-white">{conv.username}</p>
-                  <p className="truncate text-sm text-slate-400 font-mono">
+                  <p className="font-semibold flex justify-start text-white truncate">{conv.username}</p>
+                  <p className="truncate text-sm text-slate-400 flex justify-start font-mono">
                     {conv.preview.substring(0, 50)}
                     {conv.preview.length > 50 ? '...' : ''}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500 font-mono">
+                  <p className="mt-1 text-xs text-slate-500 font-mono flex justify-start truncate">
                     {new Date(conv.createdAt).toLocaleDateString()}
                   </p>
                 </div>
               </div>
-            </Link>
+            </button>
           ))
         )}
       </div>
 
       <div className="border-t border-white/10 p-4 bg-white/5">
-        <Link
-          href="/dashboard/messages"
+        <button
+          onClick={() => router.push("/dashboard/messages")}
           className="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors font-mono uppercase tracking-wider group"
         >
           View all messages
           <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
-        </Link>
+        </button>
       </div>
     </CardShell>
   );
