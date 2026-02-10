@@ -85,7 +85,8 @@ export default function SettingsForm({
         {state?.error && (
           <div className="p-4 rounded-lg border border-red-500/50 bg-red-500/10">
             <p className="text-sm text-red-400 font-mono">
-              ERROR: {state.error}
+              {/* ERROR: {state.error} */}
+              ERROR: Failed to submit. Try again later.
             </p>
           </div>
         )}
