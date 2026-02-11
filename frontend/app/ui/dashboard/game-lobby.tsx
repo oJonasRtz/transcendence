@@ -6,7 +6,7 @@ import type { User } from '@/app/lib/auth';
 import {useRouter} from 'next/navigation';
 
 type QueueStatus = 'idle' | 'searching' | 'matched' | 'playing';
-type GameType = 'pong' | 'flappy-bird';
+type GameType = 'pong' | 'flappy-bird' | 'pong-ai';
 
 interface GameLobbyProps {
   user: User;
@@ -78,6 +78,34 @@ export default function GameLobby({ user }: GameLobbyProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handlePlay = () => {
+    if (selectedGame === 'flappy-bird') {
+      router.push('/dashboard/play/flappy-bird');
+      return;
+    }
+
+    if (selectedGame === 'pong-ai') {
+      router.push('/dashboard/play/pong-ai');
+      return;
+    }
+
+    router.push('/dashboard/play/waiting-lobby');
+  };
+
+  const gameLabel =
+    selectedGame === 'flappy-bird'
+      ? 'Flappy Bird'
+      : selectedGame === 'pong-ai'
+        ? 'Pong vs AI'
+        : 'Pong Multiplayer';
+
+  const actionLabel =
+    selectedGame === 'flappy-bird'
+      ? 'Flappy Time!'
+      : selectedGame === 'pong-ai'
+        ? 'Challenge AI'
+        : 'Find Match';
+
   return (
     <div className="space-y-6">
       {/* Error Message */}
@@ -107,7 +135,7 @@ export default function GameLobby({ user }: GameLobbyProps) {
               </div>
 
               {/* Game Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {/* Flappy Bird Card */}
                 <button
                   onClick={() => setSelectedGame('flappy-bird')}
@@ -125,6 +153,22 @@ export default function GameLobby({ user }: GameLobbyProps) {
                   </span>
                 </button>
 
+                <button
+                  onClick={() => setSelectedGame('pong-ai')}
+                  className={`relative p-6 rounded-lg border-2 transition-all duration-300
+                    ${selectedGame === 'pong-ai'
+                      ? 'border-cyan-500 bg-cyan-500/20 shadow-lg shadow-cyan-500/40'
+                      : 'border-white/10 bg-white/5 hover:border-white/30'
+                    }`}
+                >
+                  <div className="text-4xl mb-3">🤖</div>
+                  <h3 className="text-lg font-bold text-white mb-1">Pong vs AI</h3>
+                  <p className="text-sm text-slate-400">Single Player</p>
+                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-500/50 text-cyan-300 text-xs">
+                    Available Now
+                  </span>
+                </button>
+
                 {/* Pong Card */}
                 <button
                   onClick={() => setSelectedGame('pong')}
@@ -137,20 +181,14 @@ export default function GameLobby({ user }: GameLobbyProps) {
                   <div className="text-4xl mb-3">🏓</div>
                   <h3 className="text-lg font-bold text-white mb-1">Pong</h3>
                   <p className="text-sm text-slate-400">Multiplayer</p>
-                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs">
-                    Work in Progress
+                  <span className="inline-block mt-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/50 text-purple-300 text-xs">
+                    Competitive
                   </span>
                 </button>
               </div>
 
               <button
-                onClick={() => {
-                  if (selectedGame === 'flappy-bird') {
-                    router.push('/dashboard/play/flappy-bird');
-                  } else {
-                    router.push('/dashboard/play/waiting-lobby');
-                  }
-                }}
+                onClick={handlePlay}
                 // disabled={selectedGame === 'pong'}
                 className="group relative px-12 py-4 rounded-lg
                            bg-gradient-to-r from-blue-500 to-purple-600
@@ -162,7 +200,7 @@ export default function GameLobby({ user }: GameLobbyProps) {
               >
                 <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400 to-purple-500
                                 opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300 -z-10" />
-                {selectedGame === 'flappy-bird' ? 'Flappy Time!' : 'Paddle Up!'}
+                {actionLabel}
               </button>
 
               {/* {selectedGame === 'flappy-bird' ? (
@@ -287,7 +325,7 @@ export default function GameLobby({ user }: GameLobbyProps) {
       {/* Info Card - Dynamic based on selected game */}
       <div className="rounded-lg border border-white/10 bg-white/5 p-6">
         <h3 className="text-lg font-bold text-white mb-4">
-          How to Play {selectedGame === 'flappy-bird' ? 'Flappy Bird' : 'Pong'}
+          How to Play {gameLabel}
         </h3>
 
         {selectedGame === 'flappy-bird' ? (
@@ -311,6 +349,25 @@ export default function GameLobby({ user }: GameLobbyProps) {
             <li className="flex items-start gap-2">
               <span className="text-green-400 mt-0.5">▸</span>
               <span>When you crash, click inside the game to restart</span>
+            </li>
+          </ul>
+        ) : selectedGame === 'pong-ai' ? (
+          <ul className="space-y-2 text-slate-400 text-sm">
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400 mt-0.5">▸</span>
+              <span>Use <kbd className="px-2 py-1 text-xs rounded bg-white/10 border border-white/20">W</kbd>/<kbd className="px-2 py-1 text-xs rounded bg-white/10 border border-white/20">S</kbd> or Arrow Keys</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400 mt-0.5">▸</span>
+              <span>The AI tracks the ball and reacts with limited speed</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400 mt-0.5">▸</span>
+              <span>First side to reach 7 points wins</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-cyan-400 mt-0.5">▸</span>
+              <span>Use restart to instantly start a new match</span>
             </li>
           </ul>
         ) : (

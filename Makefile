@@ -93,25 +93,30 @@ game-logs:
 
 # Domain and email for Let's Encrypt (override with: make aws-cert-init DOMAIN=yourdomain.com EMAIL=you@email.com)
 DOMAIN ?= transcendence42.xyz
-EMAIL ?= your-email@example.com
+ALT_DOMAIN ?= www.$(DOMAIN)
+EMAIL ?= rflseijiueno@gmail.com
+ACME_WEBROOT ?= ./shared/certbot/www
 LE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.letsencrypt.yml
+AWS_COMPOSE = NGINX_SSL_DIR=./shared/ssl-public PUBLIC_DOMAIN=$(DOMAIN) docker compose
+CERT_DOMAINS = -d $(DOMAIN) $(if $(ALT_DOMAIN),-d $(ALT_DOMAIN),)
 
 # Initialize Let's Encrypt certificates (first time only)
-aws-cert-init:
+aws-cert-init: secrets tls
 	@echo "Obtaining Let's Encrypt certificate for $(DOMAIN)..."
 	@test -n "$(EMAIL)" || (echo "ERROR: Set EMAIL (e.g., make aws-cert-init EMAIL=you@example.com)"; exit 1)
-	@echo "Stopping nginx if running..."
-	@docker compose stop nginx 2>/dev/null || true
-	@echo "Running certbot..."
-	@$(LE_COMPOSE) run --rm --service-ports certbot certbot certonly \
-		--standalone \
+	@mkdir -p "$(ACME_WEBROOT)/.well-known/acme-challenge"
+	@echo "Starting services so nginx can answer ACME challenge..."
+	@docker compose up -d
+	@echo "Running certbot (webroot challenge)..."
+	@$(LE_COMPOSE) run --rm certbot certbot certonly \
+		--webroot \
+		-w /var/www/certbot \
 		--non-interactive \
 		--agree-tos \
 		--email $(EMAIL) \
-		-d $(DOMAIN)
+		$(CERT_DOMAINS)
 	@$(MAKE) aws-tls DOMAIN=$(DOMAIN)
-	@echo "✓ Certificates obtained! Starting services..."
-	@docker compose start nginx 2>/dev/null || true
+	@echo "✓ Certificates obtained and copied to shared/ssl-public/"
 
 # Copy Let's Encrypt certs to ssl directory for nginx
 aws-tls:
@@ -127,19 +132,16 @@ aws-tls:
 # Renew Let's Encrypt certificates (run every 60-90 days)
 aws-cert-renew:
 	@echo "Renewing Let's Encrypt certificates..."
-	@docker compose stop nginx
-	@$(LE_COMPOSE) run --rm --service-ports certbot certbot renew --standalone --non-interactive
+	@mkdir -p "$(ACME_WEBROOT)/.well-known/acme-challenge"
+	@$(LE_COMPOSE) run --rm certbot certbot renew --webroot -w /var/www/certbot --non-interactive
 	@$(MAKE) aws-tls DOMAIN=$(DOMAIN)
-	@docker compose start nginx
-	@echo "✓ Certificates renewed!"
+	@$(AWS_COMPOSE) restart nginx
+	@echo "✓ Certificates renewed and nginx restarted!"
 
 # Deploy on AWS VM with Let's Encrypt (use this after aws-cert-init)
-aws: secrets aws-tls build
+aws: secrets tls aws-tls
 	@echo "Deploying on AWS with Let's Encrypt certificates..."
-	@docker compose down || true
-	@rm -rf ./shared/ssl
-	@ln -sf ssl-public ./shared/ssl
-	@docker compose up -d
+	@$(AWS_COMPOSE) up -d --build
 	@echo "✓ Deployed! Access at https://$(DOMAIN)"
 
 .PHONY: up down build clean fclean re remake tls secrets game-logs aws-cert-init aws-cert-renew aws-tls aws

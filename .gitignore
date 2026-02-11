@@ -11,6 +11,7 @@ blacklist.txt
 *.ip
 shared/letsencrypt/
 shared/letsencrypt-lib/
+shared/certbot/
 shared/ssl-public/
 
 # Grafana secure password

@@ -5,9 +5,23 @@ Simple guide for deploying transcendence on AWS EC2 with Let's Encrypt.
 ## Prerequisites
 
 - AWS EC2 instance (Ubuntu)
-- Domain name pointing to the instance IP
+- Elastic IP associated to the EC2 instance
+- Domain name pointing to the Elastic IP
 - Ports 80, 443 open in security group
 - SSH access to the instance
+
+## Elastic IP + DNS
+
+1. In AWS EC2, allocate an Elastic IP and associate it with your instance.
+2. In your DNS provider, set:
+   - `A` record `@` -> your Elastic IP
+   - `A` record `www` -> your Elastic IP (recommended)
+3. Verify DNS:
+
+```bash
+dig transcendence42.xyz +short
+dig www.transcendence42.xyz +short
+```
 
 ## Initial Setup
 
@@ -47,21 +61,38 @@ git clone <repository-url>
 cd transcendence
 ```
 
+### 3.1 One-Command Deploy (Recommended)
+
+```bash
+# Uses default domain/email configured in script:
+./scripts/deploy-aws.sh
+
+# Explicit values:
+./scripts/deploy-aws.sh \
+  --domain transcendence42.xyz \
+  --alt-domain www.transcendence42.xyz \
+  --email rflseijiueno@gmail.com
+```
+
 ### 4. Generate Let's Encrypt Certificates
 
 ```bash
-# First time only - requires your domain and email
-make aws-cert-init DOMAIN=your-domain.com EMAIL=your-email@example.com
+# First time only - requires your domain and email.
+# By default this issues certs for DOMAIN and ALT_DOMAIN=www.DOMAIN.
+make aws-cert-init DOMAIN=your-domain.com EMAIL=rflseijiueno@gmail.com
 
 # Example:
-# make aws-cert-init DOMAIN=transcendence42.xyz EMAIL=admin@transcendence42.xyz
+# make aws-cert-init DOMAIN=transcendence42.xyz EMAIL=rflseijiueno@gmail.com
+# To disable www:
+# make aws-cert-init DOMAIN=transcendence42.xyz ALT_DOMAIN=
 ```
 
 This will:
-- Stop nginx temporarily
+- Start services with internal self-signed TLS
+- Complete HTTP-01 challenge via nginx webroot
 - Request certificates from Let's Encrypt
 - Copy certificates to shared/ssl-public/
-- Restart nginx
+- Keep service-to-service TLS on shared/ssl/
 
 ### 5. Deploy Services
 
@@ -90,8 +121,10 @@ Let's Encrypt certificates expire every 90 days.
 
 ```bash
 # Manual renewal
-make aws-cert-renew
+make aws-cert-renew DOMAIN=transcendence42.xyz
 ```
+
+Renewal uses the webroot challenge and does not stop nginx.
 
 Or add to crontab for automatic renewal:
 
@@ -99,8 +132,8 @@ Or add to crontab for automatic renewal:
 # Edit crontab
 crontab -e
 
-# Add this line (runs every 60 days at 3am)
-0 3 */60 * * cd /home/ubuntu/transcendence && make aws-cert-renew >> /var/log/certbot-renew.log 2>&1
+# Add this line (runs monthly at 3am on day 1)
+0 3 1 * * cd /home/ubuntu/transcendence && make aws-cert-renew DOMAIN=transcendence42.xyz >> /var/log/certbot-renew.log 2>&1
 ```
 
 ## Troubleshooting
@@ -165,5 +198,5 @@ Same as local deployment, but with:
 ## Current Deployment
 
 - **Domain**: transcendence42.xyz
-- **IP**: 13.59.195.11
+- **Elastic IP**: 13.59.195.11
 - **VM**: AWS EC2 Ubuntu

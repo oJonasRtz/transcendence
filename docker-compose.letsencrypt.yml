@@ -8,8 +8,6 @@ services:
     volumes:
       - ./shared/letsencrypt:/etc/letsencrypt
       - ./shared/letsencrypt-lib:/var/lib/letsencrypt
-    # Standalone mode uses port 80, so nginx must be stopped
-    ports:
-      - "80:80"
+      - ./shared/certbot/www:/var/www/certbot
     entrypoint: ""
     command: /bin/sh -c "trap exit TERM; while :; do sleep 12h; done"

@@ -76,7 +76,7 @@ sudo ufw allow 443/tcp
 
 ### 3. DNS Configuration
 
-**Verify domain points to VM:**
+**Verify domain points to the Elastic IP associated to the VM:**
 
 ```bash
 # From your local machine
@@ -90,9 +90,13 @@ nslookup transcendence42.xyz
 
 **If not configured:**
 - Go to your domain registrar (e.g., Hostinger, GoDaddy, etc.)
-- Add/Update A record:
+- Add/Update A records:
   - Type: `A`
-  - Name: `@` or `transcendence42.xyz`
+  - Name: `@`
+  - Value: `13.59.195.11`
+  - TTL: `3600` (or default)
+  - Type: `A`
+  - Name: `www`
   - Value: `13.59.195.11`
   - TTL: `3600` (or default)
 
@@ -142,8 +146,18 @@ Once everything is verified:
 git clone <repository-url>
 cd transcendence
 
+# 2. One command deploy (recommended)
+./scripts/deploy-aws.sh \
+  --domain transcendence42.xyz \
+  --alt-domain www.transcendence42.xyz \
+  --email rflseijiueno@gmail.com
+
+# Optional: skip cron install if you manage renewal elsewhere
+# ./scripts/deploy-aws.sh --skip-cron
+
+# Manual equivalent:
 # 2. Generate Let's Encrypt certificates (first time only)
-make aws-cert-init EMAIL=your-email@example.com
+make aws-cert-init DOMAIN=transcendence42.xyz EMAIL=rflseijiueno@gmail.com
 
 # 3. Deploy (automatically generates secrets if .env doesn't exist)
 make aws
@@ -155,7 +169,7 @@ curl -I https://transcendence42.xyz
 
 **Note:** The `make aws` command automatically:
 - Generates `.env` with random JWT_SECRET and GRAFANA_ADMIN_PASSWORD (if not exists)
-- Copies Let's Encrypt certificates
+- Keeps internal service TLS in `shared/ssl` and mounts Let's Encrypt certs to nginx from `shared/ssl-public`
 - Builds all images
 - Starts all services
 
@@ -182,6 +196,9 @@ curl -I https://transcendence42.xyz
 # Check SSL certificate
 echo | openssl s_client -connect transcendence42.xyz:443 2>/dev/null | openssl x509 -noout -issuer -dates
 # Issuer should be "Let's Encrypt"
+
+# Check www certificate SAN
+echo | openssl s_client -connect www.transcendence42.xyz:443 2>/dev/null | openssl x509 -noout -subject -issuer -dates
 ```
 
 ## ⚠️ Common Issues
@@ -233,7 +250,7 @@ If you hit Let's Encrypt rate limits (5 failures per hour):
 
 ## 📋 Current VM Configuration
 
-- **IP**: 13.59.195.11
+- **Elastic IP**: 13.59.195.11
 - **Domain**: transcendence42.xyz
 - **OS**: Ubuntu (latest)
 - **User**: ubuntu

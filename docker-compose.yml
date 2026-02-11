@@ -7,7 +7,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./shared/ssl:/etc/nginx/ssl:ro
+      - ${NGINX_SSL_DIR:-./shared/ssl}:/etc/nginx/ssl:ro
+      - ./shared/certbot/www:/var/www/certbot:ro
     depends_on:
       - api-gateway
       - frontend
@@ -25,10 +26,10 @@ services:
       - "transcendence"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - NEXT_PUBLIC_API_GATEWAY_URL=https://localhost:3000
-      - NEXT_PUBLIC_SOCKET_URL=http://localhost
-      - NEXT_PUBLIC_MATCH_SERVICE_WS=ws://localhost:3020
-      - BACKEND_URL=https://localhost:3000
+      - NEXT_PUBLIC_API_GATEWAY_URL=https://${PUBLIC_DOMAIN:-localhost}
+      - NEXT_PUBLIC_SOCKET_URL=https://${PUBLIC_DOMAIN:-localhost}
+      - NEXT_PUBLIC_MATCH_SERVICE_WS=wss://${PUBLIC_DOMAIN:-localhost}/match-ws/
+      - BACKEND_URL=https://api-gateway:3000
       - API_GATEWAY_URL=https://api-gateway:3000
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
