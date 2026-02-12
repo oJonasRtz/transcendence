@@ -4,6 +4,7 @@ import { gameState, stats } from "../globals";
 import { Ball } from "./actors/ball";
 import { ScoreBoard } from "./ScoreBoard.class";
 import { hideDisconnectScreen, showDisconnectScreen } from "../main";
+import { EffectsOverlay } from "./EffectsOverlay.class";
 
 class Background extends ex.Actor {
   private image: ex.ImageSource;
@@ -33,8 +34,9 @@ export class Game {
   private paddles: ex.Actor[] | null = null;
   private ball: ex.Actor | null = null;
 
-  private endPromisse!: Promise<void>;
-  private endResolve!: () => void;
+  private engineStartPromise: Promise<void> | null = null;
+  private endPromise: Promise<void>;
+  private endResolve: (() => void) | null = null;
   private ended: boolean = false;
 
   private sprites: {
@@ -70,15 +72,20 @@ export class Game {
     this.addBackground();
     // this.addToGame([score]);
     this.addPaddles();
+    this.addToGame([new EffectsOverlay(this.engine)]);
+
+    this.endPromise = new Promise<void>((resolve) => {
+      this.endResolve = resolve;
+    });
 
     this.engine.on("preupdate", () => {
+      gameState.tickNetworkInterpolation();
       const { gameEnd } = gameState.getGame();
 
       if (gameEnd) this.end();
 
-      const players = gameState.getPlayers();
-      if (!players[1].connected || !players[2].connected)
-        showDisconnectScreen(this.container);
+      const { allOk } = gameState.getGame();
+      if (!allOk) showDisconnectScreen(this.container);
       else hideDisconnectScreen();
 
       this.ballReset();
@@ -137,25 +144,23 @@ export class Game {
   }
 
   async start(): Promise<void> {
-    if (!this.endPromisse) {
-      this.endPromisse = new Promise<void>((resolve) => {
-        this.endResolve = resolve;
-      });
-    }
+    await this.startEngine();
+    return this.endPromise;
+  }
 
-    // const loader = new ex.Loader([
-    //   this.sprites.arenaBackground!,
-    //   this.sprites.redPaddle!,
-    //   this.sprites.bluePaddle!,
-    // ])
+  async startEngine(): Promise<void> {
+    if (this.engineStartPromise) return this.engineStartPromise;
 
-    await this.sprites.arenaBackground!.load();
-    await this.sprites.redPaddle!.load();
-    await this.sprites.bluePaddle!.load();
+    this.engineStartPromise = (async () => {
+      await Promise.all([
+        this.sprites.arenaBackground!.load(),
+        this.sprites.redPaddle!.load(),
+        this.sprites.bluePaddle!.load(),
+      ]);
+      await this.engine.start();
+    })();
 
-    await this.engine.start();
-
-    return this.endPromisse;
+    return this.engineStartPromise;
   }
 
   end() {

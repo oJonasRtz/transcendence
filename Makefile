@@ -100,6 +100,21 @@ LE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.letsencrypt.
 AWS_COMPOSE = NGINX_SSL_DIR=./shared/ssl-public PUBLIC_DOMAIN=$(DOMAIN) docker compose
 CERT_DOMAINS = -d $(DOMAIN) $(if $(ALT_DOMAIN),-d $(ALT_DOMAIN),)
 
+# Persist AWS runtime variables in .env so plain `docker compose up -d` keeps public TLS.
+aws-env-sync: secrets
+	@echo "Syncing AWS runtime variables into .env..."
+	@if grep -q '^PUBLIC_DOMAIN=' .env; then \
+		sed -i "s#^PUBLIC_DOMAIN=.*#PUBLIC_DOMAIN=$(DOMAIN)#" .env; \
+	else \
+		echo "PUBLIC_DOMAIN=$(DOMAIN)" >> .env; \
+	fi
+	@if grep -q '^NGINX_SSL_DIR=' .env; then \
+		sed -i 's#^NGINX_SSL_DIR=.*#NGINX_SSL_DIR=./shared/ssl-public#' .env; \
+	else \
+		echo 'NGINX_SSL_DIR=./shared/ssl-public' >> .env; \
+	fi
+	@echo "✓ .env updated with PUBLIC_DOMAIN and NGINX_SSL_DIR"
+
 # Initialize Let's Encrypt certificates (first time only)
 aws-cert-init: secrets tls
 	@echo "Obtaining Let's Encrypt certificate for $(DOMAIN)..."
@@ -116,6 +131,7 @@ aws-cert-init: secrets tls
 		--email $(EMAIL) \
 		$(CERT_DOMAINS)
 	@$(MAKE) aws-tls DOMAIN=$(DOMAIN)
+	@$(MAKE) aws-env-sync DOMAIN=$(DOMAIN)
 	@echo "✓ Certificates obtained and copied to shared/ssl-public/"
 
 # Copy Let's Encrypt certs to ssl directory for nginx
@@ -130,7 +146,7 @@ aws-tls:
 	@echo "✓ Certificates copied to shared/ssl-public/"
 
 # Renew Let's Encrypt certificates (run every 60-90 days)
-aws-cert-renew:
+aws-cert-renew: aws-env-sync
 	@echo "Renewing Let's Encrypt certificates..."
 	@mkdir -p "$(ACME_WEBROOT)/.well-known/acme-challenge"
 	@$(LE_COMPOSE) run --rm certbot certbot renew --webroot -w /var/www/certbot --non-interactive
@@ -139,9 +155,9 @@ aws-cert-renew:
 	@echo "✓ Certificates renewed and nginx restarted!"
 
 # Deploy on AWS VM with Let's Encrypt (use this after aws-cert-init)
-aws: secrets tls aws-tls
+aws: secrets tls aws-tls aws-env-sync
 	@echo "Deploying on AWS with Let's Encrypt certificates..."
 	@$(AWS_COMPOSE) up -d --build
 	@echo "✓ Deployed! Access at https://$(DOMAIN)"
 
-.PHONY: up down build clean fclean re remake tls secrets game-logs aws-cert-init aws-cert-renew aws-tls aws
+.PHONY: up down build clean fclean re remake tls secrets game-logs aws-env-sync aws-cert-init aws-cert-renew aws-tls aws

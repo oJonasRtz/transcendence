@@ -147,6 +147,58 @@ function createRegistry({ serviceName }) {
 		help: "Total WebSocket messages received"
 	});
 
+	const pongPlayersConnected = new Gauge({
+		name: "pong_players_connected",
+		help: "Current connected players across Pong matches"
+	});
+	pongPlayersConnected.set(defaultLabels, 0);
+
+	const pongPlayersPlaying = new Gauge({
+		name: "pong_players_playing",
+		help: "Current connected players in active Pong games"
+	});
+	pongPlayersPlaying.set(defaultLabels, 0);
+
+	const pongMatchesTotal = new Gauge({
+		name: "pong_matches_total",
+		help: "Current total Pong matches tracked by game-server"
+	});
+	pongMatchesTotal.set(defaultLabels, 0);
+
+	const pongMatchesWaitingPlayers = new Gauge({
+		name: "pong_matches_waiting_players",
+		help: "Pong matches waiting for all players to connect"
+	});
+	pongMatchesWaitingPlayers.set(defaultLabels, 0);
+
+	const pongMatchesWaitingReady = new Gauge({
+		name: "pong_matches_waiting_ready",
+		help: "Pong matches with all players connected but waiting ready/start"
+	});
+	pongMatchesWaitingReady.set(defaultLabels, 0);
+
+	const pongMatchesPlaying = new Gauge({
+		name: "pong_matches_playing",
+		help: "Pong matches currently in active gameplay"
+	});
+	pongMatchesPlaying.set(defaultLabels, 0);
+
+	function setPongStats({
+		playersConnected = 0,
+		playersPlaying = 0,
+		matchesTotal = 0,
+		matchesWaitingPlayers = 0,
+		matchesWaitingReady = 0,
+		matchesPlaying = 0
+	} = {}) {
+		pongPlayersConnected.set(defaultLabels, playersConnected);
+		pongPlayersPlaying.set(defaultLabels, playersPlaying);
+		pongMatchesTotal.set(defaultLabels, matchesTotal);
+		pongMatchesWaitingPlayers.set(defaultLabels, matchesWaitingPlayers);
+		pongMatchesWaitingReady.set(defaultLabels, matchesWaitingReady);
+		pongMatchesPlaying.set(defaultLabels, matchesPlaying);
+	}
+
 	function collectProcessMetrics() {
 		const mem = process.memoryUsage();
 		processUptimeSeconds.set(defaultLabels, process.uptime());
@@ -159,31 +211,37 @@ function createRegistry({ serviceName }) {
 		processCpuSystemSecondsTotal.set(defaultLabels, cpu.system / 1e6);
 	}
 
-	function render() {
-		collectProcessMetrics();
-		return [
-			...nodejsVersionInfo.renderLines(),
-			...processUptimeSeconds.renderLines(),
-			...processResidentMemoryBytes.renderLines(),
-			...processHeapUsedBytes.renderLines(),
-			...processHeapTotalBytes.renderLines(),
-			...processCpuUserSecondsTotal.renderLines(),
-			...processCpuSystemSecondsTotal.renderLines(),
-			...wsConnections.renderLines(),
-			...wsMessagesReceivedTotal.renderLines()
-		].join("\n") + "\n";
-	}
+		function render() {
+			collectProcessMetrics();
+			return [
+				...nodejsVersionInfo.renderLines(),
+				...processUptimeSeconds.renderLines(),
+				...processResidentMemoryBytes.renderLines(),
+				...processHeapUsedBytes.renderLines(),
+				...processHeapTotalBytes.renderLines(),
+				...processCpuUserSecondsTotal.renderLines(),
+				...processCpuSystemSecondsTotal.renderLines(),
+				...wsConnections.renderLines(),
+				...wsMessagesReceivedTotal.renderLines(),
+				...pongPlayersConnected.renderLines(),
+				...pongPlayersPlaying.renderLines(),
+				...pongMatchesTotal.renderLines(),
+				...pongMatchesWaitingPlayers.renderLines(),
+				...pongMatchesWaitingReady.renderLines(),
+				...pongMatchesPlaying.renderLines()
+			].join("\n") + "\n";
+		}
 
-	return {
-		contentType: CONTENT_TYPE,
-		defaultLabels,
-		wsConnections,
-		wsMessagesReceivedTotal,
-		render
-	};
-}
+		return {
+			contentType: CONTENT_TYPE,
+			defaultLabels,
+			wsConnections,
+			wsMessagesReceivedTotal,
+			setPongStats,
+			render
+		};
+	}
 
 export function createGameServerMetrics({ serviceName }) {
 	return createRegistry({ serviceName });
 }
-

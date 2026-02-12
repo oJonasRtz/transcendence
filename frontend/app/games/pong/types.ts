@@ -8,6 +8,7 @@ export type InputType = {
   id: number;
   matchId: number;
   type: string;
+  seq: number;
   up: boolean;
   down: boolean;
 };

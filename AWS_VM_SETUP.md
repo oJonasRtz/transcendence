@@ -170,6 +170,7 @@ curl -I https://transcendence42.xyz
 **Note:** The `make aws` command automatically:
 - Generates `.env` with random JWT_SECRET and GRAFANA_ADMIN_PASSWORD (if not exists)
 - Keeps internal service TLS in `shared/ssl` and mounts Let's Encrypt certs to nginx from `shared/ssl-public`
+- Persists `PUBLIC_DOMAIN` and `NGINX_SSL_DIR=./shared/ssl-public` in `.env` to avoid reverting to self-signed certs on later plain `docker compose up -d`
 - Builds all images
 - Starts all services
 

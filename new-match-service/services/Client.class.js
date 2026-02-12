@@ -109,6 +109,13 @@ export class Client {
 		return this.#info.email;
 	}
 
+	syncIdentity({name, email}) {
+		if (typeof name === 'string' && name.trim() !== '')
+			this.#info.name = name;
+		if (typeof email === 'string' && email.trim() !== '')
+			this.#info.email = email;
+	}
+
 	get party() {
 		return this.#game.party;
 	}

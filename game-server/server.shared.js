@@ -44,6 +44,7 @@ export const types = {
 		CONNECT_LOBBY: "CONNECT_LOBBY",
 		END_GAME: "END_GAME",
 		INPUT: "INPUT",
+		READY: "PLAYER_READY",
 		BOUNCE: "BOUNCE",
 	}
 };

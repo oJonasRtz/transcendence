@@ -1,15 +1,21 @@
 import { checkVerticalCollision } from "../../controllers/checkVerticalCollision.js";
-import { FPS, FRAME_TIME, stats, types } from "../../server.shared.js";
+import { stats, types } from "../../server.shared.js";
 
 export class Paddle {
-	#speed = 600 / FPS;
+	#baseSpeed = stats?.paddle?.speed ?? 600;
 	#borderMargin = stats?.margin ?? 10;
 	#spawnMargin = 50;
 	#position = {x: 0, y: 0};
 	#direction = {up: false, down: false};
-	#size = {width: stats?.paddle?.width ?? 20, height: stats?.paddle?.height ?? 100};
-	#interval = null;
-	#networkBuffer = FRAME_TIME;
+	#baseSize = {width: stats?.paddle?.width ?? 20, height: stats?.paddle?.height ?? 100};
+	#modifiers = {
+		speed: 1,
+		height: 1,
+	};
+	#modifierTimers = {
+		speed: null,
+		height: null,
+	};
 	#side = null;
 
 	constructor(side) {
@@ -25,23 +31,22 @@ export class Paddle {
 	}
 
 	start() {
-		if (this.#interval)
-			return;
-
-		this.#interval = setInterval(() => {
-			this.#updatePosition();
-		}, this.#networkBuffer);
+		return;
 	}
 
 	get position() {
 		return {x: this.#position.x, y: this.#position.y};
 	}
 	get size() {
-		return {width: this.#size.width, height: this.#size.height};
+		return {
+			width: this.#baseSize.width,
+			height: this.#baseSize.height * this.#modifiers.height,
+		};
 	}
 	get hitBox() {
-		const halfHeight = this.#size.height / 2;
-		const halfWidth = this.#size.width / 2;
+		const size = this.size;
+		const halfHeight = size.height / 2;
+		const halfWidth = size.width / 2;
 
 		return {
 			top: this.#position.y - halfHeight,
@@ -52,11 +57,7 @@ export class Paddle {
 	}
 
 	stop() {
-		if (!this.#interval)
-			return;
-
-		clearInterval(this.#interval);
-		this.#interval = null;
+		this.#clearModifiers();
 	}
 
 	updateDirection({up, down}) {
@@ -66,10 +67,17 @@ export class Paddle {
 		this.#direction = {up, down};
 	}
 
-	#updatePosition() {
-		const moveSpeed = this.#getMoveSpeed();
+	update(deltaSeconds = 0) {
+		if (!deltaSeconds) return;
 
-		if (checkVerticalCollision(this.#position.y + moveSpeed, this.#size.height, this.#borderMargin))
+		this.#updatePosition(deltaSeconds);
+	}
+
+	#updatePosition(deltaSeconds) {
+		const moveSpeed = this.#getMoveSpeed() * deltaSeconds;
+		const size = this.size;
+
+		if (checkVerticalCollision(this.#position.y + moveSpeed, size.height, this.#borderMargin))
 			return;
 
 		this.#position.y += moveSpeed;
@@ -78,6 +86,46 @@ export class Paddle {
 	#getMoveSpeed() {
 		const dir = this.#direction.down - this.#direction.up;
 
-		return dir * this.#speed;
+		return dir * this.#baseSpeed * this.#modifiers.speed;
+	}
+
+	#clearModifiers() {
+		for (const key of Object.keys(this.#modifierTimers)) {
+			if (this.#modifierTimers[key]) {
+				clearTimeout(this.#modifierTimers[key]);
+				this.#modifierTimers[key] = null;
+			}
+		}
+
+		this.#modifiers.speed = 1;
+		this.#modifiers.height = 1;
+	}
+
+	applySpeedMultiplier(multiplier = 1, durationMs = 0) {
+		if (typeof multiplier !== "number" || multiplier <= 0) return;
+		const duration = Math.max(0, Number(durationMs) || 0);
+
+		this.#modifiers.speed = multiplier;
+		if (this.#modifierTimers.speed) clearTimeout(this.#modifierTimers.speed);
+		if (!duration) return;
+
+		this.#modifierTimers.speed = setTimeout(() => {
+			this.#modifiers.speed = 1;
+			this.#modifierTimers.speed = null;
+		}, duration);
+	}
+
+	applyHeightMultiplier(multiplier = 1, durationMs = 0) {
+		if (typeof multiplier !== "number" || multiplier <= 0) return;
+		const duration = Math.max(0, Number(durationMs) || 0);
+
+		this.#modifiers.height = multiplier;
+		if (this.#modifierTimers.height) clearTimeout(this.#modifierTimers.height);
+		if (!duration) return;
+
+		this.#modifierTimers.height = setTimeout(() => {
+			this.#modifiers.height = 1;
+			this.#modifierTimers.height = null;
+		}, duration);
 	}
 }

@@ -12,6 +12,7 @@ export class Player {
 	#notifyBallDeath = false;
 	#side;
 	#direction = {up: false, down: false};
+	#lastInputSeq = 0;
 	#paddle;
 	#matchId = 0;
 
@@ -32,6 +33,7 @@ export class Player {
 			position: {...this.#paddle.position},
 			size: {...this.#paddle.size},
 			connected: this.#connected,
+			lastInputSeq: this.#lastInputSeq,
 		}
 	}
 	get hitBox() {
@@ -65,8 +67,12 @@ export class Player {
 	}
 
 	connect(ws, id, name) {
-		if (id !== this.#id || name !== this.#name) 
+		const incomingId = String(id ?? "");
+		const expectedId = String(this.#id ?? "");
+		if (incomingId !== expectedId)
 			throw new Error(types.error.NOT_FOUND);
+		if (typeof name === "string" && name.trim() !== "" && name !== this.#name)
+			this.#name = name;
 		if (this.#connected) {
 			lobby.send({
 				type: types.message.ERROR,
@@ -92,12 +98,33 @@ export class Player {
 			console.error("Error sending message:", error.message);
 		}
 	}
-	updateDirection(direction) {
+	sendSerialized(serializedMessage) {
+		try {
+			if (!this.#connected || !this.#ws || this.#ws.readyState !== 1)
+				throw new Error(types.error.NOT_CONNECTED);
+			this.#ws.send(serializedMessage);
+		} catch (error) {
+			console.error("Error sending serialized message:", error.message);
+		}
+	}
+	updateDirection(direction, inputSeq = null) {
 		if (!this.#connected
 			|| Object.values(direction).some(v => typeof v !== 'boolean')) return;
 		
 		this.#direction = {...direction};
+		const parsedSeq = Number(inputSeq);
+		if (Number.isFinite(parsedSeq) && parsedSeq >= 0)
+			this.#lastInputSeq = Math.max(this.#lastInputSeq, Math.floor(parsedSeq));
 		this.#paddle.updateDirection(this.#direction);
+	}
+	update(deltaSeconds) {
+		this.#paddle.update(deltaSeconds);
+	}
+	applyHeightMultiplier(multiplier, durationMs) {
+		this.#paddle.applyHeightMultiplier(multiplier, durationMs);
+	}
+	applySpeedMultiplier(multiplier, durationMs) {
+		this.#paddle.applySpeedMultiplier(multiplier, durationMs);
 	}
 	destroy(err = null) {
 		if (this.#ws) {

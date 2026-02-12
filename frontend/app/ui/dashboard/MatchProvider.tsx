@@ -39,14 +39,13 @@ export default function MatchProvider({ user, profile, children }:
   useEffect(() => {
     if (!user) return;
 
+    const currentName = profile?.nickname || user.username;
     const tryConnect = () => {
-      if (!match.isConnected && user) {
-        match.connect({
-          id: user.user_id,
-          email: user.email,
-          name: profile?.nickname || user.username,
-        });
-      }
+      match.connect({
+        id: user.user_id,
+        email: user.email,
+        name: currentName,
+      });
     };
 
     tryConnect();
@@ -84,7 +83,7 @@ export default function MatchProvider({ user, profile, children }:
       if (reconnecIntervalRef.current) clearInterval(reconnecIntervalRef.current);
       if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
     };
-  }, [router, user]);
+  }, [router, user?.user_id, user?.email, user?.username, profile?.nickname]);
 
   return (
     <>

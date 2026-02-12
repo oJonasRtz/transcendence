@@ -63,8 +63,9 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     const joinLobby = async () => {
       try {
         if (!match.isConnected) {
+          const fallbackName = match.matchInfo.name || user.username;
           match.connect({
-            name: user.username,
+            name: fallbackName,
             email: user.email,
             id: user.user_id,
           });
@@ -86,6 +87,19 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     // Leave party on unmount
     return () => {};
   }, [user, gameType]);
+
+  useEffect(() => {
+    let redirected = false;
+    const interval = setInterval(() => {
+      if (redirected) return;
+      if (!match.match_id) return;
+
+      redirected = true;
+      router.push('/dashboard/play/pong');
+    }, 250);
+
+    return () => clearInterval(interval);
+  }, [router]);
   
 
   // Sync players from match.party periodically

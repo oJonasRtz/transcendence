@@ -14,8 +14,6 @@ import { ScoreType } from "@/app/ui/dashboard/pong-game";
 //   },
 // };
 
-connection.connect();
-
 export function waitGameStart(): Promise<void> {
   return new Promise((resolve) => {
     const check = () => {
@@ -39,13 +37,20 @@ export function waitGameStart(): Promise<void> {
  * @returns Wait a promisse till the game ends.
 */
 export async function startPong(data: StartType, container: HTMLElement, setScore: (score: ScoreType) => void): Promise<void> {
-  showDisconnectScreen(container);
   gameState.setIdentity(data);
   gameState.setSetScore(setScore);
-  await waitGameStart();
-  hideDisconnectScreen();
-
   const game = new Game(container);
+  showDisconnectScreen(container);
+  connection.setCanSendReady(false);
+
+  const engineReady = game.startEngine();
+  connection.connect(true);
+  await engineReady;
+
+  connection.setCanSendReady(true);
+  await connection.waitForConnected();
+  connection.sendReady();
+
   await game.start();
 }
 

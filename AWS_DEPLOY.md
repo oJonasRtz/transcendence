@@ -104,6 +104,7 @@ This will:
 - Build all Docker images
 - Start all services with Let's Encrypt certificates
 - Access at https://your-domain.com
+- Persist `PUBLIC_DOMAIN` and `NGINX_SSL_DIR=./shared/ssl-public` in `.env` so subsequent plain `docker compose up -d` keeps trusted certificates
 
 ## Updating the Application
 
