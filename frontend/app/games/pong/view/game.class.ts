@@ -38,6 +38,7 @@ export class Game {
   private endPromise: Promise<void>;
   private endResolve: (() => void) | null = null;
   private ended: boolean = false;
+  private preventScrollKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
   private sprites: {
     redPaddle?: ex.ImageSource;
@@ -53,7 +54,10 @@ export class Game {
 
   constructor(container: HTMLElement) {
     const canvas = document.createElement("canvas");
-    canvas.id = "pong";
+    canvas.id = "pong-canvas";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.display = "block";
 
     container.innerHTML = "";
     container.appendChild(canvas);
@@ -64,7 +68,7 @@ export class Game {
       width: stats?.game?.width ?? 800,
       height: stats?.game?.height ?? 600,
       // backgroundColor: new ex.Color(10, 20, 45, 1),
-      displayMode: ex.DisplayMode.Fixed,
+      displayMode: ex.DisplayMode.FitContainer,
     });
 
     // const score = new ScoreBoard(this.engine);
@@ -91,11 +95,12 @@ export class Game {
       this.ballReset();
     });
 
-    window.addEventListener("keydown", (e) => {
+    this.preventScrollKeydownHandler = (e: KeyboardEvent) => {
       if (["ArrowUp", "ArrowDown"].includes(e.key)) {
         e.preventDefault();
       }
-    });
+    };
+    window.addEventListener("keydown", this.preventScrollKeydownHandler);
   }
 
   private addBackground() {
@@ -167,7 +172,12 @@ export class Game {
     if (this.ended) return;
 
     this.ended = true;
+    if (this.preventScrollKeydownHandler) {
+      window.removeEventListener("keydown", this.preventScrollKeydownHandler);
+      this.preventScrollKeydownHandler = null;
+    }
     this.engine.stop();
+    this.engine.dispose();
     if (this.endResolve) this.endResolve();
   }
 }
