@@ -14,6 +14,9 @@ export class Game {
 	private player: Birb | null = null;
 	private pipes: PipePair[] | null = null;
 	private pipeSpawnInterval = 1500; // milliseconds
+	private pipeSpawnIntervalId: ReturnType<typeof setInterval> | null = null;
+	private preventScrollKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
+	private stopped: boolean = false;
 	private state: State = new State();
 	private pointsPerPipe: number = 1;
 	private playerPosX: number = 100;
@@ -29,11 +32,14 @@ export class Game {
 			width: GAME_WIDTH,
 			height: GAME_HEIGHT,
 			backgroundColor: new ex.Color(0.53, 0.81, 0.92, .7),
-			displayMode: ex.DisplayMode.Fixed,
+			displayMode: ex.DisplayMode.FitContainer,
 			canvasElement: document.createElement('canvas'),
 		});
 
 		container.innerHTML = '';
+		this.engine.canvas.style.width = '100%';
+		this.engine.canvas.style.height = '100%';
+		this.engine.canvas.style.objectFit = 'contain';
 		container.appendChild(this.engine.canvas);
 		this.setScore = setScore;
 		this.saveHighScore = saveHighScore;
@@ -47,18 +53,19 @@ export class Game {
 		this.engine.on('postupdate', () => {
 			if (!this.pipes) {
 				this.addPipes();
-				setInterval(() => {
+				this.pipeSpawnIntervalId = setInterval(() => {
 					this.addPipes();
 				}, this.pipeSpawnInterval);
 			}
 			this.endGame();
 		});
 
-		window.addEventListener('keydown', (e) => {
+		this.preventScrollKeydownHandler = (e: KeyboardEvent) => {
 			if (['ArrowUp', 'ArrowDown', ' ', 'Spacebar'].includes(e.key)) {
 				e.preventDefault();
 			}
-		});
+		};
+		window.addEventListener('keydown', this.preventScrollKeydownHandler);
 	}
 
 	private addToGame(data: ex.Actor[]) {
@@ -103,13 +110,23 @@ export class Game {
 	private endGame() {
 		if (!this.state.isGameEnded()) return;
 
-		// console.log("[GameEnd] e isso eh tudo pessoal");
-		console.log("[GameEnd] Game Over! Final Score:", this.state.getScore());
 		this?.saveHighScore?.(this.state.getScore());
 		this.stop();
 	}
 
 	public stop() {
+		if (this.stopped) return;
+		this.stopped = true;
+
+		if (this.pipeSpawnIntervalId) {
+			clearInterval(this.pipeSpawnIntervalId);
+			this.pipeSpawnIntervalId = null;
+		}
+		if (this.preventScrollKeydownHandler) {
+			window.removeEventListener('keydown', this.preventScrollKeydownHandler);
+			this.preventScrollKeydownHandler = null;
+		}
+
 		this.engine.stop();
 		this.engine.dispose();
 	}

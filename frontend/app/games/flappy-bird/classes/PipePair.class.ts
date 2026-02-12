@@ -12,7 +12,8 @@ export class PipePair extends ex.Actor {
 
 		this.playerPosX = playerX;
 		this.sprite = sprite;
-		this.pipes = this.getPipePos(75, drawHeight, drawWidth);
+		const pipeWidth = Math.max(40, Math.round(drawWidth * 0.078));
+		this.pipes = this.getPipePos(pipeWidth, drawHeight, drawWidth);
 		addToGame(this.pipes);
 		this.pipes.forEach(pipe => {
 			pipe.on('scored', () => {

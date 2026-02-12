@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { User } from '@/app/lib/auth';
 import FlappyBird from '@/app/games/FlappyBird';
-import FlappyLeaderboard from './flappyLeaderboard';
 
 interface FlappyBirdGameProps {
   user: User;
@@ -13,7 +12,7 @@ interface FlappyBirdGameProps {
 export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   const router = useRouter();
   const [restartSignal, setRestartSignal] = useState(0);
-  const [highScore, setHighScore] = useState(123); // Can be updated via API
+  const [highScore, setHighScore] = useState(0);
   const [score, setScore] = useState(0); // Current player score
 
 
@@ -24,8 +23,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
 
   const saveHighScore = async (score: number) => {
     try {
-      console.log('Saving high score:', score);
-      await fetch('/api/flappy', {
+      const res = await fetch('/api/flappy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -36,6 +34,10 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
           score,
         }),
       });
+      if (!res.ok) {
+        throw new Error(`Failed to save high score (status ${res.status})`);
+      }
+      setHighScore(prev => Math.max(prev, score));
     } catch (error) {
       console.error('Failed to save high score:', error);
     }
@@ -55,7 +57,6 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
           }),
         });
         const data = await res.json();
-        console.log('Fetched high score data:', data);
         if (res.ok && data.high_score !== undefined)
           setHighScore(data.high_score);
       } catch (error) {
@@ -76,29 +77,30 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start gap-10 px-6 py-10">
+    <div className="min-h-screen flex flex-col items-center justify-start gap-6 sm:gap-10 px-3 sm:px-6 py-4 sm:py-10">
       {/* Header */}
-      <div className="w-full max-w-6xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="w-full max-w-6xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Flappy Bird</h1>
-          <p className="text-slate-400">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">Flappy Bird</h1>
+          <p className="text-sm sm:text-base text-slate-400">
             Tap to flap! How far can you go?
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {/* Restart Button */}
           <button
             onClick={handleRestart}
-            className="px-6 py-3 rounded-lg
-                       bg-green-500/20 hover:bg-green-500/30
+            className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg
+                       bg-green-500/20 hover:bg-green-500/30 active:bg-green-500/40
                        border border-green-500/50 hover:border-green-500/70
                        text-green-400 hover:text-green-300
                        transition-all duration-300
-                       flex items-center gap-2"
+                       flex items-center justify-center gap-2
+                       text-sm sm:text-base"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -110,21 +112,22 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            Restart Game
+            Restart
           </button>
 
           {/* Back Button */}
           <button
             onClick={() => router.push('/dashboard/play')}
-            className="px-6 py-3 rounded-lg
-                       bg-white/5 hover:bg-white/10
+            className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg
+                       bg-white/5 hover:bg-white/10 active:bg-white/15
                        border border-white/10 hover:border-white/30
                        text-white
                        transition-all duration-300
-                       flex items-center gap-2"
+                       flex items-center justify-center gap-2
+                       text-sm sm:text-base"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -136,50 +139,45 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Back to Games
+            Back
           </button>
         </div>
       </div>
 
       {/* Game + Scores */}
-      <div className="w-full max-w-6xl flex flex-col items-center gap-6 relative">
+      <div className="w-full max-w-6xl flex flex-col items-center gap-4 sm:gap-6 relative">
         {/* Scores side by side */}
-        <div className="flex w-full gap-4 mb-4">
-          <div className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.5)] text-white font-bold text-lg backdrop-blur-sm text-center">
+        <div className="flex w-full gap-2 sm:gap-4">
+          <div className="flex-1 px-3 sm:px-4 py-2 rounded-lg bg-white/10 border border-white/20 shadow-[0_0_10px_rgba(255,255,255,0.5)] text-white font-bold text-sm sm:text-lg backdrop-blur-sm text-center">
             Score: {score}
           </div>
-          <div className="flex-1 px-4 py-2 rounded-lg bg-orange-500/70 border border-orange-400 shadow-[0_0_15px_rgba(255,165,0,0.7)] backdrop-blur-sm text-white font-bold text-lg text-center">
+          <div className="flex-1 px-3 sm:px-4 py-2 rounded-lg bg-orange-500/70 border border-orange-400 shadow-[0_0_15px_rgba(255,165,0,0.7)] backdrop-blur-sm text-white font-bold text-sm sm:text-lg text-center">
             High Score: {highScore}
           </div>
         </div>
 
         {/* Game container */}
-        <div className="relative w-full flex flex-col items-center">
-          <div className="relative w-full flex flex-col items-center">
-          <div className="relative overflow-hidden rounded-2xl border border-white/20 w-full h-96 lg:h-[450px]">
-            {/* Ambient glow */}
-            <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/20 w-full max-w-[960px] aspect-[16/9]">
+          {/* Ambient glow */}
+          <div className="absolute -top-24 -right-24 h-48 w-48 bg-green-500/20 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 h-48 w-48 bg-yellow-500/20 blur-3xl rounded-full pointer-events-none" />
 
-            <div className="relative w-full h-full">
-              <FlappyBird
-                restartSignal={restartSignal}
-                setScore={setScore}
-                saveHighScore={saveHighScore}
-              />
-            </div>
+          <div className="relative w-full h-full">
+            <FlappyBird
+              restartSignal={restartSignal}
+              setScore={setScore}
+              saveHighScore={saveHighScore}
+            />
           </div>
         </div>
 
-
-
-         {/* How to Play below the game, width matches game container */}
-        <div className="mt-6 w-full rounded-lg border border-white/10 bg-white/5 p-6 text-slate-400 text-sm">
-          <h3 className="text-lg font-bold text-white mb-4">How to Play</h3>
+        {/* How to Play below the game, width matches game container */}
+        <div className="mt-4 sm:mt-6 w-full max-w-[960px] rounded-lg border border-white/10 bg-white/5 p-4 sm:p-6 text-slate-400 text-sm">
+          <h3 className="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">How to Play</h3>
           <ul className="space-y-2">
             <li className="flex items-start gap-2">
               <span className="text-green-400 mt-0.5">▸</span>
-              <span>Click, tap, press ↑ or Space to flap</span>
+              <span>Tap the screen or press Space / ↑ to flap</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-green-400 mt-0.5">▸</span>
@@ -192,15 +190,10 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
             <li className="flex items-start gap-2">
               <span className="text-green-400 mt-0.5">▸</span>
               <span>
-                When you die, click the <strong className="text-green-300">"Restart Game"</strong> button above or press <strong className="text-green-400">R</strong> to play again
+                When you die, tap <strong className="text-green-300">"Restart"</strong> above or press <strong className="text-green-400">R</strong> to play again
               </span>
             </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-400 mt-0.5">▸</span>
-              <span>Or click inside the game area if that works too</span>
-            </li>
           </ul>
-        </div>
         </div>
       </div>
     </div>
