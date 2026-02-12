@@ -1,0 +1,152 @@
+groups:
+  - name: infrastructure
+    interval: 30s
+    rules:
+      # Service down alert
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute."
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes. Current value: {{ $value }}%"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for more than 5 minutes. Current value: {{ $value }}%"
+
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space is low"
+          description: "Available disk space is below 15%. Current value: {{ $value }}%"
+
+  - name: containers
+    interval: 30s
+    rules:
+      # Container restart
+      - alert: ContainerRestarted
+        expr: changes(container_start_time_seconds{name=~".+"}[1h]) > 0
+        for: 1m
+        labels:
+          severity: info
+        annotations:
+          summary: "Container {{ $labels.name }} restarted"
+          description: "Container {{ $labels.name }} has restarted within the last hour."
+
+      # High container memory
+      - alert: ContainerHighMemory
+        expr: ((container_memory_usage_bytes{name=~".+"} / container_spec_memory_limit_bytes{name=~".+"}) * 100 > 90) and on(name) (container_spec_memory_limit_bytes{name=~".+"} > 0)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} using high memory"
+          description: "Container {{ $labels.name }} is using more than 90% of its memory limit."
+
+  - name: critical_containers
+    interval: 30s
+    rules:
+      # Critical container down
+      - alert: CriticalContainerDown
+        expr: absent(container_last_seen{name=~"nginx|api-gateway|auth-service|sqlite-db"})
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical container is down"
+          description: "One of nginx/api-gateway/auth-service/sqlite-db is missing from cAdvisor metrics for more than 1 minute."
+
+      # Container CPU throttling
+      - alert: ContainerCPUThrottling
+        expr: rate(container_cpu_cfs_throttled_seconds_total{name=~".+"}[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} is being CPU throttled"
+          description: "Container {{ $labels.name }} is being CPU throttled. Consider increasing CPU limits."
+
+      # Container network errors
+      - alert: ContainerNetworkErrors
+        expr: rate(container_network_receive_errors_total{name=~".+"}[5m]) > 10 or rate(container_network_transmit_errors_total{name=~".+"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High network errors on container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} is experiencing high network error rates."
+
+      # Container filesystem usage
+      - alert: ContainerFilesystemFull
+        expr: ((container_fs_usage_bytes{name=~".+"} / container_fs_limit_bytes{name=~".+"}) * 100 > 85) and on(name) (container_fs_limit_bytes{name=~".+"} > 0)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} filesystem almost full"
+          description: "Container {{ $labels.name }} filesystem usage is above 85%."
+
+  - name: endpoint_health
+    interval: 30s
+    rules:
+      # Endpoint down
+      - alert: EndpointDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} has been unreachable for more than 1 minute."
+
+      # Slow response time
+      - alert: EndpointSlowResponse
+        expr: probe_duration_seconds > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Endpoint {{ $labels.instance }} is slow"
+          description: "{{ $labels.instance }} is taking more than 3 seconds to respond."
+
+      # SSL certificate expiring soon (if using HTTPS)
+      - alert: SSLCertificateExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 30
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "SSL certificate for {{ $labels.instance }} expiring soon"
+          description: "SSL certificate will expire in less than 30 days."
+
+      # HTTP status code errors
+      - alert: EndpointHTTPError
+        expr: probe_http_status_code >= 400
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP error on {{ $labels.instance }}"
+          description: "{{ $labels.instance }} returned status code {{ $value }}."

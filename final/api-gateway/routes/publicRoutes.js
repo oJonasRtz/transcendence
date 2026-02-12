@@ -1,0 +1,36 @@
+import axios from 'axios';
+import publicControllers from '../controllers/publicControllers.js';
+
+// AUTH-SERVICE
+
+const routes = [
+	{ method: 'GET', url: '/', handler: publicControllers.homePage },
+	{ method: 'GET', url: '/login', handler: publicControllers.login },
+	{ method: 'GET', url: '/register', handler: publicControllers.register },
+	{ method: 'GET', url: '/api/captcha', handler: publicControllers.getCaptchaJson },
+	{ method: 'POST', url: '/api/login', handler: publicControllers.loginJson },
+	{ method: 'POST', url: '/api/register', handler: publicControllers.registerJson },
+	{ method: 'POST', url: '/api/verify-2fa', handler: publicControllers.verify2FALoginJson },
+	{ method: 'POST', url: '/api/forgot-password', handler: publicControllers.forgotPasswordJson },
+	{ method: 'POST', url: '/api/verify-reset-code', handler: publicControllers.verifyResetCodeJson },
+	{ method: 'POST', url: '/api/reset-password', handler: publicControllers.resetPasswordJson },
+	{ method: 'POST', url: '/checkRegister', handler: publicControllers.checkRegister },
+	{ method: 'POST', url: '/checkLogin', handler: publicControllers.checkLogin },
+	{ method: 'GET', url: '/hello', handler: publicControllers.hello },
+	{ method: 'GET', url: '/forgotPassword', handler: publicControllers.forgotPasswordPage },
+	{ method: 'POST', url: '/checkEmail', handler: publicControllers.checkEmail },
+	{ method: 'GET', url: '/validateEmailCode', handler: publicControllers.validateEmailCode },
+	{ method: 'GET', url: '/checkEmailCode', handler: publicControllers.checkEmailCode },
+	{ method: 'POST', url: '/checkEmailCode', handler: publicControllers.checkEmailCode },
+	{ method: 'GET', url: '/newPasswordPage', handler: publicControllers.newPasswordPage },
+	{ method: 'POST', url: '/newPassword', handler: publicControllers.newPassword },
+	// TESTING BAD ROUTES
+	{ method: 'GET', url: '/checkDb', handler: publicControllers.checkDb },
+	{ method: 'GET', url: '/favicon.ico', handler: publicControllers.getIcon },
+];
+
+export default async function publicRoutes(fastify, options) {
+	for (const route of routes) {
+		fastify.route(route);
+	}	
+};

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="author" content="Time do balacobaco">
+		<link rel="stylesheet" href="/public/css/styles.css">
+		<title>Public Profile</title>
+	</head>
+	<body class="bg-cover bg-fixed bg-fixed min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0a1a2f] to-[#0f172a]">
+                <div class="min-w-100 z-10 relative bg-white/50 backdrop-blur-sm rounded-xl shadow-md p-6">
+		<header>
+			<nav>
+				<a href="/home">Home</a>
+				<a href="/seeAllUsers">See All Users</a>
+			</nav>
+		</header>
+		<h2>Public Profile</h2>
+		<img src="<%= data.avatar %>" alt="avatar">
+		<section class="flex gap-4">
+                        <form action="/friendInvite" method="POST">
+                                <input type="hidden" name="public_id" value="<%= data.public_id %>">
+                                <button type="submit" class="cursor-pointer bg-green-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-200">Invite to a friend</button>
+                        </form>
+			<form action="/blockTheUser" method="POST">
+				<input type="hidden" name="public_id" value="<%= data.public_id %>">
+				<button type="submit" class="cursor-pointer bg-red-600 text-black font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-200">Block/Unblock the user</button>
+			</form>
+			<form action="/directMessage" method="GET">
+				<input type="hidden" name="public_id" value="<%= data.public_id %>">
+				<button type="submit" class="cursor-pointer bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200">Chat</button>
+			</form>
+                </section>
+		<h2><strong><%= data.username %></strong></h2>
+		<!-- <% if (data.isOnline) { %>
+			<p style="color: green"><strong>Online</strong></p>
+		<% } else { %>
+			<p style="color: red"><strong>Offline</strong></p>
+		<% } %> -->
+		<p style="color: <%= data.state.colour %>"><strong><%= data.state.text %></strong></p>
+
+		<p><strong>Title: <%= data.title %></strong></p>
+		<p><strong>Rank: </strong> <%= data.tier %>: <%= data.rank_points %> pts </p>
+		<p><strong>Level: <%= data.level %>: <%= data.experience_points %> pts </p>
+		<p><strong>Wins: <%= history.stats.wins %></p>
+		<p><strong>Losses: <%= history.stats.losses %></p>
+		<p><string>Win rata: </string> <%= history.stats.win_rate %></p>
+
+		<% if (data.description) { %>
+			<p><strong><%= data.description %></strong></p>
+		<% } else { %>
+			<p><strong>The user has no description</strong></p>
+		<% } %>
+		<h1>History</h1>
+					<% if (history && history.history && history.history.length > 0) { %>
+					<section>
+						<% history.history.forEach(game => { %>
+						<article style="border: 1px solid black; padding: 10px; margin-bottom: 10px;">
+							
+							<div style="display: flex; align-items: center; margin-bottom: 8px;">
+							<span style="
+								display: inline-block;
+								width: 10px;
+								height: 10px;
+								border-radius: 50%;
+								background-color: <%= game.isVictory ? 'green' : 'red' %>;
+								margin-right: 6px;
+							"></span>
+							<strong><%= game.isVictory ? 'Victory' : 'Defeat' %></strong>
+							</div>
+
+							<p><strong>Game ID:</strong> <%= game.match_id %></p>
+							<p><strong>Date:</strong> <%= game.created_at %></p>
+							<p><strong>Type:</strong> <%= game.game_type %></p>
+							<p><strong>Duration:</strong> <%= game.duration %></p>
+
+							<ul style="list-style: none; padding-left: 0;">
+							<% game.players.forEach(player => { %>
+								<li style="margin-left: 20px;">
+									<img 
+									src="<%= player.avatar %>"
+									alt="avatar"
+									style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;"
+								/>
+								<strong><%= player.name %></strong> —
+								Score: <%= player.score %>
+								</li>
+							<% }) %>
+							</ul>
+						</article>
+						<% }) %>
+					</section>
+					<% } else { %>
+					<h3>You have no games played yet.</h3>
+					<% } %>
+		</div>
+	</body>
+</html>
