@@ -1,19 +1,40 @@
-# Generate secrets (.env file)
+# Generate secrets for local/dev (Docker secrets + .env used by AWS helpers)
 secrets:
 	@echo "Generating secrets..."
-	@if [ -f .env ]; then \
-		echo "⚠️  .env already exists. Skipping generation."; \
-		echo "To regenerate, run: rm .env && make secrets"; \
-	else \
-		echo "JWT_SECRET=$$(openssl rand -base64 64 | tr -d '\n')" > .env; \
-		echo "GRAFANA_ADMIN_PASSWORD=$$(openssl rand -base64 32 | tr -d '\n')" >> .env; \
-		echo "✓ Secrets generated in .env"; \
-	fi
+	@mkdir -p secrets
+	@chmod 700 secrets
+	@if [ ! -s secrets/jwt_secret.txt ]; then openssl rand -base64 64 | tr -d '\n' > secrets/jwt_secret.txt; fi
+	@if [ ! -s secrets/cookie_secret.txt ]; then openssl rand -base64 48 | tr -d '\n' > secrets/cookie_secret.txt; fi
+	@if [ ! -s secrets/session_secret.txt ]; then openssl rand -base64 48 | tr -d '\n' > secrets/session_secret.txt; fi
+	@if [ ! -s secrets/sync_secret.txt ]; then openssl rand -base64 48 | tr -d '\n' > secrets/sync_secret.txt; fi
+	@if [ ! -s secrets/cron_secret.txt ]; then openssl rand -base64 48 | tr -d '\n' > secrets/cron_secret.txt; fi
+	@if [ ! -s secrets/lobby_id.txt ]; then echo "42" > secrets/lobby_id.txt; fi
+	@if [ ! -s secrets/lobby_pass.txt ]; then openssl rand -base64 32 | tr -d '\n' > secrets/lobby_pass.txt; fi
+	@if [ ! -s secrets/grafana_admin_password.txt ]; then openssl rand -base64 32 | tr -d '\n' > secrets/grafana_admin_password.txt; fi
+	@if [ ! -f secrets/email_gmail_user.txt ]; then : > secrets/email_gmail_user.txt; fi
+	@if [ ! -f secrets/email_gmail_pass.txt ]; then : > secrets/email_gmail_pass.txt; fi
+	@if [ ! -f secrets/sightengine_user.txt ]; then : > secrets/sightengine_user.txt; fi
+	@if [ ! -f secrets/sightengine_secret.txt ]; then : > secrets/sightengine_secret.txt; fi
+	@chmod 600 secrets/*.txt
+	@echo "Syncing .env with secrets..."
+	@touch .env
+	@set -e; tmp=$$(mktemp); \
+		grep -vE '^(JWT_SECRET|GRAFANA_ADMIN_PASSWORD)=' .env > $$tmp || true; \
+		printf '%s\n' "JWT_SECRET=$$(cat secrets/jwt_secret.txt)" >> $$tmp; \
+		printf '%s\n' "GRAFANA_ADMIN_PASSWORD=$$(cat secrets/grafana_admin_password.txt)" >> $$tmp; \
+		mv $$tmp .env
+	@chmod 600 .env
+	@echo "✓ .env updated (JWT_SECRET, GRAFANA_ADMIN_PASSWORD)"
 
 # Start all services
 up: secrets tls build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
+
+# Start locally for development (foreground, rebuild on changes)
+dev: secrets tls
+	@echo "Starting local dev stack (Ctrl+C to stop)..."
+	@docker compose up --build
 
 # Main 
 all: down up
@@ -160,4 +181,4 @@ aws: secrets tls aws-tls aws-env-sync
 	@$(AWS_COMPOSE) up -d --build
 	@echo "✓ Deployed! Access at https://$(DOMAIN)"
 
-.PHONY: up down build clean fclean re remake tls secrets game-logs aws-env-sync aws-cert-init aws-cert-renew aws-tls aws
+.PHONY: up down build clean fclean re remake tls secrets dev game-logs aws-env-sync aws-cert-init aws-cert-renew aws-tls aws
