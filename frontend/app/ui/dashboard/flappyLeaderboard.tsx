@@ -18,7 +18,7 @@ interface FlappyLeaderboardProps {
   
 	return (
 	  <CardShell
-		className="w-full lg:w-1/3 lg:ml-0 flex-shrink-0"
+		className="w-full h-full md:w-1/3 lg:w-1/4 ml-4 flex-shrink-0"
 	  >
 		<CardHeader
 		  title="Flappy Bird Leaderboard"

@@ -40,13 +40,13 @@ export default function FlappyBird({
 	}, [restartSignal, start]);
 
 	return (
-		<div className="relative w-full h-full">
+		<div className="relative inline-block flex items-center justify-center">
 			<div
 				id="flappy"
-				className="w-full h-full"
+				className="w-[960px] h-[540px] rounded-lg overflow-hidden"
 			/>
 			{!start && (
-				<div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+				<div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg">
 					<button
 					onClick={() => setStart(true)}
 					className="px-8 py-4 rounded-xl
