@@ -53,22 +53,11 @@ export default function MatchProvider({ user, profile, children }:
     reconnecIntervalRef.current = setInterval(tryConnect, __TIME_TO_WAIT__.RECONNECT_INTERVAL * 1000);
 
     match.onMatch = (match_id, skip) => {
-      if (!match_id)
-        return;
-      
+      if (!match_id) return;
+    
       setMatchFound(true);
-      const go = () => router.push(`/dashboard/play/pong`);
-
-      if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
-
-      if (skip) {
-        go();
-        return;
-      }
-
-      redirectTimeoutRef.current = setTimeout(go, __TIME_TO_WAIT__.MAX_TIME * 1000);
     };
-
+    
     match.onParty = () => {
       setShowFloating(true);
     }
@@ -90,12 +79,13 @@ export default function MatchProvider({ user, profile, children }:
       {children}
       {(showFloating && !hiddenFloat.some((path) => pathname.startsWith(path))) && <FloatingRoomWidget />}
 
-      {matchFound && (
+      {(matchFound && !pathname.startsWith('/dashboard/play/pong')) && (
         <MatchNotify
           title="Match Found!"
           time={__TIME_TO_WAIT__.MAX_TIME}
           onComplete={() => {
             setMatchFound(false);
+            router.push(`/dashboard/play/pong`);
           }}
         />
       )}
