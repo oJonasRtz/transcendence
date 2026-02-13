@@ -51,6 +51,5 @@ export class Identity {
 
 	public setId(id: 1 | 2) {
 		this.id = id;
-		console.log(`You are player ${id}`);
 	}
 }

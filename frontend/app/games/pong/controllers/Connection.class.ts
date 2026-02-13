@@ -95,7 +95,6 @@ export class Connection {
     socket.onopen = () => {
       if (this.socket !== socket) return;
       const { matchId, name, id, playerId } = gameState.getIdentity();
-      console.log("tentando conexao na partida: " + matchId);
 
       this.send({ type: types.CONNECT, matchId, name, id, playerId });
 	      // gameState.getLatency((msg) => this.send(msg));

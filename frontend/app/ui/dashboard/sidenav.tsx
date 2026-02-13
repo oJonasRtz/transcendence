@@ -10,7 +10,6 @@ import EmailVerificationStatus from "@/app/ui/dashboard/email-verification-statu
 export default function SideNav({isCollapsed, setIsCollapsed}: {isCollapsed: boolean, setIsCollapsed: (collapsed: boolean) => void}) {
   const navRef = useRef<HTMLDivElement | null>(null);
 
-  // Fecha quando clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {

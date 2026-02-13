@@ -55,7 +55,6 @@ export class Pipe extends ex.Actor {
 		}
 
 		if (!this.scored && this.pos.x < this.playerPos) {
-			console.log('[Pipe] Pontuou!');
 			this.scored = true;
 			this.emit('scored');
 		}

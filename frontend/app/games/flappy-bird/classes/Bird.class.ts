@@ -53,7 +53,6 @@ export class Birb extends ex.Actor{
 			const other: ex.Actor = evt.other.owner as ex.Actor;
 
 			if (other.hasTag && other.hasTag('pipe')) {
-				console.log('[Birb] Colidiu com um cano! Game Over!');
 				this.emit('kill');
 			}
 		});

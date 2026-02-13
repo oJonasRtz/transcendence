@@ -103,8 +103,6 @@ export class Game {
 	private endGame() {
 		if (!this.state.isGameEnded()) return;
 
-		// console.log("[GameEnd] e isso eh tudo pessoal");
-		console.log("[GameEnd] Game Over! Final Score:", this.state.getScore());
 		this?.saveHighScore?.(this.state.getScore());
 		this.stop();
 	}
