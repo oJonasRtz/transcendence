@@ -1,9 +1,0 @@
-services:
-  certbot:
-    image: certbot/certbot:latest
-    container_name: certbot
-    ports:
-      - "80:80"
-    volumes:
-      - ./shared/letsencrypt:/etc/letsencrypt
-      - ./shared/letsencrypt-lib:/var/lib/letsencrypt
