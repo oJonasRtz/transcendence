@@ -69,21 +69,24 @@ If everything matches (email exists + password is correct), the inspector approv
 ```mermaid
 sequenceDiagram
   autonumber
+  participant C as Client (browser)
+  participant V as validatorHook (input inspector)
   participant W as api-gateway (waiter)
   participant P as auth-service (police inspector)
-  participant V as validatorHook (input inspector)
   participant DB as sqlite-db (private intranet)
 
-  W->>P: tryLoginUser(email, password)
-  P->>V: validate(email, password)
-  V-->>P: ok OR validation error
+  C->>V: login(email, password)
+  V->>V: validate(email, password)
 
-  alt valid input
+  alt invalid input
+    V-->>C: 400 Bad Request (validation error)
+  else valid input
+    V-->>W: forward sanitized payload
+    W->>P: tryLoginUser(email, password)
     P->>DB: SELECT user by email
     DB-->>P: auth row (hash + user_id + 2FA flags)
     P-->>W: allow / deny (credentials check)
-  else invalid input
-    P-->>W: 400 Bad Request (validation error)
+    W-->>C: response (token/cookie or error)
   end
 ```
 ### Success path (the security seal)
