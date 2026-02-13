@@ -124,9 +124,6 @@ Fetches the user high score.
 - `400` → `"You need to inform your user_id here"`
 - `500` → `"An error happened"`
 
-### ⚠️ Implementation note
-The catch block logs `err` but receives `error` (typo). Harmless to runtime if not referenced elsewhere, but logs may break.
-
 ---
 
 ## Route: `setFlappyHighScore`
@@ -890,9 +887,6 @@ The citizen answers an invite: accept ✅ / refuse ❌. The keeper writes the de
 - `204` → *(No Content)*
 - `400` → `"You need to inform user_id"`
 - `500` → `"An error happened"`
-
-### ⚠️ Implementation note
-Your validation uses `!req.body.accept`, which rejects `accept = false` (refuse). If you want to allow refusal, check `accept === undefined` instead.
 
 ---
 
