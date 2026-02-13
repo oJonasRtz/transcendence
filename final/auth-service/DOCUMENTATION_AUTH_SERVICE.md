@@ -25,7 +25,7 @@ At a high level:
 ```mermaid
 flowchart LR
   G[api-gateway] --> A[auth-service]
-  A --> DB[(sqlite-dbb)]
+  A --> DB[(sqlite-db)]
 ```
 ---
 
