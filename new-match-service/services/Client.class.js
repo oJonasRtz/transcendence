@@ -75,7 +75,6 @@ export class Client {
 
 		if (!res || res.rank === undefined) {
 			this.#info.rank = 0;
-			// console.log("nao achei o rank");
 			return;
 		}
 		this.#info.rank = res.rank;
@@ -144,8 +143,7 @@ export class Client {
 		if (!this.#info.rank)
 			await this.#getRank();
 
-		console.log("Client entered IDLE state");
-		console.log(`Client ${this.#info.name} Rank: ` + this.#info.rank);
+		// console.log("Client entered IDLE state");
 		
 		this.send({
 			type: 'STATE_CHANGE',
@@ -167,14 +165,13 @@ export class Client {
 		const res = await data.sendRequest('getUserInformation', {user_id: this.#info.id});
 
 
-		// console.log("data: " + JSON.stringify(res));
 		if (res){
 			this.#info.name = res?.nickname || res?.username;
 			this.#info.email = res?.email || this.#info.email;
 			this.#info.rank = res?.rank || this.#info.rank;
 		}
 
-		console.log("Client entered IN_QUEUE state");
+		// console.log("Client entered IN_QUEUE state");
 		this.send({
 			type: 'STATE_CHANGE',
 			state: 'IN_QUEUE',
@@ -206,7 +203,7 @@ export class Client {
 		}
 	}
 	async #in_game({lobby}) {
-		console.log("Client entered IN_GAME state");
+		// console.log("Client entered IN_GAME state");
 		this.send({
 			type: 'STATE_CHANGE',
 			state: 'IN_GAME',
@@ -219,9 +216,7 @@ export class Client {
 		const actualRank = this.#info.rank;
 
 
-		console.log(this.#info.name + " a partida comecou e to esperando terminar");		
 		await lobby.waitEnd();
-		console.log(this.#info.name + " a partida terminou");
 		
 		this.#game.match_id = null;
 		this.#game.lobby = null;

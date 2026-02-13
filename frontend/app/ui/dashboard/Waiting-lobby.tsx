@@ -27,13 +27,10 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
   const [gameType, setGameType] = useState<GameType>('RANKED');
   const [queueActionError, setQueueActionError] = useState<string | null>(null);
-  // const [showMatchFound, setShowMatchFound] = useState(false);
   const [isLeader, setIsLeader] = useState(true);
   const [animatedPlayers, setAnimatedPlayers] = useState<string[]>([])
 
   const params = useParams();
-
-  // console.log('WaitingLobby token:', token);
 
   useEffect(() => {
     setInQueue(match.inQueue);
@@ -45,16 +42,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
       match.onState = null;
     };
   }, []);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (match.match_id && !showMatchFound){
-  //       setShowMatchFound(true);
-  //     }
-  //   }, 500);
-
-  //   return () => clearInterval(interval);
-  // }, [showMatchFound]);
 
   // Connect and join party on mount
   useEffect(() => {
@@ -72,7 +59,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
         }
   
         if (match.party.length > 0) {
-          console.log('Already in a party, skipping join.');
           return;
         }
   
@@ -87,20 +73,6 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     // Leave party on unmount
     return () => {};
   }, [user, gameType]);
-
-  // useEffect(() => {
-  //   let redirected = false;
-  //   const interval = setInterval(() => {
-  //     if (redirected) return;
-  //     if (!match.match_id) return;
-
-  //     redirected = true;
-  //     router.push('/dashboard/play/pong');
-  //   }, 250);
-
-  //   return () => clearInterval(interval);
-  // }, [router]);
-  
 
   // Sync players from match.party periodically
   useEffect(() => {

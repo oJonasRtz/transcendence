@@ -19,12 +19,11 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
 
   const handleRestart = () => {
     setRestartSignal(prev => prev + 1);
-    setScore(0); // Reset score on restart
+    setScore(0); 
   };
 
   const saveHighScore = async (score: number) => {
     try {
-      console.log('Saving high score:', score);
       await fetch('/api/flappy', {
         method: 'POST',
         headers: {
@@ -55,7 +54,6 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
           }),
         });
         const data = await res.json();
-        console.log('Fetched high score data:', data);
         if (res.ok && data.high_score !== undefined)
           setHighScore(data.high_score);
       } catch (error) {

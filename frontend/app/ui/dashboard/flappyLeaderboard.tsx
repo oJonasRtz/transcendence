@@ -5,13 +5,12 @@ import { FlappyUser } from "@/app/lib/dashboard-data";
 
 interface FlappyLeaderboardProps {
 	leaderboard: FlappyUser[];
-	currentUserId?: string; // <-- ID do usuário logado
+	currentUserId?: string;
   }
   
   export default function FlappyLeaderboard({ leaderboard, currentUserId }: FlappyLeaderboardProps) {
 	const truncateName = (name: string) => name?.length > 10 ? name.slice(0,10) + '…' : (name || 'Unknown');
   
-	// Descobrir o rank do usuário logado
 	const currentUserRank = currentUserId
 	  ? leaderboard.findIndex(u => u.user_id === currentUserId) + 1
 	  : undefined;

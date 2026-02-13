@@ -68,7 +68,6 @@ const privateControllers = {
       const res = await axios.post('https://users-service:3003/getFlappyHighScore', { user_id });
 
       const highScore = res?.data || 0;
-      console.log(`[${user_id}]GET FLAPPY HIGH SCORE RESPONSE:`, highScore);
       return reply.code(200).send(highScore);
     } catch (error) {
       console.error("GET FLAPPY HIGH SCORE ERROR:", error.response?.data || error.message);
@@ -83,7 +82,6 @@ const privateControllers = {
         return reply.code(400).send("Error: Invalid high score");
       }
 
-      console.log(`[${user_id}]SETTING FLAPPY HIGH SCORE WITH: ` + score);
       const res = await axios.post('https://users-service:3003/setFlappyHighScore', req.body);
 
       return reply.code(200).send(res.data);
@@ -98,12 +96,8 @@ const privateControllers = {
       const {token} = req.params;
       const {id, game_type} = req.body;
 
-      //Token em laranja para deebug
-      console.log("JOIN PARTY TOKEN: \x1b[33m" + token + "\x1b[0m with id: " + id + " and game_type: " + game_type);
-
       const res = await axios.post('https://match-service:3010/join_party/' + token, {id, game_type});
 
-      console.log("JOIN PARTY RESPONSE:", res.data);
       return reply.code(200).send(res.data);
     } catch (error) {
       console.error("JOIN PARTY ERROR:", error.response.data || error.message);
@@ -116,7 +110,6 @@ const privateControllers = {
 
       const res = await axios.post('https://match-service:3010/leave_party', {id: user_id});
 
-      console.log("LEAVE PARTY RESPONSE:", res.data);
       return reply.code(200).send(res.data);
     } catch (error) {
       console.error("LEAVE PARTY ERROR:", error.response.data || error.message);
@@ -132,83 +125,12 @@ const privateControllers = {
         params: { id }
       });
   
-      console.log("PARTY INFO RESPONSE:", res.data);
       return reply.code(200).send(res.data); 
     } catch (error) {
       console.error("PARTY INFO ERROR:", error.response?.data || error.message);
       return reply.code(500).send("Error: " + error.message);
     }
   },
-  
-  // match: async function match(req, reply) {
-  //   const {token} = req.params;
-  //   console.log("id: " + req.user.user_id);
-
-  //   if (token) {
-  //     console.log("temos um token: " + token);
-  //     try {
-  //       const url = 'https://match-service:3010/join_party/' + token;
-  //       await axios.post(url, {id: req.user.user_id});
-  //     } catch (error) {
-  //       console.error("MATCH PAGE ERROR:", error.message);    
-  //     }
-  //   }
-
-  //   const match = matchClient.get(req.jwt);
-  //   const state = match ? match.state : 'OFFLINE';
-  //   return reply.view("matchMaking", {state});
-  // },
-
-  // joinQueue: async function joinQueue(req, reply) {
-  //   try {
-  //     console.log('JOIN QUEUE REQUEST');
-
-  //     const token = req.jwt;
-  //     if (!token) throw new Error("No token provided");
-
-  //     const match = matchClient.get(token);
-  //     if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
-
-  //     match.enqueue();
-  //     return reply.code(204).send();
-  //   } catch (error) {
-  //     console.error("JOIN QUEUE ERROR:", error.message);
-  //     return reply.code(500).send("Error: " + error.message);
-  //   }
-  // },
-
-  // leaveQueue: async function leaveQueue(req, reply) {
-  //   try {
-  //     console.log('LEAVE QUEUE REQUEST');
-
-  //     const token = req.jwt;
-  //     if (!token) throw new Error("No token provided");
-
-  //     const match = matchClient.get(token);
-  //     if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
-
-  //     match.dequeue();
-  //     return reply.code(204).send();
-  //   } catch (error) {
-  //     console.error("LEAVE QUEUE ERROR:", error.message);
-  //     return reply.code(500).send("Error: " + error.message);
-  //   }
-  // },
-
-  // matchFound: async function matchFound(req, reply) {
-  //   try {
-  //     const token = req.jwt;
-  //     if (!token) throw new Error("No token provided");
-
-  //     const match = matchClient.get(token);
-  //     if (!match || !match.isConnected) throw new Error("Not connected to Match Service");
-
-  //     reply.redirect('/pong');
-  //   } catch (error) {
-  //     console.error("MATCH FOUND ERROR:", error.message);
-  //     return reply.code(500).send("Error: " + error.message);
-  //   }
-  // },
 
   helloDb: async function testPrivateRoute(req, reply) {
     try {
@@ -295,33 +217,7 @@ const privateControllers = {
       );
 
       const h = history?.data || [];
-      // console.log(`[\x1b[33m${req.user.username}\x1b][34m USER Info:\x1b[0m ${JSON.stringify(data)}`);
-      // console.log(`[\x1b[33m${req.user.username}\x1b][34m STATS Info:\x1b[0m ${JSON.stringify(h.stats)}`);
-      // console.log('HISTORY');
-      // console.log("---------------------------");
-      // for (const match of h.history) {
-      //   console.log("\x1b[34mMatch ID: \x1b[0m", match.match_id);
-      //   console.log("\x1b[34mData: \x1b[0m", match.created_at);
-      //   console.log("\x1b[34mTipo: \x1b[0m", match.game_type);
-      //   console.log("\x1b[34mDuração: \x1b[0m", match.duration);
-      //   for (const player of match.players) {
-      //     console.log("\x1b[34m  Player: \x1b[0m", player.user_id);
-      //     console.log("\x1b[34m  Username: \x1b[0m", player.name);
-      //     console.log("\x1b[34m  Score: \x1b[0m", player.score);
-      //     console.log("\x1b[34m  Winner: \x1b[0m", player.isWinner);
-      //   }
-      //   console.log("---------------------------");
-      // }
-
-      // data.wins = h.stats.wins;
-      // data.losses = h.stats.losses;
-      // data.win_rate = h.stats.win_rate;
-
-      console.log("history: " + JSON.stringify(h));
-      //data.state = getState({isOnline: req.user.isOnline, state: match.state});
-      // const rank = await getRank(req.user);
-      // data.rank = rank;
-// 
+     
       return reply.view("home", { username, success, data, avatar, error, history: h });
     } catch (err) {
       console.error("getHomePage API-GATEWAY ERROR:", err);
@@ -345,10 +241,6 @@ const privateControllers = {
 
       reply.clearCookie("jwt");
       reply.clearCookie("session");
-
-      /*const match = matchClient.get(token);
-      if (match && match.isConnected)
-         await match.disconnect();*/
 
       await axios.post("https://auth-service:3001/set2FAValidate", {
         email: decoded.email,

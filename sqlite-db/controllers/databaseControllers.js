@@ -621,7 +621,6 @@ const databaseControllers = {
 				return reply.code(201).send();
 			return reply.code(200).send();
 		} catch (err) {
-			console.log('deu erro: ' + err?.response?.status + ' ' + err?.message);
 			if (err?.message === "SAME_USER")
 				return reply.code(403).send("SAME_USER");
 			console.error("SQLITE-DB friendInvite ERROR:", err?.response?.data || err.message);

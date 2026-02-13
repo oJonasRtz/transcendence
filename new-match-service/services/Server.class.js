@@ -57,7 +57,7 @@ export class Server {
 							return;
 
 						const data = JSON.parse(raw);
-						console.log('Received message:', data);
+						console.log('Received message: ', data?.type);
 
 						this.#handleMessages({data, ws: socket});
 					} catch (error) {
@@ -167,7 +167,7 @@ export class Server {
 				})),
 			};
 
-			console.log('Server.#getParty: Party info retrieved for client:', client.name);
+			// console.log('Server.#getParty: Party info retrieved for client:', client.name);
 
 			return reply.status(200).send({type: 'PARTY_INFO', party: partyInfo, code: 200});
 		} catch (error) {
@@ -201,12 +201,12 @@ export class Server {
 			const link = address + token;
 
 			//show token registred in orange
-			console.log('\x1b[33m%s\x1b[0m', `Server.#invite: Generated invite token: ${token} | Client: ${client.name}`);
+			// console.log('\x1b[33m%s\x1b[0m', `Server.#invite: Generated invite token: ${token} | Client: ${client.name}`);
 
 			// this.#invites.set(token, {owner: client, createdAt: Date.now(), game_type, party});
 			// this.#invitesOwners.add(client);
 
-			console.log("Server.#invite: Invite created by client:", client.name);
+			// console.log("Server.#invite: Invite created by client:", client.name);
 
 			return reply.status(200).send({type: 'INVITE_CREATED', link, code: 200});
 		} catch (error) {
@@ -230,18 +230,17 @@ export class Server {
 	  
 		  if (!token) {
 			const party = this.createSoloParty({id: client.id, game_type});
-			console.log('Server.#joinParty: (!token) Client joining solo party:', client.name);
+			// console.log('Server.#joinParty: (!token) Client joining solo party:', client.name);
 			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 		  }
 
 
-		  //Mostra o token em laranja para destacar no terminal
-		  console.log('\x1b[33m%s\x1b[0m', `Server.#joinParty: Client attempting to join party with token: ${token} | Client: ${client.name}`);
+		//   console.log('\x1b[33m%s\x1b[0m', `Server.#joinParty: Client attempting to join party with token: ${token} | Client: ${client.name}`);
 		  const invite = this.#invites.get(token);
-		  console.log('\x1b[33m%s\x1b[0m', `Server.#joinParty: Recieved: ${invite} | Client: ${client.name}`);
+		//   console.log('\x1b[33m%s\x1b[0m', `Server.#joinParty: Recieved: ${invite} | Client: ${client.name}`);
 		  if (!invite) {
 			const party = this.createSoloParty({id: client.id, game_type});
-			console.log('Server.#joinParty: (!invite) Client joining solo party:', client.name);
+			// console.log('Server.#joinParty: (!invite) Client joining solo party:', client.name);
 			return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
 		  }
 	  
@@ -250,7 +249,7 @@ export class Server {
 	  
 		  const party = invite.party;
 	  
-		  console.log('Server.#joinParty: Client joining party via invite:', client.name);
+		//   console.log('Server.#joinParty: Client joining party via invite:', client.name);
 	  
 		  party.addClient(client);
 		  return reply.status(200).send({type: 'JOINED_PARTY', code: 200});
@@ -277,7 +276,7 @@ export class Server {
 				throw new Error('NOT_IN_PARTY');
 
 
-			console.log('Server.#leaveParty: Client leaving party:', client.name);
+			// console.log('Server.#leaveParty: Client leaving party:', client.name);
 
 			party.removeClient(client);
 			return reply.status(200).send({type: 'LEFT_PARTY', code: 200});

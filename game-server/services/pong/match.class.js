@@ -330,7 +330,7 @@ export class Match {
     this.#scheduleNextPowerUp(this.#matchStarted);
     this.#newBall();
     this.#startTimer();
-    console.log(`Match ${this.#id} started after both players were ready.`);
+    // console.log(`Match ${this.#id} started after both players were ready.`);
   }
 
   // --- Player Connection ---
@@ -345,7 +345,7 @@ export class Match {
           id: key,
           matchId: this.#id,
         });
-        console.log(`Player ${key} connected to match ${this.#id}`);
+        // console.log(`Player ${key} connected to match ${this.#id}`);
         slot = Number(key);
         connected = true;
         break;

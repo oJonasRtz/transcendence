@@ -151,9 +151,6 @@ export class Party {
 		if (this.#state === 'IN_QUEUE')
 			return;
 
-		//
-		console.log("Caller is leader: " + (caller === this.#leader));
-
 		if (!caller
 			|| !(caller instanceof Client)
 			|| !this.#clients.has(caller)

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export default function MatchNotify({
   title,
   time,
-  onComplete, // ← novo prop
+  onComplete,
 }: {
   title: string;
   time: number;
@@ -28,7 +28,7 @@ export default function MatchNotify({
 
       if (remaining <= 0) {
         clearInterval(interval);
-        onComplete?.(); // ← chama callback quando termina
+        onComplete?.();
       }
     }, 50);
 

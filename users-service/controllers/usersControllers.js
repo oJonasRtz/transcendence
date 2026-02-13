@@ -26,7 +26,6 @@ const usersControllers = {
         req.body
       );
 
-      console.log("highScore data:", highScore?.data);
       return reply.code(200).send(highScore?.data ?? {});
     } catch (err) {
       console.error(
@@ -41,8 +40,6 @@ const usersControllers = {
       const {user_id, score} = req.body;
       if (user_id === undefined || score === undefined)
         throw new error("INVALID_FORMAT");
-
-      console.log(`ill send ${req.body} to sqlite`);
 
       await axios.post("https://sqlite-db:3002/setFlappyHighScore", req.body);
       return reply.code(200).send("Success");

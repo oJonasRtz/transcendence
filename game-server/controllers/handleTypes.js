@@ -57,7 +57,7 @@ export function handleTypes(ws, data) {
 			: null;
 		const match = matchById || matchBySocket || null;
 
-		if (type !== types.recieves.PING && type !== types.recieves.CONNECT_LOBBY)
+		if (type !== types.recieves.PING && type !== types.recieves.CONNECT_LOBBY && type !== types.recieves.INPUT)
 			console.log(`received type: ${type}`);
 
 		//All messages except CONNECT_PLAYER require id
