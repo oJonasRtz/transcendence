@@ -246,29 +246,35 @@ Typical registration fields (adapt to your real payload):
 ```mermaid
 sequenceDiagram
   autonumber
+  participant C as Client (browser)
+  participant V as validatorHook (input inspector)
   participant W as api-gateway (waiter)
   participant P as auth-service (police inspector)
-  participant V as validatorHook (input inspector)
   participant DB as sqlite-db (private intranet)
   participant A as AUTH (police file)
   participant U as USERS (profile body)
 
-  W->>P: checkRegister(payload)
-  P->>V: validate required fields + formats
-  V-->>P: ok OR validation error
+  C->>V: register(payload)
+  V->>V: validate required fields + formats
 
-  alt valid input
+  alt invalid input
+    V-->>C: 400 Bad Request (validation error)
+  else valid input
+    V-->>W: forward sanitized payload
+    W->>P: checkRegister(payload)
+
     P->>DB: check uniqueness (email/username/nickname)
     DB-->>P: ok OR conflict
-    alt no conflict
+
+    alt conflict found
+      P-->>W: 409 Conflict (already exists)
+      W-->>C: 409 Conflict
+    else no conflict
       P->>A: INSERT new auth row (creates police file)
       P->>U: INSERT new users row (creates profile body)
-      P-->>W: success (user created)
-    else conflict found
-      P-->>W: 409 Conflict (already exists)
+      P-->>W: 201 Created (user created)
+      W-->>C: 201 Created
     end
-  else invalid input
-    P-->>W: 400 Bad Request (validation error)
   end
 ```
 ## Route: `getCaptcha`
@@ -445,22 +451,27 @@ That’s exactly what `newPassword` does: it receives the new password and a con
 ```mermaid
 sequenceDiagram
   autonumber
+  participant C as Client (browser)
+  participant V as validatorHook (input inspector)
   participant W as api-gateway (waiter)
   participant P as auth-service (police inspector)
-  participant V as validatorHook (input inspector)
   participant DB as sqlite-db (private intranet)
 
-  W->>P: newPassword(newPassword, confirmPassword, user-identifier)
-  P->>V: validate strength + confirm match
-  V-->>P: ok OR validation error
+  C->>V: newPassword(newPassword, confirmPassword, user-identifier)
+  V->>V: validate strength + confirm match
 
-  alt valid input
+  alt invalid input
+    V-->>C: 400 Bad Request (validation error)
+  else valid input
+    V-->>W: forward sanitized payload
+    W->>P: newPassword(newPassword, confirmPassword, user-identifier)
+
     P->>P: hash(newPassword)
     P->>DB: UPDATE auth SET password = <hash> WHERE user = ?
     DB-->>P: updated
+
     P-->>W: success
-  else invalid input
-    P-->>W: 400 Bad Request (validation error)
+    W-->>C: success
   end
 ```
 ## Route: `get2FAQrCode`
