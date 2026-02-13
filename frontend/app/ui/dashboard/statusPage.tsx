@@ -17,6 +17,8 @@ export default function StatusPage({ user }: StatusPageProps) {
     if (!match.stats) router.push('/dashboard/play');
     setStats(match.stats);
 
+    match.resetStats();
+
     return () => {
       match.resetStats();
       match.leaveParty();
