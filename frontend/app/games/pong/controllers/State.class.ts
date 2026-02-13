@@ -79,7 +79,7 @@ export class State {
 	private inputSeq = 0;
 	private lastServerAckSeq = 0;
 	private pendingInputs: PendingInput[] = [];
-	private readonly interpolationDelayMs = 120;
+	private readonly interpolationDelayMs = 16 * 2; //2 frames at 60fps
 	private serverClockOffsetMs = 0;
 	private clockSynced = false;
 	private snapshots: SnapshotState[] = [];

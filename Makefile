@@ -1,3 +1,8 @@
+# Start all services
+up: secrets tls build
+	@echo "Starting all services, man =D"
+	@docker compose up -d
+
 # Generate secrets for local/dev (Docker secrets + .env used by AWS helpers)
 secrets:
 	@echo "Generating secrets..."
@@ -25,11 +30,6 @@ secrets:
 		mv $$tmp .env
 	@chmod 600 .env
 	@echo "✓ .env updated (JWT_SECRET, GRAFANA_ADMIN_PASSWORD)"
-
-# Start all services
-up: secrets tls build
-	@echo "Starting all services, man =D"
-	@docker compose up -d
 
 # Start locally for development (foreground, rebuild on changes)
 dev: secrets tls

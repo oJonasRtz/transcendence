@@ -88,18 +88,18 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     return () => {};
   }, [user, gameType]);
 
-  useEffect(() => {
-    let redirected = false;
-    const interval = setInterval(() => {
-      if (redirected) return;
-      if (!match.match_id) return;
+  // useEffect(() => {
+  //   let redirected = false;
+  //   const interval = setInterval(() => {
+  //     if (redirected) return;
+  //     if (!match.match_id) return;
 
-      redirected = true;
-      router.push('/dashboard/play/pong');
-    }, 250);
+  //     redirected = true;
+  //     router.push('/dashboard/play/pong');
+  //   }, 250);
 
-    return () => clearInterval(interval);
-  }, [router]);
+  //   return () => clearInterval(interval);
+  // }, [router]);
   
 
   // Sync players from match.party periodically

@@ -558,9 +558,6 @@ export class Match {
     }
 
     this.#ball = new Ball(this.#lastScorer);
-    console.log(
-      `\x1b[35m\x1b[1m[NEW BALL] New ball created for match ${this.#id}\x1b[0m`
-    );
     this.#ball.start();
   }
   //wip - this don not work yet
@@ -606,12 +603,6 @@ export class Match {
         if (p.score >= this.#maxScore) this.endGame(p.info.name);
       });
 
-      console.log(`Ball scored for match ${this.#id} side ${scorer}`);
-	  console.log("-- Placar --");
-	  Object.values(this.#players).forEach((p) => {
-		const info = p.info;
-		console.log(`Player ${info.name} - Score: ${info.score}`);
-	  });
     }
   // --- Cleanup ---
   destroy() {

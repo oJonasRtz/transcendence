@@ -164,6 +164,16 @@ export class Client {
 		if (!game_type || !this.#valid_game_types.includes(game_type))
 			throw new Error('INVALID_FORMAT');
 
+		const res = await data.sendRequest('getUserInformation', {user_id: this.#info.id});
+
+
+		// console.log("data: " + JSON.stringify(res));
+		if (res){
+			this.#info.name = res?.nickname || res?.username;
+			this.#info.email = res?.email || this.#info.email;
+			this.#info.rank = res?.rank || this.#info.rank;
+		}
+
 		console.log("Client entered IN_QUEUE state");
 		this.send({
 			type: 'STATE_CHANGE',
