@@ -9,6 +9,11 @@ A multiplayer Pong web application featuring real-time gaming, chat, matchmaking
   - Seiji Ueno (dev)
   - Felipe Nasser (dev)
 
+# Project management approach
+  - Project split in microservices
+  - Team communication via Discord
+  - 1-2 meetings a week
+
 ## Chosen modules
   1. Web: +9 Pts
      - Flexibility for systems(Desktop/Android/IOS) and easy access globally  
