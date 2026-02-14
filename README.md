@@ -3,11 +3,11 @@
 A multiplayer Pong web application featuring real-time gaming, chat, matchmaking, and user management. Built as a microservices architecture running on Docker.
 
 # Members
-  - Fernando Ruan(Product Owner/dev)
-  - Jonas Alberto(Tech Lead/dev)
-  - José Felipe(Product Manager/dev)
-  - Seiji Ueno(dev)
-  - Felipe Nasser(dev)
+  - Fernando Ruan (Product Owner/dev)
+  - Jonas Alberto (Tech Lead/dev)
+  - José Felipe (Product Manager/dev)
+  - Seiji Ueno (dev)
+  - Felipe Nasser (dev)
 
 ## Database Schema
 
