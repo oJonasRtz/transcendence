@@ -44,7 +44,7 @@ services:
 
   api-gateway:
     build: ./api-gateway
-    image: api-gateway:1.0.0
+    image: ${IMAGE_PREFIX:-}api-gateway:${IMAGE_TAG:-1.0.0}
     container_name: api-gateway
     ports:
       - "3000:3000"
@@ -71,7 +71,7 @@ services:
 
   auth-service:
     build: ./auth-service
-    image: auth-service:1.0.0
+    image: ${IMAGE_PREFIX:-}auth-service:${IMAGE_TAG:-1.0.0}
     container_name: auth-service
     depends_on:
       - sqlite-db
@@ -90,7 +90,7 @@ services:
 
   users-service:
     build: ./users-service
-    image: users-service:1.0.0
+    image: ${IMAGE_PREFIX:-}users-service:${IMAGE_TAG:-1.0.0}
     container_name: users-service
     depends_on:
       - sqlite-db
@@ -107,7 +107,7 @@ services:
 
   sqlite-db:
     build: ./sqlite-db
-    image: sqlite-db:1.0.0
+    image: ${IMAGE_PREFIX:-}sqlite-db:${IMAGE_TAG:-1.0.0}
     container_name: sqlite-db
     restart: always
     networks:
@@ -121,7 +121,7 @@ services:
 
   chat-service:
     build: ./chat-service
-    image: chat-service:1.0.0
+    image: ${IMAGE_PREFIX:-}chat-service:${IMAGE_TAG:-1.0.0}
     container_name: chat-service
     networks:
       - "transcendence"
@@ -136,7 +136,7 @@ services:
 
   game-server:
     build: ./game-server
-    image: game-server:1.0.0
+    image: ${IMAGE_PREFIX:-}game-server:${IMAGE_TAG:-1.0.0}
     container_name: game-server
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
@@ -154,7 +154,7 @@ services:
 
   match-service:
     build: ./new-match-service
-    image: match-service:1.0.0
+    image: ${IMAGE_PREFIX:-}match-service:${IMAGE_TAG:-1.0.0}
     container_name: match-service
     depends_on:
       - game-server
@@ -292,6 +292,7 @@ services:
 
   alert-receiver:
     build: ./monitoring/alert-receiver
+    image: ${IMAGE_PREFIX:-}alert-receiver:${IMAGE_TAG:-1.0.0}
     container_name: alert-receiver
     networks:
       - "transcendence"

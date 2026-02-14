@@ -64,7 +64,7 @@ export default async function registerServer(io) {
     } catch (err) {}
   }
 
-  async function sendPrivateMessageServer(msg, user_id, name, public_id) {
+  /*async function sendPrivateMessageServer(msg, user_id, name, public_id) {
     try {
       const response = await axios.post(
         "https://chat-service:3005/getAllPrivateMessages",
@@ -91,7 +91,7 @@ export default async function registerServer(io) {
     } catch (err) {
       console.error("Unfortunately we cannot send the private Message:", err);
     }
-  }
+  }*/
 
   async function reloadEverything(owner) {
     try {
@@ -120,10 +120,11 @@ export default async function registerServer(io) {
     // connection
 
 		socket.on("joinPrivate", async ({ target_id }) => {
-			await axios.post("https://chat-service:3005/setTargetId", {
+			socket.currentPrivateTarget = target_id;
+			/*await axios.post("https://chat-service:3005/setTargetId", {
         user_id: socket.user_id, 
         public_id: target_id
-      });
+      });*/
 			notifications.length = 0;
 			// Kick any existing socket with the same username (stale connection)
 			if (!socket.privateUserLock) {
@@ -139,9 +140,49 @@ export default async function registerServer(io) {
 					io.to(socketId).emit("kicked", "Connected from another location");
 					io.sockets.sockets.get(socketId)?.disconnect(true);
 				}
-				privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id });
+				privateUsers.set(socket.id, { name: socket.username, public_id: socket.public_id, user_id: socket.user_id, target_id: target_id });
 				socket.privateUserLock = false;
 			}
+
+      try {
+	  const response = await axios.post(
+    		"https://chat-service:3005/getAllPrivateMessages",
+    	{	
+      		user_id: socket.user_id,
+      		public_id: target_id,
+    	}
+  );
+
+  const data = Array.isArray(response?.data) ? response.data : [];
+
+  const sender = socket.public_id;
+  const target = target_id;
+
+  for (const [socketId, user] of privateUsers.entries()) {
+
+    const isSender =
+      user.public_id === sender &&
+      user.target_id === target;
+
+    const isTarget =
+      user.public_id === target &&
+      user.target_id === sender;
+
+    if (isSender || isTarget) {
+      io.to(socketId).emit("updateDirectMessages", data);
+    }
+  }
+	socket.emit("updatePrivateUsers", [
+		{
+			name: socket.username,
+			public_id: socket.public_id,
+			avatar: `avatar_$(socker.user_id}`,
+		},
+	]);
+
+} catch (err) {
+  console.error("Error loading private messages on joinPrivate:", err);
+}
 
       let official = new Map();
       official.set(socket.id, {
@@ -171,7 +212,7 @@ export default async function registerServer(io) {
         Array.from(official.values())
       );
 
-      try {
+      /*try {
         await sendPrivateMessageServer(
           null,
           socket.user_id,
@@ -180,7 +221,7 @@ export default async function registerServer(io) {
         );
       } catch (err) {
         console.error("Error sending private message:", err);
-      }
+     }*/
     });
 
 		socket.on("join", async () => {
@@ -549,74 +590,73 @@ export default async function registerServer(io) {
 
         //await axios.post("https://chat-service:3005/setTargetId", { user_id: socket.user_id, public_id: public_id });
 
-        let allowed = true;
-        const test = await axios.post("https://chat-service:3005/getTargetId", {
-          public_id: public_id,
-        });
+        /*let allowed = true;
+        const test = socket.currentPrivateTarget;
+
         if (test?.data.target_id !== socket.user_id) allowed = false;
-        privateMessages.push(...data);
+        privateMessages.push(...data);*/
 
         const res = await axios.post(
           "https://users-service:3003/getDataByPublicId",
           { public_id: public_id }
         );
+
+	privateMessages.push(...data);
+
         const target_name = res?.data.username;
 
-        for (const [socketId, user] of privateUsers.entries()) {
-          if (user.name === `${socket.username}`)
-            io.to(socketId).emit("updateDirectMessages", privateMessages);
-          else if (user.name === target_name && allowed)
-            io.to(socketId).emit("updateDirectMessages", privateMessages);
-        }
+	const sender = socket.public_id;
+	const target = public_id;
 
-        let official = new Map();
+	for (const [socketId, user] of privateUsers.entries()) {
 
-        official.set(socket.id, {
-          name: `${socket.username}`,
-          public_id: `${socket.public_id}`,
-          avatar: `avatar_${socket.user_id}`,
-        });
+		if (user.public_id === sender && user.target_id === target) {
+			io.to(socketId).emit("updateDirectMessages", privateMessages);
+		}
+		if (user.public_id === target && user.target_id === sender) {
+			io.to(socketId).emit("updateDirectMessages", privateMessages);
+		}
+	}
 
-        for (const [socketId, user] of privateUsers.entries()) {
-          if (user.public_id === public_id) {
-            official.set(socketId, {
-              name: user.name,
-              public_id: user.public_id,
-              avatar: `avatar_${user.user_id}`,
-            });
-            if (allowed)
-              io.to(socketId).emit(
-                "updatePrivateUsers",
-                Array.from(official.values())
-              );
-            break;
-          }
-        }
-        socket.emit("updateNotifications", notifications);
-        io.to(socket.id).emit(
-          "updatePrivateUsers",
-          Array.from(official.values())
-        );
-      } catch (err) {
-        if (err.message === "TOO_HIGH_LENGTH") {
-          notifications.length = 0;
-          /*try {
-						const response = await axios.post("https://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
+	let official = new Map();
+	let senderSocketId = null;
+	let targetSocketId = null;
+
+	for (const [socketId, user] of privateUsers.entries()) {
+		if (user.public_id === sender && user.target_id === target)
+			senderSocketId = socketId;
+		if (user.public_id === target && user.target_id === sender)
+			targetSocketId = socketId;
+      	}
+
+	if (senderSocketId && targetSocketId) {
+
+ 	 const official = [
+    			privateUsers.get(senderSocketId),
+    			privateUsers.get(targetSocketId),
+  		].map(user => ({
+   		 	name: user.name,
+   	 		public_id: user.public_id,
+    			avatar: `avatar_${user.user_id}`,
+ 	 	}));
+  		io.to(senderSocketId).emit("updatePrivateUsers", official);
+  		io.to(targetSocketId).emit("updatePrivateUsers", official);
+	}
+} catch (err) {
+						/*const response = await axios.post("https://chat-service:3005/getAllPrivateMessages", { user_id: socket.user_id, public_id: public_id });
 						let data = Array.isArray(response?.data) ? response?.data : [];
                                 		privateMessages.push(...data);
 					} catch (err) {}*/
-          notifications.push({
-            isSystem: true,
-            isLink: false,
-            content: "system: You cannot type a message above 200 characters",
-            username: "SYSTEM",
-            avatar: "/public/images/system.png",
-          });
-          socket.emit("updateNotifications", notifications);
-          console.error("Invalid input or message above to the allowed length");
-        }
-        console.error("Unfortunately we cannot send the private Message:", err);
-      }
+		notifications.push({
+			  isSystem: true,
+			  isLink: false,
+			  content: "system: You cannot type a message above 200 characters",
+			  username: "SYSTEM",
+ 			  avatar: "/public/images/system.png",
+		});
+		socket.emit("updateNotifications", notifications);
+		console.error("Invalid input or message above to the allowed length");
+	}
     });
   });
 }

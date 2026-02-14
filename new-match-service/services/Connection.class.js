@@ -68,12 +68,8 @@ export class Connection {
 	async #endGame(match_id, stats, timeout = false) {
 		const lobby = this.#matchesRunning.get(match_id);
 
-		console.log("chegamos na endGame");
-		
 		if (!lobby)
 			return;
-
-		console.log(`vamos remover o match ${match_id} do lobby`);
 
 		try {
 			await lobby.end_game({setter: this, stats, match_id}, timeout);
@@ -149,7 +145,6 @@ export class Connection {
 		return new Promise((resolve) => {
 			this.#matchQueue.push((matchId) => {
 				this.#matchesRunning.set(matchId, Lobby);
-				console.log("O lobby que acompanha a conexão recebeu o matchId:", matchId);
 				resolve(matchId);
 			});
 

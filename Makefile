@@ -45,6 +45,13 @@ tls:
 	@echo Generating TLS certificates
 	@chmod +x ./shared/ssl/genCert.sh
 	@bash ./shared/ssl/genCert.sh
+	@if [ ! -f ./shared/ssl-public/server.cert ] || [ ! -f ./shared/ssl-public/server.key ]; then \
+		mkdir -p ./shared/ssl-public; \
+		cp ./shared/ssl/server.cert ./shared/ssl-public/server.cert; \
+		cp ./shared/ssl/server.key ./shared/ssl-public/server.key; \
+		chmod 644 ./shared/ssl-public/server.cert; \
+		chmod 600 ./shared/ssl-public/server.key; \
+	fi
 
 # Shutdown all services
 
@@ -71,7 +78,8 @@ clean: down
 fclean: down
 	@echo "Erasing everything"
 	@docker system prune -a -f --volumes
-	@rm -f ./shared/ssl/server.crt ./shared/ssl/server.key
+	@rm -f ./shared/ssl/server.cert ./shared/ssl/server.key
+	@rm -f ./shared/ssl-public/server.cert ./shared/ssl-public/server.key
 	
 # Restart an individual service
 # how to use:
