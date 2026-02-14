@@ -10,16 +10,16 @@ A multiplayer Pong web application featuring real-time gaming, chat, matchmaking
   - Felipe Nasser (dev)
 
 ## Chosen modules
-  1- Web: +9 Pts
-    - Flexibility for systems(Desktop/Android/IOS) and easy access globally
-  2- Accessibility and Internationalization: +1Pt
-    - Access for multi browsers
-  3- User management: +4 Pts
-    - Because we want every user can have his own status/config.
-  4- Gaming & UX: +7 Pts
-    - Because we got a game dev on the team.
-  5- DevOps: +2 Pts
-    - Control management for the services
+  1. Web: +9 Pts
+     - Flexibility for systems(Desktop/Android/IOS) and easy access globally  
+  2. Accessibility and Internationalization: +1Pt
+     - Access for multi browsers  
+  3. User management: +4 Pts
+     - Because we want every user can have his own status/config.  
+  4. Gaming & UX: +7 Pts
+     - Because we got a game dev on the team.  
+  5. DevOps: +2 Pts
+      - Control management for the services  
 
   Total: 23 Pts
     
