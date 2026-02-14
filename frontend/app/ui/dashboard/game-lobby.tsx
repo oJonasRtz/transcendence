@@ -146,7 +146,7 @@ export default function GameLobby({ user }: GameLobbyProps) {
                     }`}
                 >
                   <div className="text-4xl mb-3">🐦</div>
-                  <h3 className="text-lg font-bold text-white mb-1">Flappy Bird</h3>
+                  <h3 className="text-lg font-bold text-white mb-1">Flappy Duck</h3>
                   <p className="text-sm text-slate-400">Single Player</p>
                   <span className="inline-block mt-2 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/50 text-green-400 text-xs">
                     Available Now

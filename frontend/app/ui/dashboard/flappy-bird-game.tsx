@@ -80,7 +80,7 @@ export default function FlappyBirdGame({ user }: FlappyBirdGameProps) {
       {/* Header */}
       <div className="w-full max-w-6xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Flappy Bird</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Flappy Duck</h1>
           <p className="text-slate-400">
             Tap to flap! How far can you go?
           </p>

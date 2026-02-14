@@ -21,14 +21,14 @@ interface FlappyLeaderboardProps {
 		className="w-full h-full md:w-1/3 lg:w-1/4 ml-4 flex-shrink-0"
 	  >
 		<CardHeader
-		  title="Flappy Bird Leaderboard"
+		  title="Leaderboard"
 		  accentClassName="text-yellow-400"
 		  subtitle={currentUserRank ? `Your Rank: #${currentUserRank}` : undefined}
 		/>
   
 		<div className="divide-y divide-white/5">
 		  {leaderboard.length === 0 ? (
-			<EmptyState title="No scores yet" message="Play Flappy Bird to get on the leaderboard." />
+			<EmptyState title="No scores yet" message="Play Flappy Duck to get on the leaderboard." />
 		  ) : (
 			leaderboard.map((entry, index) => (
 			  <div
