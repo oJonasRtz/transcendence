@@ -136,7 +136,7 @@ erDiagram
 
 ## Features
 
-### Authentication & Security
+### Authentication & Security - made by Fernando Ruan
 - User registration with email validation
 - JWT-based authentication with secure httpOnly cookies
 - Two-Factor Authentication (2FA) with QR code setup
@@ -144,13 +144,13 @@ erDiagram
 - Captcha integration on login/register
 - Password requirements: 8+ chars, uppercase, lowercase, numbers, special chars
 
-### User Management
+### User Management - made by Fernando Ruan
 - Customizable profiles (username, nickname, email, description)
 - Avatar upload with automatic image processing
 - Online/offline status tracking
 - User search and public profiles
 
-### Multiplayer Gaming
+### Multiplayer Gaming - made by Jonas Alberto
 - **Pong** - Classic paddle game with physics
 - **Flappy Bird** - Obstacle avoidance game
 - Real-time game state via WebSocket
@@ -159,14 +159,14 @@ erDiagram
   - **TOURNAMENT**: 4-player double-elimination brackets
 - Game statistics and leaderboards
 
-### Social Features
+### Social Features - made by Fernando Ruan FEAT José Felipe
 - Friend system (request, accept, reject, block)
 - Public chat rooms
 - Direct messaging between users
 - Real-time notifications via Socket.io
 - Message read status tracking
 
-### Dashboard & Analytics
+### Dashboard & Analytics - made by José Felipe, Seiji Ueno, Jonas Alberto & Fernando Ruan
 - User statistics (wins/losses/draws, ranking, level, XP)
 - Match history with pagination
 - Global leaderboard
@@ -204,20 +204,20 @@ Browser (HTTPS:443)
 | `game` | Game-related services (game-server, game-pong, game-flappy-bird, match-service) |
 | `db_connection` | Database access (sqlite-db, auth-service, users-service, chat-service) |
 
-### Databases
+### Databases - Made by Fernando Ruan FEAT Jonas Alberto
 
 - **SQLite**: Used by api-gateway, auth-service, users-service, chat-service
 
 ## Tech Stack
 
-### Frontend
+### Frontend - Made by Seiji Ueno & José Felipe FEAT Jonas Alberto
 - Next.js 16 with Turbopack
 - React 19
 - TypeScript 5.7
 - Tailwind CSS 3.4
 - Socket.io-client
 
-### Backend
+### Backend - Made by Fernando Ruan FEAT Seiji Ueno
 - Fastify 5.6
 - Node.js 20
 - JWT authentication
@@ -225,12 +225,12 @@ Browser (HTTPS:443)
 - Nodemailer (emails)
 - Speakeasy (2FA)
 
-### Games
+### Games - made by Jonas Alberto
 - Excalibur game engine (v0.31-0.32)
 - Vite build tool
 - WebSocket real-time sync
 
-### Infrastructure
+### Infrastructure - made by Fernando Ruan, Seiji Ueno, Felipe Nasser & Jonas Alberto
 - Docker & Docker Compose
 - Nginx (reverse proxy, TLS)
 - Prometheus, Grafana, Alertmanager (monitoring)
