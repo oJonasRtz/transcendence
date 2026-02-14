@@ -13,6 +13,7 @@ shared/letsencrypt/
 shared/letsencrypt-lib/
 shared/certbot/
 shared/ssl-public/
+secrets/*
 
 # Grafana secure password
 monitoring/.grafana-password.txt
