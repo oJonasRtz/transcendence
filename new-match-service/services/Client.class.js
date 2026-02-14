@@ -109,6 +109,13 @@ export class Client {
 		return this.#info.email;
 	}
 
+	syncIdentity({name, email}) {
+		if (typeof name === 'string' && name.trim() !== '')
+			this.#info.name = name;
+		if (typeof email === 'string' && email.trim() !== '')
+			this.#info.email = email;
+	}
+
 	get party() {
 		return this.#game.party;
 	}
@@ -156,6 +163,16 @@ export class Client {
 	async #in_queue({game_type}) {
 		if (!game_type || !this.#valid_game_types.includes(game_type))
 			throw new Error('INVALID_FORMAT');
+
+		const res = await data.sendRequest('getUserInformation', {user_id: this.#info.id});
+
+
+		// console.log("data: " + JSON.stringify(res));
+		if (res){
+			this.#info.name = res?.nickname || res?.username;
+			this.#info.email = res?.email || this.#info.email;
+			this.#info.rank = res?.rank || this.#info.rank;
+		}
 
 		console.log("Client entered IN_QUEUE state");
 		this.send({

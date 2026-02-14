@@ -413,6 +413,7 @@ export class Server {
 				throw new Error('ALREADY_CONNECTED');
 
 			if (c) {
+				c.syncIdentity({name, email});
 				c.reconnect(ws);
 				console.log(`Server.#addClient: Client reconnected: ${name} (${id})`);
 			}

@@ -23,7 +23,9 @@ export class Ball extends ex.Actor {
 	}
 
 	onPreUpdate(_engine: ex.Engine, _delta: number): void {
-		const {vector} = gameState.getBall();
+		const {vector, exist} = gameState.getBall();
+		if (!exist) return;
+
 		this.pos.x = vector.x;
 		this.pos.y = vector.y;
 	}

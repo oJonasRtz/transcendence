@@ -39,14 +39,13 @@ export default function MatchProvider({ user, profile, children }:
   useEffect(() => {
     if (!user) return;
 
+    const currentName = profile?.nickname || user.username;
     const tryConnect = () => {
-      if (!match.isConnected && user) {
-        match.connect({
-          id: user.user_id,
-          email: user.email,
-          name: profile?.nickname || user.username,
-        });
-      }
+      match.connect({
+        id: user.user_id,
+        email: user.email,
+        name: currentName,
+      });
     };
 
     tryConnect();
@@ -54,22 +53,11 @@ export default function MatchProvider({ user, profile, children }:
     reconnecIntervalRef.current = setInterval(tryConnect, __TIME_TO_WAIT__.RECONNECT_INTERVAL * 1000);
 
     match.onMatch = (match_id, skip) => {
-      if (!match_id)
-        return;
-      
+      if (!match_id) return;
+    
       setMatchFound(true);
-      const go = () => router.push(`/dashboard/play/pong`);
-
-      if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
-
-      if (skip) {
-        go();
-        return;
-      }
-
-      redirectTimeoutRef.current = setTimeout(go, __TIME_TO_WAIT__.MAX_TIME * 1000);
     };
-
+    
     match.onParty = () => {
       setShowFloating(true);
     }
@@ -84,19 +72,20 @@ export default function MatchProvider({ user, profile, children }:
       if (reconnecIntervalRef.current) clearInterval(reconnecIntervalRef.current);
       if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
     };
-  }, [router, user]);
+  }, [router, user?.user_id, user?.email, user?.username, profile?.nickname]);
 
   return (
     <>
       {children}
       {(showFloating && !hiddenFloat.some((path) => pathname.startsWith(path))) && <FloatingRoomWidget />}
 
-      {matchFound && (
+      {(matchFound && !pathname.startsWith('/dashboard/play/pong')) && (
         <MatchNotify
           title="Match Found!"
           time={__TIME_TO_WAIT__.MAX_TIME}
           onComplete={() => {
             setMatchFound(false);
+            router.push(`/dashboard/play/pong`);
           }}
         />
       )}

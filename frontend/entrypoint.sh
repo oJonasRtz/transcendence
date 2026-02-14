@@ -1,0 +1,31 @@
+#!/bin/sh
+set -e
+
+echo "🔐 [ENTRYPOINT] Loading Docker Secrets..." >&2
+
+# Load Docker Secrets into variables
+JWT_SECRET=""
+SYNC_SECRET=""
+CRON_SECRET=""
+
+if [ -f /run/secrets/jwt_secret ]; then
+  JWT_SECRET=$(cat /run/secrets/jwt_secret)
+fi
+
+if [ -f /run/secrets/sync_secret ]; then
+  SYNC_SECRET=$(cat /run/secrets/sync_secret)
+fi
+
+if [ -f /run/secrets/cron_secret ]; then
+  CRON_SECRET=$(cat /run/secrets/cron_secret)
+fi
+
+echo "✅ [ENTRYPOINT] Docker Secrets loaded successfully!" >&2
+echo "🚀 [ENTRYPOINT] Starting: $@" >&2
+
+# Execute with environment variables explicitly set
+exec env \
+  JWT_SECRET="$JWT_SECRET" \
+  SYNC_SECRET="$SYNC_SECRET" \
+  CRON_SECRET="$CRON_SECRET" \
+  "$@"

@@ -1,10 +1,8 @@
 "use client";
 import { match } from './MatchProvider';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import type { User } from '@/app/lib/auth';
 import { useEffect, useState } from 'react';
-import MatchNotify from './match-notifty';
-import { __TIME_TO_WAIT__ } from './MatchProvider';
 import WaitingLobbySkeleton from './waiting-lobby-skeleton';
 
 interface WaitingLobbyProps {
@@ -24,11 +22,11 @@ type PlayerProfile = {
 
 export default function WaitingLobby({ user }: WaitingLobbyProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [inQueue, setInQueue] = useState(false);
   const [queueTime, setQueueTime] = useState(0);
   const [players, setPlayers] = useState<PlayerProfile[]>([]);
   const [gameType, setGameType] = useState<GameType>('RANKED');
+  const [queueActionError, setQueueActionError] = useState<string | null>(null);
   // const [showMatchFound, setShowMatchFound] = useState(false);
   const [isLeader, setIsLeader] = useState(true);
   const [animatedPlayers, setAnimatedPlayers] = useState<string[]>([])
@@ -39,7 +37,14 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
 
   useEffect(() => {
     setInQueue(match.inQueue);
-  }, [match.inQueue]);
+    match.onState = (nextState: string) => {
+      setInQueue(nextState === 'IN_QUEUE');
+    };
+
+    return () => {
+      match.onState = null;
+    };
+  }, []);
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -58,10 +63,11 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     const joinLobby = async () => {
       try {
         if (!match.isConnected) {
+          const fallbackName = match.matchInfo.name || user.username;
           match.connect({
-            name: user.username,
+            name: fallbackName,
             email: user.email,
-            id: user.public_id,
+            id: user.user_id,
           });
         }
   
@@ -81,6 +87,19 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
     // Leave party on unmount
     return () => {};
   }, [user, gameType]);
+
+  // useEffect(() => {
+  //   let redirected = false;
+  //   const interval = setInterval(() => {
+  //     if (redirected) return;
+  //     if (!match.match_id) return;
+
+  //     redirected = true;
+  //     router.push('/dashboard/play/pong');
+  //   }, 250);
+
+  //   return () => clearInterval(interval);
+  // }, [router]);
   
 
   // Sync players from match.party periodically
@@ -107,8 +126,9 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
       });
     
       setIsLeader(
-        match.party.find((p) => p.id === user.user_id)?.isLeader || false
+        match.party.find((p) => p.id === user.user_id || p.id === user.public_id)?.isLeader || false
       );
+      setInQueue(match.inQueue);
     };
 
     updatePlayers();
@@ -227,7 +247,15 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             <button
               onClick={() => {
                 if (!isLeader || inQueue) return;
-                match.enqueue(gameType);
+                const enqueued = match.enqueue(gameType);
+
+                if (!enqueued) {
+                  setQueueActionError('Matchmaking is not ready yet. Please wait 1 second and try again.');
+                  return;
+                }
+
+                setQueueActionError(null);
+                setInQueue(true);
               }}
               disabled={!isLeader || inQueue}
               className={`w-full py-4 rounded-xl text-lg font-bold transition-all duration-300 flex items-center justify-center gap-4
@@ -245,7 +273,11 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             {/* Dequeue Button (X) */}
             {inQueue && (
               <button
-                onClick={() => match.dequeue()}
+                onClick={() => {
+                  match.dequeue();
+                  setQueueActionError(null);
+                  setInQueue(false);
+                }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-red-500/30 hover:bg-red-500/50 border border-red-500/50 text-red-300 flex items-center justify-center font-black text-lg transition-all shadow-lg shadow-red-500/20"
                 aria-label="Leave Queue"
               >
@@ -254,6 +286,12 @@ export default function WaitingLobby({ user }: WaitingLobbyProps) {
             )}
           </div>
         </div>
+
+        {queueActionError && (
+          <div className="w-full max-w-md rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3">
+            <p className="text-sm text-red-300">{queueActionError}</p>
+          </div>
+        )}
       </div>
       </div>
 

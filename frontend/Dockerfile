@@ -20,9 +20,16 @@ RUN pnpm install --frozen-lockfile
 # Copy the rest of the application
 COPY . .
 
+# Copy and set entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Build the Next.js application
 RUN pnpm exec next build
 
 EXPOSE 3000
 
+# Use entrypoint to load secrets
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 # Run Next.js on 3000 so nginx can proxy to the frontend container
 CMD ["pnpm", "exec", "next", "start", "-p", "3000"]

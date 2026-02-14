@@ -4,6 +4,7 @@ import { gameState, stats } from "../globals";
 import { Ball } from "./actors/ball";
 import { ScoreBoard } from "./ScoreBoard.class";
 import { hideDisconnectScreen, showDisconnectScreen } from "../main";
+import { EffectsOverlay } from "./EffectsOverlay.class";
 
 class Background extends ex.Actor {
   private image: ex.ImageSource;
@@ -33,9 +34,11 @@ export class Game {
   private paddles: ex.Actor[] | null = null;
   private ball: ex.Actor | null = null;
 
-  private endPromisse!: Promise<void>;
-  private endResolve!: () => void;
+  private engineStartPromise: Promise<void> | null = null;
+  private endPromise: Promise<void>;
+  private endResolve: (() => void) | null = null;
   private ended: boolean = false;
+  private preventScrollKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
   private sprites: {
     redPaddle?: ex.ImageSource;
@@ -51,7 +54,10 @@ export class Game {
 
   constructor(container: HTMLElement) {
     const canvas = document.createElement("canvas");
-    canvas.id = "pong";
+    canvas.id = "pong-canvas";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.display = "block";
 
     container.innerHTML = "";
     container.appendChild(canvas);
@@ -62,7 +68,7 @@ export class Game {
       width: stats?.game?.width ?? 800,
       height: stats?.game?.height ?? 600,
       // backgroundColor: new ex.Color(10, 20, 45, 1),
-      displayMode: ex.DisplayMode.Fixed,
+      displayMode: ex.DisplayMode.FitContainer,
     });
 
     // const score = new ScoreBoard(this.engine);
@@ -70,25 +76,31 @@ export class Game {
     this.addBackground();
     // this.addToGame([score]);
     this.addPaddles();
+    this.addToGame([new EffectsOverlay(this.engine)]);
+
+    this.endPromise = new Promise<void>((resolve) => {
+      this.endResolve = resolve;
+    });
 
     this.engine.on("preupdate", () => {
+      gameState.tickNetworkInterpolation();
       const { gameEnd } = gameState.getGame();
 
       if (gameEnd) this.end();
 
-      const players = gameState.getPlayers();
-      if (!players[1].connected || !players[2].connected)
-        showDisconnectScreen(this.container);
+      const { allOk } = gameState.getGame();
+      if (!allOk) showDisconnectScreen(this.container);
       else hideDisconnectScreen();
 
       this.ballReset();
     });
 
-    window.addEventListener("keydown", (e) => {
+    this.preventScrollKeydownHandler = (e: KeyboardEvent) => {
       if (["ArrowUp", "ArrowDown"].includes(e.key)) {
         e.preventDefault();
       }
-    });
+    };
+    window.addEventListener("keydown", this.preventScrollKeydownHandler);
   }
 
   private addBackground() {
@@ -137,32 +149,35 @@ export class Game {
   }
 
   async start(): Promise<void> {
-    if (!this.endPromisse) {
-      this.endPromisse = new Promise<void>((resolve) => {
-        this.endResolve = resolve;
-      });
-    }
+    await this.startEngine();
+    return this.endPromise;
+  }
 
-    // const loader = new ex.Loader([
-    //   this.sprites.arenaBackground!,
-    //   this.sprites.redPaddle!,
-    //   this.sprites.bluePaddle!,
-    // ])
+  async startEngine(): Promise<void> {
+    if (this.engineStartPromise) return this.engineStartPromise;
 
-    await this.sprites.arenaBackground!.load();
-    await this.sprites.redPaddle!.load();
-    await this.sprites.bluePaddle!.load();
+    this.engineStartPromise = (async () => {
+      await Promise.all([
+        this.sprites.arenaBackground!.load(),
+        this.sprites.redPaddle!.load(),
+        this.sprites.bluePaddle!.load(),
+      ]);
+      await this.engine.start();
+    })();
 
-    await this.engine.start();
-
-    return this.endPromisse;
+    return this.engineStartPromise;
   }
 
   end() {
     if (this.ended) return;
 
     this.ended = true;
+    if (this.preventScrollKeydownHandler) {
+      window.removeEventListener("keydown", this.preventScrollKeydownHandler);
+      this.preventScrollKeydownHandler = null;
+    }
     this.engine.stop();
+    this.engine.dispose();
     if (this.endResolve) this.endResolve();
   }
 }

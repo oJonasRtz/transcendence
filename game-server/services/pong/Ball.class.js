@@ -1,4 +1,4 @@
-import { FRAME_TIME, INTERVALS, LEFT, RIGHT, stats, types } from "../../server.shared.js";
+import { INTERVALS, LEFT, RIGHT, stats, types } from "../../server.shared.js";
 
 export class Ball {
   #direction = { x: 0, y: 0 };
@@ -14,10 +14,11 @@ export class Ball {
   };
   #lastBounce = null;
   #DELAY = 100;
-  #interval = null;
   #start = false;
-  #networkBuffer = FRAME_TIME;
+  #startTimeout = null;
   #position = { x: stats?.map?.width / 2, y: stats?.map?.height / 2 };
+  #speedMultiplier = 1;
+  #speedTimer = null;
  
   constructor(lastScorer) {
     const dir = { left: -1, right: 1 };
@@ -28,12 +29,6 @@ export class Ball {
     };
 
     this.#direction = vector;
-    const startTime = INTERVALS; //1sec + message letency buffer
-
-    setTimeout(() => {
-      this.#start = true;
-      // console.log("Ball started moving");
-    }, startTime);
   }
   get direction() {
 	return { ...this.#direction };
@@ -41,6 +36,9 @@ export class Ball {
 
   get position() {
     return { x: this.#position.x, y: this.#position.y };
+  }
+  get radius() {
+    return this.#size.width / 2;
   }
   
   get hitBox() {
@@ -60,7 +58,7 @@ export class Ball {
   }
 
   #updatePosition(delta) {
-    const distance = this.#speed.moveSpeed * delta;
+    const distance = this.#speed.moveSpeed * this.#speedMultiplier * delta;
 
     this.#position.x += this.#direction.x * distance;
     this.#position.y += this.#direction.y * distance;
@@ -77,54 +75,69 @@ export class Ball {
     return scorer[i];
   }
 
-  start(onScore, onCollision) {
-    if (this.#interval) return;
-  
-    let lastTime = Date.now();
-  
-    const loop = () => {
-      if (!this.#start) {
-        this.#interval = setTimeout(loop, this.#networkBuffer);
-        return;
-      }
-  
-      const now = Date.now();
-      const rawDelta = (now - lastTime) / 1000;
-      const deltaTime = Math.min(rawDelta, 0.05); // trava delta
-      lastTime = now;
-  
-      const scorer = this.#updatePosition(deltaTime);
-  
-      const hitTop = this.#position.y <= this.#margin;
-      const hitBottom = this.#position.y >= stats.map.height - this.#margin;
-  
-      if (hitTop || hitBottom) {
-        this.#position.y = hitTop
-          ? this.#margin
-          : stats.map.height - this.#margin;
-        this.bounce("y");
-      }
-  
-      if (onCollision()) {
-        this.bounce("x");
-      }
-  
-      if (scorer) {
-        this.#interval = null;
-        onScore(scorer);
-        return;
-      }
-  
-      this.#interval = setTimeout(loop, this.#networkBuffer);
-    };
-  
-    loop();
+  start() {
+    this.#start = false;
+    if (this.#startTimeout) {
+      clearTimeout(this.#startTimeout);
+      this.#startTimeout = null;
+    }
+    this.#startTimeout = setTimeout(() => {
+      this.#start = true;
+      this.#startTimeout = null;
+    }, INTERVALS);
+  }
+
+  update(deltaSeconds, onScore, onCollision) {
+    if (!this.#start) return;
+
+    const safeDelta = Math.min(Math.max(Number(deltaSeconds) || 0, 0), 0.05);
+    if (!safeDelta) return;
+
+    const scorer = this.#updatePosition(safeDelta);
+
+    const hitTop = this.#position.y <= this.#margin;
+    const hitBottom = this.#position.y >= stats.map.height - this.#margin;
+
+    if (hitTop || hitBottom) {
+      this.#position.y = hitTop ? this.#margin : stats.map.height - this.#margin;
+      this.bounce("y");
+    }
+
+    if (onCollision()) {
+      this.bounce("x");
+    }
+
+    if (scorer) {
+      onScore(scorer);
+    }
   }
 
   stop() {
-	if (!this.#interval) return;
-	clearInterval(this.#interval);
-	this.#interval = null;
+	this.#start = false;
+	if (this.#startTimeout) {
+	  clearTimeout(this.#startTimeout);
+	  this.#startTimeout = null;
+	}
+	if (this.#speedTimer) {
+	  clearTimeout(this.#speedTimer);
+	  this.#speedTimer = null;
+	}
+	this.#speedMultiplier = 1;
+  }
+
+  applySpeedMultiplier(multiplier = 1, durationMs = 0) {
+    if (typeof multiplier !== "number" || multiplier <= 0) return;
+    const duration = Math.max(0, Number(durationMs) || 0);
+
+    this.#speedMultiplier = multiplier;
+
+    if (this.#speedTimer) clearTimeout(this.#speedTimer);
+    if (!duration) return;
+
+    this.#speedTimer = setTimeout(() => {
+      this.#speedMultiplier = 1;
+      this.#speedTimer = null;
+    }, duration);
   }
 
 

@@ -144,6 +144,10 @@ export default function PongGame({ user }: PongGameProps) {
             <span className="text-blue-400 mt-0.5">▸</span>
             <span>The first player to reach the score limit wins</span>
           </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-400 mt-0.5">▸</span>
+            <span>Collect glowing power-orbs for temporary boosts and debuffs</span>
+          </li>
         </ul>
       </div>
     </div>

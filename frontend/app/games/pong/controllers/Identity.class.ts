@@ -17,22 +17,22 @@ export class Identity {
 		this.playerId = 0;
 		this.id = 0;
 	}
+	public reset() {
+		this.name = "";
+		this.matchId = 0;
+		this.playerId = 0;
+		this.id = 0;
+	}
 
 	//Alterar fututuramente para consultar o backend
 	public setInfo({name, matchId, playerId}: {name: string; matchId: number; playerId: number | string;}) {
-		const alreadySet = [
-			this.name.trim() !== "",
-			this.matchId !== 0,
-			this.playerId !== 0,
-		].some(Boolean);
-
 		const invalidData = [
 			name.trim() === "",
 			matchId < 1,
 			!playerId,
 		].some(Boolean);
 		
-		if (alreadySet || invalidData)
+		if (invalidData)
 			return;
 
 		this.name = name;
@@ -50,8 +50,6 @@ export class Identity {
 	}
 
 	public setId(id: 1 | 2) {
-		if (this.id !== 0)
-			return;
 		this.id = id;
 		console.log(`You are player ${id}`);
 	}

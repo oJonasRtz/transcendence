@@ -20,8 +20,6 @@ interface PongProps {
 export function Pong({setScore}: PongProps) {
 
 	useEffect(() => {
-		console.log("Starting Pong with match info:", match.matchInfo);
-		console.log('Match ID:', match.match_id);
 		const info = match.matchInfo;
 		const init = async () => {
 			const container = document.getElementById('pong');
@@ -42,11 +40,7 @@ export function Pong({setScore}: PongProps) {
 	return (
 		<div
 			id="pong"
-			className="rounded-lg mx-auto"
-			style={{
-				width: 800,
-				height: 600
-			 }}
+			className="relative mx-auto w-full max-w-[800px] aspect-[4/3] rounded-lg overflow-hidden"
 		/>
 	);
 }

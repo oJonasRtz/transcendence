@@ -10,5 +10,11 @@ RUN npm install
 COPY . .
 #generate ssl certificates
 # RUN cd ssl/ && bash ./mkcert.sh
+
+# Copy and set entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 3001
-CMD [ "node", "server.js" ]
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+CMD ["node", "server.js"]

@@ -13,6 +13,7 @@ export const INTERVAL: number = 1000; //1 second
 export const types = {
   CONNECT: "CONNECT_PLAYER",
   CONNECTED: "PLAYER_CONNECTED",
+  READY: "PLAYER_READY",
   PING: "PING",
   PONG: "PONG",
   INPUT: "INPUT",

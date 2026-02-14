@@ -9,5 +9,11 @@ RUN apt-get update && apt-get install -y curl \
 
 RUN npm install
 COPY . .
+
+# Copy and set entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 3004 3010
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["node", "server.js"]

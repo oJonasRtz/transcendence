@@ -6,7 +6,7 @@
 	"paddle": {
 		"width": 20,
 		"height": 100,
-		"speed": 300
+		"speed": 600
 	},
 	"game": {
 		"maxScore": 11

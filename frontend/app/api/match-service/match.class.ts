@@ -52,6 +52,7 @@ export class Match {
 	private interval: any = null;
 	private _isConnected: boolean = false;
 	private _state: string = 'IDLE';
+	private onStateUpdate: ((state: string) => void) | null = null;
 	private onMatchFound: ((match_id: number, skip: boolean) => void) | null = null;
 	private onMatchResults: ((stats: StatsType) => void) | null = null;
 	private _match_id: number = 0;
@@ -72,6 +73,7 @@ export class Match {
 	private handlers: Record<string, Function> = {
 		'STATE_CHANGE': async ({state}: {state: string}) => {
 			this._state = state;
+			if (this.onStateUpdate) this.onStateUpdate(state);
 			// await this.updateState();
 		},
 		'MATCH_FOUND': ({match_id, skip}: {match_id: number, skip: boolean}) => {
@@ -139,6 +141,10 @@ export class Match {
 
 	set onMatch(callback: (match_id: number, skip: boolean) => void) {
 		this.onMatchFound = callback;
+	}
+
+	set onState(callback: ((state: string) => void) | null) {
+		this.onStateUpdate = callback;
 	}
 
 	set onResults(callback: (stats: StatsType) => void) {

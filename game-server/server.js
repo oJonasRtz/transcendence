@@ -19,8 +19,48 @@ const tls = {
 const server = https.createServer(tls);
 
 const metrics = createGameServerMetrics({ serviceName: "game-server" });
+
+function collectPongStats() {
+	const liveMatches = Object.values(matches ?? {});
+
+	let playersConnected = 0;
+	let playersPlaying = 0;
+	let matchesWaitingPlayers = 0;
+	let matchesWaitingReady = 0;
+	let matchesPlaying = 0;
+
+	for (const match of liveMatches) {
+		const connectedPlayersCount = Number(match?.connectedPlayersCount) || 0;
+		const gameStarted = Boolean(match?.gameStarted);
+		const gameEnded = Boolean(match?.gameEnded);
+		const allConnected = Boolean(match?.allconnected);
+
+		playersConnected += connectedPlayersCount;
+		if (gameEnded) continue;
+
+		if (gameStarted) {
+			matchesPlaying += 1;
+			playersPlaying += connectedPlayersCount;
+			continue;
+		}
+
+		if (allConnected) matchesWaitingReady += 1;
+		else matchesWaitingPlayers += 1;
+	}
+
+	return {
+		playersConnected,
+		playersPlaying,
+		matchesTotal: liveMatches.length,
+		matchesWaitingPlayers,
+		matchesWaitingReady,
+		matchesPlaying
+	};
+}
+
 server.on("request", (req, res) => {
 	if (req.method === "GET" && req.url && req.url.startsWith("/metrics")) {
+		metrics.setPongStats(collectPongStats());
 		res.writeHead(200, { "content-type": metrics.contentType });
 		res.end(metrics.render());
 		return;
@@ -35,12 +75,27 @@ server.listen(PORT, HOST, () => {
 	console.log(`WebSocket server is running on wss://${HOST}:${PORT}`);
 });
 
-wss.on("connection", (ws) => {
+function getClientIp(ws, request) {
+	const forwardedFor = request?.headers?.["x-forwarded-for"];
+	if (typeof forwardedFor === "string" && forwardedFor.trim() !== "") {
+		const [firstIp] = forwardedFor.split(",");
+		if (firstIp && firstIp.trim() !== "") return firstIp.trim();
+	}
+
+	const realIp = request?.headers?.["x-real-ip"];
+	if (typeof realIp === "string" && realIp.trim() !== "")
+		return realIp.trim();
+
+	return request?.socket?.remoteAddress || ws?._socket?.remoteAddress || "unknown";
+}
+
+wss.on("connection", (ws, request) => {
 	metrics.wsConnections.inc(metrics.defaultLabels, 1);
 	ws.player = null;
-	const ip = ws._socket.remoteAddress;
+	const ip = getClientIp(ws, request);
+	ws.clientIp = ip;
 	if (ddosDetect(ip)) {
-		ws.close();
+		ws.close(1008, "Too many connections from this IP");
 		return;
 	}
 	ws.on("message", (message) => {
@@ -56,7 +111,7 @@ wss.on("connection", (ws) => {
 
 	ws.on("close", () => {
 		metrics.wsConnections.dec(metrics.defaultLabels, 1);
-		const ip = ws._socket.remoteAddress;
+		const ip = ws.clientIp || "unknown";
 		removeConnection(ip);
 
 		if (lobby.isConnected(ws)) {
