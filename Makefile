@@ -1,5 +1,5 @@
 # Start all services
-up: secrets tls build
+up: tls build
 	@echo "Starting all services, man =D"
 	@docker compose up -d
 

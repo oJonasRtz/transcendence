@@ -20,5 +20,5 @@ RUN chmod +x /entrypoint.sh
 # RUN cd ssl/ && bash ./mkcert.sh
 EXPOSE 3007
 
-ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+# ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["node", "server.js"]

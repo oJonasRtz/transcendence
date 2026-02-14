@@ -16,5 +16,5 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 3001
-ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+# ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["node", "server.js"]

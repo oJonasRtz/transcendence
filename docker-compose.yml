@@ -33,14 +33,16 @@ services:
       - API_GATEWAY_URL=https://api-gateway:3000
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+    env_file:
+      - ./.env
     volumes:
       #- ./frontend:/app
       #- frontend_node_modules:/app/node_modules
       - ./shared/ssl:/app/ssl:ro
-    secrets:
-      - jwt_secret
-      - sync_secret
-      - cron_secret
+    # secrets:
+    #   - jwt_secret
+    #   - sync_secret
+    #   - cron_secret
 
   api-gateway:
     build: ./api-gateway
@@ -60,14 +62,16 @@ services:
     volumes:
       - api-gateway:/app/public
       - ./shared/ssl:/app/ssl:ro
-    secrets:
-      - jwt_secret
-      - cookie_secret
-      - session_secret
-      - email_gmail_user
-      - email_gmail_pass
-      - sightengine_user
-      - sightengine_secret
+    env_file:
+      - ./.env
+    # secrets:
+    #   - jwt_secret
+    #   - cookie_secret
+    #   - session_secret
+    #   - email_gmail_user
+    #   - email_gmail_pass
+    #   - sightengine_user
+    #   - sightengine_secret
 
   auth-service:
     build: ./auth-service
@@ -82,11 +86,13 @@ services:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
       - PORT=3001
       - JWT_EXPIRES_IN=1h
+    env_file:
+      - ./.env
     volumes:
       - ./shared/ssl:/app/ssl:ro
-    secrets:
-      - jwt_secret
-      - cookie_secret
+    # secrets:
+    #   - jwt_secret
+    #   - cookie_secret
 
   users-service:
     build: ./users-service
@@ -102,8 +108,8 @@ services:
     volumes:
       - ./shared/ssl:/app/ssl:ro
       - users-service:/app/assets
-    secrets:
-      - cookie_secret
+    # secrets:
+    #   - cookie_secret
 
   sqlite-db:
     build: ./sqlite-db
@@ -131,8 +137,8 @@ services:
       - PORT=3005
     volumes:
       - ./shared/ssl:/app/ssl:ro
-    secrets:
-      - cookie_secret
+    # secrets:
+    #   - cookie_secret
 
   game-server:
     build: ./game-server
@@ -145,12 +151,14 @@ services:
     networks:
       - "game"
       - "transcendence"
+    env_file:
+      - ./.env
     volumes:
       - ./shared/ssl:/app/ssl
       - ./shared/game-stats.json:/app/game-stats.json
-    secrets:
-      - lobby_id
-      - lobby_pass
+    # secrets:
+    #   - lobby_id
+    #   - lobby_pass
 
   match-service:
     build: ./new-match-service
@@ -163,15 +171,17 @@ services:
       - "transcendence"
     volumes:
       - ./shared/ssl:/app/ssl:ro
+    env_file:
+      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
       - PORT=3004
       - PORT_LOBBY=8443
       - IP_LOBBY=localhost
-    secrets:
-      - lobby_id
-      - lobby_pass
-      - cookie_secret
+    # secrets:
+    #   - lobby_id
+    #   - lobby_pass
+    #   - cookie_secret
 
   # MONITORING STACK
   
@@ -223,8 +233,8 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
-    secrets:
-      - grafana_admin_password
+    # secrets:
+    #   - grafana_admin_password
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -333,28 +343,28 @@ networks:
   db_connection:
     driver: bridge
 
-secrets:
-  jwt_secret:
-    file: ./secrets/jwt_secret.txt
-  cookie_secret:
-    file: ./secrets/cookie_secret.txt
-  session_secret:
-    file: ./secrets/session_secret.txt
-  email_gmail_user:
-    file: ./secrets/email_gmail_user.txt
-  email_gmail_pass:
-    file: ./secrets/email_gmail_pass.txt
-  sightengine_user:
-    file: ./secrets/sightengine_user.txt
-  sightengine_secret:
-    file: ./secrets/sightengine_secret.txt
-  sync_secret:
-    file: ./secrets/sync_secret.txt
-  cron_secret:
-    file: ./secrets/cron_secret.txt
-  lobby_id:
-    file: ./secrets/lobby_id.txt
-  lobby_pass:
-    file: ./secrets/lobby_pass.txt
-  grafana_admin_password:
-    file: ./secrets/grafana_admin_password.txt
+# secrets:
+#   jwt_secret:
+#     file: ./secrets/jwt_secret.txt
+#   cookie_secret:
+#     file: ./secrets/cookie_secret.txt
+#   session_secret:
+#     file: ./secrets/session_secret.txt
+#   email_gmail_user:
+#     file: ./secrets/email_gmail_user.txt
+#   email_gmail_pass:
+#     file: ./secrets/email_gmail_pass.txt
+#   sightengine_user:
+#     file: ./secrets/sightengine_user.txt
+#   sightengine_secret:
+#     file: ./secrets/sightengine_secret.txt
+#   sync_secret:
+#     file: ./secrets/sync_secret.txt
+#   cron_secret:
+#     file: ./secrets/cron_secret.txt
+#   lobby_id:
+#     file: ./secrets/lobby_id.txt
+#   lobby_pass:
+#     file: ./secrets/lobby_pass.txt
+#   grafana_admin_password:
+#     file: ./secrets/grafana_admin_password.txt

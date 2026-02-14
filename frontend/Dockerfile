@@ -30,6 +30,6 @@ RUN pnpm exec next build
 EXPOSE 3000
 
 # Use entrypoint to load secrets
-ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+# ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 # Run Next.js on 3000 so nginx can proxy to the frontend container
 CMD ["pnpm", "exec", "next", "start", "-p", "3000"]
