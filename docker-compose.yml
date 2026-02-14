@@ -7,8 +7,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ${NGINX_SSL_DIR:-./shared/ssl}:/etc/nginx/ssl:ro
-      - ./shared/certbot/www:/var/www/certbot:ro
+      - ./shared/ssl-public:/etc/nginx/ssl:ro
     depends_on:
       - api-gateway
       - frontend
@@ -20,29 +19,24 @@ services:
   frontend:
     build: 
       context: ./frontend
-    image: frontend:1.0.0
+      args:
+        JWT_SECRET: ${JWT_SECRET}
+    image: ${IMAGE_PREFIX:-}frontend:${IMAGE_TAG:-1.0.0}
     container_name: frontend
     networks:
       - "transcendence"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - NEXT_PUBLIC_API_GATEWAY_URL=https://${PUBLIC_DOMAIN:-localhost}
-      - NEXT_PUBLIC_SOCKET_URL=https://${PUBLIC_DOMAIN:-localhost}
-      - NEXT_PUBLIC_MATCH_SERVICE_WS=wss://${PUBLIC_DOMAIN:-localhost}/match-ws/
-      - BACKEND_URL=https://api-gateway:3000
-      - API_GATEWAY_URL=https://api-gateway:3000
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
     env_file:
       - ./.env
+    environment:
+      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - API_GATEWAY_URL=https://api-gateway:3000
+      - JWT_SECRET=${JWT_SECRET}
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     volumes:
       #- ./frontend:/app
       #- frontend_node_modules:/app/node_modules
       - ./shared/ssl:/app/ssl:ro
-    # secrets:
-    #   - jwt_secret
-    #   - sync_secret
-    #   - cron_secret
 
   api-gateway:
     build: ./api-gateway
@@ -55,23 +49,14 @@ services:
     networks:
       - "transcendence"
       - "game"
+    env_file:
+      - ./.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - PORT=3000
-      - JWT_EXPIRES_IN=1h
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - api-gateway:/app/public
       - ./shared/ssl:/app/ssl:ro
-    env_file:
-      - ./.env
-    # secrets:
-    #   - jwt_secret
-    #   - cookie_secret
-    #   - session_secret
-    #   - email_gmail_user
-    #   - email_gmail_pass
-    #   - sightengine_user
-    #   - sightengine_secret
 
   auth-service:
     build: ./auth-service
@@ -82,17 +67,13 @@ services:
     networks:
       - "transcendence"
       - "db_connection"
-    environment:
-      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - PORT=3001
-      - JWT_EXPIRES_IN=1h
     env_file:
       - ./.env
+    environment:
+      - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
+      - JWT_SECRET=${JWT_SECRET}
     volumes:
       - ./shared/ssl:/app/ssl:ro
-    # secrets:
-    #   - jwt_secret
-    #   - cookie_secret
 
   users-service:
     build: ./users-service
@@ -108,8 +89,6 @@ services:
     volumes:
       - ./shared/ssl:/app/ssl:ro
       - users-service:/app/assets
-    # secrets:
-    #   - cookie_secret
 
   sqlite-db:
     build: ./sqlite-db
@@ -120,7 +99,6 @@ services:
       - "db_connection"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - PORT=3002
     volumes:
       - sqlite-db:/app/database
       - ./shared/ssl:/app/ssl:ro
@@ -134,11 +112,8 @@ services:
       - "db_connection"
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - PORT=3005
     volumes:
       - ./shared/ssl:/app/ssl:ro
-    # secrets:
-    #   - cookie_secret
 
   game-server:
     build: ./game-server
@@ -146,19 +121,12 @@ services:
     container_name: game-server
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - PORT=8443
-      - HOST=localhost
     networks:
       - "game"
       - "transcendence"
-    env_file:
-      - ./.env
     volumes:
       - ./shared/ssl:/app/ssl
       - ./shared/game-stats.json:/app/game-stats.json
-    # secrets:
-    #   - lobby_id
-    #   - lobby_pass
 
   match-service:
     build: ./new-match-service
@@ -172,16 +140,9 @@ services:
     volumes:
       - ./shared/ssl:/app/ssl:ro
     env_file:
-      - ./.env
+      - ./new-match-service/.env
     environment:
       - NODE_EXTRA_CA_CERTS=/app/ssl/server.cert
-      - PORT=3004
-      - PORT_LOBBY=8443
-      - IP_LOBBY=localhost
-    # secrets:
-    #   - lobby_id
-    #   - lobby_pass
-    #   - cookie_secret
 
   # MONITORING STACK
   
@@ -209,12 +170,14 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    env_file:
+    - ./monitoring/.grafana-password.txt
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana_admin_password
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_DOMAIN=${PUBLIC_DOMAIN:-localhost}
-      - GF_SERVER_ROOT_URL=https://${PUBLIC_DOMAIN:-localhost}/grafana/
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-https://localhost/grafana/}
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
       - GF_SECURITY_COOKIE_SECURE=true
       - GF_SECURITY_COOKIE_SAMESITE=strict
@@ -233,8 +196,6 @@ services:
     depends_on:
       - prometheus
     restart: unless-stopped
-    # secrets:
-    #   - grafana_admin_password
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -342,29 +303,3 @@ networks:
 
   db_connection:
     driver: bridge
-
-# secrets:
-#   jwt_secret:
-#     file: ./secrets/jwt_secret.txt
-#   cookie_secret:
-#     file: ./secrets/cookie_secret.txt
-#   session_secret:
-#     file: ./secrets/session_secret.txt
-#   email_gmail_user:
-#     file: ./secrets/email_gmail_user.txt
-#   email_gmail_pass:
-#     file: ./secrets/email_gmail_pass.txt
-#   sightengine_user:
-#     file: ./secrets/sightengine_user.txt
-#   sightengine_secret:
-#     file: ./secrets/sightengine_secret.txt
-#   sync_secret:
-#     file: ./secrets/sync_secret.txt
-#   cron_secret:
-#     file: ./secrets/cron_secret.txt
-#   lobby_id:
-#     file: ./secrets/lobby_id.txt
-#   lobby_pass:
-#     file: ./secrets/lobby_pass.txt
-#   grafana_admin_password:
-#     file: ./secrets/grafana_admin_password.txt
